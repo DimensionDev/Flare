@@ -34,6 +34,7 @@
 	class={`media-grid media-count-${Math.min(media.length, 9)}`}
 	class:quote-media={quoteMedia}
 	class:single-actual-ratio={media.length === 1 && appearance.expandMediaSize}
+	class:single-image-preview={media.length === 1 && media[0].type === 'Image' && appearance.expandMediaSize}
 	style={media.length === 1 ? `--single-media-ratio: ${mediaAspect(media[0])};` : undefined}
 >
 	{#each media.slice(0, 9) as item, index}
@@ -110,6 +111,15 @@
 
 	.media-count-1.single-actual-ratio {
 		aspect-ratio: var(--single-media-ratio);
+	}
+
+	.single-image-preview {
+		width: 100%;
+		max-height: var(--timeline-media-max-height, min(600px, 65svh));
+	}
+
+	.single-image-preview .media-item img {
+		object-fit: contain;
 	}
 
 	.media-count-2 {

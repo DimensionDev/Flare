@@ -4,25 +4,36 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -33,6 +44,126 @@ import kotlin.test.assertTrue
 class AdaptiveGridTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun compactTimelineKeepsItsNaturalHeight() {
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalGlobalAppearance provides GlobalAppearance.Default,
+                LocalTimelineAppearance provides TimelineAppearance.Default,
+            ) {
+                Box(Modifier.size(400.dp, 600.dp)) {
+                    LazyStatusVerticalStaggeredGrid(
+                        modifier = Modifier.heightIn(max = 200.dp).testTag("compact-list"),
+                        columns = StaggeredGridCells.Fixed(1),
+                    ) { item { Box(Modifier.height(40.dp)) } }
+                }
+            }
+        }
+        assertEquals(
+            with(composeRule.density) { 40.dp.roundToPx() },
+            composeRule
+                .onNodeWithTag("compact-list")
+                .fetchSemanticsNode()
+                .layoutInfo.height,
+        )
+    }
+
+    @Test
+    fun mediaWithoutAnImageAspectKeepsItsIntrinsicHeight() {
+        composeRule.setContent {
+            Box(Modifier.size(400.dp, 600.dp)) {
+                AdaptiveGrid(
+                    itemCount = 1,
+                    maxSingleHeight = 260.dp,
+                    itemContent = { Box(Modifier.height(64.dp).testTag("audio")) },
+                )
+            }
+        }
+        assertEquals(
+            with(composeRule.density) { 64.dp.roundToPx() },
+            composeRule
+                .onNodeWithTag("audio")
+                .fetchSemanticsNode()
+                .layoutInfo.height,
+        )
+    }
+
+    @Test
+    fun singleImageRespectsViewportCapAndKeepsOrdinaryImageHeight() {
+        var cap by mutableStateOf(455.dp)
+        var ratio by mutableStateOf(0.125f)
+        composeRule.setContent {
+            Box(Modifier.size(400.dp, 1_000.dp)) {
+                AdaptiveGrid(
+                    itemCount = 1,
+                    itemContent = { Box(Modifier.fillMaxSize().testTag("image")) },
+                    singleAspectRatio = ratio,
+                    maxSingleHeight = cap,
+                )
+            }
+        }
+        for ((height, aspect) in listOf(455 to 0.125f, 260 to 0.125f, 600 to (4f / 3f), 0 to 0.125f)) {
+            composeRule.runOnIdle {
+                cap = height.dp
+                ratio = aspect
+            }
+            val image = composeRule.onNodeWithTag("image").fetchSemanticsNode().layoutInfo
+            val expected = minOf(height.toFloat(), 400 / aspect)
+            assertEquals(with(composeRule.density) { expected.dp.roundToPx() }, image.height)
+        }
+    }
+
+    @Test
+    fun timelineProvidesTheCapBeforeFirstMediaMeasureAndScrollingDoesNotRemeasureIt() {
+        val budgets = mutableListOf<Float>()
+        val measurements = mutableMapOf<Int, Int>()
+        lateinit var state: LazyStaggeredGridState
+        lateinit var scope: CoroutineScope
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalGlobalAppearance provides GlobalAppearance.Default,
+                LocalTimelineAppearance provides TimelineAppearance.Default,
+            ) {
+                state = remember { LazyStaggeredGridState() }
+                scope = rememberCoroutineScope()
+                Box(Modifier.size(400.dp, 600.dp)) {
+                    LazyStatusVerticalStaggeredGrid(state = state, columns = StaggeredGridCells.Fixed(1)) {
+                        items(20) { index ->
+                            val cap = LocalTimelineMediaMaxHeight.current
+                            SideEffect { budgets.add(cap.value) }
+                            AdaptiveGrid(
+                                itemCount = 1,
+                                singleAspectRatio = 0.125f,
+                                maxSingleHeight = cap,
+                                itemContent = {
+                                    Box(
+                                        Modifier.fillMaxSize().layout { measurable, constraints ->
+                                            measurements[index] = measurements.getOrDefault(index, 0) + 1
+                                            val child = measurable.measure(constraints)
+                                            layout(child.width, child.height) { child.place(0, 0) }
+                                        },
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        val initial =
+            composeRule.runOnIdle {
+                assertTrue(budgets.isNotEmpty())
+                assertTrue(
+                    budgets.all { kotlin.math.abs(it - 390f) < 0.01f },
+                    "Budget must be available in the first composition: $budgets",
+                )
+                measurements.getValue(0)
+            }
+        composeRule.runOnIdle { scope.launch { state.scrollToItem(0, 8) } }
+        composeRule.waitForIdle()
+        composeRule.runOnIdle { assertEquals(initial, measurements.getValue(0), "Scrolling must only place existing media") }
+    }
 
     @Test
     fun shrinkingMediaRetainsTheRemainingItem() {

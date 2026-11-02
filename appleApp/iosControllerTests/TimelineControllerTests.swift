@@ -7,6 +7,47 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testDisabledProportionalMediaKeepsCachedHeightDuringViewportResize() async throws {
+        let fixture = await Fixture(posts: true)
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
+            base: TimelineAppearance.companion.Default,
+            patch: helper.setMediaLayout(patch: helper.setExpandMediaSize(patch: helper.empty, value: false), value: .grid)
+        ))
+        await fixture.settle()
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-0"))
+        let cell = try XCTUnwrap(fixture.collection.cellForItem(at: path) as? TimelineUIKitCollectionViewCell)
+        let height = try XCTUnwrap(cell.cachedPreferredHeight?(cell.bounds.width))
+        fixture.controller.view.frame.size.height = 300
+        fixture.controller.view.setNeedsLayout()
+        fixture.controller.view.layoutIfNeeded()
+        XCTAssertEqual(cell.cachedPreferredHeight?(cell.bounds.width), height,
+                       "A disabled media cap must not invalidate unchanged cell geometry")
+    }
+
+    func testHeightOnlyResizeUpdatesMediaBudgetAndScrollingReusesMeasurements() async throws {
+        let fixture = await Fixture(posts: true)
+        fixture.input.items = (0..<20).map { .post(makeRow($0, imageHeight: 6_400, mediaCount: 1, textRepeatCount: 1)) }
+        await fixture.apply()
+        for height: CGFloat in [600, 300, 600] {
+            fixture.controller.view.frame.size.height = height
+            await fixture.settle()
+            let media = try XCTUnwrap(descendants(fixture.collection).compactMap { $0 as? StatusMediaUIView }.first)
+            XCTAssertEqual(try XCTUnwrap(media.timelineHeight(for: media.bounds.width)), height * 0.65, accuracy: 1)
+        }
+        let cell = try XCTUnwrap(fixture.collection.visibleCells.compactMap { $0 as? TimelineUIKitCollectionViewCell }.first)
+        let original = cell.onPreferredHeightChanged
+        var measurements = 0
+        cell.onPreferredHeightChanged = { width, height in
+            measurements += 1
+            original?(width, height)
+        }
+        await fixture.scroll(fixture.collection.contentOffset.y + 1)
+        XCTAssertEqual(measurements, 0, "Position-only scrolling must retain the cell's measured height")
+    }
+
+
+
     func testAppendedTwoColumnRowsHaveFinalPositionsInTheirFirstLayout() async throws {
         let fixture = await Fixture(posts: true, columns: 2)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)

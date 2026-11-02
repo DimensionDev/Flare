@@ -180,7 +180,8 @@ final class MediaUIView: UIView {
         ])
     }
 
-    func set(media: UiMedia, cornerRadius: CGFloat) {
+    func set(media: UiMedia, cornerRadius: CGFloat, imageContentMode: UIView.ContentMode = .scaleAspectFill) {
+        if imageView.contentMode != imageContentMode { imageView.contentMode = imageContentMode }
         videoMedia = media
         accessibilityLabel = media.accessibleDescription
         let signature = MediaItemSignature(media: media)
@@ -396,6 +397,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private var cornerRadius: CGFloat = 16
     private var isBlurred: Bool = false
     private var singleFollowsImageAspect: Bool = true
+    private var mediaMaxHeight: CGFloat?
     private var limitMediaGridToNine: Bool = true
     private var mediaLayout: TimelineMediaLayout = .grid
     private var carouselLeadingPadding: CGFloat = 0
@@ -412,6 +414,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         let sensitive: Bool
         let cornerRadius: CGFloat
         let singleFollowsImageAspect: Bool
+        let mediaMaxHeight: CGFloat?
         let limitMediaGridToNine: Bool
         let mediaLayoutID: String
         let carouselLeadingPadding: CGFloat
@@ -422,6 +425,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             sensitive: Bool,
             cornerRadius: CGFloat,
             singleFollowsImageAspect: Bool,
+            mediaMaxHeight: CGFloat?,
             limitMediaGridToNine: Bool,
             mediaLayout: TimelineMediaLayout,
             carouselLeadingPadding: CGFloat,
@@ -431,6 +435,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             self.sensitive = sensitive
             self.cornerRadius = cornerRadius
             self.singleFollowsImageAspect = singleFollowsImageAspect
+            self.mediaMaxHeight = mediaMaxHeight
             self.limitMediaGridToNine = limitMediaGridToNine
             self.mediaLayoutID = mediaLayout.name
             self.carouselLeadingPadding = carouselLeadingPadding
@@ -562,13 +567,16 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         limitMediaGridToNine: Bool,
         mediaLayout: TimelineMediaLayout,
         carouselLeadingPadding: CGFloat,
-        carouselTrailingPadding: CGFloat
+        carouselTrailingPadding: CGFloat,
+        mediaMaxHeight: CGFloat? = nil
     ) {
+        let singleImageMaxHeight = data.count == 1 && data[0] is UiMediaImage && singleFollowsImageAspect ? mediaMaxHeight : nil
         let signature = ConfigureSignature(
             data: data,
             sensitive: sensitive,
             cornerRadius: cornerRadius,
             singleFollowsImageAspect: singleFollowsImageAspect,
+            mediaMaxHeight: singleImageMaxHeight,
             limitMediaGridToNine: limitMediaGridToNine,
             mediaLayout: mediaLayout,
             carouselLeadingPadding: carouselLeadingPadding,
@@ -588,6 +596,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         self.sensitive = sensitive
         self.cornerRadius = cornerRadius
         self.singleFollowsImageAspect = singleFollowsImageAspect
+        self.mediaMaxHeight = singleImageMaxHeight
         self.limitMediaGridToNine = limitMediaGridToNine
         self.mediaLayout = mediaLayout
         self.carouselLeadingPadding = carouselLeadingPadding
@@ -719,7 +728,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
                 media: item,
                 index: index,
                 showsDownloadAll: items.count > 1,
-                cornerRadius: 0
+                cornerRadius: 0,
+                imageContentMode: mediaMaxHeight != nil ? .scaleAspectFit : .scaleAspectFill
             )
         }
         if visibleCount < cellPool.count {
@@ -758,7 +768,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private func updateAspectConstraint() {
         aspectConstraint?.isActive = false
         aspectConstraint = nil
-        guard !items.isEmpty else { return }
+        guard !items.isEmpty, mediaMaxHeight == nil else { return }
 
         let spec = heightSpec()
         let constraint = heightAnchor.constraint(equalTo: widthAnchor, multiplier: spec.multiplier, constant: spec.constant)
@@ -816,7 +826,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         }
         switch visibleItemCount {
         case 1:
-            return width / singleAspectRatio()
+            return min(width / singleAspectRatio(), mediaMaxHeight ?? .infinity)
         case 2, 3, 4:
             return width * 9 / 16
         default:
@@ -911,7 +921,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             return 16.0 / 9.0
         }
         if let ratio = items.first?.aspectRatio, ratio > 0 {
-            return max(9.0 / 21.0, CGFloat(ratio))
+            return mediaMaxHeight == nil ? max(9.0 / 21.0, CGFloat(ratio)) : CGFloat(ratio)
         }
         return 1
     }
@@ -1172,13 +1182,14 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate,
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func configure(media: UiMedia, index: Int, showsDownloadAll: Bool, cornerRadius: CGFloat) {
+    func configure(media: UiMedia, index: Int, showsDownloadAll: Bool, cornerRadius: CGFloat,
+                   imageContentMode: UIView.ContentMode = .scaleAspectFill) {
         tag = index
         self.index = index
         self.media = media
         self.showsDownloadAll = showsDownloadAll
         layer.cornerRadius = cornerRadius
-        mediaView.set(media: media, cornerRadius: 0)
+        mediaView.set(media: media, cornerRadius: 0, imageContentMode: imageContentMode)
         if let altText = media.description_, !altText.isEmpty {
             let button: AltTextButton
             if let altButton {
@@ -1377,6 +1388,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
     private var appearanceShowMedia: Bool = true
     private var appearanceShowSensitive: Bool = false
     private var appearanceExpandMediaSize: Bool = true
+    private var mediaMaxHeight: CGFloat?
     private var appearanceLimitMediaGridToNine: Bool = true
     private var appearanceMediaLayout: TimelineMediaLayout = .grid
     private var carouselLeadingPadding: CGFloat = 0
@@ -1395,6 +1407,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         let appearanceShowMedia: Bool
         let appearanceShowSensitive: Bool
         let appearanceExpandMediaSize: Bool
+        let mediaMaxHeight: CGFloat?
         let appearanceLimitMediaGridToNine: Bool
         let appearanceMediaLayoutID: String
         let carouselLeadingPadding: CGFloat
@@ -1407,6 +1420,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             appearanceShowMedia: Bool,
             appearanceShowSensitive: Bool,
             appearanceExpandMediaSize: Bool,
+            mediaMaxHeight: CGFloat?,
             appearanceLimitMediaGridToNine: Bool,
             appearanceMediaLayout: TimelineMediaLayout,
             carouselLeadingPadding: CGFloat,
@@ -1418,6 +1432,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             self.appearanceShowMedia = appearanceShowMedia
             self.appearanceShowSensitive = appearanceShowSensitive
             self.appearanceExpandMediaSize = appearanceExpandMediaSize
+            self.mediaMaxHeight = mediaMaxHeight
             self.appearanceLimitMediaGridToNine = appearanceLimitMediaGridToNine
             self.appearanceMediaLayoutID = appearanceMediaLayout.name
             self.carouselLeadingPadding = carouselLeadingPadding
@@ -1505,8 +1520,10 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         appearanceLimitMediaGridToNine: Bool,
         appearanceMediaLayout: TimelineMediaLayout,
         carouselLeadingPadding: CGFloat,
-        carouselTrailingPadding: CGFloat
+        carouselTrailingPadding: CGFloat,
+        mediaMaxHeight: CGFloat? = nil
     ) {
+        let singleImageMaxHeight = data.count == 1 && data[0] is UiMediaImage && appearanceExpandMediaSize ? mediaMaxHeight : nil
         let signature = ConfigureSignature(
             data: data,
             sensitive: sensitive,
@@ -1514,6 +1531,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             appearanceShowMedia: appearanceShowMedia,
             appearanceShowSensitive: appearanceShowSensitive,
             appearanceExpandMediaSize: appearanceExpandMediaSize,
+            mediaMaxHeight: singleImageMaxHeight,
             appearanceLimitMediaGridToNine: appearanceLimitMediaGridToNine,
             appearanceMediaLayout: appearanceMediaLayout,
             carouselLeadingPadding: carouselLeadingPadding,
@@ -1530,6 +1548,7 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
         self.appearanceShowMedia = appearanceShowMedia
         self.appearanceShowSensitive = appearanceShowSensitive
         self.appearanceExpandMediaSize = appearanceExpandMediaSize
+        self.mediaMaxHeight = singleImageMaxHeight
         self.appearanceLimitMediaGridToNine = appearanceLimitMediaGridToNine
         self.appearanceMediaLayout = appearanceMediaLayout
         self.carouselLeadingPadding = carouselLeadingPadding
@@ -1554,7 +1573,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
             limitMediaGridToNine: appearanceLimitMediaGridToNine,
             mediaLayout: appearanceMediaLayout,
             carouselLeadingPadding: carouselLeadingPadding,
-            carouselTrailingPadding: carouselTrailingPadding
+            carouselTrailingPadding: carouselTrailingPadding,
+            mediaMaxHeight: mediaMaxHeight
         )
         grid.performDeferredPoolCleanup()
         grid.isHidden = true
@@ -1589,7 +1609,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
                 limitMediaGridToNine: appearanceLimitMediaGridToNine,
                 mediaLayout: appearanceMediaLayout,
                 carouselLeadingPadding: carouselLeadingPadding,
-                carouselTrailingPadding: carouselTrailingPadding
+                carouselTrailingPadding: carouselTrailingPadding,
+                mediaMaxHeight: mediaMaxHeight
             )
         } else {
             grid.isHidden = true
@@ -1603,7 +1624,8 @@ final class StatusMediaContentUIView: UIView, TimelineHeightProviding {
                 limitMediaGridToNine: appearanceLimitMediaGridToNine,
                 mediaLayout: appearanceMediaLayout,
                 carouselLeadingPadding: carouselLeadingPadding,
-                carouselTrailingPadding: carouselTrailingPadding
+                carouselTrailingPadding: carouselTrailingPadding,
+                mediaMaxHeight: mediaMaxHeight
             )
         }
         setNeedsLayout()

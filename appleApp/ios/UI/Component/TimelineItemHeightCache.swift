@@ -5,6 +5,7 @@ struct TimelineItemHeightCache {
     struct Geometry: Equatable {
         let widthInPixels: Int
         let multipleColumns: Bool
+        var mediaMaxHeightInPixels: Int? = nil
     }
 
     private struct Measurement {

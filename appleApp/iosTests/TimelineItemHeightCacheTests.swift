@@ -2,6 +2,17 @@ import XCTest
 import CoreGraphics
 
 final class TimelineItemHeightCacheTests: XCTestCase {
+    func testMediaHeightBudgetsRetainTheirOwnMeasurements() {
+        var cache = TimelineItemHeightCache()
+        let full = TimelineItemHeightCache.Geometry(widthInPixels: 780, multipleColumns: false, mediaMaxHeightInPixels: 780)
+        let short = TimelineItemHeightCache.Geometry(widthInPixels: 780, multipleColumns: false, mediaMaxHeightInPixels: 390)
+        cache.publish(400, for: "post", geometry: full, renderHash: 1)
+        XCTAssertNil(cache.height(for: "post", geometry: short))
+        cache.publish(250, for: "post", geometry: short, renderHash: 1)
+        XCTAssertEqual(cache.height(for: "post", geometry: full), 400)
+        XCTAssertEqual(cache.height(for: "post", geometry: short), 250)
+    }
+
     private let single = TimelineItemHeightCache.Geometry(widthInPixels: 780, multipleColumns: false)
 
     func testRenderChangeKeepsGeometryButRequiresFreshMeasurement() {

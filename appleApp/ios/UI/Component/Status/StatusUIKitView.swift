@@ -919,7 +919,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 appearanceLimitMediaGridToNine: appearance.limitMediaGridToNine,
                 appearanceMediaLayout: allowsMediaCarousel ? appearance.mediaLayout : .grid,
                 carouselLeadingPadding: carouselEdgePadding + (wantsAvatar ? Self.avatarSize + Self.mainRowSpacing : 0),
-                carouselTrailingPadding: carouselEdgePadding
+                carouselTrailingPadding: carouselEdgePadding,
+                mediaMaxHeight: appearance.mediaMaxHeight
             )
             mediaView.onMediaClicked = { [weak self] media, index in
                 guard let self else { return }

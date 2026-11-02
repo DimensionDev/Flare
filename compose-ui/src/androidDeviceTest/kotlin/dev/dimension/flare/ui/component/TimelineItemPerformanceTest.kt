@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -48,6 +50,39 @@ import org.junit.runner.RunWith
 class TimelineItemPerformanceTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun cappedMediaResizesWithoutRemeasuringOnPositionChanges() {
+        val cap = mutableStateOf(260.dp)
+        val offset = mutableIntStateOf(0)
+        var measured = 0
+        composeRule.setContent {
+            Box(Modifier.size(400.dp, 600.dp)) {
+                Box(Modifier.offset { IntOffset(0, offset.intValue) }) {
+                    AdaptiveGrid(
+                        itemCount = 1,
+                        singleAspectRatio = 0.125f,
+                        maxSingleHeight = cap.value,
+                        itemContent = {
+                            Box(
+                                Modifier.fillMaxSize().testTag("capped-media").layout { measurable, constraints ->
+                                    measured++
+                                    val child = measurable.measure(constraints)
+                                    layout(child.width, child.height) { child.place(0, 0) }
+                                },
+                            )
+                        },
+                    )
+                }
+            }
+        }
+        val initial = composeRule.runOnIdle { measured }
+        composeRule.runOnIdle { offset.intValue = 8 }
+        composeRule.runOnIdle { assertEquals(initial, measured) }
+        composeRule.runOnIdle { cap.value = 130.dp }
+        val image = composeRule.onNodeWithTag("capped-media").fetchSemanticsNode().layoutInfo
+        assertEquals(with(composeRule.density) { 130.dp.roundToPx() }, image.height)
+    }
 
     @Test
     fun gridOnlyComposesVisibleMediaAndRetainsOverflowCount() {

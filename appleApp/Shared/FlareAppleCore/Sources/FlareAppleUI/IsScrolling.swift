@@ -16,6 +16,7 @@ public extension EnvironmentValues {
 
 extension EnvironmentValues {
     @Entry var timelinePlaybackViewport: CGRect? = nil
+    @Entry var timelineMediaMaxHeight: CGFloat? = nil
 }
 
 @available(iOS 17.0, macOS 14.0, *)
@@ -34,6 +35,7 @@ private struct DetectScrollingModifier: ViewModifier {
         scrollingContent(content)
             .environment(\.timelinePlaybackCoordinator, playback)
             .environment(\.timelinePlaybackViewport, playbackViewport)
+            .environment(\.timelineMediaMaxHeight, playbackViewport.map { min(600, max(0, $0.height * 0.65).rounded(.down)) })
             .onGeometryChange(for: CGRect.self) { proxy in
                 // SwiftUI's container frame already excludes its safe-area insets.
                 proxy.frame(in: .global)

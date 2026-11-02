@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.toSize
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.LocalTimelineMediaMaxHeight
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
 import dev.dimension.flare.ui.component.TimelinePlaybackCoordinator
 import dev.dimension.flare.ui.component.platform.isBigScreen
@@ -151,38 +153,51 @@ public fun LazyStatusVerticalStaggeredGrid(
         } else {
             modifier
         }
-    CompositionLocalProvider(
-        LocalIsScrollingInProgress provides state.isScrollInProgress,
-        LocalTimelinePlayback provides playback,
-        LocalMultipleColumns provides bigScreen,
-        LocalEffectiveTimelineDisplayMode provides effectiveMode,
-    ) {
-        LazyVerticalStaggeredGrid(
-            modifier =
-                gridModifier.onGloballyPositioned {
-                    val bounds = Rect(it.positionInWindow(), it.size.toSize())
-                    // Scaffold/window padding reserves the area occupied by bars.
-                    val viewport =
-                        with(density) {
-                            Rect(
-                                bounds.left + contentPadding.calculateLeftPadding(layoutDirection).toPx(),
-                                bounds.top + contentPadding.calculateTopPadding().toPx(),
-                                bounds.right - contentPadding.calculateRightPadding(layoutDirection).toPx(),
-                                bounds.bottom - contentPadding.calculateBottomPadding().toPx(),
-                            )
-                        }
-                    playback.viewport = viewport.intersect(it.boundsInWindow())
-                },
-            columns = effectiveColumns,
-            state = state,
-            contentPadding = padding,
-            reverseLayout = reverseLayout,
-            verticalItemSpacing = actualVerticalSpacing,
-            horizontalArrangement = horizontalArrangement,
-            flingBehavior = flingBehavior,
-            userScrollEnabled = userScrollEnabled,
-            content = content,
-        )
+    BoxWithConstraints(modifier = gridModifier, propagateMinConstraints = true) {
+        val mediaMaxHeight =
+            if (constraints.hasBoundedHeight) {
+                minOf(
+                    600.dp,
+                    (maxHeight - contentPadding.calculateTopPadding() - contentPadding.calculateBottomPadding())
+                        .coerceAtLeast(0.dp) * 0.65f,
+                )
+            } else {
+                Dp.Unspecified
+            }
+        CompositionLocalProvider(
+            LocalIsScrollingInProgress provides state.isScrollInProgress,
+            LocalTimelinePlayback provides playback,
+            LocalMultipleColumns provides bigScreen,
+            LocalEffectiveTimelineDisplayMode provides effectiveMode,
+            LocalTimelineMediaMaxHeight provides mediaMaxHeight,
+        ) {
+            LazyVerticalStaggeredGrid(
+                modifier =
+                    Modifier.onGloballyPositioned {
+                        val bounds = Rect(it.positionInWindow(), it.size.toSize())
+                        // Scaffold/window padding reserves the area occupied by bars.
+                        val viewport =
+                            with(density) {
+                                Rect(
+                                    bounds.left + contentPadding.calculateLeftPadding(layoutDirection).toPx(),
+                                    bounds.top + contentPadding.calculateTopPadding().toPx(),
+                                    bounds.right - contentPadding.calculateRightPadding(layoutDirection).toPx(),
+                                    bounds.bottom - contentPadding.calculateBottomPadding().toPx(),
+                                )
+                            }
+                        playback.viewport = viewport.intersect(it.boundsInWindow())
+                    },
+                columns = effectiveColumns,
+                state = state,
+                contentPadding = padding,
+                reverseLayout = reverseLayout,
+                verticalItemSpacing = actualVerticalSpacing,
+                horizontalArrangement = horizontalArrangement,
+                flingBehavior = flingBehavior,
+                userScrollEnabled = userScrollEnabled,
+                content = content,
+            )
+        }
     }
 }
 

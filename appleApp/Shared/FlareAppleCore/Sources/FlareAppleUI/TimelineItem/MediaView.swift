@@ -10,10 +10,12 @@ import UIKit
 public struct MediaView: View {
     private let data: UiMedia
     private let allowsAutoplay: Bool
+    private let imageContentMode: ContentMode
 
-    public init(data: UiMedia, allowsAutoplay: Bool = true) {
+    public init(data: UiMedia, allowsAutoplay: Bool = true, imageContentMode: ContentMode = .fill) {
         self.data = data
         self.allowsAutoplay = allowsAutoplay
+        self.imageContentMode = imageContentMode
     }
 
     public var body: some View {
@@ -22,7 +24,7 @@ public struct MediaView: View {
             case .image(let image):
                 Color.gray
                     .overlay {
-                        NetworkImage(data: image.preview)
+                        NetworkImage(data: image.preview, contentMode: imageContentMode)
                             .allowsHitTesting(false)
                     }
                     .clipped()

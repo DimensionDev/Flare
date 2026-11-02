@@ -19,7 +19,7 @@
 	import { initializeFirebaseAnalytics } from '$lib/firebase/firebase';
 	import logo from '$lib/assets/logo.svg';
 	import ComposeDialog from '$lib/components/compose/ComposeDialog.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import '../app.css';
 
 	let { children } = $props();
@@ -50,6 +50,37 @@
 	const pageTitle = $derived(
 		selectedSecondaryTimeline ? timelineTabTitle(selectedSecondaryTimeline) : activeTab ? tabTitle(activeTab) : 'Flare'
 	);
+
+	function measureTimelineOcclusion(node: HTMLElement, _key: string) {
+		let header: HTMLElement | null = null;
+		let dock: HTMLElement | null = null;
+		let lastHeight = -1;
+		let generation = 0;
+		let disposed = false;
+		const update = () => {
+			const height = Math.ceil((header?.getBoundingClientRect().height ?? 0) + (dock?.getBoundingClientRect().height ?? 0));
+			if (height === lastHeight) return;
+			lastHeight = height;
+			node.style.setProperty('--timeline-obscured-height', `${height}px`);
+		};
+		const observer = new ResizeObserver(update);
+		const observe = async () => {
+			const current = ++generation;
+			await tick();
+			if (disposed || current !== generation) return;
+			observer.disconnect();
+			header = node.querySelector<HTMLElement>('[data-app-top-bar]');
+			dock = node.parentElement?.querySelector<HTMLElement>('.mobile-dock') ?? null;
+			if (header) observer.observe(header);
+			if (dock) observer.observe(dock);
+			update();
+		};
+		void observe();
+		return {
+			update: () => { void observe(); },
+			destroy: () => { disposed = true; observer.disconnect(); },
+		};
+	}
 
 	$effect(() => {
 		const host = backgroundSnapshotHost;
@@ -287,7 +318,8 @@
 				{/if}
 			</nav>
 
-				<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}>
+				<section class="app-content min-w-0 bg-base-100" aria-label={pageTitle}
+					use:measureTimelineOcclusion={`${visiblePathname}:${selectedSecondaryTimeline?.key ?? ''}:${composeOverlayOpen}`}>
 					{#if composeOverlayOpen && backgroundSnapshotElement}
 						<div class="content-stage background-snapshot-host" bind:this={backgroundSnapshotHost}></div>
 					{:else}
@@ -456,6 +488,7 @@
 	}
 
 	.app-content {
+		--timeline-media-max-height: min(600px, max(0px, calc((100svh - var(--timeline-obscured-height, 0px)) * 0.65)));
 		min-height: 100vh;
 		background: var(--color-base-100);
 	}

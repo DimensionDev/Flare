@@ -10,6 +10,140 @@ import KotlinSharedUI
 
 @MainActor
 final class TimelineMediaPreviewTests: XCTestCase {
+    func testSingleImageCapKeepsAltControlVisible() async throws {
+        let fixture = try await Fixture(imageSize: CGSize(width: 400, height: 3_200))
+        let host = UIViewController()
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let view = StatusMediaUIView()
+        host.view.addSubview(view)
+        view.configure(data: [fixture.media(width: 400, height: 3_200)], sensitive: false, cornerRadius: 16,
+                       singleFollowsImageAspect: true, limitMediaGridToNine: true, mediaLayout: .grid,
+                       carouselLeadingPadding: 0, carouselTrailingPadding: 0, mediaMaxHeight: 130)
+        view.frame = CGRect(x: 0, y: 0, width: 340, height: 130)
+        view.layoutIfNeeded()
+        func buttons(in view: UIView) -> [UIButton] {
+            (view as? UIButton).map { [$0] } ?? view.subviews.flatMap { buttons(in: $0) }
+        }
+        let alt = try XCTUnwrap(buttons(in: view).first)
+        let container = try XCTUnwrap(alt.superview)
+        XCTAssertEqual(container.bounds.width, 340, accuracy: 0.5)
+        XCTAssertTrue(container.bounds.contains(alt.frame))
+        for _ in 0..<300 {
+            if fixture.cache.imageSize(for: fixture.media().previewUrl) != nil { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertNotNil(fixture.cache.imageSize(for: fixture.media().previewUrl))
+    }
+
+    func testBudgetDoesNotChangeMultipleMediaOrNonImageLayout() async throws {
+        let fixture = try await Fixture()
+        let image = fixture.media(width: 400, height: 3_200)
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4", thumbnailUrl: image.previewUrl,
+            description: nil, height: 3_200, width: 400, customHeaders: ["X-Preview-Test": "fixture"],
+            proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        let gif = UiMediaGif(url: "https://timeline-preview.invalid/animation.gif", previewUrl: image.previewUrl,
+            description: nil, height: 3_200, width: 400, customHeaders: ["X-Preview-Test": "fixture"], proxy: ProxyRef.Global.shared)
+        let cases: [([UiMedia], Bool, TimelineMediaLayout)] = [
+            ([image], false, .grid), ([video], true, .grid), ([gif], true, .grid),
+            ([image, image], true, .grid), ([image, image], true, .carousel)
+        ]
+        for (items, expanded, layout) in cases {
+            let view = StatusMediaUIView()
+            func configure(_ budget: CGFloat?) {
+                view.configure(data: items, sensitive: false, cornerRadius: 16, singleFollowsImageAspect: expanded,
+                               limitMediaGridToNine: true, mediaLayout: layout, carouselLeadingPadding: 0,
+                               carouselTrailingPadding: 0, mediaMaxHeight: budget)
+            }
+            configure(nil)
+            let original = try XCTUnwrap(view.timelineHeight(for: 340))
+            XCTAssertGreaterThan(original, 130)
+            configure(130)
+            XCTAssertEqual(try XCTUnwrap(view.timelineHeight(for: 340)), original, accuracy: 0.01)
+        }
+    }
+
+    func testSingleImageCapPreservesAspectAndDoesNotReloadWhenShrinking() async throws {
+        let fixture = try await Fixture(imageSize: CGSize(width: 400, height: 3_200))
+        let host = UIViewController()
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let view = StatusMediaUIView()
+        host.view.addSubview(view)
+        let item = fixture.media(path: "capped-long.png", width: 400, height: 3_200)
+        func configure(_ cap: CGFloat) {
+            view.configure(data: [item], sensitive: false, cornerRadius: 16,
+                           singleFollowsImageAspect: true, limitMediaGridToNine: true, mediaLayout: .grid,
+                           carouselLeadingPadding: 0, carouselTrailingPadding: 0, mediaMaxHeight: cap)
+            view.frame = CGRect(x: 0, y: 0, width: 340, height: view.timelineHeight(for: 340) ?? 0)
+            view.layoutIfNeeded()
+            XCTAssertEqual(view.bounds.height, cap, accuracy: 0.5)
+        }
+        func findImage(_ view: UIView) -> UIImageView? {
+            if let image = view as? UIImageView { return image }
+            return view.subviews.lazy.compactMap { findImage($0) }.first
+        }
+        configure(260)
+        let image = try XCTUnwrap(findImage(view))
+        for _ in 0..<300 {
+            if image.image != nil { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertNotNil(image.image)
+        XCTAssertEqual(image.bounds.width, 340, accuracy: 0.5)
+        XCTAssertEqual(image.contentMode, .scaleAspectFit)
+        XCTAssertLessThanOrEqual(try XCTUnwrap(image.image?.cgImage).height,
+                                 Int(ceil(260 * image.traitCollection.displayScale)))
+        let requests = PreviewImageProtocol.requestCount
+        let stores = fixture.cache.storeCount
+        for cap: CGFloat in [130, 260, 130] {
+            configure(cap)
+            try await Task.sleep(for: .milliseconds(30))
+            XCTAssertTrue(findImage(view) === image)
+            XCTAssertEqual(image.bounds.width, 340, accuracy: 0.5)
+            XCTAssertEqual(image.contentMode, .scaleAspectFit)
+        }
+        XCTAssertEqual(PreviewImageProtocol.requestCount, requests, "Resizing must retain the image request identity")
+        XCTAssertEqual(fixture.cache.storeCount, stores, "Shrinking must not repeatedly decode the same image")
+    }
+
+    func testSwiftUISingleImageCapKeepsTheWholeImageAndNaturalOrdinaryHeight() async throws {
+        for (ratio, cap, height) in [(CGFloat(0.125), CGFloat(260), CGFloat(260)), (4.0 / 3.0, 455, 255)] {
+            let host = UIHostingController(rootView: AdaptiveGrid(singleViewAspectRatio: ratio, maxSingleHeight: cap) {
+                Color.blue
+            }.frame(width: 340))
+            let size = host.sizeThatFits(in: CGSize(width: 340, height: 10_000))
+            XCTAssertEqual(size.height, height, accuracy: 0.5)
+        }
+    }
+
+    func testSwiftUICapArrivingAfterFirstLayoutUpdatesTheImageAspect() async throws {
+        struct Probe: UIViewRepresentable {
+            let view: UIView
+            func makeUIView(context: Context) -> UIView { view }
+            func updateUIView(_ uiView: UIView, context: Context) {}
+        }
+        let image = UIView()
+        func content(_ cap: CGFloat?) -> some View {
+            AdaptiveGrid(singleViewAspectRatio: 0.125, maxSingleHeight: cap) { Probe(view: image) }
+                .frame(width: 340)
+        }
+        let host = UIHostingController(rootView: content(nil))
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = host
+        window.isHidden = false
+        defer { window.isHidden = true; window.rootViewController = nil }
+        host.view.layoutIfNeeded()
+        host.rootView = content(260)
+        for _ in 0..<10 {
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertEqual(image.bounds.height, 260, accuracy: 0.5)
+        XCTAssertEqual(image.bounds.width, 340, accuracy: 0.5)
+    }
+
     func testReactionImagesDecodeAtTheirDisplayHeightOnBothRenderers() async throws {
         for kind in ["uikit", "swiftui"] {
             let fixture = try await Fixture()
@@ -759,14 +893,14 @@ final class TimelineMediaPreviewTests: XCTestCase {
         private var downloaders: [(ImageDownloader, URLSessionConfiguration)] = []
         var imageView: UIImageView { view.subviews.compactMap { $0 as? UIImageView }.first! }
 
-        init(animated: Bool = false, orientation: Int? = nil) async throws {
+        init(animated: Bool = false, orientation: Int? = nil, imageSize: CGSize = CGSize(width: 1_024, height: 768)) async throws {
             let format = UIGraphicsImageRendererFormat()
             format.scale = 1
             let image = UIGraphicsImageRenderer(
-                size: CGSize(width: 1_024, height: 768), format: format
+                size: imageSize, format: format
             ).image { context in
                 UIColor.blue.setFill()
-                context.fill(CGRect(x: 0, y: 0, width: 1_024, height: 768))
+                context.fill(CGRect(origin: .zero, size: imageSize))
             }
             let data = NSMutableData()
             let type = animated ? UTType.gif : orientation == nil ? UTType.png : UTType.jpeg
@@ -836,6 +970,8 @@ final class TimelineMediaPreviewTests: XCTestCase {
 private nonisolated final class PreviewImageCache: ImageCache, @unchecked Sendable {
     private let lock = NSLock()
     private var sizes: [String: CGSize] = [:]
+    private var stores = 0
+    var storeCount: Int { lock.withLock { stores } }
 
     @MainActor
     func imageSize(for url: String) -> CGSize? {
@@ -863,7 +999,7 @@ private nonisolated final class PreviewImageCache: ImageCache, @unchecked Sendab
                         options: KingfisherParsedOptionsInfo, toDisk: Bool,
                         completionHandler: (@Sendable (CacheStoreResult) -> Void)?) {
         if let cg = image.cgImage {
-            lock.withLock { sizes[key] = CGSize(width: cg.width, height: cg.height) }
+            lock.withLock { sizes[key] = CGSize(width: cg.width, height: cg.height); stores += 1 }
         }
         super.store(image, original: original, forKey: key, options: options, toDisk: toDisk,
                     completionHandler: completionHandler)
@@ -872,9 +1008,13 @@ private nonisolated final class PreviewImageCache: ImageCache, @unchecked Sendab
 
 private final class PreviewImageProtocol: URLProtocol, @unchecked Sendable {
     nonisolated(unsafe) static var payload = Data()
+    private static let counterLock = NSLock()
+    nonisolated(unsafe) private static var requests = 0
+    static var requestCount: Int { counterLock.withLock { requests } }
     override class func canInit(with request: URLRequest) -> Bool { request.url?.host == "timeline-preview.invalid" }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
+        Self.counterLock.withLock { Self.requests += 1 }
         guard request.value(forHTTPHeaderField: "X-Preview-Test") == "fixture" else {
             client?.urlProtocol(self, didFailWithError: URLError(.userAuthenticationRequired))
             return

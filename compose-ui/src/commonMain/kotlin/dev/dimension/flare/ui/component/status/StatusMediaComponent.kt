@@ -69,6 +69,7 @@ import dev.dimension.flare.ui.component.AudioPlayer
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
+import dev.dimension.flare.ui.component.LocalTimelineMediaMaxHeight
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
@@ -117,6 +118,10 @@ internal fun StatusMediaComponent(
         allowCarousel &&
             appearanceSettings.mediaLayout == TimelineMediaLayout.Carousel &&
             data.size > 1
+    val isSingleImage = data.size == 1 && data[0] is UiMedia.Image
+    val mediaMaxHeight =
+        if (isSingleImage && appearanceSettings.expandMediaSize) LocalTimelineMediaMaxHeight.current else Dp.Unspecified
+    val fitsSingleImage = isSingleImage && appearanceSettings.expandMediaSize && mediaMaxHeight.value.isFinite()
     val carouselState = if (usesCarousel) rememberLazyListState() else null
     val carouselId = remember(post.statusKey) { Any() }
     val playback = LocalTimelinePlayback.current
@@ -263,13 +268,17 @@ internal fun StatusMediaComponent(
                             mediaCount = data.size,
                             onMediaClick = { openMedia(index) },
                             hideSensitive = hideSensitive,
-                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize && !fitsSingleImage,
+                            fillContainer = fitsSingleImage,
+                            contentScale = if (fitsSingleImage) ContentScale.Fit else ContentScale.Crop,
                         )
                     }
                 },
                 maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,
                 modifier = mediaContentModifier,
                 expandedSize = appearanceSettings.expandMediaSize,
+                singleAspectRatio = if (isSingleImage) data[0].timelineAspectRatio else null,
+                maxSingleHeight = mediaMaxHeight,
             )
         }
         if (showSensitiveButton) {
@@ -397,6 +406,7 @@ private fun StatusMediaItem(
     keepAspectRatio: Boolean,
     modifier: Modifier = Modifier,
     fillContainer: Boolean = false,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val uriHandler = LocalUriHandler.current
     val viewAltTextLabel = stringResource(Res.string.media_view_alt_text)
@@ -456,6 +466,7 @@ private fun StatusMediaItem(
                         media = media,
                         modifier = if (fillContainer) Modifier.fillMaxSize() else Modifier,
                         keepAspectRatio = keepAspectRatio,
+                        contentScale = contentScale,
                     )
                 }
             } else {
@@ -466,6 +477,7 @@ private fun StatusMediaItem(
                             onMediaClick()
                         },
                     keepAspectRatio = keepAspectRatio,
+                    contentScale = contentScale,
                 )
             }
         }

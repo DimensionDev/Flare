@@ -15,6 +15,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.math.roundToInt
 
 private const val ADAPTIVE_GRID_MAX_ITEMS = 9
 private const val ADAPTIVE_GRID_OVERFLOW_DISPLAY_LIMIT = 100
@@ -27,6 +28,8 @@ internal fun AdaptiveGrid(
     spacing: Dp = 4.dp,
     expandedSize: Boolean = true,
     maxItems: Int = ADAPTIVE_GRID_MAX_ITEMS,
+    singleAspectRatio: Float? = null,
+    maxSingleHeight: Dp = Dp.Unspecified,
     overflowContent: @Composable (Int) -> Unit = { overflowCount ->
         Box(
             modifier =
@@ -64,8 +67,15 @@ internal fun AdaptiveGrid(
             }
 
             if (visibleMeasurables.size == 1) {
+                val ratio = singleAspectRatio?.takeIf { it.isFinite() && it > 0f }
                 val placeable =
-                    if (expandedSize) {
+                    if (expandedSize && ratio != null && maxSingleHeight.value.isFinite()) {
+                        val height =
+                            (constraints.maxWidth / ratio)
+                                .coerceIn(0f, minOf(constraints.maxHeight, maxSingleHeight.roundToPx().coerceAtLeast(0)).toFloat())
+                                .roundToInt()
+                        visibleMeasurables[0].measure(Constraints.fixed(constraints.maxWidth, height))
+                    } else if (expandedSize) {
                         visibleMeasurables[0].measure(
                             Constraints(
                                 maxWidth = constraints.maxWidth,

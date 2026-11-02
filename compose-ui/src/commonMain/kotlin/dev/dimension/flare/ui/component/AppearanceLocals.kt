@@ -1,10 +1,14 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.Dp
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+
+internal val LocalTimelineMediaMaxHeight = compositionLocalOf { Dp.Unspecified }
 
 public val LocalGlobalAppearance: ProvidableCompositionLocal<GlobalAppearance> =
     staticCompositionLocalOf {

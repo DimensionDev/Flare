@@ -21,6 +21,7 @@ struct StatusMediaView: View {
     @State private var isBlur: Bool
     @State private var activeCarouselIndex: Int?
     @Environment(\.timelinePlaybackCoordinator) private var playback
+    @Environment(\.timelineMediaMaxHeight) private var mediaMaxHeight
     @State private var carouselID = UUID().uuidString
     @State private var carouselOffset: CGFloat?
     @State private var verticalOffset: CGFloat?
@@ -231,18 +232,21 @@ struct StatusMediaView: View {
     private var mediaGrid: some View {
         let visibleData = limitMediaGridToNine ? Array(data.prefix(statusMediaMaxVisibleMediaCount)) : data
         let overflowCount = data.count - visibleData.count
+        let singleImageMaxHeight = data.count == 1 && data[0] is UiMediaImage && expandMediaSize ? mediaMaxHeight : nil
         return AdaptiveGrid(
             singleFollowsImageAspect: expandMediaSize,
             singleViewAspectRatio: data.first?.aspectRatio,
             spacing: 4,
             maxColumns: 3,
+            maxSingleHeight: singleImageMaxHeight,
         ) {
             ForEach(0..<visibleData.count, id: \.self) { index in
                 mediaItem(
                     visibleData[index],
                     index: index,
                     overflowCount: index == visibleData.count - 1 ? overflowCount : 0,
-                    allowsAutoplay: !isBlur
+                    allowsAutoplay: !isBlur,
+                    imageContentMode: singleImageMaxHeight != nil ? .fit : .fill
                 )
             }
         }
@@ -252,9 +256,10 @@ struct StatusMediaView: View {
         _ item: any UiMedia,
         index: Int,
         overflowCount: Int,
-        allowsAutoplay: Bool
+        allowsAutoplay: Bool,
+        imageContentMode: ContentMode = .fill
     ) -> some View {
-        MediaView(data: item, allowsAutoplay: allowsAutoplay)
+        MediaView(data: item, allowsAutoplay: allowsAutoplay, imageContentMode: imageContentMode)
             .environment(\.timelineCarouselItem, TimelineCarouselItem(
                 groupID: carouselID, isSelected: !usesCarousel || index == (activeCarouselIndex ?? 0), isCarousel: usesCarousel
             ))

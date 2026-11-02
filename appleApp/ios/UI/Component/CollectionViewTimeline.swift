@@ -229,6 +229,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             guard oldValue != appearance else {
                 return
             }
+            updateMediaMaxHeight()
             collectionView.prepareForLayoutChange()
             clearHeightCache()
             applyLayoutForColumnCount()
@@ -480,6 +481,11 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         autoplay.reconsider()
     }
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateMediaMaxHeight()
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
@@ -664,6 +670,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     }()
     private var heightCache: [String: CGFloat] = [:]
     private var itemHeightCache = TimelineItemHeightCache()
+    private var mediaMaxHeight: CGFloat?
+
+    private var mediaAppearance: TimelineUIKitAppearance {
+        var value = appearance
+        value.status.mediaMaxHeight = mediaMaxHeight
+        return value
+    }
+
+    private func updateMediaMaxHeight() {
+        let height = view.bounds.inset(by: view.safeAreaInsets).height
+        guard height > 0 else { return }
+        let limit: CGFloat? = appearance.status.expandMediaSize
+            ? min(600, (height * 0.65).rounded(.down)) : nil
+        guard limit != mediaMaxHeight else { return }
+        collectionView.prepareForLayoutChange()
+        mediaMaxHeight = limit
+        itemHeightCache.discardPendingMeasurements()
+        reconfigureVisibleCells()
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
     private var isHeightCorrectionFlushScheduled = false
 
     private func clearHeightCache(keepingItemMeasurements: Bool = false) {
@@ -698,7 +724,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func heightGeometry(itemID: String, width: CGFloat) -> TimelineItemHeightCache.Geometry {
         .init(widthInPixels: heightCacheWidthKey(for: width),
-              multipleColumns: columnCount > 1 && itemID != Self.headerTimelineID)
+              multipleColumns: columnCount > 1 && itemID != Self.headerTimelineID,
+              mediaMaxHeightInPixels: itemID.hasPrefix(Self.timelinePrefix) ? mediaMaxHeight.map(heightCacheWidthKey) : nil)
     }
 
     private func measuredCompressedCardHeight(
@@ -998,7 +1025,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                 data: item,
                 index: row.index,
                 totalCount: row.totalCount,
-                appearance: appearance,
+                appearance: mediaAppearance,
                 detailStatusKey: detailStatusKey,
                 aiTldrEnabled: aiTldrEnabled,
                 isMultipleColumn: columnCount > 1 && itemID != Self.headerTimelineID,

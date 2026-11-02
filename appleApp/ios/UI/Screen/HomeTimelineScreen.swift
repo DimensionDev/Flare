@@ -229,21 +229,6 @@ struct HomeTimelineScreen: View {
                 }
             }
         }
-        .navigationBackButtonTitle(backButtonTitle)
-    }
-
-    private var backButtonTitle: String {
-        if case .success(let state) = onEnum(of: presenter.state.tabState),
-           !(globalAppearance.deckMode && horizontalSizeClass == .regular) {
-            let tabs = state.data.cast(UiTimelineTabItem.self)
-            let tab = (selectedTabId ?? presenter.state.initialSelectedTabId).flatMap { id in
-                tabs.first { $0.id == id }
-            } ?? tabs.first
-            if let title = tab?.title.text, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                return title
-            }
-        }
-        return String(localized: "home_tab_home_title")
     }
 
     private var shouldShowChangeLog: Bool {

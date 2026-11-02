@@ -239,6 +239,7 @@ targets:
     sources:
       - path: iosTests
       - path: ios/UI/Component/IPadCompactTabBarModifier.swift
+      - path: ios/UI/Component/NavigationBackButtonTitle.swift
       - path: ios/UI/Component/MediaViewerDismissEffect.swift
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift
       - path: ios/Common/MediaViewerPostSummaryState.swift

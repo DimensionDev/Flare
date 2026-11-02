@@ -1,4 +1,5 @@
 import CoreGraphics
+import SwiftUI
 import XCTest
 
 final class ProfileLayoutPolicyTests: XCTestCase {

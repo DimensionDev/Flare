@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -28,6 +30,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.dimension.flare.R
 import dev.dimension.flare.common.collectPagingState
 import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.data.model.appearance.GlobalAppearance
+import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
@@ -42,6 +47,8 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.screen.media.MediaViewerScreen
 import dev.dimension.flare.ui.screen.rss.OPMLImportSheet
+import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
+import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -55,7 +62,19 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
 class EmptyStatesTest {
+    private val originalMediaQueryIntegration = androidx.compose.ui.ComposeUiFlags.isMediaQueryIntegrationEnabled
+
+    @org.junit.After
+    fun restoreMediaQueryIntegration() {
+        androidx.compose.ui.ComposeUiFlags.isMediaQueryIntegrationEnabled = originalMediaQueryIntegration
+    }
+
+    init {
+        androidx.compose.ui.ComposeUiFlags.isMediaQueryIntegrationEnabled = true
+    }
+
     @get:Rule val compose = createComposeRule()
 
     @Test
@@ -65,7 +84,7 @@ class EmptyStatesTest {
         compose.setContent {
             val userState by users.collectPagingState()
             val postState by posts.collectPagingState()
-            MaterialTheme {
+            TestTheme {
                 LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
                     searchContent(userState, postState, {})
                 }
@@ -89,7 +108,7 @@ class EmptyStatesTest {
         compose.setContent {
             val userState by users.collectPagingState()
             val postState by posts.collectPagingState()
-            MaterialTheme {
+            TestTheme {
                 LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
                     searchContent(userState, postState, {})
                 }
@@ -104,7 +123,7 @@ class EmptyStatesTest {
         var indexed by mutableStateOf(false)
         compose.setContent {
             val state by data.collectPagingState()
-            MaterialTheme {
+            TestTheme {
                 Box(Modifier.size(320.dp, 200.dp).testTag("grid")) {
                     LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2), modifier = Modifier.fillMaxSize()) {
                         if (indexed) {
@@ -130,7 +149,7 @@ class EmptyStatesTest {
     @Test
     fun emojiPickerDistinguishesAnEmptyCatalogFromNoSearchMatches() {
         compose.setContent {
-            MaterialTheme {
+            TestTheme {
                 EmojiPicker(data = persistentMapOf(), onEmojiSelected = {}, accountType = AccountType.Guest)
             }
         }
@@ -147,7 +166,7 @@ class EmptyStatesTest {
         var media by mutableStateOf<UiState<ImmutableList<UiMedia>>>(UiState.Loading())
         var dismissed = false
         compose.setContent {
-            MaterialTheme {
+            TestTheme {
                 MediaViewerScreen(
                     medias = media,
                     initialIndex = 0,
@@ -176,7 +195,7 @@ class EmptyStatesTest {
         var dismissed = false
         try {
             compose.setContent {
-                MaterialTheme { OPMLImportSheet(Uri.fromFile(file), onBack = { dismissed = true }) }
+                TestTheme { OPMLImportSheet(Uri.fromFile(file), onBack = { dismissed = true }) }
             }
             compose.waitUntil(5_000) {
                 compose
@@ -191,6 +210,52 @@ class EmptyStatesTest {
             compose.runOnIdle { assertTrue(dismissed) }
         } finally {
             file.delete()
+        }
+    }
+
+    @Test
+    fun addTabSheetWaitsForResolvedCatalogBeforeShowingEmpty() {
+        var loaded by mutableStateOf(false)
+        compose.setContent {
+            val state =
+                object : AllTabsPresenter.State {
+                    override val rssTabs = persistentListOf<UiTimelineTabItem>()
+                    override val flattenedAccountTabs: UiState<ImmutableList<AllTabsPresenter.State.FlattenedAccountTabs>> =
+                        UiState.Success(
+                            persistentListOf<AllTabsPresenter.State.FlattenedAccountTabs>(),
+                        )
+                    override val accountTabs: UiState<ImmutableList<AllTabsPresenter.State.AccountTabs>> =
+                        UiState.Success(
+                            persistentListOf(AllTabsPresenter.State.AccountTabs(profile(), persistentListOf(), tabsLoaded = loaded)),
+                        )
+                }
+            TestTheme {
+                TabAddBottomSheet(
+                    tabs = persistentListOf(),
+                    allTabs = state,
+                    onDismissRequest = {},
+                    onAddTab = {},
+                    onDeleteTab = {},
+                    toAddRssSource = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Search result").performClick()
+        val empty = compose.onNodeWithText(label(R.string.empty_tab_candidates))
+        empty.assertDoesNotExist()
+        compose.runOnIdle { loaded = true }
+        empty.assertIsDisplayed()
+        compose.runOnIdle { loaded = false }
+        empty.assertDoesNotExist()
+    }
+
+    @Composable
+    private fun TestTheme(content: @Composable () -> Unit) {
+        CompositionLocalProvider(
+            LocalGlobalAppearance provides GlobalAppearance(),
+            LocalTimelineAppearance provides TimelineAppearance(),
+        ) {
+            MaterialTheme(content = content)
         }
     }
 

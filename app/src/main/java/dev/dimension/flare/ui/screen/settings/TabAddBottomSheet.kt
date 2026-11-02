@@ -257,7 +257,7 @@ internal fun TabAddBottomSheet(
                                     }
                                 }
                             }
-                            if (accountTabs.tabs.isEmpty()) {
+                            if (accountTabs.tabsLoaded && accountTabs.tabs.isEmpty()) {
                                 ListEmptyView(
                                     modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
                                     text = stringResource(R.string.empty_tab_candidates),

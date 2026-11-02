@@ -15,6 +15,7 @@ struct StatusMediaView: View {
     let carouselLeadingPadding: CGFloat
     let carouselTrailingPadding: CGFloat
     @Environment(\.timelineAppearance.expandMediaSize) private var expandMediaSize
+    @Environment(\.timelineAppearance.limitSingleMediaHeight) private var limitSingleMediaHeight
     @Environment(\.timelinePlaybackViewport) private var timelinePlaybackViewport
     @Environment(\.timelineAppearance.mediaLayout) private var mediaLayout
     @Environment(\.timelineAppearance.limitMediaGridToNine) private var limitMediaGridToNine
@@ -258,7 +259,8 @@ struct StatusMediaView: View {
     }
 
     private var singleExpandedMedia: (any UiMedia)? {
-        guard expandMediaSize, post.images.count == 1, data.count == 1, !(data[0] is UiMediaAudio) else { return nil }
+        guard expandMediaSize, limitSingleMediaHeight, post.images.count == 1, data.count == 1,
+              !(data[0] is UiMediaAudio) else { return nil }
         return data[0]
     }
 

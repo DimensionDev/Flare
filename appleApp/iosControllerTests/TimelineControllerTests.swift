@@ -9,6 +9,10 @@ import FlareAppleUI
 final class TimelineControllerIntegrationTests: XCTestCase {
     func testViewportHeightChangeResizesSingleMediaAndPreservesReadingPosition() async throws {
         let fixture = await Fixture(posts: true)
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
+            base: TimelineAppearance.companion.Default,
+            patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
         fixture.input.items = (0..<40).map { .post(makeRow($0, imageHeight: 1_600, mediaCount: 1)) }
         await fixture.apply()
         await fixture.scroll(2_500)
@@ -33,6 +37,38 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.view.frame.size.height = 600
         await fixture.settle()
         try fixture.assertPosition(expected)
+    }
+
+    func testSingleMediaLimitSwitchKeepsReadingPosition() async throws {
+        let fixture = await Fixture(posts: true)
+        fixture.input.items = (0..<40).map { .post(makeRow($0, imageHeight: 1_600, mediaCount: 1)) }
+        await fixture.apply()
+        await fixture.scroll(2_500)
+        let anchor = try fixture.position()
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?(anchor.id))
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+        await fixture.scroll(frame.minY - fixture.collection.adjustedContentInset.top)
+        let expected = try fixture.position()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        for enabled in [true, false, true, false] {
+            fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
+                base: TimelineAppearance.companion.Default,
+                patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: enabled)))
+            await fixture.settle()
+            try fixture.assertPosition(expected)
+            let media = fixture.collection.visibleCells.flatMap(descendants)
+                .compactMap { $0 as? StatusMediaUIView }.filter { !$0.isHidden }
+            XCTAssertFalse(media.isEmpty)
+            for view in media {
+                if enabled {
+                    XCTAssertEqual(view.bounds.height, 300, accuracy: 1)
+                    XCTAssertEqual(view.bounds.width, 150, accuracy: 1)
+                } else {
+                    XCTAssertGreaterThan(view.bounds.height, 300)
+                    XCTAssertGreaterThan(view.bounds.width, 150)
+                }
+            }
+        }
     }
 
     func testAppendedTwoColumnRowsHaveFinalPositionsInTheirFirstLayout() async throws {

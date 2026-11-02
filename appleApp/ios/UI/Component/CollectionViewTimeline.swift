@@ -668,7 +668,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private var mediaAppearance: TimelineUIKitAppearance {
         var result = appearance
-        result.status.singleMediaMaxHeight = singleMediaMaxHeight
+        result.status.singleMediaMaxHeight = appearance.status.expandMediaSize && appearance.status.limitSingleMediaHeight
+            ? singleMediaMaxHeight : nil
         return result
     }
 
@@ -678,6 +679,10 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             viewportHeight: Float(collectionView.bounds.inset(by: collectionView.safeAreaInsets).height)
         ))
         guard heightCacheWidthKey(for: height) != heightCacheWidthKey(for: singleMediaMaxHeight) else { return }
+        guard appearance.status.expandMediaSize, appearance.status.limitSingleMediaHeight else {
+            singleMediaMaxHeight = height
+            return
+        }
         collectionView.prepareForLayoutChange()
         singleMediaMaxHeight = height
         clearHeightCache(keepingItemMeasurements: true)
@@ -721,7 +726,8 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
     private func heightGeometry(itemID: String, width: CGFloat) -> TimelineItemHeightCache.Geometry {
         .init(widthInPixels: heightCacheWidthKey(for: width),
               multipleColumns: columnCount > 1 && itemID != Self.headerTimelineID,
-              singleMediaMaxHeightInPixels: appearance.status.expandMediaSize ? heightCacheWidthKey(for: singleMediaMaxHeight) : 0)
+              singleMediaMaxHeightInPixels: appearance.status.expandMediaSize && appearance.status.limitSingleMediaHeight
+                ? heightCacheWidthKey(for: singleMediaMaxHeight) : 0)
     }
 
     private func measuredCompressedCardHeight(

@@ -176,6 +176,8 @@ import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
+import dev.dimension.flare.settings_appearance_limit_single_media_height
+import dev.dimension.flare.settings_appearance_limit_single_media_height_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
 import dev.dimension.flare.settings_appearance_media_layout
@@ -1297,6 +1299,28 @@ internal fun SettingsScreen(
                                 )
                             },
                         )
+                        AnimatedVisibility(LocalTimelineAppearance.current.expandMediaSize) {
+                            Column {
+                                ExpanderItemSeparator()
+                                ExpanderItem(
+                                    heading = {
+                                        Text(stringResource(Res.string.settings_appearance_limit_single_media_height))
+                                    },
+                                    caption = {
+                                        Text(stringResource(Res.string.settings_appearance_limit_single_media_height_description))
+                                    },
+                                    trailing = {
+                                        Switcher(
+                                            checked = LocalTimelineAppearance.current.limitSingleMediaHeight,
+                                            {
+                                                state.appearanceState.update(AppearanceKeys.LimitSingleMediaHeight, it)
+                                            },
+                                            textBefore = true,
+                                        )
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
                 ExpanderItemSeparator()

@@ -1,4 +1,5 @@
 import XCTest
+import AVFoundation
 import UIKit
 import SwiftUI
 import ImageIO
@@ -22,7 +23,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                 if renderer == "uikit" {
                     host = UIViewController()
                     let view = StatusUIKitView()
-                    var appearance = StatusUIKitAppearance(timeline: TimelineAppearance.companion.Default)
+                    var appearance = StatusUIKitAppearance(timeline: singleMediaAppearance())
                     appearance.singleMediaMaxHeight = 400
                     view.configure(data: post, appearance: appearance)
                     host.view.addSubview(view)
@@ -34,6 +35,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                             Spacer(minLength: 0)
                         }
                         .padding(16)
+                        .environment(\.timelineAppearance, singleMediaAppearance())
                         .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 800)))
                 }
                 let window = try fixture.show(host)
@@ -70,6 +72,81 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
+    private func singleMediaAppearance(limited: Bool = true, expanded: Bool = true) -> TimelineAppearance {
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        return helper.resolve(base: TimelineAppearance.companion.Default, patch:
+            helper.setExpandMediaSize(patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: limited), value: expanded))
+    }
+
+    private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
+
+    func testSingleMediaLimitToggleRestoresOriginalBoundsOnBothRenderers() async throws {
+        for renderer in ["uikit", "swiftui"] {
+            let fixture = try await Fixture(imageSize: CGSize(width: 360, height: 640))
+            let media = fixture.media(path: "toggle-\(renderer).png", width: 360, height: 640)
+            let post = singleMediaPost(media)
+            let host: UIViewController
+            let update: (TimelineAppearance) -> Void
+            var native: StatusUIKitView?
+            if renderer == "uikit" {
+                host = UIViewController()
+                let status = StatusUIKitView()
+                native = status
+                host.view.addSubview(status)
+                update = { appearance in
+                    var appearance = StatusUIKitAppearance(timeline: appearance)
+                    appearance.singleMediaMaxHeight = 200
+                    status.configure(data: post, appearance: appearance)
+                    status.prepareForFitting(width: 360)
+                    status.frame = CGRect(x: 16, y: host.view.safeAreaInsets.top + 16,
+                                          width: 360, height: status.timelineHeight(for: 360) ?? 0)
+                }
+            } else {
+                func content(_ appearance: TimelineAppearance) -> some View {
+                    VStack(alignment: .leading) {
+                        StatusView(data: post).frame(width: 360)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .environment(\.timelineAppearance, appearance)
+                    .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+                }
+                let controller = UIHostingController(rootView: content(TimelineAppearance.companion.Default))
+                host = controller
+                update = { controller.rootView = content($0) }
+            }
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for (index, appearance) in [TimelineAppearance.companion.Default, singleMediaAppearance(),
+                                        singleMediaAppearance(limited: true, expanded: false),
+                                        singleMediaAppearance(limited: false), singleMediaAppearance()].enumerated() {
+                update(appearance)
+                for _ in 0..<300 {
+                    host.view.layoutIfNeeded()
+                    if fixture.cache.imageSize(for: media.previewUrl) != nil { break }
+                    try await Task.sleep(for: .milliseconds(10))
+                }
+                try await Task.sleep(for: .milliseconds(150))
+                host.view.layoutIfNeeded()
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 1
+                let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let bounds = try cyanBounds(screenshot)
+                let limited = appearance.limitSingleMediaHeight && appearance.expandMediaSize
+                XCTAssertEqual(bounds.width, limited ? 112.5 : 308, accuracy: 2, "\(renderer), step \(index)")
+                XCTAssertEqual(bounds.height, limited ? 200 : (appearance.expandMediaSize ? 308 * 16 / 9 : 308 * 9 / 16),
+                               accuracy: 2, "\(renderer), step \(index)")
+                XCTAssertEqual(bounds.minX, 68, accuracy: 2)
+                if let native {
+                    XCTAssertEqual(native.bounds.height, native.timelineHeight(for: 360) ?? 0, accuracy: 1)
+                }
+            }
+        }
+    }
+
     func testSingleMediaLimitRespectsScopeAndKeepsVideoAspectRatio() async throws {
         let fixture = try await Fixture()
         let image = fixture.media(width: 360, height: 640)
@@ -100,12 +177,48 @@ final class TimelineMediaPreviewTests: XCTestCase {
         XCTAssertEqual(grid.fittingWidth(for: 360), 360)
     }
 
+    func testSingleVideoToggleUpdatesExistingThumbnailAndPlayer() throws {
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/tall.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/tall.png", description: nil, height: 1_800, width: 360,
+            customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        let status = StatusUIKitView()
+        let post = singleMediaPost(video, sensitive: true)
+        func update(limited: Bool) {
+            var appearance = StatusUIKitAppearance(timeline: singleMediaAppearance(limited: limited))
+            appearance.singleMediaMaxHeight = 200
+            status.configure(data: post, appearance: appearance)
+            status.prepareForFitting(width: 360)
+            status.frame.size = CGSize(width: 360, height: status.timelineHeight(for: 360) ?? 0)
+            status.layoutIfNeeded()
+        }
+        update(limited: false)
+        let media = try XCTUnwrap(descendants(status).compactMap { $0 as? MediaUIView }.first)
+        let thumbnail = try XCTUnwrap(descendants(media).compactMap { $0 as? NetworkImageView }.first)
+        let grid = try XCTUnwrap(descendants(status).compactMap { $0 as? StatusMediaUIView }.first)
+        let blur = try XCTUnwrap(grid.subviews.compactMap { $0 as? UIVisualEffectView }.first)
+        let reveal = try XCTUnwrap(grid.subviews.compactMap { $0 as? UIButton }.first)
+        reveal.sendActions(for: .touchUpInside)
+        XCTAssertTrue(blur.isHidden)
+        let surface = VideoPlaybackSurfaceView()
+        media.attachAutoplayPlayer(surface)
+        for enabled in [true, false, true, false] {
+            update(limited: enabled)
+            XCTAssertTrue(descendants(status).contains { $0 === media })
+            XCTAssertTrue(surface.superview === media)
+            XCTAssertTrue(blur.isHidden)
+            XCTAssertTrue(grid.allowsVideoAutoplay)
+            XCTAssertEqual(thumbnail.contentMode, enabled ? .scaleAspectFit : .scaleAspectFill)
+            XCTAssertEqual(surface.playerLayer.videoGravity, enabled ? .resizeAspect : .resizeAspectFill)
+        }
+    }
+
     func testSinglePostMediaUsesScrollViewportWithoutPlaybackCoordinator() async throws {
         let fixture = try await Fixture(imageSize: CGSize(width: 360, height: 640))
         let media = fixture.media(path: "scroll-viewport.png", width: 360, height: 640)
         let post = singleMediaPost(media)
         func content(height: CGFloat) -> some View {
             ScrollView { StatusView(data: post).padding(16) }
+                .environment(\.timelineAppearance, singleMediaAppearance())
                 .frame(height: height)
                 .frame(maxHeight: .infinity, alignment: .top)
         }
@@ -159,13 +272,13 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
-    private func singleMediaPost(_ media: UiMedia) -> UiTimelineV2.Post {
+    private func singleMediaPost(_ media: UiMedia, sensitive: Bool = false) -> UiTimelineV2.Post {
         func rich(_ text: String) -> UiRichText {
             let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
             return UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
         }
         let profile = UiProfile(key: MicroBlogKey(id: "demo", host: "example.invalid"), handle: UiHandle(raw: "flare", host: "example.invalid", displayOverride: nil), avatar: nil as UiMediaImage?, nameInternal: rich("Flare"), platformId: "mastodon", platformIcon: IconType.Material(icon: .world), clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil, pluginId: nil)
-        return UiTimelineV2.Post(platformId: "mastodon", images: [media], sensitive: false, contentWarning: nil, user: profile, platformIcon: IconType.Material(icon: .world), sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich("Single attachment · expanded media\nAligned with the post content"), translation: nil), actions: [], poll: nil, statusKey: MicroBlogKey(id: "media-layout", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "media-layout", pluginId: nil, authorSubtitleInternal: nil)
+        return UiTimelineV2.Post(platformId: "mastodon", images: [media], sensitive: sensitive, contentWarning: nil, user: profile, platformIcon: IconType.Material(icon: .world), sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich("Single attachment · expanded media\nAligned with the post content"), translation: nil), actions: [], poll: nil, statusKey: MicroBlogKey(id: "media-layout", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "media-layout", pluginId: nil, authorSubtitleInternal: nil)
     }
 
     private func cyanBounds(_ image: UIImage) throws -> CGRect {

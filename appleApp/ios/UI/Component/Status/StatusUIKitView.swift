@@ -675,9 +675,10 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
 
     private func updateSingleMediaHeightLimit() {
         guard let mediaViewStorage else { return }
-        let maximumHeight = appearance.singleMediaMaxHeight ?? CGFloat(TimelineSingleMediaLayout.shared.maximumHeight(
+        let maximumHeight: CGFloat? = appearance.expandMediaSize && appearance.limitSingleMediaHeight
+            ? appearance.singleMediaMaxHeight ?? CGFloat(TimelineSingleMediaLayout.shared.maximumHeight(
             viewportHeight: Float(window.map { $0.bounds.inset(by: $0.safeAreaInsets).height } ?? 0)
-        ))
+        )) : nil
         if mediaViewStorage.singleMediaMaxHeight != maximumHeight {
             mediaViewStorage.singleMediaMaxHeight = maximumHeight
             lastPreparedFittingWidthKey = nil

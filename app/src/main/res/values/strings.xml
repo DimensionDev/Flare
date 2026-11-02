@@ -386,6 +386,8 @@
     <string name="settings_appearance_expand_content_warning_description">Always reveal post content hidden by content warnings</string>
     <string name="settings_appearance_expand_media">Preserve media aspect ratio</string>
     <string name="settings_appearance_expand_media_description">Show media at its original aspect ratio in timelines</string>
+    <string name="settings_appearance_limit_single_media_height">Limit single attachment height</string>
+    <string name="settings_appearance_limit_single_media_height_description">Scale down tall single attachments when expanded to reduce screen space.</string>
     <string name="settings_appearance_media_layout">Media layout</string>
     <string name="settings_appearance_media_layout_description">Choose how multiple media items are arranged in timeline posts</string>
     <string name="settings_appearance_media_layout_grid">Grid</string>

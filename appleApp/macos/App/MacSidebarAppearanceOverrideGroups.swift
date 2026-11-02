@@ -226,6 +226,21 @@ struct MacSidebarMediaAppearanceOverrideGroup: View {
                     Text("appearance_expand_media_size")
                 }
 
+                if timelineAppearance.expandMediaSize {
+                    Toggle(isOn: Binding(get: {
+                        timelineAppearance.limitSingleMediaHeight
+                    }, set: { value in
+                        appearancePatch = TimelinePresentationAppearancePatchHelper.shared.setLimitSingleMediaHeight(
+                            patch: appearancePatch,
+                            value: value
+                        )
+                    })) {
+                        Text("appearance_limit_single_media_height")
+                        Text("appearance_limit_single_media_height_description")
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+
                 Picker(selection: Binding(get: {
                     timelineAppearance.mediaLayout
                 }, set: { value in
@@ -292,6 +307,7 @@ struct MacSidebarMediaAppearanceOverrideGroup: View {
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: timelineAppearance.expandMediaSize)
     }
 }
 

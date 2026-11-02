@@ -64,6 +64,8 @@ import dev.dimension.flare.settings_appearance_layout_group_subtitle
 import dev.dimension.flare.settings_appearance_layout_group_title
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine
 import dev.dimension.flare.settings_appearance_limit_media_grid_to_nine_description
+import dev.dimension.flare.settings_appearance_limit_single_media_height
+import dev.dimension.flare.settings_appearance_limit_single_media_height_description
 import dev.dimension.flare.settings_appearance_media_group_subtitle
 import dev.dimension.flare.settings_appearance_media_group_title
 import dev.dimension.flare.settings_appearance_media_layout
@@ -176,6 +178,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
             appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
+            appearancePatch.contains(AppearanceKeys.LimitSingleMediaHeight) ||
             appearancePatch.contains(AppearanceKeys.MediaLayout) ||
             appearancePatch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
@@ -478,6 +481,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(
+                                        AppearanceKeys.LimitSingleMediaHeight,
+                                        timelineAppearance.limitSingleMediaHeight,
+                                    ).set(
                                         AppearanceKeys.MediaLayout,
                                         timelineAppearance.mediaLayout,
                                     ).set(
@@ -493,6 +499,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowSensitiveContent,
                                     AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.LimitSingleMediaHeight,
                                     AppearanceKeys.MediaLayout,
                                     AppearanceKeys.LimitMediaGridToNine,
                                     AppearanceKeys.VideoAutoplay,
@@ -595,6 +602,24 @@ internal fun TimelinePresentationEditor(
                                     )
                                 },
                             )
+                            AnimatedVisibility(timelineAppearance.expandMediaSize) {
+                                Column {
+                                    ExpanderItemSeparator()
+                                    SwitchItem(
+                                        title = stringResource(Res.string.settings_appearance_limit_single_media_height),
+                                        caption = stringResource(Res.string.settings_appearance_limit_single_media_height_description),
+                                        checked = timelineAppearance.limitSingleMediaHeight,
+                                        onCheckedChange = {
+                                            onAppearancePatchChange(
+                                                appearancePatch.set(
+                                                    AppearanceKeys.LimitSingleMediaHeight,
+                                                    it,
+                                                ),
+                                            )
+                                        },
+                                    )
+                                }
+                            }
                             ExpanderItemSeparator()
                             ChoiceItem(
                                 title = stringResource(Res.string.settings_appearance_video_autoplay),

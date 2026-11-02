@@ -438,6 +438,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         didSet {
             guard oldValue != singleMediaMaxHeight else { return }
             updateAspectConstraint()
+            if (oldValue == nil) != (singleMediaMaxHeight == nil), singleFollowsImageAspect,
+               items.count == 1, items.first is UiMediaVideo {
+                rebuildGrid()
+            }
             invalidateIntrinsicContentSize()
             setNeedsLayout()
         }

@@ -117,6 +117,7 @@ public class HomeTabSettingsPresenter : PresenterBase<HomeTabSettingsPresenter.S
                     icon = icon,
                     appearancePatch =
                         buildAppearancePatch(
+                            existingPatch = tab.appearancePatch,
                             layoutEnabled = layoutEnabled,
                             timelineDisplayMode = timelineDisplayMode,
                             fullWidthPost = fullWidthPost,
@@ -179,6 +180,7 @@ public class HomeTabSettingsPresenter : PresenterBase<HomeTabSettingsPresenter.S
                     icon = icon,
                     appearancePatch =
                         buildAppearancePatch(
+                            existingPatch = initialItem?.appearancePatch,
                             layoutEnabled = layoutEnabled,
                             timelineDisplayMode = timelineDisplayMode,
                             fullWidthPost = fullWidthPost,
@@ -355,7 +357,8 @@ public class HomeTabSettingsPresenter : PresenterBase<HomeTabSettingsPresenter.S
 private fun AppearancePatch?.hasAny(vararg keys: dev.dimension.flare.data.model.appearance.AppearanceKey<*>): Boolean =
     this != null && keys.any { contains(it) }
 
-private fun buildAppearancePatch(
+internal fun buildAppearancePatch(
+    existingPatch: AppearancePatch?,
     layoutEnabled: Boolean,
     timelineDisplayMode: TimelineDisplayMode,
     fullWidthPost: Boolean,
@@ -375,7 +378,13 @@ private fun buildAppearancePatch(
     themeEnabled: Boolean,
     avatarShape: AvatarShape,
 ): AppearancePatch? {
-    var patch = AppearancePatch.EMPTY
+    // Web has no control for this native preference, so edits there must preserve its explicit value.
+    var patch =
+        if (existingPatch?.contains(AppearanceKeys.LimitSingleMediaHeight) == true) {
+            AppearancePatch.EMPTY.set(AppearanceKeys.LimitSingleMediaHeight, existingPatch[AppearanceKeys.LimitSingleMediaHeight])
+        } else {
+            AppearancePatch.EMPTY
+        }
     if (layoutEnabled) {
         patch =
             patch

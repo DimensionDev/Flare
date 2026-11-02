@@ -33,6 +33,7 @@ public object TimelinePresentationAppearancePatchHelper {
             patch.contains(AppearanceKeys.ShowSensitiveContent) ||
             patch.contains(AppearanceKeys.ExpandContentWarning) ||
             patch.contains(AppearanceKeys.ExpandMediaSize) ||
+            patch.contains(AppearanceKeys.LimitSingleMediaHeight) ||
             patch.contains(AppearanceKeys.MediaLayout) ||
             patch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             patch.contains(AppearanceKeys.VideoAutoplay)
@@ -86,6 +87,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .set(AppearanceKeys.ShowSensitiveContent, appearance.showSensitiveContent)
             .set(AppearanceKeys.ExpandContentWarning, appearance.expandContentWarning)
             .set(AppearanceKeys.ExpandMediaSize, appearance.expandMediaSize)
+            .set(AppearanceKeys.LimitSingleMediaHeight, appearance.limitSingleMediaHeight)
             .set(AppearanceKeys.MediaLayout, appearance.mediaLayout)
             .set(AppearanceKeys.LimitMediaGridToNine, appearance.limitMediaGridToNine)
             .set(AppearanceKeys.VideoAutoplay, appearance.videoAutoplay)
@@ -96,6 +98,7 @@ public object TimelinePresentationAppearancePatchHelper {
             .clear(AppearanceKeys.ShowSensitiveContent)
             .clear(AppearanceKeys.ExpandContentWarning)
             .clear(AppearanceKeys.ExpandMediaSize)
+            .clear(AppearanceKeys.LimitSingleMediaHeight)
             .clear(AppearanceKeys.MediaLayout)
             .clear(AppearanceKeys.LimitMediaGridToNine)
             .clear(AppearanceKeys.VideoAutoplay)
@@ -176,6 +179,11 @@ public object TimelinePresentationAppearancePatchHelper {
         patch: AppearancePatch,
         value: Boolean,
     ): AppearancePatch = patch.set(AppearanceKeys.ExpandMediaSize, value)
+
+    public fun setLimitSingleMediaHeight(
+        patch: AppearancePatch,
+        value: Boolean,
+    ): AppearancePatch = patch.set(AppearanceKeys.LimitSingleMediaHeight, value)
 
     public fun setMediaLayout(
         patch: AppearancePatch,

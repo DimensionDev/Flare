@@ -128,6 +128,7 @@ final class StatusActionColorTests: XCTestCase {
             showSensitiveContent: base.showSensitiveContent,
             expandContentWarning: base.expandContentWarning,
             expandMediaSize: base.expandMediaSize,
+            limitSingleMediaHeight: base.limitSingleMediaHeight,
             mediaLayout: base.mediaLayout,
             limitMediaGridToNine: base.limitMediaGridToNine,
             videoAutoplay: base.videoAutoplay,

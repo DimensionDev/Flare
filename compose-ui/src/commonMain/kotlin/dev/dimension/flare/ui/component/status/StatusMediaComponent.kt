@@ -114,7 +114,7 @@ internal fun StatusMediaComponent(
     val appearanceSettings = LocalTimelineAppearance.current
     val singleExpandedMedia =
         data.singleOrNull()?.takeIf {
-            post.images.size == 1 && appearanceSettings.expandMediaSize && it !is UiMedia.Audio
+            post.images.size == 1 && appearanceSettings.expandMediaSize && appearanceSettings.limitSingleMediaHeight && it !is UiMedia.Audio
         }
     val singleMediaRatio =
         singleExpandedMedia?.let {

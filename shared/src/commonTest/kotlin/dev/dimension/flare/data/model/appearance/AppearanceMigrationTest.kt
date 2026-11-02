@@ -61,6 +61,13 @@ class AppearanceMigrationTest {
                     .toAppearanceSettings(),
             )
             assertFalse(fs.exists(oldPath))
+            assertFalse(
+                store.data
+                    .first()
+                    .toPatch()
+                    .toTimelineAppearance()
+                    .limitSingleMediaHeight,
+            )
             fs.deleteRecursively(root)
         }
 }

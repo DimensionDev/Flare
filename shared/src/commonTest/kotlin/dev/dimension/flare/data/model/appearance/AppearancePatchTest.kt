@@ -23,8 +23,40 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class AppearancePatchTest {
+    @Test
+    fun singleMediaHeightLimitDefaultsOffAndPreservesExplicitOverrides() {
+        assertFalse(TimelineAppearance.Default.limitSingleMediaHeight)
+        assertFalse(AppearanceBag().toPatch().toTimelineAppearance().limitSingleMediaHeight)
+        assertFalse(
+            AppearanceSettings.Default
+                .toPatch()
+                .toTimelineAppearance()
+                .limitSingleMediaHeight,
+        )
+        val global =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.LimitSingleMediaHeight, true)
+                .toBag()
+                .toPatch()
+        val disabled =
+            AppearancePatch.EMPTY
+                .set(AppearanceKeys.LimitSingleMediaHeight, false)
+                .toBag()
+                .toPatch()
+
+        assertTrue(global.toTimelineAppearance(AppearancePatch.EMPTY).limitSingleMediaHeight)
+        assertFalse(global.toTimelineAppearance(disabled).limitSingleMediaHeight)
+        assertFalse(global.toTimelineAppearance().withPatch(disabled).limitSingleMediaHeight)
+        assertTrue(global.toTimelineAppearance(disabled.clear(AppearanceKeys.LimitSingleMediaHeight)).limitSingleMediaHeight)
+
+        val hidden = global.set(AppearanceKeys.ExpandMediaSize, false).toBag().toPatch()
+        assertTrue(hidden.toTimelineAppearance().limitSingleMediaHeight)
+        assertTrue(hidden.set(AppearanceKeys.ExpandMediaSize, true).toTimelineAppearance().limitSingleMediaHeight)
+    }
+
     @Test
     fun mediaViewerPostPreferenceSurvivesStorageAndCanReturnToDefault() {
         val stored = AppearancePatch.EMPTY.set(AppearanceKeys.ShowPostInMediaViewer, false).toBag()
@@ -210,6 +242,7 @@ class AppearancePatchTest {
                 AppearanceKeys.DeckMode,
                 AppearanceKeys.ShowPostInMediaViewer,
                 AppearanceKeys.ExpandContentWarning,
+                AppearanceKeys.LimitSingleMediaHeight,
                 AppearanceKeys.MediaLayout,
                 AppearanceKeys.LimitMediaGridToNine,
                 AppearanceKeys.ShowEmojiReactions,

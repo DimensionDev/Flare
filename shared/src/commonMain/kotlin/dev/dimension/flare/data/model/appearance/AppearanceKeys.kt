@@ -63,6 +63,8 @@ public object AppearanceKeys {
 
     public object ExpandMediaSize : PerTimeline<Boolean>("timeline.expand_media_size", true, Boolean.serializer())
 
+    public object LimitSingleMediaHeight : PerTimeline<Boolean>("timeline.limit_single_media_height", false, Boolean.serializer())
+
     public object MediaLayout : PerTimeline<AppearanceTimelineMediaLayout>(
         "timeline.media_layout",
         AppearanceTimelineMediaLayout.Grid,
@@ -139,6 +141,7 @@ public object AppearanceKeys {
             ShowSensitiveContent,
             ExpandContentWarning,
             ExpandMediaSize,
+            LimitSingleMediaHeight,
             MediaLayout,
             LimitMediaGridToNine,
             VideoAutoplay,

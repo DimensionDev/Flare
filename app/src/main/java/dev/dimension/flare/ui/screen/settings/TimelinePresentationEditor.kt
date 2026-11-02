@@ -102,6 +102,7 @@ internal fun TimelinePresentationEditor(
             appearancePatch.contains(AppearanceKeys.ShowSensitiveContent) ||
             appearancePatch.contains(AppearanceKeys.ExpandContentWarning) ||
             appearancePatch.contains(AppearanceKeys.ExpandMediaSize) ||
+            appearancePatch.contains(AppearanceKeys.LimitSingleMediaHeight) ||
             appearancePatch.contains(AppearanceKeys.MediaLayout) ||
             appearancePatch.contains(AppearanceKeys.LimitMediaGridToNine) ||
             appearancePatch.contains(AppearanceKeys.VideoAutoplay)
@@ -464,6 +465,9 @@ internal fun TimelinePresentationEditor(
                                         AppearanceKeys.ExpandMediaSize,
                                         timelineAppearance.expandMediaSize,
                                     ).set(
+                                        AppearanceKeys.LimitSingleMediaHeight,
+                                        timelineAppearance.limitSingleMediaHeight,
+                                    ).set(
                                         AppearanceKeys.MediaLayout,
                                         timelineAppearance.mediaLayout,
                                     ).set(
@@ -476,6 +480,7 @@ internal fun TimelinePresentationEditor(
                                     AppearanceKeys.ShowSensitiveContent,
                                     AppearanceKeys.ExpandContentWarning,
                                     AppearanceKeys.ExpandMediaSize,
+                                    AppearanceKeys.LimitSingleMediaHeight,
                                     AppearanceKeys.MediaLayout,
                                     AppearanceKeys.LimitMediaGridToNine,
                                     AppearanceKeys.VideoAutoplay,
@@ -580,6 +585,22 @@ internal fun TimelinePresentationEditor(
                                 },
                                 shapes = ListItemDefaults.item(),
                             )
+                            AnimatedVisibility(timelineAppearance.expandMediaSize) {
+                                SwitchSettingsItem(
+                                    title = stringResource(id = R.string.settings_appearance_limit_single_media_height),
+                                    description = stringResource(id = R.string.settings_appearance_limit_single_media_height_description),
+                                    checked = timelineAppearance.limitSingleMediaHeight,
+                                    onCheckedChange = {
+                                        onAppearancePatchChange(
+                                            appearancePatch.set(
+                                                AppearanceKeys.LimitSingleMediaHeight,
+                                                it,
+                                            ),
+                                        )
+                                    },
+                                    shapes = ListItemDefaults.item(),
+                                )
+                            }
                             SingleChoiceSettingsItem(
                                 headline = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay)) },
                                 supporting = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description)) },

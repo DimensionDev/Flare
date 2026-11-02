@@ -41,7 +41,6 @@ struct ProfileScreen: View {
             for: .navigationBar
         )
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBackButtonTitle(backButtonTitle)
         .onChange(of: isBlockedProfile) { _, isBlocked in
             if !isBlocked {
                 showBlockedProfileContent = false
@@ -309,14 +308,6 @@ struct ProfileScreen: View {
     @ViewBuilder
     private func profileTabPicker(tabs: [ProfileState.Tab]) -> some View {
         ProfileTabPicker(tabs: tabs, selectedTab: $selectedTab)
-    }
-
-    private var backButtonTitle: String {
-        if case .success(let user) = onEnum(of: presenter.state.userState),
-           !user.data.name.innerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return user.data.name.innerText
-        }
-        return String(localized: "profile_title")
     }
 
     private func updateToolbarTabPickerVisibility() {

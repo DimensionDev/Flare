@@ -12,10 +12,10 @@ struct SecondaryTabsScreen: View {
         Group {
             if #available(iOS 18.0, *) {
                 Router { _ in
-                    content.navigationBackButtonTitle(String(localized: "more"))
+                    content
                 }
             } else {
-                content.navigationBackButtonTitle(String(localized: "more"))
+                content
             }
         }
         .toolbar {

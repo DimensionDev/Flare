@@ -101,7 +101,6 @@ struct NotificationScreen: View {
                 }
             }
             .detectScrolling()
-            .navigationBackButtonTitle(String(localized: "home_tab_notifications_title"))
             .if(!notificationItems.isEmpty && horizontalSizeClass == .compact && !isSyncingAccountSelection) { view in
                 view
                     .safeAreaInset(edge: .top) {

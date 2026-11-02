@@ -16,14 +16,6 @@ struct GalleryDetailScreen: View {
     private let onNavigate: (Route) -> Void
     private var isBigScreen: Bool { horizontalSizeClass == .regular }
 
-    private var backButtonTitle: String {
-        if case .success(let detail) = onEnum(of: presenter.state.detail),
-           !detail.data.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return detail.data.title
-        }
-        return String(localized: "status_detail_title")
-    }
-
     init(accountType: AccountType, statusKey: MicroBlogKey, onNavigate: @escaping (Route) -> Void) {
         self.accountType = accountType
         self.statusKey = statusKey
@@ -52,7 +44,6 @@ struct GalleryDetailScreen: View {
         .environment(\.timelineAppearance, timelineAppearance.galleryCardTimeline())
         .background(Color(.systemGroupedBackground))
         .navigationTitle("")
-        .navigationBackButtonTitle(backButtonTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !isBigScreen {

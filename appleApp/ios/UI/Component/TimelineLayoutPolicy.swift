@@ -1,4 +1,4 @@
-import CoreGraphics
+import SwiftUI
 
 enum TimelineColumnPolicy {
     case adaptive
@@ -16,13 +16,13 @@ struct ProfileLayoutPolicy: Equatable {
     let profileWidth: CGFloat
     let columnSpacing: CGFloat
 
-    init(width: CGFloat, division: CGRect? = nil) {
+    init(width: CGFloat, division: CGRect? = nil, layoutDirection: LayoutDirection = .leftToRight) {
         // Classify before fold displacement so resizing a pane cannot switch modes.
         usesCard = TimelineColumnPolicy.adaptive.columnCount(for: width - 400 - 8) > 1
         if !usesCard, let division,
            division.width > 0, division.height > division.width,
            division.minX > 0, division.maxX < width {
-            profileWidth = division.minX
+            profileWidth = layoutDirection == .rightToLeft ? width - division.maxX : division.minX
             columnSpacing = division.width
         } else {
             profileWidth = 400

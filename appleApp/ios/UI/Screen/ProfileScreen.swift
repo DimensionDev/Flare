@@ -9,6 +9,7 @@ import Observation
 struct ProfileScreen: View {
     @Environment(\.timelineAccountID) private var accountID
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.layoutDirection) private var layoutDirection
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
@@ -113,7 +114,11 @@ struct ProfileScreen: View {
     var regularBody: some View {
         GeometryReader { proxy in
             let division = profileDivision(in: proxy)
-            let layout = ProfileLayoutPolicy(width: proxy.size.width, division: division)
+            let layout = ProfileLayoutPolicy(
+                width: proxy.size.width,
+                division: division,
+                layoutDirection: layoutDirection
+            )
             HStack(spacing: 0) {
                 ScrollView {
                     ProfileHeader(

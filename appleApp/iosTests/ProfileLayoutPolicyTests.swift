@@ -38,6 +38,19 @@ final class ProfileLayoutPolicyTests: XCTestCase {
         XCTAssertEqual(layout.profileWidth + layout.columnSpacing, 488)
     }
 
+    func testRightToLeftFoldAlignsWithAsymmetricReservedRegion() {
+        let layout = ProfileLayoutPolicy(
+            width: 880,
+            division: CGRect(x: 456, y: 0, width: 32, height: 600),
+            layoutDirection: .rightToLeft
+        )
+
+        XCTAssertEqual(layout.profileWidth, 392)
+        XCTAssertEqual(layout.columnSpacing, 32)
+        XCTAssertEqual(880 - layout.profileWidth - layout.columnSpacing, 456)
+        XCTAssertEqual(880 - layout.profileWidth, 488)
+    }
+
     func testMultipleTimelineColumnsKeepTheCardWhenFolded() {
         let layout = ProfileLayoutPolicy(
             width: 1_440,

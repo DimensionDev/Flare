@@ -61,42 +61,46 @@ public struct AgentChatView: View {
                 case .loading:
                     AgentChatMessagesSkeleton()
                 default:
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 10) {
-                            PagingView(
-                                data: messages,
-                                reversed: true,
-                                id: { $0.id },
-                                emptyContent: {
-                                    EmptyView()
-                                },
-                                errorContent: { error, retry in
-                                    AgentErrorCard(failure: AgentFailure.companion.fromThrowable(throwable: error), onRetry: retry, historyError: true)
-                                        .padding()
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                },
-                                loadingContent: { _, _ in
-                                    ProgressView()
-                                },
-                                successContent: { message, _, _ in
-                                    AgentChatMessageBubble(
-                                        parts: Array(message.parts),
-                                        isUser: message.isUser,
-                                        onInputRequestOptionSelected: onInputRequestOptionSelected,
-                                        onPostClick: onPostClick,
-                                        onUserClick: onUserClick
-                                    )
-                                }
-                            )
+                    GeometryReader { viewport in
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 10) {
+                                PagingView(
+                                    data: messages,
+                                    reversed: true,
+                                    id: { $0.id },
+                                    emptyContent: {
+                                        EmptyView()
+                                    },
+                                    errorContent: { error, retry in
+                                        AgentErrorCard(failure: AgentFailure.companion.fromThrowable(throwable: error), onRetry: retry, historyError: true)
+                                            .padding()
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                    },
+                                    loadingContent: { _, _ in
+                                        ProgressView()
+                                    },
+                                    successContent: { message, _, _ in
+                                        AgentChatMessageBubble(
+                                            parts: Array(message.parts),
+                                            isUser: message.isUser,
+                                            onInputRequestOptionSelected: onInputRequestOptionSelected,
+                                            onPostClick: onPostClick,
+                                            onUserClick: onUserClick
+                                        )
+                                    }
+                                )
+                            }
+                            .scrollTargetLayout()
+                            .padding()
+                            // Keep short histories bottom-aligned without extra scroll insets.
+                            .frame(minHeight: viewport.size.height, alignment: .bottom)
                         }
-                        .scrollTargetLayout()
-                        .padding()
-                    }
-                    .defaultScrollAnchor(.bottom)
-                    .scrollPosition(id: $scrollPosition, anchor: .bottom)
-                    .onChange(of: newestMessageId) { previous, next in
-                        if scrollPosition == nil || scrollPosition == previous {
-                            scrollPosition = next
+                        .defaultScrollAnchor(.bottom)
+                        .scrollPosition(id: $scrollPosition, anchor: .bottom)
+                        .onChange(of: newestMessageId) { previous, next in
+                            if scrollPosition == nil || scrollPosition == previous {
+                                scrollPosition = next
+                            }
                         }
                     }
                 }

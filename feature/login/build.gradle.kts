@@ -32,5 +32,12 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.molecule.runtime)
+            }
+        }
     }
 }

@@ -35,7 +35,7 @@ public data object FanboxPlatformSpec :
     override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "FANBOX",
-            icon = UiIcon.Fanbox,
+            icon = UiIcon.Fanbox.asType(),
         )
     override val order: Int = 40
 

@@ -67,7 +67,7 @@ class TimelineDatabaseWriteAmplificationTest : RobolectricTest() {
                     .build()
             try {
                 val original = createPost("content-fingerprint")
-                val updated = original.copy(clickEvent = ClickEvent.Deeplink("https://updated.invalid"))
+                val updated = original.copy(pluginId = "test.plugin")
                 assertEquals(original.renderHash, updated.renderHash)
 
                 database.connect {

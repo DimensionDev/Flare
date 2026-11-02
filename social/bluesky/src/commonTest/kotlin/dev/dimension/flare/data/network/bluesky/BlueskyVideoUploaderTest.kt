@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.readByteArray
+import okio.Buffer
 import sh.christian.ozone.api.model.Blob
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -27,44 +28,79 @@ class BlueskyVideoUploaderTest {
     @Test
     fun uploadsOriginalBytesThenWaitsForBlob() =
         runTest {
-            var requests = 0
-            val bytes = byteArrayOf(0, 0, 0, 20) + "ftypisom".encodeToByteArray()
-            val client =
-                videoClient { request ->
-                    requests++
-                    if (requests == 1) {
-                        assertEquals("Bearer token", request.headers["Authorization"])
-                        assertEquals("did:plc:test", request.url.parameters["did"])
-                        val content = assertIs<OutgoingContent.WriteChannelContent>(request.body)
-                        assertEquals("video/mp4", content.contentType.toString())
-                        assertEquals(bytes.size.toLong(), content.contentLength)
-                        val uploaded =
-                            coroutineScope {
-                                val channel = ByteChannel(true)
-                                launch {
-                                    try {
-                                        content.writeTo(channel)
-                                    } finally {
-                                        channel.flushAndClose()
-                                    }
-                                }
-                                channel.readBuffer().readByteArray()
-                            }
-                        assertContentEquals(bytes, uploaded)
-                        respond("""{"jobId":"job","state":"PROCESSING"}""")
-                    } else {
-                        assertEquals("job", request.url.parameters["jobId"])
-                        respond("""{"jobStatus":{"jobId":"job","state":"JOB_STATE_COMPLETED","blob":$blobJson}}""")
-                    }
-                }
-            try {
-                val blob = BlueskyVideoUploader(client).upload(UploadMedia.fromBytes("clip", bytes), "did:plc:test", "token")
-                assertEquals("video/mp4", assertIs<Blob.StandardBlob>(blob).mimeType)
-                assertEquals(2, requests)
-            } finally {
-                client.close()
-            }
+            assertOriginalUpload(
+                bytes = byteArrayOf(0, 0, 0, 20) + "ftypisom".encodeToByteArray(),
+                expectedMimeType = "video/mp4",
+                expectedName = "clip.mp4",
+            )
         }
+
+    @Test
+    fun uploadsOriginalGifThenWaitsForProcessedMp4() =
+        runTest {
+            assertOriginalUpload(
+                bytes = "GIF89a".encodeToByteArray() + ByteArray(150_000) { (it % 251).toByte() },
+                expectedMimeType = "image/gif",
+                expectedName = "clip.gif",
+            )
+        }
+
+    @Test
+    fun uploadsOriginalQuickTimeEvenWithMp4NameAndDeclaredMime() =
+        runTest {
+            assertOriginalUpload(
+                bytes = byteArrayOf(0, 0, 0, 20) + "ftypqt  ".encodeToByteArray(),
+                expectedMimeType = "video/quicktime",
+                expectedName = "clip.mov",
+            )
+        }
+
+    private suspend fun TestScope.assertOriginalUpload(
+        bytes: ByteArray,
+        expectedMimeType: String,
+        expectedName: String,
+    ) {
+        var requests = 0
+        val client =
+            videoClient { request ->
+                requests++
+                if (requests == 1) {
+                    assertEquals("Bearer token", request.headers["Authorization"])
+                    assertEquals("did:plc:test", request.url.parameters["did"])
+                    assertEquals(expectedName, request.url.parameters["name"])
+                    val content = assertIs<OutgoingContent.WriteChannelContent>(request.body)
+                    assertEquals(expectedMimeType, content.contentType.toString())
+                    assertEquals(bytes.size.toLong(), content.contentLength)
+                    val uploaded =
+                        coroutineScope {
+                            val channel = ByteChannel(true)
+                            launch {
+                                try {
+                                    content.writeTo(channel)
+                                } finally {
+                                    channel.flushAndClose()
+                                }
+                            }
+                            channel.readBuffer().readByteArray()
+                        }
+                    assertContentEquals(bytes, uploaded)
+                    respond("""{"jobId":"job","state":"PROCESSING"}""")
+                } else {
+                    assertEquals("job", request.url.parameters["jobId"])
+                    respond("""{"jobStatus":{"jobId":"job","state":"JOB_STATE_COMPLETED","blob":$blobJson}}""")
+                }
+            }
+        try {
+            val blob =
+                BlueskyVideoUploader(
+                    client,
+                ).upload(UploadMedia.fromBytes("clip.mp4", bytes, "video/mp4"), "did:plc:test", "token")
+            assertEquals("video/mp4", assertIs<Blob.StandardBlob>(blob).mimeType)
+            assertEquals(2, requests)
+        } finally {
+            client.close()
+        }
+    }
 
     @Test
     fun alreadyProcessedBlobIsReusedEvenOnConflict() =
@@ -98,7 +134,7 @@ class BlueskyVideoUploaderTest {
                     }
                 assertTrue(error.message.orEmpty().contains("Invalid video codec"))
                 assertFailsWith<IllegalArgumentException> {
-                    uploader.upload(UploadMedia.fromBytes("a.gif", "GIF89a".encodeToByteArray()), "did:plc:test", "token")
+                    uploader.upload(UploadMedia.fromBytes("a.png", byteArrayOf(1), "image/png"), "did:plc:test", "token")
                 }
                 assertEquals(1, requests)
             } finally {
@@ -107,26 +143,51 @@ class BlueskyVideoUploaderTest {
         }
 
     @Test
-    fun quickTimeVideoIsRejectedBeforeUploadEvenWithMp4Name() =
+    fun rejectsUnprocessedGifBlob() =
         runTest {
             var requests = 0
             val client =
                 videoClient {
                     requests++
-                    respond("""{"jobId":"job","state":"JOB_STATE_COMPLETED","blob":$blobJson}""")
+                    respond("""{"jobId":"job","state":"JOB_STATE_COMPLETED","blob":${blobJson.replace("video/mp4", "image/gif")}}""")
                 }
             try {
-                val media =
-                    UploadMedia.fromBytes(
-                        "clip.mp4",
-                        byteArrayOf(0, 0, 0, 20) + "ftypqt  ".encodeToByteArray(),
-                        "video/mp4",
-                    )
+                val media = UploadMedia.fromBytes("clip.mp4", byteArrayOf(1))
                 val error =
-                    assertFailsWith<IllegalArgumentException> {
+                    assertFailsWith<IllegalStateException> {
                         BlueskyVideoUploader(client).upload(media, "did:plc:test", "token")
                     }
-                assertEquals("Bluesky does not support video/quicktime: clip.mov", error.message)
+                assertEquals("Bluesky video processing did not return an MP4 blob", error.message)
+                assertEquals(1, requests)
+            } finally {
+                client.close()
+            }
+        }
+
+    @Test
+    fun oversizedGifAndQuickTimeAreRejectedBeforeReadingUploadBodies() =
+        runTest {
+            var requests = 0
+            val client =
+                videoClient {
+                    requests++
+                    respond("""{"blob":$blobJson}""")
+                }
+            try {
+                for (mimeType in listOf("image/gif", "video/quicktime")) {
+                    var readersOpened = 0
+                    val media =
+                        UploadMedia.fromSource("large", mimeType, 300_000_001) {
+                            readersOpened++
+                            Buffer().writeByte(1)
+                        }
+                    val error =
+                        assertFailsWith<IllegalArgumentException> {
+                            BlueskyVideoUploader(client).upload(media, "did:plc:test", "token")
+                        }
+                    assertTrue(error.message.orEmpty().contains("exceeds 300000000 bytes"))
+                    assertEquals(1, readersOpened) // Only MIME detection opens the source.
+                }
                 assertEquals(0, requests)
             } finally {
                 client.close()

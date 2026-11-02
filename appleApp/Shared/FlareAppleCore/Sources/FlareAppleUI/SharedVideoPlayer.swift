@@ -1,6 +1,7 @@
 import AVFoundation
 import Combine
 import SwiftUI
+@preconcurrency import KotlinSharedUI
 
 public enum VideoState {
     case idle
@@ -10,15 +11,21 @@ public enum VideoState {
     case error(any Error)
 }
 
+private func playbackFailure(_ error: any Error) -> NSError {
+    NSError(domain: "Flare.VideoPlayback", code: 1, userInfo: [
+        NSLocalizedDescriptionKey: Bundle.main.localizedString(forKey: "media_video_error", value: "Video failed to load", table: nil),
+        NSUnderlyingErrorKey: error
+    ])
+}
+
 /// The only AVPlayer allocation for inline video and the media viewer.
 @MainActor
 final class SharedVideoPlayer {
     static let shared = SharedVideoPlayer()
     private lazy var player = AVQueuePlayer()
     private weak var owner: VideoPlaybackSession?
-    private(set) var looper: AVPlayerLooper?
     private var playbackSubscription: AnyCancellable?
-    private var looperSubscription: AnyCancellable?
+    private var queueSubscription: AnyCancellable?
     private var timeObserver: Any?
     private var playbackError: (any Error)?
     private var pendingPosition: Double?
@@ -27,7 +34,8 @@ final class SharedVideoPlayer {
     private var seekGeneration = 0
     private var wantsPlayback = false
     private var rate: Float = 1
-    private var loadedURL: URL?
+    private var loadedSource: MediaPlaybackSource?
+    private var unsubscribeRoute: (() -> Void)?
     private var retentionTask: Task<Void, Never>?
     private var handoffTask: Task<Void, Never>?
     private var lifecycleSubscriptions: Set<AnyCancellable> = []
@@ -54,30 +62,45 @@ final class SharedVideoPlayer {
         memoryPressure = pressure
     }
 
-    func attach(_ session: VideoPlaybackSession, url: URL, position: Double?, allowsAudio: Bool) -> (AVQueuePlayer, Double) {
-        if loadedURL == url { continuePlayback(to: url.absoluteString) }
-        owner?.detach()
+    func attach(_ session: VideoPlaybackSession, source: MediaPlaybackSource, position: Double?, allowsAudio: Bool) throws -> (AVQueuePlayer, Double) {
+        guard URL(string: source.url) != nil else {
+            MediaProxy.shared.release(source: source)
+            throw URLError(.badURL)
+        }
+        if loadedSource?.key == source.key { continuePlayback(to: source.originalUrl) }
+        if owner !== session { owner?.detach() }
         owner = session
         updateAudioSession(active: allowsAudio)
         retentionTask?.cancel()
         handoffTask?.cancel()
         handoffTask = nil
-        if loadedURL == url, playbackError == nil, player.error == nil,
+        if loadedSource?.key == source.key, playbackError == nil, player.error == nil,
            player.currentItem?.status != .failed, player.currentItem?.error == nil, !player.items().isEmpty {
+            MediaProxy.shared.release(source: source)
             player.isMuted = true
             player.preventsDisplaySleepDuringVideoPlayback = false
             if let position { seek(session, to: position) }
             return (player, self.position(session))
         }
-        let position = position ?? MediaPlaybackMemory.shared.position(for: url.absoluteString)
-        loadedURL = url
+        let position = position ?? MediaPlaybackMemory.shared.position(for: source.originalUrl)
         generation += 1
         stopObserving()
         player.pause()
-        // Pending asset loading can retain the old looper after we release it.
-        looper?.disableLooping()
-        looper = nil
         player.removeAllItems()
+        releaseSource()
+        loadedSource = source
+        if let snapshot = source.snapshot {
+            let key = source.key
+            let unsubscribe = snapshot.onInvalidated { @Sendable [weak self] in
+                Task { @MainActor in
+                    guard let self, self.loadedSource?.key == key else { return }
+                    if let owner = self.owner { owner.reloadInvalidatedSource() }
+                    else { self.clearIfIdle() }
+                }
+            }
+            unsubscribeRoute = { unsubscribe() }
+        }
+        player.actionAtItemEnd = .advance
         player.isMuted = true
         player.preventsDisplaySleepDuringVideoPlayback = false
         pendingPosition = position > 0 ? position : nil
@@ -85,19 +108,18 @@ final class SharedVideoPlayer {
         playbackError = nil
         // Observe before queuing the item: a local file can fail immediately.
         observePlayback()
-        let looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
-        self.looper = looper
-        let generation = generation
-        looperSubscription = looper.publisher(for: \.status).sink { @Sendable [weak self] status in
-            guard status == .failed else { return }
-            let error = looper.error ?? URLError(.cannotDecodeContentData)
-            Task { @MainActor in
-                guard let self, self.generation == generation else { return }
-                self.playbackError = error
-                self.owner?.refresh()
-            }
-        }
+        replenishQueue()
         return (player, position)
+    }
+
+    private func replenishQueue() {
+        guard let source = loadedSource, let url = URL(string: source.url), playbackError == nil, player.error == nil,
+              player.currentItem?.status != .failed else { return }
+        while player.items().count < 3 {
+            // Looper replicas and shared assets can freeze short videos on iOS.
+            let item = AVPlayerItem(url: url)
+            player.insert(item, after: player.items().last)
+        }
     }
 
     private enum PlaybackUpdate: Sendable {
@@ -107,6 +129,12 @@ final class SharedVideoPlayer {
 
     private func observePlayback() {
         let generation = generation
+        queueSubscription = player.publisher(for: \.currentItem).sink { @Sendable [weak self] _ in
+            Task { @MainActor in
+                guard let self, self.generation == generation else { return }
+                self.replenishQueue()
+            }
+        }
         timeObserver = player.addPeriodicTimeObserver(
             forInterval: CMTime(seconds: 0.25, preferredTimescale: 600), queue: .main
         ) { [weak self] _ in
@@ -147,7 +175,7 @@ final class SharedVideoPlayer {
 
     private func stopObserving() {
         playbackSubscription = nil
-        looperSubscription = nil
+        queueSubscription = nil
         if let timeObserver {
             player.removeTimeObserver(timeObserver)
             self.timeObserver = nil
@@ -156,7 +184,12 @@ final class SharedVideoPlayer {
 
     func error(_ session: VideoPlaybackSession) -> (any Error)? {
         guard owner === session else { return nil }
-        return playbackError ?? player.error
+        guard let error = playbackError ?? player.error ?? player.currentItem?.error else { return nil }
+        if let source = loadedSource, let message = MediaProxy.shared.failureMessage(localUrl: source.url) {
+            return NSError(domain: "Flare.MediaProxy", code: 1,
+                           userInfo: [NSLocalizedDescriptionKey: message, NSUnderlyingErrorKey: error])
+        }
+        return error
     }
 
     func update(_ session: VideoPlaybackSession, playing: Bool, rate: Float) {
@@ -213,7 +246,7 @@ final class SharedVideoPlayer {
         guard seconds.isFinite, seconds >= 0 else { return }
         if let owner, owner.mediaURL == url, abs(owner.position - seconds) > 0.5 {
             owner.seek(to: seconds)
-        } else if owner == nil, loadedURL?.absoluteString == url {
+        } else if owner == nil, loadedSource?.originalUrl == url {
             // A slider may commit after the old surface has disappeared but
             // before the returning timeline attaches to the retained item.
             seekGeneration += 1
@@ -265,7 +298,7 @@ final class SharedVideoPlayer {
     // Only navigation may keep the clock running without a surface. Offscreen
     // scrolling still pauses synchronously; an abandoned handoff is bounded.
     func continuePlayback(to url: String) {
-        guard loadedURL?.absoluteString == url else { return }
+        guard loadedSource?.originalUrl == url else { return }
         player.isMuted = true
         handoffTask?.cancel()
         handoffTask = Task { [weak self] in
@@ -277,7 +310,7 @@ final class SharedVideoPlayer {
     func finishHandoff() {
         handoffTask?.cancel()
         handoffTask = nil
-        if owner == nil, loadedURL != nil {
+        if owner == nil, loadedSource != nil {
             player.pause()
             wantsPlayback = false
             updateAudioSession(active: false)
@@ -291,21 +324,26 @@ final class SharedVideoPlayer {
     }
 
     func clearIfIdle() {
-        guard owner == nil, loadedURL != nil else { return }
+        guard owner == nil, loadedSource != nil else { return }
         finishHandoff()
         retentionTask?.cancel()
         retentionTask = nil
         generation += 1
         stopObserving()
         player.pause()
-        looper?.disableLooping()
-        looper = nil
         player.removeAllItems()
-        loadedURL = nil
+        releaseSource()
         pendingPosition = nil
         seeking = false
         wantsPlayback = false
         playbackError = nil
+    }
+
+    private func releaseSource() {
+        unsubscribeRoute?()
+        unsubscribeRoute = nil
+        if let source = loadedSource { MediaProxy.shared.release(source: source) }
+        loadedSource = nil
     }
 }
 
@@ -348,22 +386,92 @@ public final class VideoPlaybackSession {
         SharedVideoPlayer.shared.clearIfIdle()
     }
 
-    public func play(url: String, position: Double? = nil, muted: Bool = true, rate: Float = 1, playing: Bool = true) {
-        guard let mediaURL = URL(string: url) else {
-            state = .error(URLError(.badURL))
+    private struct PlaybackRequest {
+        let media: any UiMedia
+        var position: Double?
+        let muted: Bool
+        var rate: Float
+        var playing: Bool
+    }
+    private var request: PlaybackRequest?
+    private var loadTask: Task<Void, Never>?
+    private var proxyObservation: AnyCancellable?
+    private var mediaIdentity: String?
+
+    public func play(media: any UiMedia, position: Double? = nil, muted: Bool = true, rate: Float = 1, playing: Bool = true) {
+        let identity = media.cacheKey + "|" + String(describing: media.proxy)
+        let nextRequest = PlaybackRequest(media: media, position: position, muted: muted, rate: rate, playing: playing)
+        request = nextRequest
+        if mediaIdentity == identity, player != nil {
+            setPlaying(playing, rate: rate)
             return
         }
-        if player == nil || self.url != url {
-            hasRestoredPosition = false
-            hasDisplayedFrame = false
-            allowsAudio = !muted
-            let attachment = SharedVideoPlayer.shared.attach(self, url: mediaURL, position: position, allowsAudio: allowsAudio)
-            player = attachment.0
-            self.position = attachment.1
-            self.url = url
-            state = .loading
+        mediaIdentity = identity
+        if !media.isRemote {
+            loadTask?.cancel()
+            proxyObservation = nil
+            do {
+                try attach(MediaPlaybackSource(url: media.url, key: media.url, originalUrl: media.url, snapshot: nil), request: nextRequest, position: position)
+            } catch {
+                state = .error(playbackFailure(error))
+                updateSubject.send()
+            }
+            return
         }
-        setPlaying(playing, rate: rate)
+        if proxyObservation == nil {
+            proxyObservation = ProxyNetwork.shared.changes.toPublisher().dropFirst()
+                .receive(on: DispatchQueue.main).sink { [weak self] _ in
+                    if self?.player == nil { self?.resolvePlayback() }
+                }
+        }
+        resolvePlayback()
+    }
+
+    private func resolvePlayback() {
+        guard let request, let identity = mediaIdentity else { return }
+        let position = player == nil ? request.position : SharedVideoPlayer.shared.position(self)
+        loadTask?.cancel()
+        if player == nil { state = .loading }
+        loadTask = Task { @MainActor [weak self] in
+            do {
+                let source = try await MediaProxy.shared.playbackSource(media: request.media)
+                guard !Task.isCancelled, let self, self.mediaIdentity == identity else {
+                    MediaProxy.shared.release(source: source)
+                    return
+                }
+                try self.attach(source, request: request, position: position)
+            } catch {
+                guard !Task.isCancelled, let self else { return }
+                SharedVideoPlayer.shared.detach(self)
+                SharedVideoPlayer.shared.clearIfIdle()
+                self.player = nil
+                self.state = .error(playbackFailure(error))
+                self.updateSubject.send()
+            }
+        }
+    }
+
+    func reloadInvalidatedSource() {
+        request?.position = SharedVideoPlayer.shared.position(self)
+        SharedVideoPlayer.shared.detach(self)
+        SharedVideoPlayer.shared.clearIfIdle()
+        player = nil
+        hasRestoredPosition = false
+        hasDisplayedFrame = false
+        resolvePlayback()
+        updateSubject.send()
+    }
+
+    private func attach(_ source: MediaPlaybackSource, request: PlaybackRequest, position: Double?) throws {
+        hasRestoredPosition = false
+        hasDisplayedFrame = false
+        allowsAudio = !request.muted
+        let attachment = try SharedVideoPlayer.shared.attach(self, source: source, position: position, allowsAudio: allowsAudio)
+        player = attachment.0
+        self.position = attachment.1
+        url = request.media.url
+        setPlaying(self.request?.playing ?? request.playing, rate: self.request?.rate ?? request.rate)
+        updateSubject.send()
     }
 
     func surfaceReady() {
@@ -373,6 +481,8 @@ public final class VideoPlaybackSession {
     }
 
     public func setPlaying(_ playing: Bool, rate: Float = 1) {
+        request?.playing = playing
+        request?.rate = rate
         SharedVideoPlayer.shared.update(self, playing: playing, rate: rate)
         refresh()
     }
@@ -386,7 +496,7 @@ public final class VideoPlaybackSession {
         guard let player else { return }
         defer { updateSubject.send() }
         if let error = SharedVideoPlayer.shared.error(self) ?? player.currentItem?.error {
-            state = .error(error)
+            state = .error(playbackFailure(error))
             if player.timeControlStatus != .paused { player.pause() }
             return
         }
@@ -409,6 +519,11 @@ public final class VideoPlaybackSession {
     }
 
     public func detach() {
+        loadTask?.cancel()
+        loadTask = nil
+        proxyObservation = nil
+        request = nil
+        mediaIdentity = nil
         guard player != nil else { return }
         position = SharedVideoPlayer.shared.position(self)
         if let url { MediaPlaybackMemory.shared.save(position, for: url) }
@@ -424,7 +539,7 @@ public final class VideoPlaybackSession {
 @MainActor
 final class VideoPlaybackPresentation {
     private struct Request {
-        let url: String
+        let media: any UiMedia
         var position: Double?
         var playing: Bool
         let rate: Float
@@ -432,6 +547,7 @@ final class VideoPlaybackPresentation {
 
     private let arbiter: VideoPlaybackArbiter
     private weak var session: VideoPlaybackSession?
+    private var frames: (owner: AnyObject, play: () -> Void, stop: () -> Void)?
     private var request: Request?
     private var presented = false
     private var suspended = false
@@ -447,7 +563,7 @@ final class VideoPlaybackPresentation {
 
     func begin() {
         presented = true
-        arbiter.present(self, selectedMediaURL: selectedMediaURL ?? request?.url)
+        arbiter.present(self, selectedMediaURL: selectedMediaURL ?? request?.media.url)
         activate()
     }
 
@@ -457,6 +573,7 @@ final class VideoPlaybackPresentation {
         stop()
         request = nil
         session = nil
+        frames = nil
         arbiter.withdraw(self, mediaURLs: mediaURLs, selectedMediaURL: selectedMediaURL)
         VideoPlaybackSession.finishHandoff()
     }
@@ -464,7 +581,7 @@ final class VideoPlaybackPresentation {
     func setSuspended(_ value: Bool) {
         suspended = value
         if value {
-            session?.detach()
+            stop()
         } else {
             activate()
         }
@@ -475,10 +592,12 @@ final class VideoPlaybackPresentation {
         selectedMediaURL = selectedURL
     }
 
-    func update(_ session: VideoPlaybackSession, url: String, position: Double? = nil, playing: Bool, rate: Float) {
+    func update(_ session: VideoPlaybackSession, media: any UiMedia, position: Double? = nil, playing: Bool, rate: Float) {
+        frames?.stop()
+        frames = nil
         if self.session !== session { self.session?.detach() }
         self.session = session
-        request = Request(url: url, position: position, playing: playing, rate: rate)
+        request = Request(media: media, position: position, playing: playing, rate: rate)
         activate()
     }
 
@@ -493,13 +612,34 @@ final class VideoPlaybackPresentation {
         arbiter.release(self)
     }
 
+    func updateFrames(owner: AnyObject, play: @escaping () -> Void, stop: @escaping () -> Void) {
+        session?.detach()
+        session = nil
+        request = nil
+        if frames?.owner !== owner { frames?.stop() }
+        frames = (owner, play, stop)
+        activate()
+    }
+
+    func releaseFrames(owner: AnyObject) {
+        guard frames?.owner === owner else { return }
+        frames?.stop()
+        frames = nil
+        arbiter.release(self)
+    }
+
     private func activate() {
+        if presented, !suspended, let frames, arbiter.acquire(self) {
+            frames.play()
+            return
+        }
         guard presented, !suspended, let session, let request, arbiter.acquire(self) else { return }
         self.request?.position = nil
-        session.play(url: request.url, position: request.position, muted: false, rate: request.rate, playing: request.playing)
+        session.play(media: request.media, position: request.position, muted: false, rate: request.rate, playing: request.playing)
     }
 
     private func stop() {
+        frames?.stop()
         #if os(macOS)
         // macOS also accepts pause commands through AVPlayerView's native controls.
         if let session, let player = session.player, player.currentItem?.status == .readyToPlay,

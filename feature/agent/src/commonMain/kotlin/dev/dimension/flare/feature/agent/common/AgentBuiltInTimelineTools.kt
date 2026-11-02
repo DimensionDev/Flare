@@ -178,6 +178,7 @@ private fun List<UiTimelineV2>.toBuiltInTimelineItemsToolText(maxItems: Int): St
 
 private fun UiTimelineV2.toBuiltInTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.Gap -> ""
         is UiTimelineV2.TimelinePostItem -> toBuiltInTimelinePostToolText()
         is UiTimelineV2.Post -> toBuiltInTimelinePostToolText()
         is UiTimelineV2.User -> value.toBuiltInTimelineUserToolText(message)
@@ -251,7 +252,7 @@ private fun List<UiTimelineV2>.extractBuiltInTimelineUsers(): List<UiProfile> =
                 listOfNotNull(item.user)
             }
 
-            is UiTimelineV2.Feed -> {
+            is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {
                 emptyList()
             }
         }

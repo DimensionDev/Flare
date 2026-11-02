@@ -50,7 +50,7 @@ internal fun FeedComponent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            data.source.icon?.let {
+            data.source.media?.let {
                 NetworkImage(
                     it,
                     contentDescription = data.source.name,
@@ -103,7 +103,7 @@ internal fun FeedComponent(
             }
             data.media?.let {
                 NetworkImage(
-                    model = it.url,
+                    model = it,
                     contentDescription = it.accessibleDescription(),
                     modifier =
                         Modifier
@@ -116,7 +116,6 @@ internal fun FeedComponent(
                             }.clip(
                                 PlatformTheme.shapes.medium,
                             ),
-                    customHeaders = it.customHeaders,
                 )
             }
         }

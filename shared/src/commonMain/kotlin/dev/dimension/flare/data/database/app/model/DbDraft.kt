@@ -18,7 +18,7 @@ import kotlin.uuid.Uuid
 @Serializable
 internal data class DraftContent(
     val text: String,
-    val visibility: UiTimelineV2.Post.Visibility,
+    val visibility: UiTimelineV2.Post.Visibility? = null,
     val language: List<String>,
     val sensitive: Boolean,
     val spoilerText: String? = null,

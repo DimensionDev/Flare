@@ -24,9 +24,12 @@ internal object DesktopSaveDialog {
         return File(directory, file)
     }
 
-    fun chooseDirectory(window: ComposeWindow?): File? {
+    fun chooseDirectory(
+        window: ComposeWindow?,
+        initialDirectory: String? = null,
+    ): File? {
         val chooser =
-            JFileChooser().apply {
+            JFileChooser(initialDirectory).apply {
                 fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
                 isAcceptAllFileFilterUsed = false
             }

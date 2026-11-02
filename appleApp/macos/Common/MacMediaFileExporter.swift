@@ -1,3 +1,4 @@
+import FlareAppleUI
 import AppKit
 import Observation
 import FlareAppleCore
@@ -132,87 +133,25 @@ struct MacMediaShareContext: Hashable {
 }
 
 struct MacMediaExportSource: Identifiable, Hashable {
-    enum Kind: String, Hashable {
-        case image
-        case gif
-        case video
-        case audio
-    }
-
+    enum Kind: String, Hashable { case image, gif, video, audio }
+    let media: any UiMedia
     let kind: Kind
-    let url: String
-    let customHeaders: [String: String]?
     let shareContext: MacMediaShareContext?
+    var ugoira: UiMediaUgoira? { media as? UiMediaUgoira }
+    var url: String { ugoira == nil ? media.urlForDownload : media.url }
+    var id: String { [kind.rawValue, media.cacheKey, String(describing: media.proxy), shareContext?.statusKey, shareContext?.userHandle].compactMap { $0 }.joined(separator: "|") }
+    var supportsSharing: Bool { kind == .image || kind == .gif }
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 
-    init(
-        kind: Kind,
-        url: String,
-        customHeaders: [String: String]?,
-        shareContext: MacMediaShareContext?
-    ) {
-        self.kind = kind
-        self.url = url
-        self.customHeaders = customHeaders
+    init?(media: any UiMedia, shareContext: MacMediaShareContext?) {
+        self.media = media
         self.shareContext = shareContext
-    }
-
-    var id: String {
-        [
-            kind.rawValue,
-            url,
-            customHeaders?
-                .sorted { $0.key < $1.key }
-                .map { "\($0.key)=\($0.value)" }
-                .joined(separator: "&"),
-            shareContext?.statusKey,
-            shareContext?.userHandle,
-        ]
-        .compactMap { $0 }
-        .joined(separator: "|")
-    }
-
-    var supportsSharing: Bool {
-        switch kind {
-        case .image, .gif:
-            true
-        case .video, .audio:
-            false
-        }
-    }
-
-    init?(
-        media: any UiMedia,
-        shareContext: MacMediaShareContext?
-    ) {
         switch onEnum(of: media) {
-        case .image(let image):
-            self.init(
-                kind: .image,
-                url: image.url,
-                customHeaders: image.customHeaders,
-                shareContext: shareContext
-            )
-        case .gif(let gif):
-            self.init(
-                kind: .gif,
-                url: gif.url,
-                customHeaders: gif.customHeaders,
-                shareContext: shareContext
-            )
-        case .video(let video):
-            self.init(
-                kind: .video,
-                url: video.url,
-                customHeaders: video.customHeaders,
-                shareContext: shareContext
-            )
-        case .audio(let audio):
-            self.init(
-                kind: .audio,
-                url: audio.url,
-                customHeaders: audio.customHeaders,
-                shareContext: shareContext
-            )
+        case .ugoira, .video: kind = .video
+        case .image: kind = .image
+        case .gif: kind = .gif
+        case .audio: kind = .audio
         }
     }
 }
@@ -240,7 +179,7 @@ enum MacMediaFileExporter {
 
     private static func cachedShareFile(source: MacMediaExportSource) throws -> URL? {
         let remoteURL = try makeRemoteURL(source.url)
-        guard let cachedURL = KingfisherManager.shared.cache.cacheFileURLIfOnDisk(forKey: remoteURL.cacheKey) else {
+        guard let cachedURL = KingfisherManager.shared.cache.cacheFileURLIfOnDisk(forKey: source.media.cacheKey) else {
             return nil
         }
         let data = try Data(contentsOf: cachedURL)
@@ -404,14 +343,13 @@ enum MacMediaFileExporter {
     }
 
     static func saveRemoteFile(
-        url: String,
-        fileName: String,
-        customHeaders: [String: String]?
+        media: any UiMedia,
+        fileName: String
     ) async throws -> Bool {
         let notification = MacMediaExportNotification()
 
         do {
-            let remoteURL = try makeRemoteURL(url)
+            let remoteURL = try makeRemoteURL(media.urlForDownload)
             let sourceName = fileName.trimmedNonEmpty
                 ?? remoteURL.lastPathComponent.trimmedNonEmpty
                 ?? "file"
@@ -429,8 +367,7 @@ enum MacMediaFileExporter {
                     let destinationURL = customDirectoryURL.appendingPathComponent(defaultFileName)
                     notification.progress()
                     _ = try await writeRemoteFile(
-                        url: remoteURL,
-                        customHeaders: customHeaders,
+                        media: media,
                         to: destinationURL
                     )
                     notification.success()
@@ -448,8 +385,7 @@ enum MacMediaFileExporter {
 
             notification.progress()
             _ = try await writeRemoteFile(
-                url: remoteURL,
-                customHeaders: customHeaders,
+                media: media,
                 to: destinationURL
             )
             notification.success()
@@ -461,12 +397,26 @@ enum MacMediaFileExporter {
     }
 
     private static func writeSource(_ source: MacMediaExportSource, to destinationURL: URL) async throws {
+        if let url = URL(string: source.url), url.isFileURL {
+            guard ImageTranslationExportFile.isOwned(url) else { throw MacMediaExportError.downloadFailed }
+            try copyReplacingItem(at: url, to: destinationURL)
+            return
+        }
+        if let animation = source.ugoira {
+            let success: Bool = await withCheckedContinuation { continuation in
+                UgoiraExporter.shared.save(animation, fileName: destinationURL.lastPathComponent, write: { url in
+                    try copyReplacingItem(at: url, to: destinationURL)
+                }, completion: { continuation.resume(returning: $0) })
+            }
+            if !success { throw MacMediaExportError.downloadFailed }
+            return
+        }
+
         let remoteURL = try makeRemoteURL(source.url)
         switch source.kind {
         case .image, .gif:
             let data = try await downloadOriginalImageData(
-                url: remoteURL,
-                customHeaders: source.customHeaders
+                media: source.media
             )
             try writeData(data, to: destinationURL)
 
@@ -475,15 +425,13 @@ enum MacMediaFileExporter {
                 throw MacMediaExportError.unsupportedStreamingVideo
             }
             _ = try await writeRemoteFile(
-                url: remoteURL,
-                customHeaders: source.customHeaders,
+                media: source.media,
                 to: destinationURL
             )
 
         case .audio:
             _ = try await writeRemoteFile(
-                url: remoteURL,
-                customHeaders: source.customHeaders,
+                media: source.media,
                 to: destinationURL
             )
         }
@@ -494,8 +442,7 @@ enum MacMediaFileExporter {
         switch source.kind {
         case .image, .gif:
             let data = try await downloadOriginalImageData(
-                url: remoteURL,
-                customHeaders: source.customHeaders
+                media: source.media
             )
             let extensionName = AppleMediaFileExtension.image(
                 url: remoteURL,
@@ -515,9 +462,9 @@ enum MacMediaFileExporter {
                 throw MacMediaExportError.unsupportedStreamingVideo
             }
             let (downloadedURL, response) = try await downloadRemoteFile(
-                url: remoteURL,
-                customHeaders: source.customHeaders
+                media: source.media
             )
+            defer { try? FileManager.default.removeItem(at: downloadedURL) }
             guard isSuccessfulHTTPResponse(response) else {
                 throw MacMediaExportError.downloadFailed
             }
@@ -532,9 +479,9 @@ enum MacMediaFileExporter {
 
         case .audio:
             let (downloadedURL, response) = try await downloadRemoteFile(
-                url: remoteURL,
-                customHeaders: source.customHeaders
+                media: source.media
             )
+            defer { try? FileManager.default.removeItem(at: downloadedURL) }
             guard isSuccessfulHTTPResponse(response) else {
                 throw MacMediaExportError.downloadFailed
             }
@@ -555,89 +502,56 @@ enum MacMediaFileExporter {
         return url
     }
 
-    private static func downloadOriginalImageData(
-        url: URL,
-        customHeaders: [String: String]?
-    ) async throws -> Data {
-        let result = try await KingfisherManager.shared.downloader.downloadImage(
-            with: url,
-            options: kingfisherOptions(customHeaders: customHeaders)
-        )
-        return result.originalData
+    private static func downloadOriginalImageData(media: any UiMedia) async throws -> Data {
+        try await MediaTransfer.data(media)
     }
 
-    private static func downloadRemoteFile(
-        url: URL,
-        customHeaders: [String: String]?
-    ) async throws -> (URL, URLResponse) {
-        var request = URLRequest(url: url)
-        customHeaders?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
-        }
-        return try await URLSession.shared.download(for: request)
+    private static func downloadRemoteFile(media: any UiMedia) async throws -> (URL, URLResponse) {
+        try await MediaTransfer.download(media)
     }
 
     private static func writeRemoteFile(
-        url: URL,
-        customHeaders: [String: String]?,
+        media: any UiMedia,
         to destinationURL: URL
     ) async throws -> URLResponse {
-        var request = URLRequest(url: url)
-        customHeaders?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
-        }
-
-        let (bytes, response) = try await URLSession.shared.bytes(for: request)
-        guard isSuccessfulHTTPResponse(response) else {
-            throw MacMediaExportError.downloadFailed
-        }
-
-        let didAccess = destinationURL.startAccessingSecurityScopedResource()
-        defer {
-            if didAccess {
-                destinationURL.stopAccessingSecurityScopedResource()
+        try await MediaTransfer.withSession(media) { session, request in
+            let (bytes, response) = try await session.bytes(for: request)
+            guard isSuccessfulHTTPResponse(response) else {
+                throw MacMediaExportError.downloadFailed
             }
-        }
 
-        do {
-            try prepareDestinationFileForWriting(destinationURL)
-            let handle = try FileHandle(forWritingTo: destinationURL)
+            let didAccess = destinationURL.startAccessingSecurityScopedResource()
             defer {
-                try? handle.close()
+                if didAccess {
+                    destinationURL.stopAccessingSecurityScopedResource()
+                }
             }
 
-            var buffer = Data()
-            buffer.reserveCapacity(64 * 1024)
-            for try await byte in bytes {
-                buffer.append(byte)
-                if buffer.count >= 64 * 1024 {
+            do {
+                try prepareDestinationFileForWriting(destinationURL)
+                let handle = try FileHandle(forWritingTo: destinationURL)
+                defer {
+                    try? handle.close()
+                }
+
+                var buffer = Data()
+                buffer.reserveCapacity(64 * 1024)
+                for try await byte in bytes {
+                    buffer.append(byte)
+                    if buffer.count >= 64 * 1024 {
+                        try handle.write(contentsOf: buffer)
+                        buffer.removeAll(keepingCapacity: true)
+                    }
+                }
+                if !buffer.isEmpty {
                     try handle.write(contentsOf: buffer)
-                    buffer.removeAll(keepingCapacity: true)
                 }
+                return response
+            } catch {
+                try? FileManager.default.removeItem(at: destinationURL)
+                throw error
             }
-            if !buffer.isEmpty {
-                try handle.write(contentsOf: buffer)
-            }
-            return response
-        } catch {
-            try? FileManager.default.removeItem(at: destinationURL)
-            throw error
         }
-    }
-
-    private static func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
-        guard let customHeaders, !customHeaders.isEmpty else {
-            return []
-        }
-        return [
-            .requestModifier(AnyModifier { request in
-                var request = request
-                for (key, value) in customHeaders {
-                    request.setValue(value, forHTTPHeaderField: key)
-                }
-                return request
-            }),
-        ]
     }
 
     private static func temporaryFileURL(
@@ -740,10 +654,14 @@ enum MacMediaFileExporter {
         }
 
         let fileManager = FileManager.default
+        let temporary = destinationURL.deletingLastPathComponent().appendingPathComponent(".\(UUID().uuidString).part")
+        defer { try? fileManager.removeItem(at: temporary) }
+        try fileManager.copyItem(at: sourceURL, to: temporary)
         if fileManager.fileExists(atPath: destinationURL.path) {
-            try fileManager.removeItem(at: destinationURL)
+            _ = try fileManager.replaceItemAt(destinationURL, withItemAt: temporary)
+        } else {
+            try fileManager.moveItem(at: temporary, to: destinationURL)
         }
-        try fileManager.copyItem(at: sourceURL, to: destinationURL)
     }
 
     private static func writeData(_ data: Data, to destinationURL: URL) throws {

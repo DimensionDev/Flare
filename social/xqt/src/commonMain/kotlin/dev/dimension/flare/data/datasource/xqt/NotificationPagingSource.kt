@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.xqt
 
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -17,7 +17,7 @@ internal class NotificationPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: () -> Unit,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : NotificationTimelineLoader {
     override val pagingKey: String = "notification_$accountKey"
 
     override suspend fun load(

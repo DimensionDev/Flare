@@ -5,14 +5,13 @@ import KotlinSharedUI
 
 struct OriginalImageShareFile {
     static func make(
-        url: String,
-        customHeaders: [String: String]?,
+        media: UiMediaImage,
         statusKey: String? = nil,
         userHandle: String? = nil,
         onPreparingNeeded: (@Sendable () -> Void)? = nil
     ) async throws -> URL {
-        let imageURL = try makeImageURL(url)
-        if let cachedFileURL = cachedImageFileURL(for: imageURL) {
+        let imageURL = try makeImageURL(media.url)
+        if let cachedFileURL = cachedImageFileURL(for: media.cacheKey) {
             let data = try Data(contentsOf: cachedFileURL)
             return try makeShareFile(
                 data: data,
@@ -23,20 +22,17 @@ struct OriginalImageShareFile {
         }
 
         onPreparingNeeded?()
-        let result = try await KingfisherManager.shared.downloader.downloadImage(
-            with: imageURL,
-            options: kingfisherOptions(customHeaders: customHeaders)
-        )
+        let data = try await MediaTransfer.data(media)
         return try makeShareFile(
-            data: result.originalData,
+            data: data,
             url: imageURL,
             statusKey: statusKey,
             userHandle: userHandle
         )
     }
 
-    private static func cachedImageFileURL(for url: URL) -> URL? {
-        KingfisherManager.shared.cache.cacheFileURLIfOnDisk(forKey: url.cacheKey)
+    private static func cachedImageFileURL(for key: String) -> URL? {
+        KingfisherManager.shared.cache.cacheFileURLIfOnDisk(forKey: key)
     }
 
     private static func makeShareFile(
@@ -63,19 +59,6 @@ struct OriginalImageShareFile {
             throw URLError(.badURL)
         }
         return imageURL
-    }
-
-    private static func kingfisherOptions(customHeaders: [String: String]?) -> KingfisherOptionsInfo {
-        guard let customHeaders, !customHeaders.isEmpty else {
-            return []
-        }
-        return [.requestModifier(AnyModifier { request in
-            var request = request
-            for (key, value) in customHeaders {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-            return request
-        })]
     }
 
     private static func makeFileName(

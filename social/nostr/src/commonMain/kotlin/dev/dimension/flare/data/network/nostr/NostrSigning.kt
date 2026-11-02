@@ -12,9 +12,13 @@ import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSignerInternal
 import com.vitorpamplona.quartz.nip19Bech32.bech32.bechToBytes
 import com.vitorpamplona.quartz.nip19Bech32.toNsec
+import com.vitorpamplona.quartz.nip46RemoteSigner.BunkerRequest
 import com.vitorpamplona.quartz.nip46RemoteSigner.NostrConnectEvent
 import com.vitorpamplona.quartz.nip46RemoteSigner.NostrConnectURI
 import com.vitorpamplona.quartz.nip46RemoteSigner.signer.NostrSignerRemote
+import com.vitorpamplona.quartz.nip46RemoteSigner.signer.RemoteSignerManager
+import com.vitorpamplona.quartz.nip46RemoteSigner.signer.SignResponse
+import com.vitorpamplona.quartz.nip46RemoteSigner.signer.SignerResult
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.platform.NostrSignerCredential
 import kotlinx.coroutines.CancellationException
@@ -99,13 +103,7 @@ internal fun nostrEventSigner(
                     }
 
                     is NostrSignerCredential.Amber -> {
-                        val unsigned =
-                            buildJsonObject {
-                                JSON.parseToJsonElement(template.toJson()).jsonObject.forEach { (key, value) -> put(key, value) }
-                                put("pubkey", pubkeyHex)
-                                put("id", EventHasher.hashId(pubkeyHex, template.createdAt, template.kind, template.tags, template.content))
-                            }
-                        QuartzEvent.fromJson(amber.signEvent(credential, unsigned.toString()))
+                        QuartzEvent.fromJson(amber.signEvent(credential, template.unsignedJson(pubkeyHex)))
                     }
 
                     null -> {
@@ -128,6 +126,13 @@ internal fun nostrEventSigner(
     }
 }
 
+private fun EventTemplate<out QuartzEvent>.unsignedJson(pubkey: String): String =
+    buildJsonObject {
+        JSON.parseToJsonElement(toJson()).jsonObject.forEach { (key, value) -> put(key, value) }
+        put("pubkey", pubkey)
+        put("id", EventHasher.hashId(pubkey, createdAt, kind, tags, content))
+    }.toString()
+
 internal class NostrBunkerSession(
     private val credential: NostrSignerCredential.Bunker,
     private val expectedPubkey: String? = credential.userPubkeyHex,
@@ -147,7 +152,7 @@ internal class NostrBunkerSession(
                 val uri = credential.uri.substringBefore("://").lowercase() + "://" + credential.uri.substringAfter("://")
                 val bunker = NostrConnectURI.parseBunker(uri)
                 val relays =
-                    bunker?.relays ?: normalizedNostrRelays(
+                    normalizedNostrRelays(
                         io.ktor.http
                             .Url(uri)
                             .parameters
@@ -156,7 +161,7 @@ internal class NostrBunkerSession(
                     )
                 require(relays.isNotEmpty()) { "Bunker requires at least one relay" }
                 val remotePubkey =
-                    bunker?.remoteSignerPubKey ?: run {
+                    bunker?.remoteSignerPubKey?.lowercase() ?: run {
                         // Older credentials could persist the client offer instead of the resolved bunker URI.
                         val offer = io.ktor.http.Url(uri)
                         require(uri.startsWith("nostrconnect://") && offer.host == localSigner.pubKey) {
@@ -190,7 +195,67 @@ internal class NostrBunkerSession(
             signer.getPublicKey().also { require(expectedPubkey == null || it == expectedPubkey) { "Bunker account identity changed" } }
         }
 
-    suspend fun sign(template: EventTemplate<out QuartzEvent>): QuartzEvent = withTimeout(10.seconds) { signer().sign(template) }
+    suspend fun sign(template: EventTemplate<out QuartzEvent>): QuartzEvent =
+        withTimeout(10.seconds) {
+            val signer = signer()
+            val unsigned = template.unsignedJson(expectedPubkey ?: signer.getPublicKey())
+            val manager =
+                RemoteSignerManager(
+                    client = client,
+                    signer = localSigner,
+                    remoteKey = signer.remotePubkey,
+                    relayList = signer.relays,
+                    maxRetries = 0,
+                )
+            val subId = Uuid.random().toString()
+            val filter =
+                QuartzFilter(
+                    authors = listOf(signer.remotePubkey),
+                    kinds = listOf(NostrConnectEvent.KIND),
+                    tags =
+                        mapOf("p" to listOf(localSigner.pubKey)),
+                )
+            try {
+                client.subscribe(
+                    subId,
+                    signer.relays.associateWith { listOf(filter) },
+                    object : SubscriptionListener {
+                        override suspend fun onEvent(
+                            event: QuartzEvent,
+                            isLive: Boolean,
+                            relay: NormalizedRelayUrl,
+                            forFilters: List<QuartzFilter>?,
+                        ) {
+                            if (event is NostrConnectEvent && filter.match(event) && event.verify()) {
+                                try {
+                                    manager.newResponse(event)
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (_: Exception) {
+                                    // Unrelated or malformed relay traffic cannot complete a signing request.
+                                }
+                            }
+                        }
+                    },
+                )
+                // Rust NIP-46 signers require pubkey (and accept id) in the unsigned event.
+                val result =
+                    manager.launchWaitAndParse(
+                        bunkerRequestBuilder = { BunkerRequest(Uuid.random().toString(), "sign_event", arrayOf(unsigned)) },
+                        parser = SignResponse::parse,
+                    )
+                if (result is SignerResult.RequestAddressed.Successful) {
+                    result.result.event
+                } else {
+                    throw signer.convertExceptions(
+                        "Could not sign",
+                        result,
+                    )
+                }
+            } finally {
+                client.unsubscribe(subId)
+            }
+        }
 
     override fun close() {
         closed.value = true

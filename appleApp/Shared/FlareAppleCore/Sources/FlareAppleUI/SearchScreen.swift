@@ -4,7 +4,6 @@ import FlareAppleCore
 
 public struct SearchScreen: View {
     @Environment(\.timelineListRenderer) private var listRenderer
-    @State private var listScope = UUID().uuidString
     @State private var searchAccountType: AccountType
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
@@ -115,7 +114,7 @@ public struct SearchScreen: View {
             AccountType.Specific(accountKey: $0.key)
         } ?? searchAccountType
         searchAccountType = accountType
-        // The source and its reading key change together. The previous query's
+        // The source and its list identity change together. The previous query's
         // asynchronous results cannot consume the new query's top reset.
         searchPresenter = KotlinPresenter(presenter: SearchPresenter(accountType: accountType, initialQuery: query))
     }
@@ -182,11 +181,9 @@ public struct SearchScreen: View {
         }
         headers.append(.title("local_history_status"))
         return TimelineListRequest(
-            key: "\(listScope):\(searchPresenter.key)",
-            positionScope: listScope,
+            key: searchPresenter.key,
             content: .posts(searchPresenter.state.status),
-            headers: headers,
-            positionOwner: searchPresenter
+            headers: headers
         )
     }
 
@@ -212,18 +209,18 @@ public struct SearchScreen: View {
                                 }
                             })) {
                                 Label {
-                                    Text(account.handle.canonical)
+                                    Text(account.handle.display)
                                 } icon: {
-                                    AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                                    AvatarView(data: account.avatar)
                                 }
                             }
                         }
                     } label: {
                         if let selectedAccount = searchPresenter.state.selectedAccount {
                             HStack {
-                                AvatarView(data: selectedAccount.avatar?.url, customHeader: selectedAccount.avatar?.customHeaders)
+                                AvatarView(data: selectedAccount.avatar)
                                     .frame(width: 24, height: 24)
-                                Text(selectedAccount.handle.canonical)
+                                Text(selectedAccount.handle.display)
                                 Image(fontAwesome: .chevronDown)
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -267,13 +264,12 @@ public struct SearchScreen: View {
                         isMacAccountPopoverPresented.toggle()
                     } label: {
                         AvatarView(
-                            data: toolbarAccount.avatar?.url,
-                            customHeader: toolbarAccount.avatar?.customHeaders
+                            data: toolbarAccount.avatar
                         )
                         .frame(width: 26, height: 26)
                     }
                     .buttonStyle(.plain)
-                    .help(toolbarAccount.handle.canonical)
+                    .help(toolbarAccount.handle.display)
                     .popover(isPresented: $isMacAccountPopoverPresented, arrowEdge: .top) {
                         MacSearchAccountPopover(
                             accounts: accounts,
@@ -340,10 +336,10 @@ private struct MacSearchAccountRow: View {
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .frame(width: 18)
 
-                AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                AvatarView(data: account.avatar)
                     .frame(width: 28, height: 28)
 
-                Text(account.handle.canonical)
+                Text(account.handle.display)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

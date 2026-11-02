@@ -16,10 +16,10 @@ internal class PleromaDataSource(
         credentialFlow = credentialFlow,
     ),
     ReactionDataSource {
-//    override fun react(
-//        statusKey: MicroBlogKey,
-//        hasReacted: Boolean,
-//        reaction: String,
-//    ) {
-//    }
+    // ponytail: Keep the existing Unicode unit until the Pleroma server rule is verified; CW shares its limit.
+    override fun countComposeText(
+        content: String,
+        spoilerText: String?,
+        urlCharacters: Int,
+    ): Long = content.length.toLong() + spoilerText.orEmpty().length
 }

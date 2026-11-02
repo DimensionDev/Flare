@@ -419,9 +419,8 @@ private fun ArticleCover(
     onOpenMedia: (UiMedia.Image) -> Unit,
 ) {
     NetworkImage(
-        model = cover.url,
+        model = cover,
         contentDescription = title,
-        customHeaders = cover.customHeaders,
         contentScale = ContentScale.Crop,
         modifier =
             Modifier
@@ -516,7 +515,7 @@ private fun ArticleRssAuthor(
                         size = 16.dp,
                     )
                 } else {
-                    author.iconUrl?.let {
+                    author.media?.let {
                         NetworkImage(
                             model = it,
                             contentDescription = siteName,
@@ -614,9 +613,8 @@ private fun ArticleImageBlock(
     onOpenMedia: (UiMedia.Image) -> Unit,
 ) {
     NetworkImage(
-        model = media.url,
+        model = media,
         contentDescription = media.accessibleDescription(),
-        customHeaders = media.customHeaders,
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -641,8 +639,7 @@ private fun ArticleVideoBlock(media: UiMedia.Video) {
             contentAlignment = Alignment.Center,
         ) {
             VideoItem(
-                url = media.url,
-                thumbnailUrl = media.thumbnailUrl,
+                media = media,
                 description = media.accessibleDescription(),
                 modifier = Modifier.fillMaxSize(),
             )
@@ -732,7 +729,7 @@ private fun ArticleEmbedBlockContent(block: UiArticleBlock.Embed) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        block.imageUrl?.let {
+        block.media?.let {
             NetworkImage(
                 model = it,
                 contentDescription = block.title,
@@ -940,9 +937,8 @@ private fun saveArticleFile(
         ) ?: return
     scope.launch {
         downloadManager.download(
-            url = block.url,
+            media = block.media,
             targetFile = targetFile,
-            customHeaders = block.customHeaders,
         )
     }
 }
@@ -951,4 +947,5 @@ private fun UiMedia.Image.rawImageRoute(): Route.RawImage =
     Route.RawImage(
         rawImage = url,
         customHeaders = customHeaders,
+        proxy = proxy,
     )

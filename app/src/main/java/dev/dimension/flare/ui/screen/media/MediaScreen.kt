@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import dev.dimension.flare.common.MediaFileNamePolicy
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
@@ -15,6 +16,7 @@ internal fun MediaScreen(
     uri: String,
     previewUrl: String?,
     customHeaders: Map<String, String>?,
+    proxy: ProxyRef,
     onDismiss: () -> Unit,
     toAltText: (UiMedia) -> Unit = {},
 ) {
@@ -29,6 +31,7 @@ internal fun MediaScreen(
                     width = 0f,
                     sensitive = false,
                     customHeaders = customHeaders?.toImmutableMap(),
+                    proxy = proxy,
                 ),
             ),
         index = 0,
@@ -50,6 +53,7 @@ internal fun RawMediaScreen(
 ) {
     MediaViewerScreen(
         medias = UiState.Success(medias),
+        previewProxy = medias.getOrNull(index)?.proxy ?: ProxyRef.Global,
         initialIndex = index.coerceIn(0, (medias.size - 1).coerceAtLeast(0)),
         preview = preview,
         onDismiss = onDismiss,

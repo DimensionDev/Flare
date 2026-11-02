@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versão %1$s:</span>
             <ul>
-                <li>Melhorada a reprodução de vídeos na cronologia com transições mais fluidas, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador multimédia.</li>
-                <li>Melhorada a fiabilidade da cronologia: as respostas e o contexto permanecem visíveis durante a atualização, o aviso de novas publicações é atualizado corretamente e foram corrigidas falhas de paginação.</li>
-                <li>Melhorada a acessibilidade das publicações, dos conteúdos multimédia e do ecrã de composição com etiquetas, estados e controlos mais claros.</li>
-                <li>Melhorada a fiabilidade das sessões Bluesky, a compatibilidade com novas respostas da cronologia do X e o suporte para mais formatos de ligações de obras e perfis Pixiv.</li>
+                <li>Adicionada a tradução de imagens. Após configurar um serviço de tradução, pode alternar entre o original e a tradução e guardar ou partilhar o resultado.</li>
+                <li>Pode escolher respostas e respostas aninhadas ao partilhar uma publicação como imagem, com suporte para imagens longas.</li>
+                <li>Adicionadas cronologias de grupos, círculo de amigos e contas seguidas em privado do Weibo, definições de visibilidade das publicações e reprodução de Live Photo. Restaurada a localização por IP.</li>
+                <li>Adicionadas definições de proxy globais e por conta, com suporte para HTTPS e SOCKS5.</li>
+                <li>Corrigidas algumas falhas no carregamento de imagens, ações de marcadores na galeria e abertura de ligações FANBOX. Melhoradas as cronologias mistas, a apresentação de traduções e a memorização da conta selecionada.</li>
             </ul>
         ]]></string>
 </resources>

@@ -36,7 +36,9 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.renderDirectMessage
 import dev.dimension.flare.ui.render.toUi
@@ -198,7 +200,7 @@ private fun fallbackDirectMessageUser(userKey: MicroBlogKey): UiProfile =
         avatar = null,
         nameInternal = userKey.id.toUiPlainText(),
         platformId = XQT_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
+        platformIcon = UiIcon.X.asType(),
         clickEvent = ClickEvent.Noop,
         banner = null,
         description = null,
@@ -219,6 +221,7 @@ internal data class XQTTimeline(
     val id: String?,
     val sortedIndex: Long,
     val notInterestedAction: TimelineFeedbackActionValue? = null,
+    val entryId: String? = null,
 )
 
 internal fun Timeline.tweets(includePin: Boolean = true): List<XQTTimeline> =
@@ -572,13 +575,14 @@ internal fun TopLevel.tweets(): List<XQTTimeline> {
                     ?.id
                     ?: return@mapNotNull null
             val index = entry.sortIndex?.toLongOrNull() ?: return@mapNotNull null
-            resolveTweet(tweetId)?.let { it to index }
-        }?.map { (tweet, index) ->
+            resolveTweet(tweetId)?.let { Triple(it, index, entry.entryID) }
+        }?.map { (tweet, index, entryId) ->
             XQTTimeline(
                 tweets = TimelineTweet(tweetResults = ItemResult(result = tweet)),
                 id = tweet.restId,
                 sortedIndex = index,
                 parents = emptyList(),
+                entryId = entryId,
             )
         }?.toList()
         .orEmpty()

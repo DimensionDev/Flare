@@ -55,17 +55,23 @@ internal fun testTimelineSpecs(): List<TimelineSpec<out TimelineSpec.Data>> = te
 
 internal fun unavailableAccountService(): AccountService =
     object : AccountService {
+        override suspend fun deleteAccounts(
+            platformId: String,
+            ownsCredential: (String) -> Boolean,
+            beforeDelete: suspend () -> Unit,
+        ): Unit = error("Account deletion is not available")
+
         override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
             error("Account service is not available in this test")
 
         override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
             error("Account service is not available in this test")
 
-        override fun <T : Any> addAccount(
+        override suspend fun <T : Any> addAccount(
             account: UiAccount,
             credential: T,
             serializer: KSerializer<T>,
-        ): Job = error("Account service is not available in this test")
+        ): Unit = error("Account service is not available in this test")
 
         override fun <T : Any> credentialFlow(
             accountKey: MicroBlogKey,
@@ -175,7 +181,7 @@ private abstract class TestDeepLinkPlatformSpec(
     final override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = displayName,
-            icon = icon,
+            icon = icon.asType(),
         )
     final override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 

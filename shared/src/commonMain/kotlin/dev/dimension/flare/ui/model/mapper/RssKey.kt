@@ -7,6 +7,7 @@ import kotlin.native.HiddenFromObjC
 @HiddenFromObjC
 public fun MicroBlogKey.Companion.fromRss(url: String): MicroBlogKey =
     MicroBlogKey(
-        id = Base64.encode(url.encodeToByteArray()),
+        // Keep IDs compatible with articles saved before original HTTP URLs were preserved.
+        id = Base64.encode(url.replace("http://", "https://").encodeToByteArray()),
         host = "RSS",
     )

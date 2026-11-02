@@ -58,6 +58,9 @@ import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.R
+import dev.dimension.flare.common.Locale
+import dev.dimension.flare.di.koinGet
+import dev.dimension.flare.feature.plugin.login.PluginOAuthCallbackCoordinatorV1
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.isLoginCallbackDeepLink
@@ -104,6 +107,8 @@ internal fun HomeScreen(afterInit: () -> Unit) {
         state.updateUriHandler(uriHandler)
     }
     val hapticFeedback = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+    val pluginOAuthCallbacks = remember { koinGet<PluginOAuthCallbackCoordinatorV1>() }
     state.tabs
         .onSuccess { tabs ->
             val currentRoute =
@@ -116,9 +121,19 @@ internal fun HomeScreen(afterInit: () -> Unit) {
             OnNewIntent(
                 withOnCreateIntent = true,
             ) {
-                it.dataString
-                    ?.takeUnless { url -> url.isLoginCallbackDeepLink() }
-                    ?.let { url -> state.deeplinkPresenter.handle(url) }
+                it.dataString?.let { url ->
+                    when {
+                        pluginOAuthCallbacks.canHandle(url) -> {
+                            coroutineScope.launch {
+                                runCatching { pluginOAuthCallbacks.handle(url, Locale.language) }
+                            }
+                        }
+
+                        !url.isLoginCallbackDeepLink() -> {
+                            state.deeplinkPresenter.handle(url)
+                        }
+                    }
+                }
             }
             LaunchedEffect(Unit) {
                 afterInit.invoke()
@@ -354,7 +369,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             item.user.onSuccess {
                                                 RichText(it.name)
                                                 Text(
-                                                    it.handle.canonical,
+                                                    it.handle.display,
                                                     style = MaterialTheme.typography.bodySmall,
                                                 )
                                             }
@@ -723,18 +738,24 @@ private val LocalScrollToTopRegistry =
 internal fun RegisterTabCallback(
     lazyListState: LazyStaggeredGridState,
     onRefresh: () -> Unit,
+    onScrollToTop: (() -> Unit)? = null,
+    canRefreshAtTop: Boolean = true,
 ) {
     val onRefreshState by rememberUpdatedState(onRefresh)
+    val onScrollToTopState by rememberUpdatedState(onScrollToTop)
+    val canRefreshAtTopState by rememberUpdatedState(canRefreshAtTop)
     val tabState = LocalScrollToTopRegistry.current
     if (tabState != null) {
         val scope = rememberCoroutineScope()
         val callback: () -> Unit =
             remember(lazyListState, scope) {
                 {
-                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                    if (canRefreshAtTopState && lazyListState.firstVisibleItemIndex == 0 &&
                         lazyListState.firstVisibleItemScrollOffset == 0
                     ) {
                         onRefreshState.invoke()
+                    } else if (onScrollToTopState != null) {
+                        onScrollToTopState?.invoke()
                     } else {
                         scope.launch {
                             if (lazyListState.firstVisibleItemIndex > 20) {

@@ -7,7 +7,10 @@ import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.tab.TabSettingsV2
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
+import dev.dimension.flare.data.model.tab.TimelinePresentation
 import dev.dimension.flare.data.model.tab.TimelineResolver
+import dev.dimension.flare.data.model.tab.TimelineSlot
+import dev.dimension.flare.data.model.tab.TimelineSlotContent
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
 import dev.dimension.flare.data.model.tab.toTimelineSlotOrNull
 import dev.dimension.flare.model.AccountType
@@ -20,6 +23,25 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class GroupConfigPresenterTest {
+    @Test
+    fun editingGroupPreservesExcludedChildren() {
+        assertEditingPreservesChildren(
+            listOf(
+                homeSlot("visible"),
+                homeSlot("excluded").copy(presentation = TimelinePresentation(enabled = false)),
+            ),
+        )
+    }
+
+    @Test
+    fun editingGroupKeepsGroupWhenAllChildrenAreExcluded() {
+        assertEditingPreservesChildren(
+            listOf(
+                homeSlot("excluded").copy(presentation = TimelinePresentation(enabled = false)),
+            ),
+        )
+    }
+
     @Test
     fun upsertGroupConfigReplacesDuplicateKeyInsteadOfAppending() {
         val timelineResolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService())
@@ -77,4 +99,30 @@ class GroupConfigPresenterTest {
         )
         assertEquals(TimelineMergePolicy.Staggered, updatedGroup.mergePolicy)
     }
+
+    private fun assertEditingPreservesChildren(children: List<TimelineSlot>) {
+        val resolver = TimelineResolver(testPlatformRuntimeData(), unavailableAccountService())
+        val slot = TimelineSlot(id = "custom", content = TimelineSlotContent.Group(children = children))
+        val item = assertIs<UiGroupTimelineTabItem>(resolver.toTabItem(slot))
+
+        val updated =
+            TabSettingsV2(homeSlots = listOf(slot)).upsertGroupConfig(
+                initialItem = item,
+                name = "Custom",
+                icon = item.icon,
+                appearancePatch = item.appearancePatch,
+                enabled = item.enabled,
+                tabs = item.children,
+                defaultGroupName = "Group",
+                timelineResolver = resolver,
+            )
+
+        assertEquals(1, updated.homeSlots.size)
+        assertEquals(children, assertIs<TimelineSlotContent.Group>(updated.homeSlots.single().content).children)
+    }
+
+    private fun homeSlot(accountId: String): TimelineSlot =
+        requireNotNull(
+            HomeTimelineTabItem(AccountType.Specific(MicroBlogKey(accountId, "example.com"))).toTimelineSlotOrNull(),
+        )
 }

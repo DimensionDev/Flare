@@ -19,6 +19,7 @@ import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asText
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -41,10 +42,11 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
                     .toImmutableList()
                     .mapNotNull { it.profile.takeSuccess() }
                     .map { user ->
-                        val tabs = listTabPresenter(accountKey = user.key).tabs.takeSuccess()
+                        val tabsState = listTabPresenter(accountKey = user.key).tabs
                         State.AccountTabs(
                             profile = user,
-                            tabs = tabs?.toImmutableList() ?: persistentListOf(),
+                            tabs = tabsState.takeSuccess()?.toImmutableList() ?: persistentListOf(),
+                            tabsLoaded = tabsState.isSuccess,
                         )
                     }.toImmutableList()
             }
@@ -58,7 +60,7 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
                                 group.tabs
                                     .map { section ->
                                         State.FlattenedTabSection(
-                                            title = section.title.asText(),
+                                            title = section.title,
                                             data =
                                                 when (val data = section.data) {
                                                     is dev.dimension.flare.common.PagingState.Success -> {
@@ -125,6 +127,7 @@ public class AllTabsPresenter : PresenterBase<AllTabsPresenter.State>() {
         public data class AccountTabs(
             val profile: UiProfile,
             val tabs: ImmutableList<PinnableTimelineTabPresenter.PinnableTimelineTab>,
+            val tabsLoaded: Boolean,
         )
 
         @Immutable

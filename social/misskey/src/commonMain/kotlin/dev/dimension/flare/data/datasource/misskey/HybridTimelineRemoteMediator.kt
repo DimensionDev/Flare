@@ -13,6 +13,7 @@ internal class HybridTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
 ) : CacheableRemoteLoader<UiTimelineV2> {
+    override val canJoinTimeline: Boolean = true
     override val pagingKey = "hybrid_timeline_$accountKey"
 
     override suspend fun load(

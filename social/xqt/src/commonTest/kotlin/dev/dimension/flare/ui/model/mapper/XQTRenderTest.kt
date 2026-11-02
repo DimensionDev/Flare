@@ -23,12 +23,15 @@ import dev.dimension.flare.data.network.xqt.model.UserLegacy
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.XqtUrl
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.postEventOrNull
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.plugin.module.dsl.modules
@@ -52,6 +55,32 @@ class XQTRenderTest {
     @AfterTest
     fun tearDown() {
         stopKoin()
+    }
+
+    @Test
+    fun profileMentionsUseBareUserNames() {
+        listOf('@', '＠').forEach { prefix ->
+            val user = createUser("profile-user", "momizibotanE")
+            val description = "サブ${prefix}momizibotansab"
+            val profile = user.copy(legacy = user.legacy.copy(description = description)).render(accountKey)
+            val mention =
+                assertNotNull(profile.description)
+                    .renderRuns
+                    .filterIsInstance<RenderContent.Text>()
+                    .flatMap { it.runs }
+                    .filterIsInstance<RenderRun.Text>()
+                    .single { it.style.link != null }
+            val route =
+                assertIs<DeeplinkRoute.Profile.UserNameWithHost>(
+                    DeeplinkRoute.parse(assertNotNull(mention.style.link)),
+                )
+
+            assertEquals("${prefix}momizibotansab", mention.text)
+            assertEquals("momizibotansab", route.userName)
+            assertEquals(accountKey.host, route.host)
+            assertEquals(AccountType.Specific(accountKey), route.accountType)
+            assertEquals("momizibotansab", UiHandle(route.userName, route.host).normalizedRaw)
+        }
     }
 
     @Test
@@ -269,14 +298,14 @@ class XQTRenderTest {
     }
 
     @Test
-    fun platformTranslationUsesFullMatchingTranslationAndEntities() {
+    fun platformTranslationDecodesHtmlEntitiesOnceAndPreservesLinks() {
         val shortUrl = "https://t.co/translated"
         val expandedUrl = "https://example.com/translated"
         val status =
             createTweet(
                 id = "status-translated",
                 user = createUser("user-translated", "translated_user"),
-                text = "original content",
+                text = "original &amp; &lt;tag&gt; &amp;amp; &#39;quoted&#39;",
                 grokTranslation =
                     GrokTranslatedPostWithAvailability(
                         isAvailable = true,
@@ -284,7 +313,7 @@ class XQTRenderTest {
                             GrokTranslatedPost(
                                 destinationLanguage = Locale.language.replace('-', '_').uppercase(),
                                 previewTranslation = "truncated preview",
-                                translation = "full translation $shortUrl",
+                                translation = "full translation &amp; &lt;tag&gt; &amp;amp; &#39;quoted&#39; $shortUrl",
                                 entities =
                                     Entities(
                                         urls =
@@ -308,8 +337,8 @@ class XQTRenderTest {
                 .filterIsInstance<RenderRun.Text>()
                 .first { it.style.link != null }
 
-        assertEquals("original content", rendered.content.original.innerText)
-        assertEquals("full translation example.com/translated", translation.innerText)
+        assertEquals("original & <tag> &amp; 'quoted'", rendered.content.original.innerText)
+        assertEquals("full translation & <tag> &amp; 'quoted' example.com/translated", translation.innerText)
         assertEquals(expandedUrl, link.style.link)
     }
 

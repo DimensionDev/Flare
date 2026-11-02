@@ -4,10 +4,8 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 import org.koin.core.annotation.Single
@@ -15,15 +13,24 @@ import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public interface AccountService {
+    public suspend fun invalidatePlatform(platformId: String) {}
+
+    /** Validate all matching credentials, then invoke beforeDelete before changing any account data. */
+    public suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
+    )
+
     public fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource>
 
     public fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>>
 
-    public fun <T : Any> addAccount(
+    public suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job
+    ): Unit
 
     public fun <T : Any> credentialFlow(
         accountKey: MicroBlogKey,
@@ -45,10 +52,10 @@ public data class AccountMicroblogDataSource(
 )
 
 @HiddenFromObjC
-public inline fun <reified T : Any> AccountService.addAccount(
+public suspend inline fun <reified T : Any> AccountService.addAccount(
     account: UiAccount,
     credential: T,
-): Job =
+): Unit =
     addAccount(
         account = account,
         credential = credential,
@@ -77,29 +84,27 @@ public inline fun <reified T : Any> AccountService.updateCredential(
 internal class RepositoryAccountService(
     private val repository: AccountRepository,
 ) : AccountService {
+    override suspend fun invalidatePlatform(platformId: String) = repository.invalidatePlatform(platformId)
+
+    override suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
+    ) = repository.deleteAccounts(platformId, ownsCredential, beforeDelete)
+
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> =
         accountServiceFlow(
             accountType = accountType,
             repository = repository,
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> =
-        repository.allAccounts.mapLatest { accounts ->
-            accounts.filter { it.platformAvailable }.map { account ->
-                AccountMicroblogDataSource(
-                    accountKey = account.accountKey,
-                    platformId = account.platformId,
-                    dataSource = repository.getOrCreateDataSource(account),
-                )
-            }
-        }
+    override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> = repository.allAccountServices
 
-    override fun <T : Any> addAccount(
+    override suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job =
+    ): Unit =
         repository.addAccount(
             account = account,
             credential = credential,

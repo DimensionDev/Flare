@@ -10,7 +10,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -19,6 +19,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.flatMapLatestUiState
 import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -27,7 +28,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -44,9 +44,8 @@ public class EditAccountListPresenter(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val userListFlow by lazy {
         accountServiceFlow(accountType, accountRepository)
-            .flatMapLatest { service ->
-                require(service is ListDataSource)
-                service.listMemberHandler.userLists(userKey).toUi()
+            .flatMapLatestUiState { service ->
+                requireNotNull(service.capabilities.list).listMemberHandler.userLists(userKey).toUi()
             }.map {
                 it.map {
                     it.toImmutableList()
@@ -58,12 +57,12 @@ public class EditAccountListPresenter(
     override fun body(): EditAccountListState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val listState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.list) } }
         val allList =
-            serviceState
-                .map { service ->
-                    require(service is ListDataSource)
-                    remember(service) {
-                        service.listHandler.data.cachedIn(scope).map {
+            listState
+                .map { list ->
+                    remember(list) {
+                        list.listHandler.data.cachedIn(scope).map {
                             it.filter {
                                 !it.readonly
                             }
@@ -77,18 +76,16 @@ public class EditAccountListPresenter(
 
             override fun addList(list: UiList) {
                 serviceState.onSuccess {
-                    require(it is ListDataSource)
                     scope.launch {
-                        it.listMemberHandler.addMember(list.id, userKey = userKey)
+                        requireNotNull(it.capabilities.list).listMemberHandler.addMember(list.id, userKey = userKey)
                     }
                 }
             }
 
             override fun removeList(list: UiList) {
                 serviceState.onSuccess {
-                    require(it is ListDataSource)
                     scope.launch {
-                        it.listMemberHandler.removeMember(list.id, userKey = userKey)
+                        requireNotNull(it.capabilities.list).listMemberHandler.removeMember(list.id, userKey = userKey)
                     }
                 }
             }

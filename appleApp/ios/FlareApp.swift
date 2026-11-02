@@ -2,6 +2,8 @@ import SwiftUI
 import KotlinSharedUI
 import FlareAppleCore
 import FlareAppleUI
+import AVFAudio
+import UIKit
 
 @main
 struct FlareApp: App {
@@ -14,6 +16,7 @@ struct FlareApp: App {
         if firebaseEnabled {
             AppleSharedHelper.shared.setupCrashlytics()
         }
+        ProxySessionConfigurator.install()
         AppleSharedHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,
@@ -27,8 +30,14 @@ struct FlareApp: App {
                 root
             }
             .modifier(IOSTimelineListEnvironment())
+        .ugoiraExportStatus()
             .onChange(of: scenePhase) { _, phase in
                 MediaCacheMaintenance.handleScenePhase(phase)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in
+                Task.detached {
+                    try? await PluginRuntimeLifecycleFacadeV1().onMemoryPressure()
+                }
             }
         }
     }

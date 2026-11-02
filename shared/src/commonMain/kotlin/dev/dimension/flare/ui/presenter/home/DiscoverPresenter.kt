@@ -16,10 +16,12 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.allAccountServicesFlow
@@ -31,9 +33,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebIgnore
 import dev.dimension.flare.web.shared.WebPresenter
@@ -42,7 +42,8 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
@@ -50,20 +51,33 @@ import kotlinx.coroutines.flow.map
 @WebPresenter("discover")
 public class DiscoverPresenter : PresenterBase<DiscoverState>() {
     private val accountRepository: AccountRepository by koinInject()
+    private val appDataStore: AppDataStore by koinInject()
+    private val appScope: CoroutineScope by koinInject()
+    private val accountSelection by lazy {
+        RememberedAccountSelection(appDataStore.discoverPreferences, appScope, accountRepository.accountMutationMutex) {
+            accountRepository.find(it) !=
+                null
+        }
+    }
+
+    private val accountKeysFlow by lazy {
+        allAccountServicesFlow(accountRepository)
+            .map { sources ->
+                sources
+                    .filter { it.capabilities.search != null && it.accountProfileFlow() != null }
+                    .mapNotNull { it.accountKeyOrNull }
+            }.distinctUntilChanged()
+    }
 
     private val accountsFlow by lazy {
         allAccountServicesFlow(accountRepository)
             .map {
                 it
-                    .filterIsInstance<UserDataSource>()
-                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
-                    .toImmutableList()
-            }.map {
-                it.map { dataSource ->
-                    val authenticated = dataSource as UserDataSource
-                    val accountKey = dataSource.accountKey
-                    authenticated.userHandler.userById(accountKey.id).toUi()
-                }
+                    .mapNotNull { dataSource ->
+                        val capabilities = dataSource.capabilities
+                        if (capabilities.search == null) return@mapNotNull null
+                        dataSource.accountProfileFlow()
+                    }.toImmutableList()
             }.combineLatestFlowLists()
             .map {
                 it
@@ -73,16 +87,8 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             }
     }
 
-    private val selectedAccountFlow by lazy {
-        MutableStateFlow<UiProfile?>(null)
-    }
-
     private val selectedAccountTypeFlow: Flow<AccountType> by lazy {
-        selectedAccountFlow.map { profile ->
-            profile?.let {
-                AccountType.Specific(it.key)
-            } ?: AccountType.Guest
-        }
+        accountSelection.selectedAccountType.filterNotNull()
     }
 
     private val usersFlow by lazy {
@@ -90,8 +96,9 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             accountServiceFlow(accountType = accountType, repository = accountRepository)
                 .flatMapLatest { dataSource ->
                     runCatching {
+                        val search = requireNotNull(dataSource.capabilities.search)
                         Pager(config = pagingConfig) {
-                            dataSource.discoverUsers().toPagingSource()
+                            search.discoverUsers().toPagingSource()
                         }.flow
                     }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
@@ -103,8 +110,9 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             accountServiceFlow(accountType = accountType, repository = accountRepository)
                 .flatMapLatest { dataSource ->
                     runCatching {
+                        val search = requireNotNull(dataSource.capabilities.search)
                         Pager(config = pagingConfig) {
-                            dataSource.discoverHashtags().toPagingSource()
+                            search.discoverHashtags().toPagingSource()
                         }.flow
                     }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
@@ -120,8 +128,9 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
     override fun body(): DiscoverState {
         val scope = rememberCoroutineScope()
         val accounts by accountsFlow.collectAsUiState()
-        val selectedAccount by selectedAccountFlow.collectAsState()
-        val selectedAccountType by selectedAccountTypeFlow.collectAsState(AccountType.Guest)
+        val restoredAccountType by accountSelection.selectedAccountType.collectAsState()
+        val selectedAccountKey = (restoredAccountType as? AccountType.Specific)?.accountKey
+        val selectedAccount = accounts.takeSuccess()?.firstOrNull { it.key == selectedAccountKey }
         val users =
             remember(usersFlow, scope) {
                 usersFlow.cachedIn(scope)
@@ -137,12 +146,11 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
                 statusFlow(scope)
             }.collectAsLazyPagingItems().toPagingState()
 
-        accounts.onSuccess {
-            LaunchedEffect(it.size) {
-                if (selectedAccountFlow.value == null) {
-                    selectedAccountFlow.value = it.firstOrNull()
-                }
-            }
+        LaunchedEffect(Unit) {
+            accountSelection.restore()
+        }
+        LaunchedEffect(Unit) {
+            accountKeysFlow.collect(accountSelection::updateAccounts)
         }
 
         return object : DiscoverState {
@@ -150,8 +158,11 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             override val status = status
             override val hashtags = hashtags
             override val selectedAccount = selectedAccount
+            override val selectedAccountKey = selectedAccountKey
             override val accounts = accounts
-            override val selectedAccountType = selectedAccountType
+            override val selectedAccountType = restoredAccountType ?: AccountType.Guest
+            override val isAccountReady = restoredAccountType != null
+            override val canSwitchAccount = accounts.takeSuccess()?.any { it.key != selectedAccountKey } == true
 
             override suspend fun refreshSuspend() {
                 users.refreshSuspend()
@@ -160,13 +171,11 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             }
 
             override fun setAccount(profile: UiProfile) {
-                selectedAccountFlow.value = profile
+                setAccountKey(profile.key)
             }
 
             override fun setAccountKey(key: MicroBlogKey) {
-                accounts.takeSuccess()?.firstOrNull { it.key == key }?.let {
-                    selectedAccountFlow.value = it
-                }
+                accountSelection.selectAccount(key)
             }
         }
     }
@@ -179,7 +188,10 @@ public interface DiscoverState {
     public val hashtags: PagingState<UiHashtag>
     public val accounts: UiState<ImmutableList<UiProfile>>
     public val selectedAccount: UiProfile?
+    public val selectedAccountKey: MicroBlogKey?
     public val selectedAccountType: AccountType
+    public val isAccountReady: Boolean
+    public val canSwitchAccount: Boolean
 
     public suspend fun refreshSuspend()
 

@@ -1,13 +1,18 @@
 package dev.dimension.flare.ui.route
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromHexString
+import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
+import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
+import kotlin.uuid.Uuid
 
 public const val APPSCHEMA: String = "flare"
 
@@ -25,6 +30,11 @@ public sealed class DeeplinkRoute {
 
     @Serializable
     public sealed class Timeline : DeeplinkRoute() {
+        @Serializable
+        public data class Source(
+            val loaderKey: String,
+        ) : Timeline()
+
         @Serializable
         public data class XQTDeviceFollow(
             val accountType: AccountType,
@@ -120,6 +130,7 @@ public sealed class DeeplinkRoute {
             val url: String,
             val descriptionHtml: String? = null,
             val title: String? = null,
+            val fallbackHtml: String? = null,
         ) : Rss()
     }
 
@@ -167,6 +178,7 @@ public sealed class DeeplinkRoute {
             val uri: String,
             val previewUrl: String?,
             val customHeaders: Map<String, String>? = null,
+            val proxy: ProxyRef = ProxyRef.Global,
         ) : Media()
 
         @Serializable
@@ -295,7 +307,9 @@ public sealed class DeeplinkRoute {
         @OptIn(ExperimentalSerializationApi::class)
         public fun parse(uri: String): DeeplinkRoute? =
             runCatching {
-                ProtoBuf.decodeFromHexString<RoutePackage>(uri.removePrefix("$APPSCHEMA://")).route
+                val data = ProtoBuf.decodeFromHexString<RoutePackage>(uri.removePrefix("$APPSCHEMA://"))
+                require(!data.route.hasMediaProxyOverride() || data.signature == data.route.mediaProxySignature())
+                data.route
             }.getOrNull()
 
         public fun isDeeplink(uri: String): Boolean = uri.startsWith("$APPSCHEMA://")
@@ -304,11 +318,32 @@ public sealed class DeeplinkRoute {
 
 @OptIn(ExperimentalSerializationApi::class)
 public fun DeeplinkRoute.toUri(): String {
-    val protobuf = ProtoBuf.encodeToHexString(RoutePackage(this))
+    val signature = if (hasMediaProxyOverride()) mediaProxySignature() else null
+    val protobuf = ProtoBuf.encodeToHexString(RoutePackage(this, signature))
     return "$APPSCHEMA://$protobuf"
 }
+
+// Only links generated in this process may carry a media proxy override.
+private val mediaProxySigningKey by lazy { Uuid.random().toString().encodeUtf8() }
+
+private fun DeeplinkRoute.hasMediaProxyOverride(): Boolean =
+    when (this) {
+        is DeeplinkRoute.Media.Image -> proxy != ProxyRef.Global
+        is DeeplinkRoute.Media.StatusMedia -> preview != null && ProxyRef.forAccountType(accountType) != ProxyRef.Global
+        is DeeplinkRoute.DeepLinkAccountPicker -> data.values.any { it.hasMediaProxyOverride() }
+        else -> false
+    }
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun DeeplinkRoute.mediaProxySignature(): String =
+    ProtoBuf
+        .encodeToByteArray(RoutePackage(this))
+        .toByteString()
+        .hmacSha256(mediaProxySigningKey)
+        .hex()
 
 @Serializable
 private data class RoutePackage(
     val route: DeeplinkRoute,
+    val signature: String? = null,
 )

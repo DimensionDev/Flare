@@ -118,6 +118,10 @@ export function visibilityIcon(visibility: UiTimelineV2PostVisibility): string {
 			return 'Mention';
 		case 'Channel':
 			return 'Channel';
+		case 'Friends':
+			return 'Heart';
+		case 'SelfOnly':
+			return 'Lock';
 	}
 }
 
@@ -133,6 +137,10 @@ export function visibilityLabel(visibility: UiTimelineV2PostVisibility): string 
 			return m.visibilitySpecified();
 		case 'Channel':
 			return m.visibilityChannel();
+		case 'Friends':
+			return m.composeVisibilityFriends();
+		case 'SelfOnly':
+			return m.composeVisibilitySelf();
 	}
 }
 

@@ -7,8 +7,6 @@ import SwiftUIBackports
 import FlareAppleCore
 
 struct NotificationScreen: View {
-    @State private var positions = TimelinePagePositions()
-    @Environment(\.timelineAccountScope) private var accountScope
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
     @State private var selectedAccountStableKey: String?
@@ -31,12 +29,9 @@ struct NotificationScreen: View {
     }
 
     private var presenterSelectedAccountStableKey: String? {
-        let selectedStableKey =
-            presenter.state.selectedAccount.flatMap { profile in
-                let stableKey = "\(profile.key.host):\(profile.key.id)"
-                return notificationItems.contains(where: { $0.stableKey == stableKey }) ? stableKey : nil
-            }
-        return selectedStableKey ?? notificationItems.first?.stableKey
+        presenter.state.selectedAccountKey.map { key in
+            "\(key.host):\(key.id)"
+        }
     }
 
     private var presenterSelectedFilterStableKey: String? {
@@ -87,7 +82,6 @@ struct NotificationScreen: View {
             data: presenter.state.timeline,
             detailStatusKey: nil,
             key: timelineKey,
-            readingState: positions.state(for: timelineKey, scope: "\(accountScope):\(presenterSelectedAccountStableKey ?? "none")"),
             topContentInset: horizontalSizeClass == .compact && !isSyncingAccountSelection ? filterSegmentsHeight + 8 : 0,
             onIsAtTopChanged: { isAtTop = $0 }
         )
@@ -107,6 +101,7 @@ struct NotificationScreen: View {
                 }
             }
             .detectScrolling()
+            .navigationBackButtonTitle(String(localized: "home_tab_notifications_title"))
             .if(!notificationItems.isEmpty && horizontalSizeClass == .compact && !isSyncingAccountSelection) { view in
                 view
                     .safeAreaInset(edge: .top) {
@@ -114,7 +109,7 @@ struct NotificationScreen: View {
                     }
             }
             .toolbar {
-                if notificationItems.count > 1 {
+                if presenter.state.canSwitchAccount {
                     ToolbarItem {
                         NotificationAccountsMenu(
                             items: notificationItems,
@@ -242,14 +237,6 @@ struct NotificationAccountsMenu: View {
     let items: [NotificationAccountItem]
     @Binding var selectedStableKey: String?
 
-    private var resolvedSelectedStableKey: String? {
-        if let selectedStableKey,
-           items.contains(where: { $0.stableKey == selectedStableKey }) {
-            return selectedStableKey
-        }
-        return items.first?.stableKey
-    }
-
     private var unreadItems: [NotificationAccountItem] {
         items.filter { $0.badge > 0 }
     }
@@ -261,7 +248,7 @@ struct NotificationAccountsMenu: View {
     }
 
     private var selectedItem: NotificationAccountItem? {
-        items.first(where: { $0.stableKey == resolvedSelectedStableKey }) ?? items.first
+        items.first(where: { $0.stableKey == selectedStableKey })
     }
 
     private func unreadText(for count: Int) -> String? {
@@ -272,11 +259,11 @@ struct NotificationAccountsMenu: View {
     }
 
     var body: some View {
-        if items.count > 1 {
+        if !items.isEmpty {
             Menu {
                 ForEach(items, id: \.stableKey) { item in
                     Toggle(isOn: Binding(
-                        get: { resolvedSelectedStableKey == item.stableKey },
+                        get: { selectedStableKey == item.stableKey },
                         set: { isSelected in
                             if isSelected {
                                 selectedStableKey = item.stableKey
@@ -284,9 +271,9 @@ struct NotificationAccountsMenu: View {
                         }
                     )) {
                         Label {
-                            Text(item.profile.handle.canonical)
+                            Text(item.profile.handle.display)
                         } icon: {
-                            AvatarView(data: item.profile.avatar?.url, customHeader: item.profile.avatar?.customHeaders)
+                            AvatarView(data: item.profile.avatar)
                         }
                         if let unreadText = unreadText(for: Int(item.badge)) {
                             Text(unreadText)
@@ -297,10 +284,10 @@ struct NotificationAccountsMenu: View {
                 if let selectedItem {
                     let selectedAccount = selectedItem.profile
                     HStack(spacing: 8) {
-                        AvatarView(data: selectedAccount.avatar?.url, customHeader: selectedAccount.avatar?.customHeaders)
+                        AvatarView(data: selectedAccount.avatar)
                             .frame(width: 24, height: 24)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(selectedAccount.handle.canonical)
+                            Text(selectedAccount.handle.display)
                                 .lineLimit(1)
                             if let unreadText = unreadText(for: totalUnreadCount) {
                                 Text(unreadText)
@@ -321,6 +308,8 @@ struct NotificationAccountsMenu: View {
                             )
                             .scaleEffect(0.66)
                     }
+                } else {
+                    Text("home_tab_notifications_title")
                 }
             }
         }

@@ -33,3 +33,4 @@ appleApp/K_D/
 .env
 
 GoogleService-Info.plist
+/artifacts/

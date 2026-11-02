@@ -45,6 +45,15 @@ class QuartzMigrationTest {
         EventTemplate<QuartzEvent>(1700000000, 1, arrayOf(arrayOf("t", "nostr")), content)
 
     @Test
+    fun persistedRelaySchemesRemainCaseInsensitiveWithoutChangingPaths() {
+        for (scheme in listOf("ws", "wss")) {
+            val expected = normalizedNostrRelays(listOf("$scheme://relay.example/CaseSensitive?token=AbC"))
+            assertEquals(expected, normalizedNostrRelays(listOf("${scheme.uppercase()}://relay.example/CaseSensitive?token=AbC")))
+        }
+        assertFailsWith<IllegalArgumentException> { normalizedNostrRelays(listOf("ftp://relay.example")) }
+    }
+
+    @Test
     fun legacyCredentialsKeepIdentityAndCanonicalEventId() =
         runTest {
             val nsec = secret.hexToByteArray().toNsec()

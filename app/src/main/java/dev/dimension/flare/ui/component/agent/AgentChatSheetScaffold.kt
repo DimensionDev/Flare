@@ -1,13 +1,10 @@
 package dev.dimension.flare.ui.component.agent
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -15,9 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentFailure
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.model.UiProfile
@@ -42,7 +37,8 @@ internal fun AgentChatSheetScaffold(
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    errorMessage: String?,
+    error: AgentFailure?,
+    onRetry: () -> Unit,
     runningTrace: String,
     inputPlaceholder: String,
     sendContentDescription: String,
@@ -96,10 +92,14 @@ internal fun AgentChatSheetScaffold(
                 },
                 loadingCount = AGENT_CHAT_SHEET_MESSAGE_LOADING_COUNT,
                 loadingContent = { index, _ ->
-                    AgentChatSheetMessageSkeleton(isUser = index == 0)
+                    AgentChatMessageSkeleton(isUser = index == 0)
                 },
                 errorContent = { throwable ->
-                    AgentChatError(text = throwable.message ?: throwable.toString())
+                    AgentErrorCard(
+                        failure = AgentFailure.fromThrowable(throwable),
+                        onRetry = { (messages as? PagingState.Error)?.onRetry?.invoke() },
+                        historyError = true,
+                    )
                 },
                 itemContent = { _, _, message ->
                     AgentChatMessageBubble(
@@ -121,9 +121,10 @@ internal fun AgentChatSheetScaffold(
                         .padding(top = 8.dp),
             )
         }
-        errorMessage?.let { text ->
-            AgentChatError(
-                text = text,
+        error?.takeUnless { isRunning }?.let { failure ->
+            AgentErrorCard(
+                failure = failure,
+                onRetry = onRetry.takeIf { failure.canRetry },
                 modifier =
                     Modifier
                         .padding(horizontal = screenHorizontalPadding)
@@ -148,56 +149,3 @@ internal fun AgentChatSheetScaffold(
 }
 
 private const val AGENT_CHAT_SHEET_MESSAGE_LOADING_COUNT = 3
-
-@Composable
-private fun AgentChatSheetMessageSkeleton(isUser: Boolean) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement =
-            if (isUser) {
-                Arrangement.End
-            } else {
-                Arrangement.Start
-            },
-    ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(0.72f),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ),
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(14.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    androidx.compose.material3.Surface(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(14.dp),
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-                        content = {},
-                    )
-                }
-                androidx.compose.material3.Surface(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(0.62f)
-                            .height(14.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                    content = {},
-                )
-            }
-        }
-    }
-}

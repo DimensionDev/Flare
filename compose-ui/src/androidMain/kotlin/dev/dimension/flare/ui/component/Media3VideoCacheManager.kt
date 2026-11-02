@@ -1,24 +1,23 @@
 package dev.dimension.flare.ui.component
 
 import android.content.Context
-import androidx.annotation.OptIn
 import androidx.compose.runtime.Stable
 import androidx.media3.common.C
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.CacheKeyFactory
 import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import dev.dimension.flare.data.network.proxyCallFactory
+import dev.dimension.flare.ui.model.UiMedia
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import java.io.File
-import java.security.MessageDigest
 
 @Stable
 @Single
@@ -38,22 +37,22 @@ public class Media3VideoCacheManager(
         )
     }
 
-    public fun mediaSourceFactory(customHeaders: Map<String, String>? = null): DefaultMediaSourceFactory =
-        DefaultMediaSourceFactory(dataSourceFactory(customHeaders = customHeaders))
+    public fun mediaSourceFactory(media: UiMedia): DefaultMediaSourceFactory =
+        DefaultMediaSourceFactory(dataSourceFactory(media = media))
 
     public fun dataSourceFactory(
-        customHeaders: Map<String, String>? = null,
+        media: UiMedia,
         allowNetwork: Boolean = true,
         writeToCache: Boolean = true,
     ): CacheDataSource.Factory =
         CacheDataSource
             .Factory()
             .setCache(cache)
-            .setCacheKeyFactory(cacheKeyFactory(customHeaders))
+            .setCacheKeyFactory(CacheKeyFactory { dataSpec -> mediaKey(media, dataSpec.key ?: dataSpec.uri.toString()) })
             .setFlags(CacheDataSource.FLAG_BLOCK_ON_CACHE)
             .apply {
                 if (allowNetwork) {
-                    setUpstreamDataSourceFactory(upstreamDataSourceFactory(customHeaders))
+                    setUpstreamDataSourceFactory(upstreamDataSourceFactory(media))
                     if (!writeToCache) {
                         setCacheWriteDataSinkFactory(null)
                     }
@@ -63,68 +62,36 @@ public class Media3VideoCacheManager(
                 }
             }
 
-    public fun cacheOnlyDataSourceFactory(customHeaders: Map<String, String>? = null): CacheDataSource.Factory =
+    public fun cacheOnlyDataSourceFactory(media: UiMedia): CacheDataSource.Factory =
         dataSourceFactory(
-            customHeaders = customHeaders,
+            media = media,
             allowNetwork = false,
             writeToCache = false,
         )
 
-    public fun downloadingDataSourceFactory(customHeaders: Map<String, String>? = null): CacheDataSource.Factory =
+    public fun downloadingDataSourceFactory(media: UiMedia): CacheDataSource.Factory =
         dataSourceFactory(
-            customHeaders = customHeaders,
+            media = media,
             allowNetwork = true,
             writeToCache = true,
         )
 
     public fun isFullyCached(
-        uri: String,
-        customHeaders: Map<String, String>? = null,
+        media: UiMedia,
     ): Boolean {
-        val key = cacheKey(uri, customHeaders)
+        val key = mediaKey(media, media.urlForDownload)
         val contentLength = ContentMetadata.getContentLength(cache.getContentMetadata(key))
         return contentLength > 0 && contentLength != C.LENGTH_UNSET.toLong() && cache.isCached(key, 0, contentLength)
     }
 
-    private fun upstreamDataSourceFactory(customHeaders: Map<String, String>?): DataSource.Factory {
-        val httpFactory =
-            DefaultHttpDataSource
-                .Factory()
-                .setAllowCrossProtocolRedirects(true)
-        if (!customHeaders.isNullOrEmpty()) {
-            httpFactory.setDefaultRequestProperties(customHeaders)
-        }
-        return DefaultDataSource.Factory(applicationContext, httpFactory)
-    }
+    private fun upstreamDataSourceFactory(media: UiMedia): DataSource.Factory =
+        DefaultDataSource.Factory(applicationContext,
+            OkHttpDataSource.Factory(proxyCallFactory(media))
+                .setDefaultRequestProperties(media.customHeaders.orEmpty()),
+        )
 
-    private fun cacheKeyFactory(customHeaders: Map<String, String>?): CacheKeyFactory =
-        CacheKeyFactory { dataSpec ->
-            cacheKey(dataSpec.key ?: dataSpec.uri.toString(), customHeaders)
-        }
-
-    private fun cacheKey(
-        baseKey: String,
-        customHeaders: Map<String, String>?,
-    ): String {
-        if (customHeaders.isNullOrEmpty()) {
-            return baseKey
-        }
-        val headerFingerprint =
-            customHeaders
-                .toSortedMap()
-                .entries
-                .joinToString(separator = "\n") { (key, value) -> "$key:$value" }
-                .sha256()
-        return "$baseKey#headers=$headerFingerprint"
-    }
-
-    private fun String.sha256(): String =
-        MessageDigest
-            .getInstance("SHA-256")
-            .digest(toByteArray())
-            .joinToString(separator = "") { byte ->
-                "%02x".format(byte.toInt() and 0xff)
-            }
+    private fun mediaKey(media: UiMedia, uri: String): String =
+        media.cacheKeyFor(uri)
 
     private companion object {
         private const val CACHE_DIR_NAME = "media3-video"

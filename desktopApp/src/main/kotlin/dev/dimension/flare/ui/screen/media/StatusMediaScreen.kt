@@ -1,12 +1,11 @@
 package dev.dimension.flare.ui.screen.media
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -43,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
@@ -58,11 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.roundToIntSize
 import androidx.compose.ui.unit.toOffset
 import coil3.compose.AsyncImagePainter
-import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
+import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import coil3.size.Size
 import compose.icons.FontAwesomeIcons
@@ -88,19 +84,22 @@ import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.MediaViewerPlayback
 import dev.dimension.flare.ui.component.MediaViewerSelection
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
+import dev.dimension.flare.ui.component.rememberMediaImageRequest
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.media.ImageTranslationPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
+import dev.dimension.flare.ui.screen.settings.imageTranslationText
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -114,7 +113,6 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -152,6 +150,7 @@ private fun StatusMediaContent(
     statusKey: MicroBlogKey,
     index: Int,
 ) {
+    val translation = remember(accountType) { ImageTranslationPresenter(accountType) }.invoke()
     val scope = rememberCoroutineScope()
     val window = LocalComposeWindow.current
     val state by producePresenter(
@@ -175,7 +174,7 @@ private fun StatusMediaContent(
                 ) {
                     medias.size
                 }
-            MediaViewerSelection(medias.map { it.url }, medias.getOrNull(pagerState.currentPage)?.url)
+            MediaViewerSelection(medias.map { it.url }, pagerState.currentPage)
             HorizontalFlipView(
                 state = pagerState,
                 enabled = state.lockPager,
@@ -215,12 +214,21 @@ private fun StatusMediaContent(
             ) {
                 val media = medias[it]
                 when (media) {
+                    is UiMedia.Ugoira -> {
+                        val zoom = rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
+                        LaunchedEffect(zoom.zoomFraction) { state.setLockPager((zoom.zoomFraction ?: 0f) > .01f) }
+                        UgoiraPlayer(media, Modifier.fillMaxSize().zoomable(zoom), autoplay = pagerState.currentPage == it)
+                    }
+
                     is UiMedia.Image -> {
                         ImageItem(
+                            translating = translation.item(media).loading,
                             modifier = Modifier.fillMaxSize(),
-                            url = media.url,
-                            previewUrl = media.previewUrl,
-                            customHeaders = media.customHeaders,
+                            media = translation.displayed(media),
+                            onLoadError = {
+                                val result = translation.displayed(media)
+                                if (result.url != media.url) translation.imageFailed(media, result.url)
+                            },
                             description = media.accessibleDescription(),
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
@@ -230,8 +238,7 @@ private fun StatusMediaContent(
                     is UiMedia.Video -> {
                         if (pagerState.currentPage == it) {
                             VideoItem(
-                                url = media.url,
-                                thumbnailUrl = media.thumbnailUrl,
+                                media = media,
                                 description = media.accessibleDescription(),
                                 modifier =
                                     Modifier
@@ -240,9 +247,7 @@ private fun StatusMediaContent(
                         } else {
                             ImageItem(
                                 modifier = Modifier.fillMaxSize(),
-                                url = media.thumbnailUrl,
-                                previewUrl = media.thumbnailUrl,
-                                customHeaders = media.customHeaders,
+                                media = media.preview,
                                 description = media.accessibleDescription(),
                                 isFocused = pagerState.currentPage == it,
                                 setLockPager = state::setLockPager,
@@ -296,13 +301,7 @@ private fun StatusMediaContent(
                             },
                         ) {
                             NetworkImage(
-                                model =
-                                    when (media) {
-                                        is UiMedia.Audio -> media.previewUrl
-                                        is UiMedia.Gif -> media.previewUrl
-                                        is UiMedia.Image -> media.previewUrl
-                                        is UiMedia.Video -> media.thumbnailUrl
-                                    },
+                                model = media.preview,
                                 contentDescription = media.accessibleDescription(),
                                 modifier =
                                     Modifier
@@ -314,19 +313,24 @@ private fun StatusMediaContent(
                         CommandBarSeparator()
                     }
                 }
-                item {
-                    SubtleButton(
-                        onClick = {
-                            val current = medias[pagerState.currentPage]
-                            state.save(current)
-                        },
-                        content = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.FloppyDisk,
-                                contentDescription = stringResource(Res.string.media_save),
-                            )
-                        },
-                    )
+                medias.getOrNull(pagerState.currentPage)?.let { current ->
+                    if (current is UiMedia.Image) item { ImageTranslationActions(translation, current) }
+                }
+                if (medias.getOrNull(pagerState.currentPage) !is UiMedia.Ugoira) {
+                    item {
+                        SubtleButton(
+                            onClick = {
+                                val current = medias[pagerState.currentPage]
+                                state.save(current, translation.displayed(current))
+                            },
+                            content = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.FloppyDisk,
+                                    contentDescription = stringResource(Res.string.media_save),
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -335,15 +339,13 @@ private fun StatusMediaContent(
 
 @Composable
 internal fun VideoItem(
-    url: String,
-    thumbnailUrl: String,
+    media: UiMedia.Video,
     description: String?,
     modifier: Modifier = Modifier,
 ) {
     var showControls by remember { mutableStateOf(true) }
     VideoPlayer(
-        uri = url,
-        previewUri = thumbnailUrl,
+        media = media,
         contentDescription = description,
         modifier = modifier.clickable { showControls = !showControls },
         muted = false,
@@ -480,39 +482,38 @@ private fun PlayerControl(
 @OptIn(ExperimentalTelephotoApi::class)
 @Composable
 internal fun ImageItem(
-    url: String,
-    previewUrl: String,
-    customHeaders: ImmutableMap<String, String>?,
+    media: UiMedia?,
     description: String?,
     setLockPager: (Boolean) -> Unit,
     isFocused: Boolean,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    onLoadError: () -> Unit = {},
+    translating: Boolean = false,
 ) {
-    val painter =
-        rememberAsyncImagePainter(
-            ImageRequest
-                .Builder(LocalPlatformContext.current)
-                .data(url)
-                .placeholderMemoryCacheKey(previewUrl)
-                .crossfade(1_000)
+    val translationBlur by animateDpAsState(if (translating) 8.dp else 0.dp, label = "Image translation blur")
+    val loadingDescription = imageTranslationText("Translating image")
+    val currentOnLoadError by androidx.compose.runtime.rememberUpdatedState(onLoadError)
+    var previousCacheKey by remember { mutableStateOf<MemoryCache.Key?>(null) }
+    val currentMediaKey by androidx.compose.runtime.rememberUpdatedState(media?.cacheKey)
+    val baseRequest = rememberMediaImageRequest(media, crossfade = false)
+    val request =
+        remember(baseRequest) {
+            val requestedKey = media?.cacheKey
+            baseRequest
+                .newBuilder()
                 .size(Size.ORIGINAL)
-                .let { builder ->
-                    if (customHeaders.isNullOrEmpty()) {
-                        builder
-                    } else {
-                        builder.httpHeaders(
-                            NetworkHeaders
-                                .Builder()
-                                .apply {
-                                    customHeaders.forEach { (key, value) ->
-                                        set(key, value)
-                                    }
-                                }.build(),
-                        )
+                .apply { previousCacheKey?.let { placeholderMemoryCacheKey(it) } }
+                .listener(onSuccess = { _, result -> previousCacheKey = result.memoryCacheKey }, onError = { _, _ ->
+                    if (requestedKey ==
+                        currentMediaKey
+                    ) {
+                        currentOnLoadError()
                     }
-                }.build(),
-        )
+                })
+                .build()
+        }
+    val painter = rememberAsyncImagePainter(request)
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(isFocused) {
         if (isFocused) {
@@ -582,6 +583,7 @@ internal fun ImageItem(
             modifier =
                 Modifier
                     .matchParentSize()
+                    .blur(translationBlur)
                     .focusRequester(focusRequester)
                     .zoomable(
                         state = zoomableState,
@@ -594,8 +596,14 @@ internal fun ImageItem(
             contentScale = ContentScale.Fit,
             alignment = Alignment.Center,
         )
-        if (state is AsyncImagePainter.State.Loading) {
-            ProgressRing()
+        AnimatedVisibility(
+            visible = translating || state is AsyncImagePainter.State.Loading,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            ProgressRing(
+                modifier = if (translating) Modifier.semantics { contentDescription = loadingDescription } else Modifier,
+            )
         }
     }
 }
@@ -634,7 +642,17 @@ private fun presenter(
             lockPager = value
         }
 
-        fun save(item: UiMedia) {
+        fun save(
+            item: UiMedia,
+            displayed: UiMedia = item,
+        ) {
+            if (item is UiMedia.Ugoira) return
+            val export =
+                dev.dimension.flare.common.prepareImageTranslationExport(
+                    displayed,
+                    dev.dimension.flare.common.FileSystemUtilsExt
+                        .flareCacheDirectory(),
+                )
             val status = state.status.takeSuccess()?.contentPostOrNull()
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"
@@ -648,11 +666,19 @@ private fun presenter(
                 val targetFile =
                     DesktopSaveDialog.chooseFile(
                         window = window,
-                        defaultName = fileName,
+                        defaultName =
+                            if (displayed.url ==
+                                item.url
+                            ) {
+                                fileName
+                            } else {
+                                fileName.substringBeforeLast('.') + "_" +
+                                    MediaFileNamePolicy.rawMediaFileName(displayed)
+                            },
                     ) ?: return
                 scope.launch {
                     desktopDownloadManager.download(
-                        url = item.url,
+                        media = export,
                         targetFile = targetFile,
                     )
                 }

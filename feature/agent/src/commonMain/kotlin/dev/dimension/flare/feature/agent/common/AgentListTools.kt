@@ -647,6 +647,7 @@ private fun List<UiTimelineV2>.toTimelineToolText(maxItems: Int): String {
 
 private fun UiTimelineV2.toTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.Gap -> ""
         is UiTimelineV2.TimelinePostItem -> toListPostToolText()
         is UiTimelineV2.Post -> toListPostToolText()
         is UiTimelineV2.User -> value.toListUserToolText(message)

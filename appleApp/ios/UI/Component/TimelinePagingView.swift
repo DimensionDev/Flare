@@ -9,9 +9,7 @@ struct UITimelinePagingView: View {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
-    let readingState: TimelineReadingState?
-    @State private var positions = TimelinePagePositions()
-    @Environment(\.timelineAccountScope) private var accountScope
+    @Environment(\.timelineAccountID) private var accountID
     let topContentInset: CGFloat
     let allowGalleryMode: Bool
     let accessoryItems: [UITimelineCollectionViewAccessoryItem]
@@ -23,7 +21,6 @@ struct UITimelinePagingView: View {
         data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         key: String,
-        readingState: TimelineReadingState? = nil,
         topContentInset: CGFloat = 0,
         allowGalleryMode: Bool = false,
         accessoryItems: [UITimelineCollectionViewAccessoryItem] = [],
@@ -34,7 +31,6 @@ struct UITimelinePagingView: View {
         self.data = data
         self.detailStatusKey = detailStatusKey
         self.key = key
-        self.readingState = readingState
         self.topContentInset = topContentInset
         self.allowGalleryMode = allowGalleryMode
         self.accessoryItems = accessoryItems
@@ -50,6 +46,7 @@ struct UITimelinePagingView: View {
                 suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
                 onIsAtTopChanged: onIsAtTopChanged
             )
+                .id("\(accountID):\(key)")
                 .ignoresSafeArea(edges: .vertical)
         } else {
             GeometryReader { proxy in
@@ -60,9 +57,9 @@ struct UITimelinePagingView: View {
                     columnCount: columnPolicy.columnCount(for: proxy.size.width),
                     accessoryItems: accessoryItems,
                     suppressInitialRefreshIndicator: suppressInitialRefreshIndicator,
-                    readingState: readingState ?? positions.state(for: key, scope: accountScope),
                     onIsAtTopChanged: onIsAtTopChanged
                 )
+                .id("\(accountID):\(key)")
                 .ignoresSafeArea(edges: .vertical)
             }
             .modifier(TimelineListBackground(columnPolicy: columnPolicy))

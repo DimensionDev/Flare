@@ -154,7 +154,7 @@ public fun <T : Any> LazyStaggeredGridScope.items(
                 errorContent(it)
             }
         }.onEmpty {
-            item(content = emptyContent)
+            item(span = StaggeredGridItemSpan.FullLine, content = emptyContent)
         }
 }
 
@@ -203,6 +203,6 @@ public fun <T : Any> LazyStaggeredGridScope.itemsIndexed(
                 errorContent(it)
             }
         }.onEmpty {
-            item(content = emptyContent)
+            item(span = StaggeredGridItemSpan.FullLine, content = emptyContent)
         }
 }

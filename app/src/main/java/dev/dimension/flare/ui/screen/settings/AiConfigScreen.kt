@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -41,13 +42,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Language
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -74,7 +82,9 @@ import java.util.Locale
 @Composable
 internal fun AiConfigScreen(onBack: () -> Unit) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val state by producePresenter { presenter() }
+    val baseState by producePresenter("ai_config_basic") { presenter() }
+    val agentState by producePresenter("ai_config_agent") { presenter(agentConfig = true) }
+    val states = listOf(baseState, agentState)
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -99,475 +109,461 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     .padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
-            val serverTitle = stringResource(id = R.string.settings_ai_config_server)
-            val serverHint = stringResource(id = R.string.settings_ai_config_server_hint)
-            val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
-            val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
-            val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
-            val extraBodyTitle = stringResource(id = R.string.settings_ai_config_extra_body)
-            val extraBodyHint = """{"thinking": {"type": "enabled"}}"""
-            val modelTitle = stringResource(id = R.string.settings_ai_config_model)
-            val modelPlaceholder = stringResource(id = R.string.settings_ai_config_model_select)
-            val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
-            val shouldShowManualModelInput =
-                when (val openAIModels = state.openAIModels) {
-                    is UiState.Error -> true
-                    is UiState.Success -> openAIModels.data.isEmpty()
-                    is UiState.Loading -> false
-                }
-            val shouldShowAiAgentSwitch =
-                state.aiType == AiTypeOption.OpenAI && state.openAIModel.isNotBlank()
-            SegmentedListItem(
-                checked = state.showTypeDropdown,
-                onCheckedChange = {
-                    state.setShowTypeDropdown(it)
-                },
-                shapes =
-                    if (state.aiType == AiTypeOption.OpenAI) {
-                        ListItemDefaults.first()
-                    } else {
-                        ListItemDefaults.single()
-                    },
-                content = {
-                    Text(
-                        text = stringResource(id = R.string.settings_ai_config_type),
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = stringResource(id = R.string.settings_ai_config_type_description),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                },
-                trailingContent = {
-                    androidx.compose.foundation.layout.Box {
-                        TextButton(
-                            onClick = {
-                                state.setShowTypeDropdown(true)
-                            },
-                        ) {
-                            Text(
-                                text =
-                                    stringResource(
-                                        id =
-                                            when (state.aiType) {
-                                                AiTypeOption.OnDevice -> R.string.settings_ai_config_type_on_device
-                                                AiTypeOption.OpenAI -> R.string.settings_ai_config_type_openai
-                                            },
-                                    ),
-                            )
-                        }
-                        FlareDropdownMenu(
-                            expanded = state.showTypeDropdown,
-                            onDismissRequest = {
-                                state.setShowTypeDropdown(false)
-                            },
-                        ) {
-                            state.supportedTypes
-                                .forEach { type ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text =
-                                                    stringResource(
-                                                        id =
-                                                            when (type) {
-                                                                AiTypeOption.OnDevice -> R.string.settings_ai_config_type_on_device
-                                                                AiTypeOption.OpenAI -> R.string.settings_ai_config_type_openai
-                                                            },
-                                                    ),
-                                            )
-                                        },
-                                        onClick = {
-                                            state.setShowTypeDropdown(false)
-                                            state.selectType(type)
-                                        },
-                                    )
-                                }
-                        }
+            states.forEach { state ->
+                val serverTitle = stringResource(id = R.string.settings_ai_config_server)
+                val serverHint = stringResource(id = R.string.settings_ai_config_server_hint)
+                val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
+                val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
+                val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
+                val contextWindowTitle = stringResource(id = R.string.settings_ai_config_context_window)
+                val contextWindowHint = stringResource(id = R.string.settings_ai_config_context_window_hint)
+                val extraBodyTitle = stringResource(id = R.string.settings_ai_config_extra_body)
+                val extraBodyHint = """{"thinking": {"type": "enabled"}}"""
+                val modelTitle = stringResource(id = R.string.settings_ai_config_model)
+                val modelPlaceholder = stringResource(id = R.string.settings_ai_config_model_select)
+                val tldrPromptTitle = stringResource(id = R.string.settings_ai_config_tldr_prompt)
+                val shouldShowManualModelInput =
+                    when (val openAIModels = state.openAIModels) {
+                        is UiState.Error -> true
+                        is UiState.Success -> openAIModels.data.isEmpty()
+                        is UiState.Loading -> false
                     }
-                },
-            )
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == AiConfigEditField.ServerUrl,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TextEditDialogState(
-                                    field = AiConfigEditField.ServerUrl,
-                                    title = serverTitle,
-                                    placeholder = serverHint,
-                                    value = state.openAIServerUrl,
-                                    suggestions = state.serverSuggestions,
-                                    hint = serverRequirementHint,
-                                    onConfirm = { newValue ->
-                                        state.setOpenAIServerUrl(newValue)
-                                    },
-                                ),
-                            )
-                        } else if (state.textEditDialog?.field == AiConfigEditField.ServerUrl) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = serverTitle)
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.openAIServerUrl.ifBlank {
-                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
+                Text(
+                    stringResource(
+                        if (state.isAgentConfig) R.string.settings_ai_config_agent_title else R.string.settings_ai_config_basic_title,
+                    ),
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    style = MaterialTheme.typography.titleMedium,
                 )
-            }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == AiConfigEditField.ApiKey,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TextEditDialogState(
-                                    field = AiConfigEditField.ApiKey,
-                                    title = apiKeyTitle,
-                                    placeholder = apiKeyHint,
-                                    value = state.openAIApiKey,
-                                    onConfirm = { newValue ->
-                                        state.setOpenAIApiKey(newValue)
-                                    },
-                                ),
+                if (state.isAgentConfig) {
+                    SegmentedListItem(
+                        onClick = {
+                            state.setAIAgent(!state.aiAgent)
+                        },
+                        shapes = ListItemDefaults.first(),
+                        content = {
+                            Text(
+                                text = stringResource(id = R.string.settings_ai_config_enable_agent),
                             )
-                        } else if (state.textEditDialog?.field == AiConfigEditField.ApiKey) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = apiKeyTitle)
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.openAIApiKey.ifBlank {
-                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(id = R.string.settings_ai_config_agent_description),
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = state.aiAgent,
+                                onCheckedChange = {
+                                    state.setAIAgent(it)
                                 },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                )
-            }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                SegmentedListItem(
-                    checked = state.showReasoningEffortDropdown,
-                    onCheckedChange = { checked ->
-                        state.setShowReasoningEffortDropdown(checked)
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_ai_config_reasoning_effort))
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_reasoning_effort_description),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                    trailingContent = {
-                        Box {
-                            TextButton(
-                                onClick = {
-                                    state.setShowReasoningEffortDropdown(true)
-                                },
-                            ) {
-                                Text(
-                                    text = openAIReasoningEffortLabel(state.openAIReasoningEffort),
-                                )
-                            }
-                            FlareDropdownMenu(
-                                expanded = state.showReasoningEffortDropdown,
-                                onDismissRequest = {
-                                    state.setShowReasoningEffortDropdown(false)
-                                },
-                            ) {
-                                state.supportedOpenAIReasoningEfforts.forEach { effort ->
-                                    DropdownMenuItem(
-                                        text = { Text(openAIReasoningEffortLabel(effort)) },
-                                        onClick = {
-                                            state.setShowReasoningEffortDropdown(false)
-                                            state.setOpenAIReasoningEffort(value = effort)
-                                        },
+                            )
+                        },
+                    )
+                    SegmentedListItem(
+                        onClick = { state.setUseSharedConfig(!state.useSharedConfig) },
+                        shapes = ListItemDefaults.last(),
+                        content = { Text(stringResource(R.string.settings_ai_config_use_shared)) },
+                        supportingContent = { Text(stringResource(R.string.settings_ai_config_use_shared_description)) },
+                        trailingContent = {
+                            Switch(checked = state.useSharedConfig, onCheckedChange = state::setUseSharedConfig)
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                if (!state.isAgentConfig || !state.useSharedConfig) {
+                    SegmentedListItem(
+                        checked = state.showTypeDropdown,
+                        onCheckedChange = {
+                            state.setShowTypeDropdown(it)
+                        },
+                        shapes =
+                            if (state.aiType == AiTypeOption.OpenAI) {
+                                ListItemDefaults.first()
+                            } else {
+                                ListItemDefaults.single()
+                            },
+                        content = {
+                            Text(
+                                text = stringResource(id = R.string.settings_ai_config_type),
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(id = R.string.settings_ai_config_type_description),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        },
+                        trailingContent = {
+                            androidx.compose.foundation.layout.Box {
+                                TextButton(
+                                    onClick = {
+                                        state.setShowTypeDropdown(true)
+                                    },
+                                ) {
+                                    Text(
+                                        text =
+                                            stringResource(
+                                                id =
+                                                    when (state.aiType) {
+                                                        AiTypeOption.OnDevice -> R.string.settings_ai_config_type_on_device
+                                                        AiTypeOption.OpenAI -> R.string.settings_ai_config_type_openai
+                                                    },
+                                            ),
                                     )
                                 }
-                            }
-                        }
-                    },
-                )
-            }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == AiConfigEditField.ExtraBody,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TextEditDialogState(
-                                    field = AiConfigEditField.ExtraBody,
-                                    title = extraBodyTitle,
-                                    placeholder = extraBodyHint,
-                                    value = state.openAIExtraBody,
-                                    onConfirm = { newValue ->
-                                        state.setOpenAIExtraBody(newValue)
+                                FlareDropdownMenu(
+                                    expanded = state.showTypeDropdown,
+                                    onDismissRequest = {
+                                        state.setShowTypeDropdown(false)
                                     },
-                                ),
-                            )
-                        } else if (state.textEditDialog?.field == AiConfigEditField.ExtraBody) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.item(),
-                    content = {
-                        Text(text = extraBodyTitle)
-                    },
-                    supportingContent =
-                        if (state.openAIExtraBody.isBlank()) {
-                            null
-                        } else {
-                            {
+                                ) {
+                                    state.supportedTypes
+                                        .forEach { type ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text =
+                                                            stringResource(
+                                                                id =
+                                                                    when (type) {
+                                                                        AiTypeOption.OnDevice -> R.string.settings_ai_config_type_on_device
+                                                                        AiTypeOption.OpenAI -> R.string.settings_ai_config_type_openai
+                                                                    },
+                                                            ),
+                                                    )
+                                                },
+                                                onClick = {
+                                                    state.setShowTypeDropdown(false)
+                                                    state.selectType(type)
+                                                },
+                                            )
+                                        }
+                                }
+                            }
+                        },
+                    )
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                        AiConfigTextSetting(
+                            title = serverTitle,
+                            value = state.openAIServerUrl,
+                            shapes = ListItemDefaults.item(),
+                            placeholder = serverHint,
+                            suggestions = state.serverSuggestions,
+                            hint = serverRequirementHint,
+                            onConfirm = state::setOpenAIServerUrl,
+                        )
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                        AiConfigTextSetting(
+                            title = apiKeyTitle,
+                            value = state.openAIApiKey,
+                            shapes = ListItemDefaults.item(),
+                            placeholder = apiKeyHint,
+                            onConfirm = state::setOpenAIApiKey,
+                        )
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                        SegmentedListItem(
+                            checked = state.showReasoningEffortDropdown,
+                            onCheckedChange = { checked ->
+                                state.setShowReasoningEffortDropdown(checked)
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_ai_config_reasoning_effort))
+                            },
+                            supportingContent = {
                                 Text(
-                                    text = state.openAIExtraBody,
+                                    text = stringResource(id = R.string.settings_ai_config_reasoning_effort_description),
                                     style = MaterialTheme.typography.bodySmall,
                                 )
-                            }
-                        },
-                )
-            }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && !shouldShowManualModelInput) {
-                SegmentedListItem(
-                    checked = state.showModelDropdown,
-                    onCheckedChange = { checked ->
-                        state.setShowModelDropdown(checked)
-                    },
-                    shapes = ListItemDefaults.last(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_ai_config_model))
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_model_description),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                    trailingContent = {
-                        Box {
-                            TextButton(
-                                onClick = {
-                                    state.setShowModelDropdown(true)
-                                },
-                            ) {
-                                Text(
-                                    text =
-                                        state.openAIModel.ifBlank {
-                                            stringResource(id = R.string.settings_ai_config_model_select)
+                            },
+                            trailingContent = {
+                                Box {
+                                    TextButton(
+                                        onClick = {
+                                            state.setShowReasoningEffortDropdown(true)
                                         },
-                                )
-                            }
-                            FlareDropdownMenu(
-                                expanded = state.showModelDropdown,
-                                onDismissRequest = {
-                                    state.setShowModelDropdown(false)
-                                },
-                            ) {
-                                state.openAIModels
-                                    .onLoading {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(id = R.string.settings_ai_config_model_loading)) },
-                                            onClick = {},
-                                            enabled = false,
+                                    ) {
+                                        Text(
+                                            text = openAIReasoningEffortLabel(state.openAIReasoningEffort),
                                         )
-                                    }.onError {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(id = R.string.settings_ai_config_model_error)) },
-                                            onClick = {},
-                                            enabled = false,
-                                        )
-                                    }.onSuccess { models ->
-                                        if (models.isEmpty()) {
+                                    }
+                                    FlareDropdownMenu(
+                                        expanded = state.showReasoningEffortDropdown,
+                                        onDismissRequest = {
+                                            state.setShowReasoningEffortDropdown(false)
+                                        },
+                                    ) {
+                                        state.supportedOpenAIReasoningEfforts.forEach { effort ->
                                             DropdownMenuItem(
-                                                text = { Text(stringResource(id = R.string.settings_ai_config_model_no_models)) },
-                                                onClick = {},
-                                                enabled = false,
+                                                text = { Text(openAIReasoningEffortLabel(effort)) },
+                                                onClick = {
+                                                    state.setShowReasoningEffortDropdown(false)
+                                                    state.setOpenAIReasoningEffort(value = effort)
+                                                },
                                             )
-                                        } else {
-                                            models.forEach { model ->
-                                                DropdownMenuItem(
-                                                    text = { Text(model) },
-                                                    onClick = {
-                                                        state.setShowModelDropdown(false)
-                                                        state.setOpenAIModel(model)
-                                                    },
-                                                )
-                                            }
                                         }
                                     }
-                            }
-                        }
-                    },
-                )
-            }
-            AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && shouldShowManualModelInput) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == AiConfigEditField.Model,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TextEditDialogState(
-                                    field = AiConfigEditField.Model,
-                                    title = modelTitle,
-                                    placeholder = modelPlaceholder,
-                                    value = state.openAIModel,
-                                    onConfirm = { newValue ->
-                                        state.setOpenAIModel(newValue)
-                                    },
-                                ),
-                            )
-                        } else if (state.textEditDialog?.field == AiConfigEditField.Model) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.last(),
-                    content = {
-                        Text(text = stringResource(id = R.string.settings_ai_config_model_manual_input))
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.openAIModel.ifBlank {
-                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    },
-                )
-            }
-            if (shouldShowAiAgentSwitch) {
-                Spacer(modifier = Modifier.height(12.dp))
-                SegmentedListItem(
-                    onClick = {
-                        state.setAIAgent(!state.aiAgent)
-                    },
-                    shapes = ListItemDefaults.single(),
-                    content = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_enable_agent),
-                        )
-                    },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(id = R.string.settings_ai_config_agent_description),
-                        )
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = state.aiAgent,
-                            onCheckedChange = {
-                                state.setAIAgent(it)
+                                }
                             },
                         )
-                    },
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            SegmentedListItem(
-                onClick = {
-                    state.setAITldr(!state.aiTldr)
-                },
-                shapes =
-                    if (state.aiTldr) {
-                        ListItemDefaults.first()
-                    } else {
-                        ListItemDefaults.single()
-                    },
-                content = {
-                    Text(
-                        text = stringResource(id = R.string.settings_ai_config_enable_tldr),
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        text = stringResource(id = R.string.settings_ai_config_tldr_description),
-                    )
-                },
-                trailingContent = {
-                    Switch(
-                        checked = state.aiTldr,
-                        onCheckedChange = {
-                            state.setAITldr(it)
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                        SegmentedListItem(
+                            checked = state.textEditDialog?.field == AiConfigEditField.ContextWindow,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    state.setTextEditDialog(
+                                        TextEditDialogState(
+                                            field = AiConfigEditField.ContextWindow,
+                                            title = contextWindowTitle,
+                                            placeholder = contextWindowHint,
+                                            value = state.openAIContextWindow,
+                                            hint = contextWindowHint,
+                                            isValid = state::isValidOpenAIContextWindow,
+                                            onConfirm = { newValue ->
+                                                state.setOpenAIContextWindow(newValue)
+                                            },
+                                        ),
+                                    )
+                                } else if (state.textEditDialog?.field == AiConfigEditField.ContextWindow) {
+                                    state.setTextEditDialog(null)
+                                }
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = contextWindowTitle)
+                            },
+                            supportingContent =
+                                if (state.openAIContextWindow.isBlank()) {
+                                    null
+                                } else {
+                                    {
+                                        Text(
+                                            text = state.openAIContextWindow,
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                },
+                        )
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI) {
+                        SegmentedListItem(
+                            checked = state.textEditDialog?.field == AiConfigEditField.ExtraBody,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    state.setTextEditDialog(
+                                        TextEditDialogState(
+                                            field = AiConfigEditField.ExtraBody,
+                                            title = extraBodyTitle,
+                                            placeholder = extraBodyHint,
+                                            value = state.openAIExtraBody,
+                                            onConfirm = { newValue ->
+                                                state.setOpenAIExtraBody(newValue)
+                                            },
+                                        ),
+                                    )
+                                } else if (state.textEditDialog?.field == AiConfigEditField.ExtraBody) {
+                                    state.setTextEditDialog(null)
+                                }
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = extraBodyTitle)
+                            },
+                            supportingContent =
+                                if (state.openAIExtraBody.isBlank()) {
+                                    null
+                                } else {
+                                    {
+                                        Text(
+                                            text = state.openAIExtraBody,
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                },
+                        )
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && !shouldShowManualModelInput) {
+                        SegmentedListItem(
+                            checked = state.showModelDropdown,
+                            onCheckedChange = { checked ->
+                                state.setShowModelDropdown(checked)
+                            },
+                            shapes = ListItemDefaults.last(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_ai_config_model))
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = stringResource(id = R.string.settings_ai_config_model_description),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            },
+                            trailingContent = {
+                                Box {
+                                    TextButton(
+                                        onClick = {
+                                            state.setShowModelDropdown(true)
+                                        },
+                                    ) {
+                                        Text(
+                                            text =
+                                                state.openAIModel.ifBlank {
+                                                    stringResource(id = R.string.settings_ai_config_model_select)
+                                                },
+                                        )
+                                    }
+                                    FlareDropdownMenu(
+                                        expanded = state.showModelDropdown,
+                                        onDismissRequest = {
+                                            state.setShowModelDropdown(false)
+                                        },
+                                    ) {
+                                        state.openAIModels
+                                            .onLoading {
+                                                DropdownMenuItem(
+                                                    text = { Text(stringResource(id = R.string.settings_ai_config_model_loading)) },
+                                                    onClick = {},
+                                                    enabled = false,
+                                                )
+                                            }.onError {
+                                                DropdownMenuItem(
+                                                    text = { Text(stringResource(id = R.string.settings_ai_config_model_error)) },
+                                                    onClick = {},
+                                                    enabled = false,
+                                                )
+                                            }.onSuccess { models ->
+                                                if (models.isEmpty()) {
+                                                    DropdownMenuItem(
+                                                        text = { Text(stringResource(id = R.string.settings_ai_config_model_no_models)) },
+                                                        onClick = {},
+                                                        enabled = false,
+                                                    )
+                                                } else {
+                                                    models.forEach { model ->
+                                                        DropdownMenuItem(
+                                                            text = { Text(model) },
+                                                            onClick = {
+                                                                state.setShowModelDropdown(false)
+                                                                state.setOpenAIModel(model)
+                                                            },
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                    }
+                                }
+                            },
+                        )
+                    }
+                    AnimatedVisibility(visible = state.aiType == AiTypeOption.OpenAI && shouldShowManualModelInput) {
+                        AiConfigTextSetting(
+                            title = modelTitle,
+                            value = state.openAIModel,
+                            shapes = ListItemDefaults.last(),
+                            placeholder = modelPlaceholder,
+                            onConfirm = state::setOpenAIModel,
+                        )
+                    }
+                }
+                if (!state.isAgentConfig) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    SegmentedListItem(
+                        onClick = {
+                            state.setAITldr(!state.aiTldr)
+                        },
+                        shapes =
+                            if (state.aiTldr) {
+                                ListItemDefaults.first()
+                            } else {
+                                ListItemDefaults.single()
+                            },
+                        content = {
+                            Text(
+                                text = stringResource(id = R.string.settings_ai_config_enable_tldr),
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                text = stringResource(id = R.string.settings_ai_config_tldr_description),
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = state.aiTldr,
+                                onCheckedChange = {
+                                    state.setAITldr(it)
+                                },
+                            )
                         },
                     )
-                },
-            )
-            AnimatedVisibility(visible = state.aiTldr) {
-                SegmentedListItem(
-                    checked = state.textEditDialog?.field == AiConfigEditField.TldrPrompt,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            state.setTextEditDialog(
-                                TextEditDialogState(
-                                    field = AiConfigEditField.TldrPrompt,
-                                    title = tldrPromptTitle,
-                                    placeholder = "",
-                                    value = state.tldrPrompt,
-                                    onConfirm = { newValue ->
-                                        state.setTldrPrompt(newValue)
-                                    },
-                                ),
-                            )
-                        } else if (state.textEditDialog?.field == AiConfigEditField.TldrPrompt) {
-                            state.setTextEditDialog(null)
-                        }
-                    },
-                    shapes = ListItemDefaults.last(),
-                    content = {
-                        Text(text = tldrPromptTitle)
-                    },
-                    supportingContent = {
-                        Text(
-                            text =
-                                state.tldrPrompt.ifBlank {
-                                    stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
-                                },
-                            style = MaterialTheme.typography.bodySmall,
+                    AnimatedVisibility(visible = state.aiTldr) {
+                        SegmentedListItem(
+                            checked = state.textEditDialog?.field == AiConfigEditField.TldrPrompt,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    state.setTextEditDialog(
+                                        TextEditDialogState(
+                                            field = AiConfigEditField.TldrPrompt,
+                                            title = tldrPromptTitle,
+                                            placeholder = "",
+                                            value = state.tldrPrompt,
+                                            onConfirm = { newValue ->
+                                                state.setTldrPrompt(newValue)
+                                            },
+                                        ),
+                                    )
+                                } else if (state.textEditDialog?.field == AiConfigEditField.TldrPrompt) {
+                                    state.setTextEditDialog(null)
+                                }
+                            },
+                            shapes = ListItemDefaults.last(),
+                            content = {
+                                Text(text = tldrPromptTitle)
+                            },
+                            supportingContent = {
+                                Text(
+                                    text =
+                                        state.tldrPrompt.ifBlank {
+                                            stringResource(id = R.string.settings_ai_config_value_empty_placeholder)
+                                        },
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            },
                         )
-                    },
-                )
+                    }
+                }
             }
         }
     }
-    state.textEditDialog?.let { dialog ->
-        TextEditDialog(
-            title = dialog.title,
-            placeholder = dialog.placeholder,
-            value = dialog.value,
-            suggestions = dialog.suggestions,
-            hint = dialog.hint,
-            onDismiss = {
-                state.setTextEditDialog(null)
-            },
-            onConfirm = { newValue ->
-                dialog.onConfirm(newValue)
-                state.setTextEditDialog(null)
-            },
-        )
+    states.forEach { state ->
+        state.textEditDialog?.let { dialog ->
+            TextEditDialog(
+                isValid = dialog.isValid,
+                title = dialog.title,
+                placeholder = dialog.placeholder,
+                value = dialog.value,
+                suggestions = dialog.suggestions,
+                hint = dialog.hint,
+                onDismiss = {
+                    state.setTextEditDialog(null)
+                },
+                onConfirm = { newValue ->
+                    dialog.onConfirm(newValue)
+                    state.setTextEditDialog(null)
+                },
+            )
+        }
     }
 }
 
 @Composable
-private fun presenter() =
+private fun presenter(agentConfig: Boolean = false) =
     run {
-        val businessState = remember { AiConfigPresenter() }.invoke()
+        val businessState = remember(agentConfig) { AiConfigPresenter(agentConfig) }.invoke()
         var showTypeDropdown by remember { mutableStateOf(false) }
         var showModelDropdown by remember { mutableStateOf(false) }
         var showReasoningEffortDropdown by remember { mutableStateOf(false) }
@@ -601,13 +597,18 @@ private fun presenter() =
 private fun openAIReasoningEffortLabel(option: AiReasoningEffortOption): String =
     when (option) {
         AiReasoningEffortOption.Default -> stringResource(id = R.string.settings_ai_config_reasoning_effort_default)
+        AiReasoningEffortOption.None -> stringResource(id = R.string.settings_ai_config_reasoning_effort_none)
+        AiReasoningEffortOption.Minimal -> stringResource(id = R.string.settings_ai_config_reasoning_effort_minimal)
         AiReasoningEffortOption.Low -> stringResource(id = R.string.settings_ai_config_reasoning_effort_low)
         AiReasoningEffortOption.Medium -> stringResource(id = R.string.settings_ai_config_reasoning_effort_medium)
         AiReasoningEffortOption.High -> stringResource(id = R.string.settings_ai_config_reasoning_effort_high)
+        AiReasoningEffortOption.XHigh -> stringResource(id = R.string.settings_ai_config_reasoning_effort_xhigh)
+        AiReasoningEffortOption.Max -> stringResource(id = R.string.settings_ai_config_reasoning_effort_max)
     }
 
 private data class TextEditDialogState(
     val field: AiConfigEditField,
+    val isValid: (String) -> Boolean = { true },
     val title: String,
     val placeholder: String,
     val value: String,
@@ -617,16 +618,14 @@ private data class TextEditDialogState(
 )
 
 private enum class AiConfigEditField {
-    ServerUrl,
-    ApiKey,
+    ContextWindow,
     ExtraBody,
-    Model,
     TldrPrompt,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TextEditDialog(
+internal fun TextEditDialog(
     title: String,
     placeholder: String,
     value: String,
@@ -634,6 +633,9 @@ private fun TextEditDialog(
     hint: String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
+    secret: Boolean = false,
+    singleLine: Boolean = false,
+    isValid: (String) -> Boolean = { true },
 ) {
     var text by remember(value) { mutableStateOf(value) }
     var showSuggestions by remember(value) { mutableStateOf(false) }
@@ -657,6 +659,9 @@ private fun TextEditDialog(
                             text = it
                         },
                         modifier = Modifier.fillMaxWidth(),
+                        singleLine = singleLine,
+                        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
+                        keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions.Default,
                         placeholder = {
                             if (placeholder.isNotBlank()) {
                                 Text(text = placeholder)
@@ -678,6 +683,7 @@ private fun TextEditDialog(
                                 Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+                            singleLine = singleLine,
                             placeholder = {
                                 if (placeholder.isNotBlank()) {
                                     Text(text = placeholder)
@@ -717,7 +723,7 @@ private fun TextEditDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(text) }) {
+            TextButton(enabled = isValid(text), onClick = { onConfirm(text) }) {
                 Text(text = stringResource(id = android.R.string.ok))
             }
         },
@@ -1151,6 +1157,7 @@ internal fun TranslationConfigScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            ImageTranslationSettingsSection()
         }
     }
     if (state.showExcludedLanguagesDialog) {
@@ -1329,6 +1336,15 @@ private fun ExcludedLanguagesDialog(
                     state = rememberLazyListState(),
                     verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                 ) {
+                    if (filteredOptions.isEmpty()) {
+                        item {
+                            ListEmptyView(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                                text = stringResource(R.string.empty_languages),
+                                icon = FontAwesomeIcons.Solid.Language,
+                            )
+                        }
+                    }
                     items(
                         items = filteredOptions,
                         key = { it.tag },

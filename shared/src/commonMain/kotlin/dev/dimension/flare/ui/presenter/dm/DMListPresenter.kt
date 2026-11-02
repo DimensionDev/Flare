@@ -9,7 +9,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -27,12 +27,15 @@ public class DMListPresenter(
     override fun body(): DMListState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val directMessageState =
+            remember(serviceState) {
+                serviceState.map { requireNotNull(it.capabilities.directMessage) }
+            }
         val items =
-            serviceState
-                .map { service ->
-                    require(service is DirectMessageDataSource)
-                    remember(service) {
-                        service.directMessageList(scope = scope)
+            directMessageState
+                .map { directMessage ->
+                    remember(directMessage) {
+                        directMessage.directMessageList(scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : DMListState {

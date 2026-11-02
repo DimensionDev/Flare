@@ -29,6 +29,7 @@ public fun UserCompat(
     avatarModifier: Modifier = Modifier,
     nameModifier: Modifier = Modifier,
     handleModifier: Modifier = Modifier,
+    subtitle: String = user.handle.display,
     leading: @Composable (RowScope.() -> Unit)? = {
         Box(avatarModifier, propagateMinConstraints = true) {
             AvatarComponent(
@@ -37,7 +38,7 @@ public fun UserCompat(
                 contentDescription =
                     stringResource(
                         Res.string.profile_open_user,
-                        user.handle.canonical,
+                        user.handle.display,
                     ),
                 modifier =
                     Modifier.clickable {
@@ -71,7 +72,7 @@ public fun UserCompat(
                     modifier = Modifier.alignByBaseline().then(nameModifier),
                 )
                 PlatformText(
-                    text = handle.canonical,
+                    text = subtitle,
                     style = PlatformTheme.typography.caption,
                     color = PlatformTheme.colorScheme.caption,
                     maxLines = 1,

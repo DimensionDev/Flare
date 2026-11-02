@@ -19,10 +19,34 @@ import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
 import platform.UIKit.UIRectFill
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalForeignApi::class)
 class IosImageCompressorTest {
+    @Test
+    fun exifOrientationIsAppliedToCompressedPixels() =
+        runTest {
+            val original = generateTestImage(40.0, 20.0).jpegData(1.0)!!.withTestExifOrientation(6)
+            assertEquals(6, imageMetadata(original)?.orientation)
+            val result = IosImageCompressor().compress(original, 100_000, 40 to 40)
+            assertEquals(ImageMetadata(20, 40), imageMetadata(result))
+        }
+
+    @Test
+    fun veryWideImageFitsBothDimensions() =
+        runTest {
+            val result = IosImageCompressor().compress(wideTestPng, 100_000, 1000 to 1000)
+            assertEquals(ImageMetadata(1000, 1), imageMetadata(result))
+        }
+
+    @Test
+    fun impossibleSizeFailsInsteadOfReturningOversizedData() =
+        runTest {
+            assertFailsWith<IllegalStateException> { IosImageCompressor().compress(transparentTestPng, 1, 20 to 20) }
+        }
+
     @Test
     fun testCompressToSpecificSizeAndDimension() =
         runTest {

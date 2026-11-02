@@ -3,16 +3,14 @@ import KotlinSharedUI
 
 public struct AvatarView: View {
     @Environment(\.timelineAppearance.avatarShape) private var avatarShape
-    private let data: String?
-    private let customHeader: [String: String]?
+    private let data: UiMedia?
 
-    public init(data: String?, customHeader: [String: String]? = nil) {
+    public init(data: UiMedia?) {
         self.data = data
-        self.customHeader = customHeader
     }
 
     public var body: some View {
-        NetworkImage(data: data, customHeader: customHeader)
+        NetworkImage(data: data)
             .clipShape(avatarShape == .circle ? AnyShape(.circle) : AnyShape(.rect(cornerRadius: 8)))
     }
 }

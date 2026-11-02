@@ -247,10 +247,7 @@ private struct ArticleCoverView: View {
             onOpenMedia(cover)
         } label: {
             ArticleRemoteImage(
-                url: cover.url,
-                preview: cover.previewUrl,
-                customHeaders: cover.customHeaders
-            )
+                media: cover)
             .frame(height: 260)
             .frame(maxWidth: .infinity)
             .clipped()
@@ -325,8 +322,8 @@ private struct ArticleRssAuthorView: View {
                         if let host {
                             FavTabIcon(host: host)
                                 .frame(width: 16, height: 16)
-                        } else if let iconUrl = author.iconUrl {
-                            NetworkImage(data: iconUrl)
+                        } else if let media = author.media {
+                            NetworkImage(data: media)
                                 .frame(width: 16, height: 16)
                                 .clipShape(.rect(cornerRadius: 4))
                         }
@@ -396,10 +393,7 @@ private struct ArticleImageBlockView: View {
         } label: {
             ArticleMediaFrame(aspectRatio: articleAspectRatio(media.aspectRatio)) {
                 ArticleRemoteImage(
-                    url: media.url,
-                    preview: media.previewUrl,
-                    customHeaders: media.customHeaders
-                )
+                    media: media)
             }
         }
         .buttonStyle(.plain)
@@ -527,8 +521,8 @@ private struct ArticleEmbedBlockView: View {
 
     private var content: some View {
         HStack(spacing: 12) {
-            if let imageUrl = block.imageUrl {
-                NetworkImage(data: imageUrl)
+            if let media = block.media {
+                NetworkImage(data: media)
                     .frame(width: 64, height: 64)
                     .clipShape(.rect(cornerRadius: 8))
             } else {
@@ -610,16 +604,9 @@ private struct ArticleContentGateBlockView: View {
 }
 
 private struct ArticleRemoteImage: View {
-    let url: String
-    let preview: String?
-    let customHeaders: [String: String]?
-
+    let media: any UiMedia
     var body: some View {
-        if let preview {
-            NetworkImage(data: url, placeholder: preview, customHeader: customHeaders)
-        } else {
-            NetworkImage(data: url, customHeader: customHeaders)
-        }
+        NetworkImage(data: media, placeholder: media.preview)
     }
 }
 

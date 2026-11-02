@@ -28,7 +28,7 @@
 			? notifications.supportedNotificationFilters.data
 			: []
 	);
-	const hasMultipleAccounts = $derived(accounts.length > 1);
+	const hasMultipleAccounts = $derived(notifications.canSwitchAccount);
 	const hasMultipleFilters = $derived(filters.length > 1);
 	const refreshing = $derived(
 		notifications.timeline.type === 'Success' && notifications.timeline.isRefreshing
@@ -40,8 +40,8 @@
 
 	function isSelectedAccount(account: NotificationAccountItem): boolean {
 		return (
-			notifications.selectedAccount?.key.id === account.profile.key.id &&
-			notifications.selectedAccount?.key.host === account.profile.key.host
+			notifications.selectedAccountKey?.id === account.profile.key.id &&
+			notifications.selectedAccountKey?.host === account.profile.key.host
 		);
 	}
 
@@ -122,7 +122,7 @@
 								{/if}
 								<img class="account-avatar" src={account.profile.avatar?.url} alt="" />
 							</span>
-							<span class="account-handle">{account.profile.handle.canonical}</span>
+							<span class="account-handle">{account.profile.handle.display}</span>
 							{#if account.badge > 0}
 								<span class="badge badge-sm">{account.badge}</span>
 							{/if}

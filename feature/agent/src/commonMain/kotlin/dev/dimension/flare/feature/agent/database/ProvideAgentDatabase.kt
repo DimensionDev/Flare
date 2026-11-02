@@ -11,6 +11,7 @@ private const val AGENT_DATABASE_NAME = "agent.db"
 internal fun provideAgentDatabase(driverFactory: DriverFactory): AgentDatabase =
     driverFactory
         .createBuilder<AgentDatabase>(AGENT_DATABASE_NAME)
+        .addMigrations(AGENT_CONTEXT_MIGRATION)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .setDriver(createDatabaseDriver())
         .setQueryCoroutineContext(PlatformDispatchers.IO)

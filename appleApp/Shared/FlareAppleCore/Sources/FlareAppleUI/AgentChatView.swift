@@ -2,13 +2,13 @@ import FlareAppleCore
 import KotlinSharedUI
 import SwiftUI
 import SwiftUIBackports
-import Textual
 
 public struct AgentChatView: View {
     let messages: PagingState<AgentChatHistoryMessage>
     let isRunning: Bool
     let canSend: Bool
-    let errorMessage: String?
+    let error: AgentFailure?
+    let onRetry: () -> Void
     let runningTrace: String
     let inputPlaceholder: String
     let onInputChange: (String) -> Void
@@ -19,12 +19,15 @@ public struct AgentChatView: View {
     let showsEmptyPlaceholder: Bool
 
     @State private var draft = ""
+    // PagingView registers its outer row IDs as AnyHashable.
+    @State private var scrollPosition: AnyHashable?
 
     public init(
         messages: PagingState<AgentChatHistoryMessage>,
         isRunning: Bool,
         canSend: Bool,
-        errorMessage: String?,
+        error: AgentFailure?,
+        onRetry: @escaping () -> Void,
         runningTrace: String,
         inputPlaceholder: String,
         onInputChange: @escaping (String) -> Void,
@@ -37,7 +40,8 @@ public struct AgentChatView: View {
         self.messages = messages
         self.isRunning = isRunning
         self.canSend = canSend
-        self.errorMessage = errorMessage
+        self.error = error
+        self.onRetry = onRetry
         self.runningTrace = runningTrace
         self.inputPlaceholder = inputPlaceholder
         self.onInputChange = onInputChange
@@ -57,36 +61,48 @@ public struct AgentChatView: View {
                 case .loading:
                     AgentChatMessagesSkeleton()
                 default:
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 10) {
-                            PagingView(
-                                data: messages,
-                                reversed: true,
-                                successContent: { message in
-                                    AgentChatMessageBubble(
-                                        parts: Array(message.parts),
-                                        isUser: message.isUser,
-                                        onInputRequestOptionSelected: onInputRequestOptionSelected,
-                                        onPostClick: onPostClick,
-                                        onUserClick: onUserClick
-                                    )
-                                },
-                                loadingContent: {
-                                    ProgressView()
-                                },
-                                errorContent: { error, retry in
-                                    ListErrorView(error: error, onRetry: retry)
-                                        .padding()
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                },
-                                emptyContent: {
-                                    EmptyView()
-                                }
-                            )
+                    GeometryReader { viewport in
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 10) {
+                                PagingView(
+                                    data: messages,
+                                    reversed: true,
+                                    id: { $0.id },
+                                    emptyContent: {
+                                        EmptyView()
+                                    },
+                                    errorContent: { error, retry in
+                                        AgentErrorCard(failure: AgentFailure.companion.fromThrowable(throwable: error), onRetry: retry, historyError: true)
+                                            .padding()
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                    },
+                                    loadingContent: { _, _ in
+                                        ProgressView()
+                                    },
+                                    successContent: { message, _, _ in
+                                        AgentChatMessageBubble(
+                                            parts: Array(message.parts),
+                                            isUser: message.isUser,
+                                            onInputRequestOptionSelected: onInputRequestOptionSelected,
+                                            onPostClick: onPostClick,
+                                            onUserClick: onUserClick
+                                        )
+                                    }
+                                )
+                            }
+                            .scrollTargetLayout()
+                            .padding()
+                            // Keep short histories bottom-aligned without extra scroll insets.
+                            .frame(minHeight: viewport.size.height, alignment: .bottom)
                         }
-                        .padding()
+                        .defaultScrollAnchor(.bottom)
+                        .scrollPosition(id: $scrollPosition, anchor: .bottom)
+                        .onChange(of: newestMessageId) { previous, next in
+                            if scrollPosition == nil || scrollPosition == previous {
+                                scrollPosition = next
+                            }
+                        }
                     }
-                    .defaultScrollAnchor(.bottom)
                 }
             }
         }
@@ -97,9 +113,8 @@ public struct AgentChatView: View {
                     StatusInsightCurrentTrace(trace: runningTrace)
                         .padding(.horizontal)
                 }
-                if let errorMessage {
-                    Text(verbatim: errorMessage)
-                        .foregroundStyle(.red)
+                if let error, !isRunning {
+                    AgentErrorCard(failure: error, onRetry: error.canRetry ? onRetry : nil)
                         .padding(.horizontal)
                 }
 
@@ -114,8 +129,15 @@ public struct AgentChatView: View {
         }
     }
 
+    private var newestMessageId: AnyHashable? {
+        if case .success(let success) = onEnum(of: messages) {
+            return success.peek(index: 0).map { AnyHashable($0.id) }
+        }
+        return nil
+    }
+
     private var isEmptyPlaceholderVisible: Bool {
-        guard showsEmptyPlaceholder, errorMessage == nil else {
+        guard showsEmptyPlaceholder, error == nil else {
             return false
         }
         if case .empty = onEnum(of: messages) {
@@ -169,16 +191,18 @@ private struct AgentChatMessageSkeletonBubble: View {
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(.quaternary)
-                    .frame(width: 280, height: 14)
+                    .frame(width: isUser ? 280 : nil, height: 14)
                 RoundedRectangle(cornerRadius: 4)
                     .fill(.quaternary)
-                    .frame(width: 180, height: 14)
+                    .frame(width: isUser ? 180 : nil, height: 14)
+                    .padding(.trailing, isUser ? 0 : 80)
             }
-            .padding(12)
-            .background(Color.flareSecondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 14))
+            .padding(isUser ? 12 : 0)
+            .padding(.vertical, isUser ? 0 : 4)
+            .background(isUser ? Color.flareSecondarySystemGroupedBackground : .clear, in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.flareSeparator.opacity(0.35), lineWidth: 1)
+                    .stroke(isUser ? Color.flareSeparator.opacity(0.35) : .clear, lineWidth: 1)
             )
         }
         .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
@@ -236,7 +260,13 @@ private struct AgentChatMessageBubble: View {
                 Spacer(minLength: 80)
             }
 
-            if isPreviewOnlyUserMessage {
+            if !isUser {
+                messageContent
+                    .textSelection(.enabled)
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 4)
+            } else if isPreviewOnlyUserMessage {
                 messageContent
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -244,19 +274,11 @@ private struct AgentChatMessageBubble: View {
                 messageContent
                     .textSelection(.enabled)
                     .padding(12)
-                    .foregroundStyle(isUser ? .white : .primary)
+                    .foregroundStyle(.white)
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(isUser ? Color.accentColor : Color.flareSecondarySystemGroupedBackground)
+                            .fill(Color.accentColor)
                     )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(isUser ? Color.clear : Color.flareSeparator.opacity(0.45), lineWidth: 1)
-                    )
-            }
-
-            if !isUser {
-                Spacer(minLength: 80)
             }
         }
         .frame(maxWidth: .infinity)
@@ -305,8 +327,7 @@ private struct AgentChatMessageBubble: View {
         if isUser {
             Text(verbatim: value)
         } else {
-            StructuredText(markdown: value)
-                .textual.textSelection(.enabled)
+            AgentMarkdownText(markdown: value)
         }
     }
 

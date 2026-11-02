@@ -10,6 +10,7 @@ import dev.dimension.flare.data.network.fanbox.FanboxService
 import dev.dimension.flare.data.network.fanbox.toFanboxCursor
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.bindMediaProxy
 import io.ktor.http.Url
 import kotlinx.collections.immutable.toImmutableList
 
@@ -59,6 +60,7 @@ internal class FanboxHomeTimelineLoader(
     accountKey: MicroBlogKey,
 ) : FanboxTimelineLoader(service, accountKey) {
     override val pagingKey: String = "fanbox_home_$accountKey"
+    override val canJoinTimeline: Boolean = true
 
     override suspend fun loadPage(
         pageSize: Int,
@@ -85,6 +87,7 @@ internal class FanboxSupportedTimelineLoader(
     accountKey: MicroBlogKey,
 ) : FanboxTimelineLoader(service, accountKey) {
     override val pagingKey: String = "fanbox_supported_$accountKey"
+    override val canJoinTimeline: Boolean = true
 
     override suspend fun loadPage(
         pageSize: Int,
@@ -264,7 +267,7 @@ internal class FanboxCommentsLoader(
                                 UiTimelineV2.PostPresentation(
                                     quotes = replies,
                                 ),
-                        )
+                        ).bindMediaProxy()
                     } else {
                         post
                     }

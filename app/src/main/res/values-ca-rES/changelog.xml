@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Versió %1$s:</span>
             <ul>
-                <li>S’ha millorat la reproducció de vídeo a la cronologia amb transicions més fluides, una millor selecció automàtica i la conservació del progrés en obrir o tancar el visor multimèdia.</li>
-                <li>S’ha millorat la fiabilitat de la cronologia: les respostes i el context continuen visibles durant les actualitzacions, el bàner de publicacions noves s’actualitza correctament i s’han corregit bloquejos de paginació.</li>
-                <li>S’ha millorat l’accessibilitat de les publicacions, els continguts multimèdia i la pantalla de redacció amb etiquetes, estats i controls més clars.</li>
-                <li>S’ha millorat la fiabilitat de les sessions de Bluesky, la compatibilitat amb noves respostes de la cronologia d’X i l’admissió de més formats d’enllaços d’obres i perfils de Pixiv.</li>
+                <li>S’ha afegit la traducció d’imatges. Després de configurar un servei de traducció, podeu alternar entre l’original i la traducció i desar o compartir el resultat.</li>
+                <li>Podeu triar respostes i respostes imbricades en compartir una publicació com a imatge, amb compatibilitat amb imatges llargues.</li>
+                <li>S’han afegit fils de grups, cercle d’amics i seguiments privats de Weibo, opcions de visibilitat de publicacions i reproducció de Live Photo. S’ha recuperat la ubicació segons l’adreça IP.</li>
+                <li>S’han afegit opcions de servidor intermediari globals i per compte, amb compatibilitat amb HTTPS i SOCKS5.</li>
+                <li>S’han corregit errors de càrrega d’imatges, accions de marcadors a la galeria i navegació d’enllaços de FANBOX. S’han millorat els fils mixtos, la visualització de traduccions i el recordatori del compte seleccionat.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Et donem la benvinguda de nou!</string>

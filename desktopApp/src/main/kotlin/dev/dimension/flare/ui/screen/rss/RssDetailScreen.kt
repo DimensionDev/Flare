@@ -44,6 +44,7 @@ import dev.dimension.flare.rss_detail_open_in_browser
 import dev.dimension.flare.rss_detail_tldr
 import dev.dimension.flare.rss_detail_tldr_error
 import dev.dimension.flare.rss_detail_translate
+import dev.dimension.flare.rss_detail_unavailable
 import dev.dimension.flare.status_share
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.DateTimeText
@@ -84,10 +85,11 @@ internal fun RssDetailScreen(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
+    fallbackHtml: String? = null,
     onBack: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
-    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
+    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle, fallbackHtml) }
     val inAppNotification: ComposeInAppNotification = koinInject()
     val scrollState = rememberScrollState()
     androidx.compose.foundation.layout.Box(
@@ -236,8 +238,11 @@ internal fun RssDetailScreen(
                             ProgressRing(modifier = Modifier.align(Alignment.CenterHorizontally))
                         }.onError {
                             Text(
-                                text = it.message ?: "Failed to load article",
+                                text = stringResource(Res.string.rss_detail_unavailable),
                             )
+                            SubtleButton(onClick = { uriHandler.openUri(url) }) {
+                                Text(stringResource(Res.string.rss_detail_open_in_browser))
+                            }
                         }
                     state.data
                         .onSuccess { data ->
@@ -350,11 +355,12 @@ private fun presenter(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
+    fallbackHtml: String? = null,
     settingsRepository: SettingsRepository = koinInject(),
 ) = run {
     val state =
-        remember(url, descriptionHtml) {
-            RssDetailPresenter(url, descriptionHtml, descriptionTitle)
+        remember(url, descriptionHtml, descriptionTitle, fallbackHtml) {
+            RssDetailPresenter(url, descriptionHtml, descriptionTitle, fallbackHtml)
         }.invoke()
     val enableTldr by remember {
         settingsRepository.appSettings.map { it.aiConfig.tldr }

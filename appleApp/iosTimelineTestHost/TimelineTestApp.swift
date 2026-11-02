@@ -1,5 +1,5 @@
 import UIKit
-import CHTCollectionViewWaterfallLayout
+import CHTCollectionViewWaterfallLayoutObjC
 
 @main
 final class TimelineTestApp: UIResponder, UIApplicationDelegate {
@@ -17,7 +17,18 @@ final class TimelineTestScene: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
         guard let scene = scene as? UIWindowScene else { return }
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = TimelineTestController()
+        if ProcessInfo.processInfo.arguments.contains("tab-refresh-late-height") {
+            let tabs = UITabBarController()
+            let other = UIViewController()
+            other.view.backgroundColor = .systemBackground
+            other.tabBarItem = UITabBarItem(title: "Other", image: nil, tag: 0)
+            let timeline = TimelineTestController()
+            timeline.tabBarItem = UITabBarItem(title: "Timeline", image: nil, tag: 1)
+            tabs.viewControllers = [other, timeline]
+            window.rootViewController = tabs
+        } else {
+            window.rootViewController = TimelineTestController()
+        }
         self.window = window
         window.makeKeyAndVisible()
     }
@@ -26,7 +37,7 @@ final class TimelineTestScene: UIResponder, UIWindowSceneDelegate {
 /// A real application window is required for native scroll/refresh animations and
 /// pan/deceleration. A hostless XCTest window does not exercise those lifecycles.
 private final class TimelineTestController: UIViewController, CHTCollectionViewDelegateWaterfallLayout {
-    private let layout = CHTCollectionViewWaterfallLayout()
+    private let layout = TimelineWaterfallLayout()
     private lazy var list = TimelineCollectionView(frame: .zero, collectionViewLayout: layout)
     private var dataSource: UICollectionViewDiffableDataSource<Int, Int>!
     private var heights: [Int: CGFloat] = [:]
@@ -34,12 +45,18 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     private var started = false
     private var failures: [String] = []
     private let scenario = ProcessInfo.processInfo.arguments.dropFirst().first ?? "refresh"
+    private var receivedPullRefresh = false
+    private var pendingRefreshSnapshot: NSDiffableDataSourceSnapshot<Int, Int>?
+    private var didCommitRefreshSnapshot = false
+    private var refreshFrames: CADisplayLink?
+    private var refreshPositions: [CGFloat] = []
+    private var largestRefreshStep: CGFloat?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         additionalSafeAreaInsets.top = 80
-        layout.columnCount = 1
+        layout.columnCount = scenario.contains("columns") ? 2 : 1
         layout.minimumInteritemSpacing = 0
         layout.minimumColumnSpacing = 8
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -70,7 +87,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         list.onProgrammaticScrollBegan = { [weak self] in self?.scrolling = true }
         list.onProgrammaticScrollEnded = { [weak self] in self?.scrolling = false }
         list.refreshControl = UIRefreshControl()
-        if scenario != "initial-refresh" { loadItems() }
+        list.refreshControl?.addTarget(self, action: #selector(pullRefreshBegan), for: .valueChanged)
+        if !scenario.hasPrefix("initial-refresh") { loadItems() }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -81,13 +99,18 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             await settle(200)
             switch scenario {
             case "scroll-to-top": await checkScrollToTop()
-            case "drag", "deceleration", "refine-reading-item": await checkGesture()
+            case "drag", "deceleration", "refine-reading-item", "refine-reading-item-deceleration": await checkGesture()
+            case "pull-refresh", "fast-refresh-prepend": await checkRefreshWithPrepend()
+            case "refresh-late-height", "refresh-late-height-columns", "refresh-height-after-collapse", "refresh-collapse-navigation": await checkRefreshWithLateHeight()
+            case "initial-refresh-late-height", "tab-refresh-late-height": await checkTopRefreshWithLateHeight()
+            case let name where name.hasPrefix("snapshot-"): await checkSnapshotGesture()
             default: await checkRefresh()
             }
             let result = UILabel(frame: CGRect(x: 16, y: view.safeAreaInsets.top, width: view.bounds.width - 32, height: 80))
             result.accessibilityIdentifier = "timeline-result"
             result.numberOfLines = 0
             result.text = failures.isEmpty ? "PASS" : failures.joined(separator: "; ")
+            if let largestRefreshStep { result.accessibilityValue = "maxStep=\(largestRefreshStep)pt" }
             view.addSubview(result)
         }
     }
@@ -143,7 +166,7 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     }
 
     private func checkGesture() async {
-        let refineReadingItem = scenario == "refine-reading-item"
+        let refineReadingItem = scenario.hasPrefix("refine-reading-item")
         if refineReadingItem {
             heights[20] = 600
             list.invalidateMeasuredHeights()
@@ -153,15 +176,8 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             jump(to: layout.collectionViewContentSize.height - list.bounds.height + list.adjustedContentInset.bottom)
         }
         await settle(100)
-        let ready = UILabel(frame: CGRect(x: 16, y: 0, width: 200, height: 20))
-        ready.text = "Ready"
-        ready.accessibilityIdentifier = "gesture-ready"
-        view.addSubview(ready)
-        let decelerating = scenario == "deceleration"
-        for _ in 0..<1500 {
-            if decelerating ? list.isDecelerating : list.isDragging { break }
-            try? await Task.sleep(for: .milliseconds(10))
-        }
+        let decelerating = scenario.contains("deceleration")
+        await waitForGesture()
         check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
         guard let id = list.captureReadingPosition()?.itemID.flatMap(Int.init),
               let path = dataSource.indexPath(for: id), id > 0,
@@ -170,17 +186,22 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             return
         }
         let oldScreenY = oldFrame.minY - list.contentOffset.y
-        if refineReadingItem {
-            heights[id] = 120
-        } else {
-            heights[id - 1] = itemHeight(id - 1) + 120
+        let nextPath = dataSource.indexPath(for: id + 1)!
+        let nextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
+        list.invalidateMeasuredHeights(at: [dataSource.indexPath(for: refineReadingItem ? id : id - 1)!]) {
+            if refineReadingItem {
+                self.heights[id] = 120
+            } else {
+                self.heights[id - 1] = self.itemHeight(id - 1) + 120
+            }
+            return true
         }
-        list.invalidateMeasuredHeights()
         list.layoutIfNeeded()
         let newScreenY = layout.layoutAttributesForItem(at: path)!.frame.minY - list.contentOffset.y
         if refineReadingItem {
-            check(list.captureReadingPosition()?.itemID == String(id), "refinement hid the reading item during the pan")
-            check(abs(newScreenY - list.restingAdjustedTopInset + 119) < 1, "unreachable estimated offset was not clamped to the reading item")
+            let newNextScreenY = layout.layoutAttributesForItem(at: nextPath)!.frame.minY - list.contentOffset.y
+            check(abs(newNextScreenY - nextScreenY) < 1,
+                  "shrinking the partly hidden card moved visible content by \(newNextScreenY - nextScreenY)pt")
         } else {
             check(abs(newScreenY - oldScreenY) < 1, "height refinement moved reading item by \(newScreenY - oldScreenY)pt")
         }
@@ -189,6 +210,209 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
             let offset = list.contentOffset.y
             await settle(40)
             check(abs(list.contentOffset.y - offset) > 1, "height compensation stopped momentum")
+        }
+    }
+
+    @objc private func pullRefreshBegan() {
+        receivedPullRefresh = true
+        list.beginRefreshing(revealingIndicator: false)
+    }
+
+    private func checkRefreshWithPrepend() async {
+        let baseline = list.restingAdjustedTopInset
+        jump(to: -baseline)
+        if scenario == "pull-refresh" {
+            let ready = UILabel(frame: CGRect(x: 16, y: 0, width: 200, height: 20))
+            ready.text = "Ready"
+            ready.accessibilityIdentifier = "gesture-ready"
+            view.addSubview(ready)
+            for _ in 0..<1000 {
+                if receivedPullRefresh { break }
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            check(receivedPullRefresh, "native pull refresh did not start")
+        } else {
+            list.beginRefreshing(revealingIndicator: true)
+        }
+        await settle(50)
+        if scenario == "pull-refresh" {
+            check(list.isScrollInteractionActive && list.contentOffset.y < -baseline,
+                  "refresh result did not arrive during the elastic pull")
+        }
+        var snapshot = dataSource.snapshot()
+        snapshot.insertItems(Array(200..<205), beforeItem: 0)
+        pendingRefreshSnapshot = snapshot
+        applyPendingRefreshSnapshot()
+        for _ in 0..<1000 {
+            if didCommitRefreshSnapshot { break }
+            await settle(10)
+        }
+        check(didCommitRefreshSnapshot, "refresh result remained queued after scrolling ended")
+        await settle(600)
+        checkRefreshCollapse()
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 0)!)!.frame
+        check(abs(frame.minY - list.contentOffset.y - baseline) < 1,
+              "refresh moved the old first row by \(frame.minY - list.contentOffset.y - baseline)pt")
+        check(!list.hasReadingPosition, "refresh left a stale bookmark")
+        // Remove the native spinner after sampling so XCTest can finish quiescing.
+        list.refreshControl = nil
+    }
+
+    private func checkTopRefreshWithLateHeight() async {
+        let baseline = list.restingAdjustedTopInset
+        jump(to: -baseline)
+        list.beginRefreshing(revealingIndicator: true)
+        if scenario.hasPrefix("initial-refresh") {
+            await settle(100)
+            loadItems()
+        }
+        await settle(400)
+        sampleRefreshCollapse()
+        list.endRefreshing()
+        await settle(30)
+        check(list.shouldDeferSnapshotChanges, "measurement missed the refresh collapse")
+        check(list.contentOffset.y < -list.adjustedContentInset.top - 1, "measurement missed the elastic top boundary")
+        let before = list.contentOffset.y
+        list.invalidateMeasuredHeights(at: [dataSource.indexPath(for: 0)!]) {
+            heights[0] = itemHeight(0) + 35
+            return true
+        }
+        check(abs(list.contentOffset.y - before) < 1, "height publication moved the in-flight collapse position")
+        await settle(500)
+        checkRefreshCollapse()
+        check(abs(list.contentOffset.y + baseline) < 1, "refresh lost its top reading position")
+        check(!list.hasReadingPosition && !list.isPresentingRefresh, "refresh left a pending bookmark")
+    }
+
+    private func checkRefreshWithLateHeight() async {
+        let baseline = list.restingAdjustedTopInset
+        jump(to: -baseline)
+        list.beginRefreshing(revealingIndicator: true)
+        await settle(400)
+        var measured = false
+        list.isReadingLayoutReady = { _ in measured }
+        list.prepareForSnapshotChange()
+        var snapshot = dataSource.snapshot()
+        snapshot.insertItems(scenario.contains("columns") ? [200, 201, 202] : [200], beforeItem: 0)
+        await dataSource.apply(snapshot, animatingDifferences: false)
+        await settle(100)
+
+        check(list.captureReadingPosition()?.itemID == "0", "snapshot did not retain the original reading item")
+        sampleRefreshCollapse()
+        list.endRefreshing()
+        await settle(scenario == "refresh-height-after-collapse" ? 450 : 80)
+        check(list.hasReadingPosition, "collapse discarded its unmeasured reading bookmark")
+        check(!list.isProgrammaticScrolling, "internal collapse was treated as navigation")
+        if scenario == "refresh-collapse-navigation" {
+            list.setContentOffset(CGPoint(x: 0, y: -baseline), animated: true)
+            measured = true
+        }
+        let measuredID = scenario.contains("columns") ? 201 : 200
+        heights[measuredID] = itemHeight(measuredID) + 180
+        list.invalidateMeasuredHeights()
+        await settle(500)
+        if scenario == "refresh-collapse-navigation" {
+            refreshFrames?.invalidate()
+            refreshFrames = nil
+            check(abs(list.contentOffset.y + baseline) < 1,
+                  "late measurement overrode explicit navigation: \(list.contentOffset.y) instead of \(-baseline)")
+            check(!list.hasReadingPosition && !list.isPresentingRefresh, "navigation retained the collapse bookmark")
+            return
+        }
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 0)!)!.frame
+        check(abs(frame.minY - list.contentOffset.y - baseline) < 1,
+              "late measurement moved the reading item by \(frame.minY - list.contentOffset.y - baseline)pt")
+        check(list.hasReadingPosition, "animation completion consumed an unready bookmark")
+        measured = true
+        list.setNeedsLayout()
+        await settle(100)
+        checkRefreshCollapse()
+        check(!list.hasReadingPosition && !list.isPresentingRefresh, "ready collapse left a pending bookmark")
+    }
+
+    private func applyPendingRefreshSnapshot() {
+        guard let snapshot = pendingRefreshSnapshot, !list.shouldDeferSnapshotChanges else { return }
+        pendingRefreshSnapshot = nil
+        list.prepareForSnapshotChange()
+        list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+            dataSource.apply(snapshot, animatingDifferences: false) { [weak self] in
+                self?.didCommitRefreshSnapshot = true
+                self?.list.layoutIfNeeded()
+                self?.sampleRefreshCollapse()
+                self?.list.endRefreshing()
+            }
+        }
+    }
+
+    private func waitForGesture() async {
+        let ready = UILabel(frame: CGRect(x: 16, y: 0, width: 200, height: 20))
+        ready.text = "Ready"
+        ready.accessibilityIdentifier = "gesture-ready"
+        view.addSubview(ready)
+        let decelerating = scenario.contains("deceleration")
+        for _ in 0..<1500 {
+            if decelerating ? list.isDecelerating : list.isDragging { break }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func checkSnapshotGesture() async {
+        let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 80)!)!.frame
+        jump(to: frame.minY + 40 - list.restingAdjustedTopInset)
+        await settle(100)
+        await waitForGesture()
+        let decelerating = scenario.contains("deceleration")
+        check(decelerating ? list.isDecelerating : list.isDragging, "native gesture was not observed")
+        for change in ["append", "insert", "move", "delete", "delete-reading-item", "measure", "delete-tail"] {
+            // Delayed measurement must use the user's current position.
+            if change == "measure" { await settle(40) }
+            guard let id = list.captureReadingPosition()?.itemID.flatMap(Int.init),
+                  let path = dataSource.indexPath(for: id),
+                  let oldFrame = layout.layoutAttributesForItem(at: path)?.frame else {
+                failures.append("missing reading item before \(change)")
+                return
+            }
+            let oldScreenY = oldFrame.minY - list.contentOffset.y
+            var snapshot = dataSource.snapshot()
+            var expectedID = id
+            switch change {
+            case "append": snapshot.appendItems([200, 201])
+            case "insert": snapshot.insertItems([202], beforeItem: 0)
+            case "move": snapshot.moveItem(1, afterItem: 201)
+            case "delete": snapshot.deleteItems([2])
+            case "measure": heights[0] = itemHeight(0) + 120
+            case "delete-tail":
+                snapshot.deleteItems(Array(snapshot.itemIdentifiers.dropFirst(snapshot.indexOfItem(id)! + 1)))
+            default:
+                expectedID = snapshot.itemIdentifiers[snapshot.indexOfItem(id)! + 1]
+                snapshot.deleteItems([id])
+            }
+            if change == "measure" {
+                list.invalidateMeasuredHeights()
+            } else {
+                list.prepareForSnapshotChange()
+                list.performUpdatesPreservingReadingPosition(keepingItemIDs: Set(snapshot.itemIdentifiers.map(String.init))) {
+                    dataSource.apply(snapshot, animatingDifferences: false, completion: nil)
+                }
+            }
+            list.layoutIfNeeded()
+            let newFrame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: expectedID)!)!.frame
+            let expectedY = max(oldScreenY, list.restingAdjustedTopInset + 1 - newFrame.height)
+            if change == "delete-tail" {
+                let bottom = max(-list.adjustedContentInset.top, list.contentSize.height - list.bounds.height + list.adjustedContentInset.bottom)
+                check(abs(list.contentOffset.y - bottom) < 1, "removing the tail left a blank viewport")
+                check(newFrame.maxY > list.contentOffset.y + list.restingAdjustedTopInset, "removing the tail hid the reading item")
+            } else {
+                check(abs(newFrame.minY - list.contentOffset.y - expectedY) < 1,
+                      "\(change) moved reading item by \(newFrame.minY - list.contentOffset.y - expectedY)pt")
+            }
+            check(decelerating ? list.isDecelerating : list.isDragging, "\(change) cancelled gesture")
+            check(!list.hasReadingPosition, "\(change) left a stale bookmark")
+        }
+        if decelerating {
+            let offset = list.contentOffset.y
+            await settle(40)
+            check(abs(list.contentOffset.y - offset) > 1, "snapshot compensation stopped momentum")
         }
     }
 
@@ -214,16 +438,49 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
         let frame = layout.layoutAttributesForItem(at: dataSource.indexPath(for: 0)!)!.frame
         let gap = frame.minY - list.contentOffset.y - baseline - control.bounds.height
         check(abs(gap) < 1, "extra blank below refresh control: \(gap)pt")
+        sampleRefreshCollapse()
         list.endRefreshing()
-        await settle(500)
+        check(list.shouldDeferSnapshotChanges, "refresh collapse allowed an overlapping snapshot")
+        await settle(80)
+        check(list.hasReadingPosition, "ready layout consumed the bookmark before collapse finished")
+        await settle(420)
+        checkRefreshCollapse()
+        check(!list.shouldDeferSnapshotChanges && !list.isPresentingRefresh, "refresh collapse never finished")
         check(abs(list.contentOffset.y + baseline) < 1, "refresh did not return to resting top")
+    }
+
+    private func sampleRefreshCollapse() {
+        refreshPositions = []
+        sampleRefreshFrame()
+        refreshFrames = CADisplayLink(target: self, selector: #selector(sampleRefreshFrame))
+        refreshFrames?.add(to: .main, forMode: .common)
+    }
+
+    @objc private func sampleRefreshFrame() {
+        guard let path = dataSource.indexPath(for: 0),
+              let frame = layout.layoutAttributesForItem(at: path)?.frame else { return }
+        refreshPositions.append(frame.minY - list.contentOffset.y)
+    }
+
+    private func checkRefreshCollapse() {
+        refreshFrames?.invalidate()
+        refreshFrames = nil
+        sampleRefreshFrame()
+        guard let first = refreshPositions.first, let last = refreshPositions.last else {
+            failures.append("refresh collapse was not sampled")
+            return
+        }
+        check(first - last > 30, "refresh collapse did not move the reading item")
+        let largestStep = zip(refreshPositions, refreshPositions.dropFirst()).map { abs($1 - $0) }.max() ?? 0
+        largestRefreshStep = largestStep
+        check(largestStep < 20, "refresh collapse jumped \(largestStep)pt in one frame")
     }
 
     private func itemHeight(_ id: Int) -> CGFloat { heights[id] ?? CGFloat(120 + id % 7 * 17) }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: layout.itemWidth(inSection: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
+        CGSize(width: layout.itemWidthInSection(at: indexPath.section), height: itemHeight(dataSource.itemIdentifier(for: indexPath)!))
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -240,12 +497,17 @@ private final class TimelineTestController: UIViewController, CHTCollectionViewD
     }
 
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate { scrolling = false }
+        if !decelerate { endScrollInteraction() }
     }
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { scrolling = false }
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) { endScrollInteraction() }
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        list.endProgrammaticScrolling()
-        scrolling = false
+        endScrollInteraction()
     }
-    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) { scrolling = false }
+    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) { endScrollInteraction() }
+
+    private func endScrollInteraction() {
+        list.endScrollInteraction()
+        scrolling = false
+        applyPendingRefreshSnapshot()
+    }
 }

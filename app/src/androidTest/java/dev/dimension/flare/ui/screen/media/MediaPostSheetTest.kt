@@ -32,10 +32,12 @@ import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -56,6 +58,72 @@ import kotlin.time.Instant
 class MediaPostSheetTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun hiddenActionsStayHiddenInBothSheetStatesAndReactToSettingsChanges() {
+        val style = mutableStateOf(PostActionStyle.Hidden)
+        val post = testPost()
+        composeRule.setContent {
+            MaterialExpressiveTheme {
+                CompositionLocalProvider(
+                    LocalTimelineAppearance provides TimelineAppearance(postActionStyle = style.value, showTranslateButton = false),
+                ) {
+                    MediaPostSheet(
+                        post = post,
+                        quotes = persistentListOf(),
+                        visible = true,
+                        uriHandler =
+                            object : UriHandler {
+                                override fun openUri(uri: String) = Unit
+                            },
+                    ) { Text("Media stays mounted") }
+                }
+            }
+        }
+
+        fun assertActionsVisible(visible: Boolean) {
+            val action = composeRule.onNodeWithContentDescription("Like post")
+            if (visible) action.assertIsDisplayed() else action.assertDoesNotExist()
+            val pixels = composeRule.onRoot().captureToImage().toPixelMap()
+            val hasRedAction =
+                (0 until pixels.height).any { y ->
+                    (0 until pixels.width).any { x ->
+                        val color = pixels[x, y]
+                        color.red - color.green > 0.3f && color.red - color.blue > 0.3f
+                    }
+                }
+            assertEquals("The rendered action icon must follow the setting", visible, hasRedAction)
+        }
+
+        assertActionsVisible(false)
+        composeRule.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.Expand)).performSemanticsAction(SemanticsActions.Expand) { it() }
+        composeRule.onNodeWithText("Full post body").assertIsDisplayed()
+        assertActionsVisible(false)
+        composeRule.runOnIdle { style.value = PostActionStyle.LeftAligned }
+        assertActionsVisible(true)
+        composeRule
+            .onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.Collapse))
+            .performSemanticsAction(SemanticsActions.Collapse) { it() }
+        assertActionsVisible(true)
+        composeRule.runOnIdle { style.value = PostActionStyle.Hidden }
+        assertActionsVisible(false)
+    }
+
+    @Test
+    fun ordinaryPostDetailsKeepActionsWhenTimelineActionsAreHidden() {
+        val post = testPost()
+        composeRule.setContent {
+            MaterialExpressiveTheme {
+                CompositionLocalProvider(
+                    LocalTimelineAppearance provides
+                        TimelineAppearance(postActionStyle = PostActionStyle.Hidden, showTranslateButton = false),
+                ) {
+                    CommonStatusComponent(item = post, isDetail = true)
+                }
+            }
+        }
+        composeRule.onNodeWithContentDescription("Like post").assertIsDisplayed()
+    }
 
     @Test
     fun draggingExpandsAndCollapsesWithoutRecreatingMedia() {

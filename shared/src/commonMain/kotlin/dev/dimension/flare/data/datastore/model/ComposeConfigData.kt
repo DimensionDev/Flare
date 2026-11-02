@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class ComposeConfigData(
-    val visibility: UiTimelineV2.Post.Visibility =
-        UiTimelineV2.Post.Visibility.Public,
+    val visibility: UiTimelineV2.Post.Visibility? = null,
     val lastAccounts: List<MicroBlogKey> = emptyList(),
 )

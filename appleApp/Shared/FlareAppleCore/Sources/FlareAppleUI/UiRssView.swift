@@ -19,7 +19,7 @@ public struct UiRssView: View {
                 }
             } icon: {
                 if let favIcon = data.favIcon, !favIcon.isEmpty {
-                    NetworkImage(data: favIcon)
+                    NetworkImage(data: UiMediaImage(url: favIcon, proxy: ProxyRef.Global.shared))
                         .frame(width: 24, height: 24)
                         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                 } else {

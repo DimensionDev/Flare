@@ -211,7 +211,7 @@ private class BlueskyPasswordLoginHandler(
         password: String,
         authFactorToken: String?,
     ) {
-        val service = BlueskyService(baseUrl)
+        val service = BlueskyService(baseUrl, context.reloginTarget?.accountKey)
         val response =
             if (username.contains("@") || username.contains(".")) {
                 service.createSession(
@@ -346,6 +346,7 @@ private class BlueskyOAuthLoginHandler(
             repairTranquilDelegationScopes(
                 credential = repair.credential,
                 controllerDid = repair.controllerDid,
+                proxy = context.proxy,
             )
             pendingRepair = null
             request =
@@ -457,7 +458,7 @@ private class BlueskyOAuthLoginHandler(
         userName: String,
         redirectUri: String,
     ): OAuthAuthorizationRequest =
-        createOAuthApi(host).buildAuthorizationRequest(
+        createOAuthApi(host, context.proxy).buildAuthorizationRequest(
             oauthClient = oauthClient(redirectUri),
             scopes = FLARE_BLUESKY_OAUTH_SCOPES,
             loginHandleHint = userName.takeIf { !it.contains('@') && it.contains('.') },
@@ -480,13 +481,14 @@ private class BlueskyOAuthLoginHandler(
         }
         val host = Url(iss).host
         val credential =
-            createOAuthApi(host)
+            createOAuthApi(host, context.proxy)
                 .requestBlueskyOAuthCredential(
                     issuer = iss,
                     oauthClient = oauthClient(redirectUri),
                     code = code,
                     nonce = request.nonce,
                     codeVerifier = request.codeVerifier,
+                    proxy = context.proxy,
                 )
         val token = credential.oAuthToken
         val missingScopes = token.missingFlareOAuthScopes()
@@ -548,9 +550,12 @@ private fun tranquilDelegationRepairMessage(missingScopes: List<String>): String
         missingScopes.joinToString(" ") +
         ". Tap Fix Tranquil permissions, then authorize Flare again."
 
-private fun createOAuthApi(host: String): OAuthApi =
+private fun createOAuthApi(
+    host: String,
+    proxy: dev.dimension.flare.data.model.ProxyRef,
+): OAuthApi =
     OAuthApi(
-        ktorClient {
+        ktorClient(proxy) {
             install(DefaultRequest) {
                 url.takeFrom("https://$host")
             }

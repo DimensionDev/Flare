@@ -16,6 +16,7 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -23,6 +24,7 @@ import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.database.app.model.SubscriptionType
 import dev.dimension.flare.data.model.IconType
@@ -35,12 +37,15 @@ import dev.dimension.flare.data.platform.BlueskyPlatformSpec
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.RssTimelineSpecs
+import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.feature.plugin.login.PluginOAuthCallbackCoordinatorV1
 import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
@@ -93,6 +98,7 @@ import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.settings.AgentChatScreen
 import dev.dimension.flare.ui.screen.settings.AgentHistoryScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
+import dev.dimension.flare.ui.screen.settings.DesktopPluginManagementScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.LocalHistoryAgentScreen
 import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
@@ -113,6 +119,7 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -125,6 +132,8 @@ internal fun Router(
     enableDeepLinkHandler: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val pluginOAuthCallbacks: PluginOAuthCallbackCoordinatorV1 by koinInject()
     val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
     val isBigScreen = isBigScreen()
@@ -138,11 +147,18 @@ internal fun Router(
     }
     if (enableDeepLinkHandler) {
         OnDeepLink {
-            val route = Route.parse(it)
-            if (route != null) {
-                navigate(route)
+            if (pluginOAuthCallbacks.canHandle(it)) {
+                coroutineScope.launch {
+                    runCatching { pluginOAuthCallbacks.handle(it, Locale.language) }
+                }
+                true
+            } else {
+                val route = Route.parse(it)
+                if (route != null) {
+                    navigate(route)
+                }
+                route != null
             }
-            route != null
         }
     }
     NavDisplay(
@@ -261,6 +277,7 @@ internal fun Router(
                     dev.dimension.flare.ui.screen.rss.RssDetailScreen(
                         url = args.url,
                         descriptionHtml = args.descriptionHtml,
+                        fallbackHtml = args.fallbackHtml,
                         descriptionTitle = args.title,
                         onBack = onBack,
                     )
@@ -612,6 +629,7 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                    proxy = it.proxy,
                                 ),
                             )
                         },
@@ -665,6 +683,7 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                    proxy = it.proxy,
                                 ),
                             )
                         },
@@ -682,10 +701,10 @@ internal fun Router(
                 entry<Route.ServiceSelect> {
                     ServiceSelectScreen(
                         onBack = onBack,
-                        onWebViewLogin = { url, callback ->
+                        onWebViewLogin = { request, callback ->
                             navigate(
                                 Route.WebViewLogin(
-                                    url = url,
+                                    request = request,
                                     callback = callback,
                                 ),
                             )
@@ -697,10 +716,10 @@ internal fun Router(
                     ReloginScreen(
                         target = args.target,
                         onBack = onBack,
-                        onWebViewLogin = { url, callback ->
+                        onWebViewLogin = { request, callback ->
                             navigate(
                                 Route.WebViewLogin(
-                                    url = url,
+                                    request = request,
                                     callback = callback,
                                 ),
                             )
@@ -710,6 +729,9 @@ internal fun Router(
 
                 entry<Route.Settings> {
                     SettingsScreen(
+                        toPlugins = {
+                            navigate(Route.PluginManagement)
+                        },
                         toLogin = {
                             navigate(Route.ServiceSelect)
                         },
@@ -738,6 +760,10 @@ internal fun Router(
                             navigate(Route.PostActionLayout)
                         },
                     )
+                }
+
+                entry<Route.PluginManagement> {
+                    DesktopPluginManagementScreen(onBack = onBack, onCreateWithAI = { navigateToAgentChat(null) })
                 }
 
                 entry<Route.PostActionLayout> {
@@ -881,6 +907,7 @@ internal fun Router(
                                 Route.RawImage(
                                     rawImage = it.url,
                                     customHeaders = it.customHeaders,
+                                    proxy = it.proxy,
                                 ),
                             )
                         },
@@ -943,8 +970,7 @@ internal fun Router(
                     metadata = window(isDarkTheme = true),
                 ) { args ->
                     RawMediaScreen(
-                        url = args.rawImage,
-                        customHeaders = args.customHeaders,
+                        media = args.rawImage.toUiImage(args.customHeaders, args.proxy),
                     )
                 }
                 entry<Route.StatusMedia>(
@@ -1134,7 +1160,7 @@ internal fun Router(
 
                 entry<Route.WebViewLogin> { args ->
                     WebViewLoginScreen(
-                        url = args.url,
+                        request = args.request,
                         callback = args.callback,
                         onBack = onBack,
                     )

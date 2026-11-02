@@ -1,0 +1,28 @@
+package dev.dimension.flare.ui.presenter
+
+import dev.dimension.flare.ui.model.TimelineReadingPosition
+
+public interface TimelineReadingState {
+    public val restorePosition: TimelineReadingPosition?
+    public val hasNewContent: Boolean
+    public val isAtLatest: Boolean get() = !hasNewContent
+
+    public fun viewportChanged(
+        index: Int,
+        offset: Double,
+    )
+
+    public fun positionChanged(
+        index: Int,
+        offset: Double,
+    )
+
+    public fun restorationFinished()
+
+    /** Reapply this reader's bookmark when its native list is recreated. */
+    public fun restoreCurrentPosition(): Unit = Unit
+
+    public fun savePosition(): Unit = Unit
+
+    public fun showLatest()
+}

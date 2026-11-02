@@ -68,9 +68,8 @@
 
 		search.setAccountKey(firstAccount.key);
 		void goto(searchUrl(query.trim(), accountSegmentFromKey(firstAccount.key)), {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true,
+			reset: false,
+			replace: true,
 		});
 	});
 
@@ -86,9 +85,8 @@
 		const next = query.trim();
 		search.search(next);
 		void goto(searchUrl(next, accountSegment), {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true,
+			reset: false,
+			replace: true,
 		});
 	}
 
@@ -96,9 +94,8 @@
 		search.setAccountKey(profile.key);
 		showAccountMenu = false;
 		void goto(searchUrl(query.trim(), accountSegmentFromKey(profile.key)), {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true,
+			reset: false,
+			replace: true,
 		});
 		if (query.trim()) {
 			search.search(query.trim());
@@ -231,7 +228,7 @@
 					<button
 						class="btn btn-ghost btn-square btn-sm rounded-box"
 						type="button"
-						aria-label={search.selectedAccount.handle.canonical}
+						aria-label={search.selectedAccount.handle.display}
 						onclick={() => {
 							showAccountMenu = !showAccountMenu;
 						}}
@@ -244,7 +241,7 @@
 								<li>
 									<button type="button" onclick={() => selectAccount(account)}>
 										<img class="menu-avatar" src={account.avatar?.url} alt="" />
-										<span>{account.handle.canonical}</span>
+										<span>{account.handle.display}</span>
 									</button>
 								</li>
 							{/each}
@@ -273,7 +270,7 @@
 						onclick={() => selectAccount(account)}
 					>
 						<img class="chip-avatar" src={account.avatar?.url} alt="" />
-						<span>{account.handle.canonical}</span>
+						<span>{account.handle.display}</span>
 					</button>
 				{/each}
 			</div>

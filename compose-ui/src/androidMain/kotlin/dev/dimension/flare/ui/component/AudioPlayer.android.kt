@@ -12,19 +12,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-internal actual fun rememberPlayerState(uri: String): PlayerState {
+internal actual fun rememberPlayerState(media: UiMedia): PlayerState {
+    val route = rememberMediaProxySnapshot(media)
+    val cache: Media3VideoCacheManager = org.koin.compose.koinInject()
     val context = LocalContext.current
     val player =
-        remember {
+        remember(media, route) {
             ExoPlayer
                 .Builder(context)
+                .setMediaSourceFactory(cache.mediaSourceFactory(media))
                 .build()
                 .apply {
-                    setMediaItem(MediaItem.fromUri(uri))
+                    setMediaItem(MediaItem.fromUri(media.url))
                 }
         }
     DisposableEffect(player) {

@@ -1,7 +1,18 @@
-import type { UiStrings } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
+import type { UiStrings, UiText } from '@flare/web-presenters/homeTimelineWithTabs.svelte';
 import { m } from '$lib/paraglide/messages.js';
 
 export type { UiStrings };
+
+export function localizedUiText(value: UiText): string {
+	switch (value.type) {
+		case 'ExternalRef':
+			return value.fallback;
+		case 'Localized':
+			return localizedUiString(value.string);
+		case 'Raw':
+			return value.string;
+	}
+}
 
 export function localizedUiString(value: UiStrings): string {
 	switch (value) {
@@ -53,6 +64,10 @@ export function localizedUiString(value: UiStrings): string {
 			return m.tabSettingsFilterRepost();
 		case 'Articles':
 			return m.profileTabArticles();
+		case 'WeiboFriendsCircle':
+			return m.weiboFriendsCircleTitle();
+		case 'WeiboPrivateFollowing':
+			return m.weiboPrivateFollowingTitle();
 		case 'Media':
 			return m.profileTabMedia();
 		case 'Channel':

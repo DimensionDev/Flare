@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Images
 import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
@@ -90,6 +91,7 @@ import dev.dimension.flare.ui.component.platform.adaptiveSideContentSize
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
@@ -97,9 +99,8 @@ import dev.dimension.flare.ui.component.status.statusLoadingPlaceholders
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStrings
+import dev.dimension.flare.ui.model.UiText
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.contentPostOrNull
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -522,7 +523,7 @@ internal fun ProfileScreen(
                                                             },
                                                         ) {
                                                             dev.dimension.flare.ui.component.Text(
-                                                                text = profileTab.name.asText(),
+                                                                text = profileTab.name,
                                                                 modifier =
                                                                     Modifier
                                                                         .padding(8.dp),
@@ -735,6 +736,13 @@ private fun ProfileMediaTab(
         ) {
             items(
                 mediaState,
+                emptyContent = {
+                    ListEmptyView(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        text = stringResource(R.string.empty_profile_media),
+                        icon = FontAwesomeIcons.Solid.Images,
+                    )
+                },
                 key = {
                     it.key
                 },
@@ -768,6 +776,7 @@ private fun ProfileMediaTab(
                                                         is UiMedia.Image -> media.previewUrl
                                                         is UiMedia.Video -> media.thumbnailUrl
                                                         is UiMedia.Gif -> media.previewUrl
+                                                        is UiMedia.Ugoira -> media.previewUrl
                                                         else -> null
                                                     },
                                                 )
@@ -854,17 +863,17 @@ private fun profilePresenter(
 
 private sealed interface ProfileTabItem {
     val id: String
-    val name: UiStrings
+    val name: UiText
 
     data class Timeline(
         override val id: String,
-        override val name: UiStrings,
+        override val name: UiText,
         val presenter: TimelinePresenter,
     ) : ProfileTabItem
 
     data class Media(
         override val id: String,
-        override val name: UiStrings,
+        override val name: UiText,
         val presenter: ProfileMediaPresenter,
     ) : ProfileTabItem
 }

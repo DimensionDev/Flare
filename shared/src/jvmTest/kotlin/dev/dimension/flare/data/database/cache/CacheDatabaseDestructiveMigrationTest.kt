@@ -12,6 +12,18 @@ import kotlin.test.assertEquals
 
 class CacheDatabaseDestructiveMigrationTest {
     @Test
+    fun cachesWithUiIconPlatformFieldsAreRebuilt() =
+        runTest {
+            assertCacheIsRebuilt(fromVersion = 52)
+        }
+
+    @Test
+    fun cachesWithoutPluginMediaOwnershipAreRebuilt() =
+        runTest {
+            assertCacheIsRebuilt(fromVersion = 51)
+        }
+
+    @Test
     fun version44CacheIsRebuiltDestructively() =
         runTest {
             assertCacheIsRebuilt(fromVersion = 44)
@@ -21,6 +33,20 @@ class CacheDatabaseDestructiveMigrationTest {
     fun version45CacheIsRebuiltDestructively() =
         runTest {
             assertCacheIsRebuilt(fromVersion = 45)
+        }
+
+    @Test
+    fun version47CacheIsRebuiltWithIndependentNotificationEntries() =
+        runTest {
+            assertCacheIsRebuilt(fromVersion = 47)
+        }
+
+    @Test
+    fun currentAndExperimentalCachesAreRebuiltWithoutMigration() =
+        runTest {
+            assertCacheIsRebuilt(fromVersion = 48)
+            assertCacheIsRebuilt(fromVersion = 49)
+            assertCacheIsRebuilt(fromVersion = 58)
         }
 
     private suspend fun assertCacheIsRebuilt(fromVersion: Int) {

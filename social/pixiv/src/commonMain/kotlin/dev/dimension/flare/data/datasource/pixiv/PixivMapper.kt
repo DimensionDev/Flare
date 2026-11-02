@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.pixiv
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.pixiv.PIXIV_IMAGE_REFERER
 import dev.dimension.flare.data.network.pixiv.model.PixivComment
 import dev.dimension.flare.data.network.pixiv.model.PixivCommentStamp
@@ -23,8 +24,11 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.mapper.pixivFavourite
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -41,7 +45,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
     val statusKey = pixivIllustKey(id)
     return UiTimelineV2.Post(
         platformId = PIXIV_PLATFORM_ID,
-        images = toUiMedia().toPersistentList(),
+        images = toUiMedia(accountKey).toPersistentList(),
         sensitive = xRestrict > 0 || sanityLevel >= 6,
         contentWarning = UiTranslatableText(original = title.toUiPlainText()),
         user = user.toUiProfile(accountKey),
@@ -62,7 +66,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
                             )
                         }
                     }.trim().let {
-                        parseHtml(it).toUi()
+                        parseHtml(it, baseUri = "https://$PIXIV_HOST/artworks/$id").toUi()
                     },
             ),
         actions =
@@ -107,7 +111,7 @@ internal fun PixivIllust.toUiTimeline(accountKey: MicroBlogKey): UiTimelineV2.Po
             ),
         mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun PixivComment.toUiTimeline(
@@ -140,7 +144,7 @@ internal fun PixivComment.toUiTimeline(
             ),
         mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 
 private fun PixivCommentStamp.toUiMedia(): UiMedia.Image? = stampUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER))
 
@@ -153,7 +157,7 @@ internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile 
                 .toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
         nameInternal = name.toUiPlainText(),
         platformId = PIXIV_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Pixiv,
+        platformIcon = UiIcon.Pixiv.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -176,7 +180,7 @@ internal fun PixivUser.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile 
                 persistentListOf()
             },
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 
 internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile =
     UiProfile(
@@ -185,7 +189,7 @@ internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiPr
         avatar = profileImageUrl.toUiImage(persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)),
         nameInternal = (userName ?: userAccount ?: userId.toString()).toUiPlainText(),
         platformId = PIXIV_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Pixiv,
+        platformIcon = UiIcon.Pixiv.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -208,7 +212,7 @@ internal fun PixivCredential.toUiProfile(accountKey: MicroBlogKey? = null): UiPr
                 persistentListOf()
             },
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 
 internal fun PixivUserDetailResponse.toUiProfile(accountKey: MicroBlogKey? = null): UiProfile {
     val base = user.toUiProfile(accountKey)
@@ -267,8 +271,24 @@ private fun PixivIllust.renderContent(): String =
         }
     }
 
-internal fun PixivIllust.toUiMedia(): List<UiMedia> {
+internal fun PixivIllust.toUiMedia(accountKey: MicroBlogKey): List<UiMedia> {
     val headers = persistentMapOf("Referer" to PIXIV_IMAGE_REFERER)
+    if (type == "ugoira") {
+        val preview = imageUrls.medium ?: imageUrls.large ?: imageUrls.squareMedium ?: return emptyList()
+        return listOf(
+            UiMedia.Ugoira(
+                statusKey = pixivIllustKey(id),
+                accountKey = accountKey,
+                previewUrl = preview,
+                originalFrameUrl = metaSinglePage?.originalImageUrl ?: imageUrls.original,
+                description = title,
+                width = width.toFloat(),
+                height = height.toFloat(),
+                sensitive = xRestrict > 0 || sanityLevel >= 6,
+                customHeaders = headers,
+            ),
+        )
+    }
     return if (metaPages.isNotEmpty()) {
         metaPages.mapNotNull { page ->
             page.imageUrls.toUiImage(

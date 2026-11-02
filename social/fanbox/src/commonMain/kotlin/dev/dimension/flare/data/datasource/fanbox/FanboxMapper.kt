@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.fanbox
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.fanbox.FANBOX_USER_AGENT
 import dev.dimension.flare.data.network.fanbox.FANBOX_WEB_URL
 import dev.dimension.flare.data.network.fanbox.FanboxCommentItem
@@ -28,8 +29,11 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -94,7 +98,7 @@ internal fun FanboxPostEntity.toUiTimeline(
                 ),
             ),
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun FanboxPostDetailBody.toUiTimeline(
@@ -121,7 +125,7 @@ internal fun FanboxPostDetailBody.toUiTimeline(
                 ),
             ),
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun FanboxPostDetailBody.toUiArticle(
@@ -206,7 +210,7 @@ internal fun FanboxCommentItem.toUiTimeline(
         clickEvent = user?.let { ClickEvent.Deeplink(it.profileRoute(accountKey, null)) } ?: ClickEvent.Noop,
         mediaClickPolicy = UiTimelineV2.Post.MediaClickPolicy.OpenPostClickEvent,
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun FanboxCreatorDetailBody.toUiProfile(
@@ -221,7 +225,7 @@ internal fun FanboxCreatorDetailBody.toUiProfile(
         avatar = userEntity?.iconUrl.toUiImage(imageHeaders),
         nameInternal = (userEntity?.name ?: creatorId).toUiPlainText(),
         platformId = FANBOX_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
+        platformIcon = UiIcon.Fanbox.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -250,7 +254,7 @@ internal fun FanboxCreatorDetailBody.toUiProfile(
                 ?.toMap()
                 ?.toPersistentMap()
                 ?.let { UiProfile.BottomContent.Fields(it) },
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun FanboxCreatorDetailBody.toUiTimeline(
@@ -263,7 +267,7 @@ internal fun FanboxCreatorDetailBody.toUiTimeline(
         createdAt = Clock.System.now().toUi(),
         statusKey = profile.key,
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun FanboxCredential.toUiProfile(
@@ -279,7 +283,7 @@ internal fun FanboxCredential.toUiProfile(
         avatar = iconUrl.toUiImage(imageHeaders),
         nameInternal = (name ?: profileId).toUiPlainText(),
         platformId = FANBOX_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
+        platformIcon = UiIcon.Fanbox.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile.User(
@@ -302,7 +306,7 @@ internal fun FanboxCredential.toUiProfile(
                 persistentListOf()
             },
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 private fun FanboxUserEntity.toUiProfile(
@@ -318,7 +322,7 @@ private fun FanboxUserEntity.toUiProfile(
         avatar = iconUrl.toUiImage(imageHeaders),
         nameInternal = (name.ifBlank { profileId }).toUiPlainText(),
         platformId = FANBOX_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Fanbox,
+        platformIcon = UiIcon.Fanbox.asType(),
         clickEvent = ClickEvent.Deeplink(profileRoute(accountKey, creatorId)),
         banner = null,
         description = null,
@@ -330,7 +334,7 @@ private fun FanboxUserEntity.toUiProfile(
             ),
         mark = persistentListOf(),
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 private fun FanboxUserEntity.profileRoute(
@@ -353,6 +357,7 @@ private fun FanboxPostDetailBody.BodyContent.toArticleBlocks(
         val htmlBlocks =
             html.toArticleHtmlBlocks(
                 keyPrefix = "$postId:html",
+                sourceUrl = sourceUrl,
                 sensitive = sensitive,
                 imageHeaders = imageHeaders,
             )
@@ -579,10 +584,11 @@ private fun String.httpUrlOrNull(): String? =
 
 private fun String.toArticleHtmlBlocks(
     keyPrefix: String,
+    sourceUrl: String,
     sensitive: Boolean,
     imageHeaders: ImmutableMap<String, String>? = null,
 ): List<UiArticleBlock> =
-    parseHtml(this)
+    parseHtml(this, baseUri = sourceUrl)
         .toUi()
         .renderRuns
         .mapIndexedNotNull { index, content ->

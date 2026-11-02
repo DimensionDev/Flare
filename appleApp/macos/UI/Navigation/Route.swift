@@ -33,11 +33,11 @@ enum Route: Hashable, Identifiable {
     case profileInsight(AccountType, MicroBlogKey)
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
-    case mediaImage(String, String?, [String: String]?)
+    case mediaImage(String, String?, [String: String]?, ProxyRef)
     case mediaRaw([any UiMedia], Int, String?)
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?)
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
-    case rssDetail(String, String?, String?)
+    case rssDetail(String, String?, String?, String?)
     case article(AccountType, MicroBlogKey)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
@@ -237,8 +237,8 @@ enum Route: Hashable, Identifiable {
                 onNavigate: onNavigate
             )
             .frame(width: 300, height: 400)
-        case .rssDetail(let url, let descriptionHtml, let title):
-            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
+        case .rssDetail(let url, let descriptionHtml, let title, let fallbackHtml):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title, fallbackHtml: fallbackHtml)
         case .article(let accountType, let articleKey):
             MacArticleScreen(
                 accountType: accountType,
@@ -395,13 +395,12 @@ private struct MacArticleScreen: View {
         Task {
             do {
                 _ = try await MacMediaFileExporter.saveRemoteFile(
-                    url: block.url,
+                    media: block.media,
                     fileName: MediaFileNamePolicy.shared.articleFileName(
                         name: block.name,
                         url: block.url,
                         extensionName: block.extension
-                    ),
-                    customHeaders: block.customHeaders
+                    )
                 )
             } catch {
                 downloadAlert = MacArticleDownloadAlert(message: error.localizedDescription)
@@ -521,7 +520,7 @@ extension Route {
     private static func fromMedia(_ media: DeeplinkRoute.Media) -> Route? {
         switch onEnum(of: media) {
         case .image(let data):
-            .mediaImage(data.uri, data.previewUrl, data.customHeaders)
+            .mediaImage(data.uri, data.previewUrl, data.customHeaders, data.proxy)
         case .statusMedia(let data):
             .mediaStatusMedia(data.accountType, data.statusKey, Int32(data.index), data.preview)
         case .podcast:
@@ -538,6 +537,12 @@ extension Route {
 
     private static func fromTimeline(_ timeline: DeeplinkRoute.Timeline) -> Route? {
         switch onEnum(of: timeline) {
+        case .source(let data):
+            if let tabItem = TimelineDeepLinkRouteResolver.shared.resolve(route: data) {
+                .timeline(tabItem)
+            } else {
+                nil
+            }
         case .xQTDeviceFollow(let data):
             if let tabItem = XQTUiTimelineTabItemHelpers.shared.xqtDeviceFollow(accountType: data.accountType) {
                 .timeline(tabItem)
@@ -586,7 +591,7 @@ extension Route {
     private static func fromRss(_ rss: DeeplinkRoute.Rss) -> Route? {
         switch onEnum(of: rss) {
         case .detail(let data):
-            .rssDetail(data.url, data.descriptionHtml, data.title)
+            .rssDetail(data.url, data.descriptionHtml, data.title, data.fallbackHtml)
         }
     }
 

@@ -4,9 +4,12 @@ import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -41,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -55,8 +59,11 @@ import compose.icons.fontawesomeicons.solid.FaceSadTear
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
+import compose.icons.fontawesomeicons.solid.UserPlus
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.UnsupportedPlatformException
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -65,19 +72,27 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.resolveText
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.toImageVector
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import dev.dimension.flare.ui.presenter.settings.AccountsState.AccountItem
@@ -95,6 +110,7 @@ internal fun AccountsScreen(
     toLogin: () -> Unit,
     toRelogin: (ReloginTarget) -> Unit,
     toNostrRelays: (MicroBlogKey) -> Unit,
+    toPlugins: () -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter {
@@ -145,6 +161,27 @@ internal fun AccountsScreen(
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             state = lazyListState,
         ) {
+            if (state.removalFailed) {
+                item {
+                    Text(stringResource(R.string.settings_accounts_remove_failed), color = MaterialTheme.colorScheme.error)
+                }
+            }
+            if (state.accounts.takeSuccess()?.isEmpty() == true && state.currentItems.isEmpty()) {
+                item {
+                    Column(
+                        Modifier.fillParentMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        ListEmptyView(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                            text = stringResource(R.string.empty_accounts),
+                            icon = FontAwesomeIcons.Solid.UserPlus,
+                        )
+                        TextButton(onClick = toLogin) { Text(stringResource(R.string.quick_menu_add_account)) }
+                    }
+                }
+            }
             itemsIndexed(state.currentItems, key = { _, item -> item.account.accountKey.toString() }) { index, (account, data) ->
                 val swipeState =
                     rememberSwipeToDismissBoxState()
@@ -158,7 +195,7 @@ internal fun AccountsScreen(
                         pendingDeleteAccountKey = account.accountKey
                         pendingDeleteAccountLabel =
                             when (val profile = data) {
-                                is UiState.Success -> profile.data.handle.canonical
+                                is UiState.Success -> profile.data.handle.display
                                 is UiState.Error, is UiState.Loading -> account.accountKey.toString()
                             }
                         swipeState.snapTo(SwipeToDismissBoxValue.Settled)
@@ -204,6 +241,8 @@ internal fun AccountsScreen(
                             },
                             toLogin = toLogin,
                             toRelogin = toRelogin,
+                            unavailableAccount = account.takeUnless { it.platformAvailable },
+                            toPlugins = toPlugins,
                             trailingContent = { user ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -289,7 +328,7 @@ internal fun AccountsScreen(
                                                     pendingDeleteAccountKey = account.accountKey
                                                     pendingDeleteAccountLabel =
                                                         when (val profile = data) {
-                                                            is UiState.Success -> profile.data.handle.canonical
+                                                            is UiState.Success -> profile.data.handle.display
                                                             is UiState.Error, is UiState.Loading -> account.accountKey.toString()
                                                         }
                                                 },
@@ -366,12 +405,14 @@ fun AccountItem(
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,
     toRelogin: (ReloginTarget) -> Unit = { toLogin() },
+    unavailableAccount: UiAccount? = null,
+    toPlugins: (() -> Unit)? = null,
     trailingContent: @Composable (UiProfile) -> Unit = { },
     headlineContent: @Composable (UiProfile) -> Unit = {
         RichText(text = it.name, maxLines = 1)
     },
     supportingContent: @Composable (UiProfile) -> Unit = {
-        Text(text = it.handle.canonical, maxLines = 1)
+        Text(text = it.handle.display, maxLines = 1)
     },
     avatarSize: Dp = AvatarComponentDefaults.size,
     colors: ListItemColors = ListItemDefaults.segmentedColors(),
@@ -436,6 +477,12 @@ fun AccountItem(
                     colors = colors,
                 )
             }.onError { throwable ->
+                val reloginTarget =
+                    when (throwable) {
+                        is LoginExpiredException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                        is RequireReLoginException -> ReloginTarget(throwable.accountKey, throwable.platformId)
+                        else -> null
+                    }
                 SegmentedListItem(
                     selected = selected,
                     onClick = {},
@@ -445,13 +492,13 @@ fun AccountItem(
                     shapes = shapes,
                     content = {
                         if (throwable is UnsupportedPlatformException) {
-                            Text(text = throwable.platformId)
-                        } else if (throwable is LoginExpiredException) {
+                            Text(text = unavailableAccount?.platformDisplayNameText?.resolveText() ?: throwable.platformId)
+                        } else if (reloginTarget != null) {
                             Text(
                                 text =
                                     stringResource(
                                         id = R.string.login_expired,
-                                        throwable.accountKey.toString(),
+                                        reloginTarget.accountKey.toString(),
                                     ),
                             )
                         } else {
@@ -460,10 +507,9 @@ fun AccountItem(
                     },
                     leadingContent = {
                         if (throwable is UnsupportedPlatformException) {
-                            ThemedIcon(
-                                UiIcon.World.toImageVector(),
-                                contentDescription = throwable.platformId,
-                                color = ThemeIconData.Color.ImperialMagenta,
+                            TabIcon(
+                                icon = unavailableAccount?.platformIcon ?: UiIcon.World.asType(),
+                                contentDescription = unavailableAccount?.platformDisplayName ?: throwable.platformId,
                                 size = avatarSize,
                             )
                         } else {
@@ -478,24 +524,23 @@ fun AccountItem(
                     supportingContent = {
                         if (throwable is UnsupportedPlatformException) {
                             Text(text = throwable.accountKey?.toString() ?: throwable.platformId)
-                        } else if (throwable is LoginExpiredException) {
-                            Text(text = throwable.accountKey.toString())
+                        } else if (reloginTarget != null) {
+                            Text(text = reloginTarget.accountKey.toString())
                         } else {
                             Text(text = stringResource(id = R.string.account_item_error_message))
                         }
                     },
                     trailingContent =
-                        if (throwable is LoginExpiredException) {
+                        if (throwable is UnsupportedPlatformException && toPlugins != null) {
+                            {
+                                TextButton(onClick = toPlugins) {
+                                    Text(text = stringResource(id = R.string.settings_plugins_title))
+                                }
+                            }
+                        } else if (reloginTarget != null) {
                             {
                                 TextButton(
-                                    onClick = {
-                                        toRelogin(
-                                            ReloginTarget(
-                                                accountKey = throwable.accountKey,
-                                                platformId = throwable.platformId,
-                                            ),
-                                        )
-                                    },
+                                    onClick = { toRelogin(reloginTarget) },
                                 ) {
                                     Text(text = stringResource(id = R.string.login_expired_relogin))
                                 }

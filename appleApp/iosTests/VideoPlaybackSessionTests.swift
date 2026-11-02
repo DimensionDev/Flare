@@ -1,12 +1,32 @@
 import AVFoundation
 import Combine
 import XCTest
+import KotlinSharedUI
 #if os(iOS)
 import AVFAudio
 import UIKit
 #endif
 
 final class VideoPlaybackSessionTests: XCTestCase {
+    @MainActor
+    func testFramePlaybackStopsForViewerAndResumesOnReturn() {
+        let arbiter = VideoPlaybackArbiter()
+        let gallery = VideoPlaybackPresentation(arbiter: arbiter)
+        let viewer = VideoPlaybackPresentation(arbiter: arbiter)
+        let owner = NSObject()
+        var playing = false
+        gallery.begin()
+        gallery.updateFrames(owner: owner, play: { playing = true }, stop: { playing = false })
+        XCTAssertTrue(playing)
+        viewer.begin()
+        XCTAssertFalse(playing)
+        viewer.end()
+        XCTAssertTrue(playing)
+        gallery.setSuspended(true)
+        XCTAssertFalse(playing)
+        gallery.end()
+    }
+
     @MainActor
     func testMissingMediaReportsFailureWithoutPollingAndStopsUpdatesAfterDetach() async throws {
         let session = VideoPlaybackSession()
@@ -16,7 +36,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
             subscription.cancel()
             session.detach()
         }
-        session.play(url: URL(fileURLWithPath: "/missing-playback-test-\(UUID()).mp4").absoluteString)
+        session.play(media: testVideo(URL(fileURLWithPath: "/missing-playback-test-\(UUID()).mp4").absoluteString))
         for _ in 0..<200 {
             if case .error = session.state { break }
             try await Task.sleep(for: .milliseconds(10))
@@ -39,24 +59,24 @@ final class VideoPlaybackSessionTests: XCTestCase {
         let first = VideoPlaybackSession()
         let second = VideoPlaybackSession()
         let url = URL(fileURLWithPath: "/video-player-instance-test.mp4").absoluteString
-        first.play(url: url, position: 37)
+        first.play(media: testVideo(url), position: 37)
         let player = first.player
         XCTAssertNotNil(player)
-        second.play(url: url)
+        second.play(media: testVideo(url))
         XCTAssertNil(first.player)
         XCTAssertEqual(first.position, 37)
         XCTAssertTrue(player === second.player)
         second.detach()
         XCTAssertNil(second.player)
         XCTAssertEqual(player?.rate, 0)
-        first.play(url: url, position: first.position)
+        first.play(media: testVideo(url), position: first.position)
         XCTAssertTrue(player === first.player)
         XCTAssertEqual(first.position, 37)
         first.detach()
     }
 
     @MainActor
-    func testSwitchingMediaCancelsLoadingLooperBeforeReusingPlayer() async throws {
+    func testSwitchingMediaDiscardsPendingQueueReplenishment() async throws {
         let firstURL = try await makeVideo()
         let secondURL = try await makeVideo()
         defer {
@@ -70,32 +90,25 @@ final class VideoPlaybackSessionTests: XCTestCase {
             second.detach()
             VideoPlaybackSession.releaseIdleBuffer()
         }
-        first.play(url: firstURL.absoluteString, playing: false)
+        first.play(media: testVideo(firstURL.absoluteString), playing: false)
         let player = try XCTUnwrap(first.player)
-        // Keep the old looper alive, as AVFoundation's pending asset load does.
-        let oldLooper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
-        defer { oldLooper.disableLooping() }
-        XCTAssertEqual(oldLooper.status, .unknown)
+        let oldItems = player.items()
+        player.advanceToNextItem()
 
-        second.play(url: secondURL.absoluteString, playing: false)
+        second.play(media: testVideo(secondURL.absoluteString), playing: false)
         XCTAssertNil(first.player)
         XCTAssertTrue(second.player === player)
-        XCTAssertEqual(oldLooper.status, .cancelled,
-                       "The old looper must stop managing the queue before another looper takes over")
-        // A regression must fail the assertion without letting two live loopers abort the test host.
-        guard oldLooper.status == .cancelled else { return }
-        let newLooper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
-        XCTAssertFalse(newLooper === oldLooper)
         try await waitUntilReady(player)
-        XCTAssertEqual(newLooper.status, .ready)
-        XCTAssertFalse(player.items().isEmpty)
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertEqual(player.items().count, 3)
         for item in player.items() {
             XCTAssertEqual((item.asset as? AVURLAsset)?.url, secondURL)
+            XCTAssertFalse(oldItems.contains { $0 === item })
         }
     }
 
     @MainActor
-    func testReleasingIdleBufferCancelsLoadingLooper() async throws {
+    func testReleasingIdleBufferDiscardsPendingQueueReplenishment() async throws {
         let url = try await makeVideo()
         defer { try? FileManager.default.removeItem(at: url) }
         let session = VideoPlaybackSession()
@@ -103,18 +116,15 @@ final class VideoPlaybackSessionTests: XCTestCase {
             session.detach()
             VideoPlaybackSession.releaseIdleBuffer()
         }
-        session.play(url: url.absoluteString, playing: false)
+        session.play(media: testVideo(url.absoluteString), playing: false)
         let player = try XCTUnwrap(session.player)
-        let looper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
-        defer { looper.disableLooping() }
-        XCTAssertEqual(looper.status, .unknown)
+        player.advanceToNextItem()
 
         session.detach()
         VideoPlaybackSession.releaseIdleBuffer()
-        XCTAssertEqual(looper.status, .cancelled,
-                       "A pending looper must not repopulate the queue after the idle buffer is released")
-        XCTAssertNil(SharedVideoPlayer.shared.looper)
         XCTAssertTrue(player.items().isEmpty)
+        try await Task.sleep(for: .milliseconds(100))
+        XCTAssertTrue(player.items().isEmpty, "Pending callbacks must not repopulate a released queue")
     }
 
     @MainActor
@@ -129,31 +139,28 @@ final class VideoPlaybackSessionTests: XCTestCase {
             detail.detach()
             VideoPlaybackSession.releaseIdleBuffer()
         }
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         let player = try XCTUnwrap(inline.player)
         try await waitUntilReady(player)
         let item = try XCTUnwrap(player.currentItem)
-        let looper = try XCTUnwrap(SharedVideoPlayer.shared.looper)
-        defer { looper.disableLooping() }
+        let items = player.items()
         XCTAssertEqual(item.status, .readyToPlay)
-        detail.play(url: url.absoluteString)
+        detail.play(media: testVideo(url.absoluteString))
         XCTAssertNil(inline.player)
         XCTAssertTrue(detail.player === player)
         XCTAssertTrue(player.currentItem === item)
-        XCTAssertTrue(SharedVideoPlayer.shared.looper === looper)
-        XCTAssertEqual(looper.status, .ready)
+        XCTAssertEqual(player.items(), items)
         detail.detach()
         XCTAssertEqual(player.rate, 0)
         XCTAssertTrue(player.currentItem === item)
         try await Task.sleep(for: .milliseconds(100))
         VideoPlaybackSession.setPosition(for: url.absoluteString, seconds: 17)
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         XCTAssertTrue(player.currentItem === item)
-        XCTAssertTrue(SharedVideoPlayer.shared.looper === looper)
+        XCTAssertEqual(player.items(), items)
         XCTAssertEqual(inline.position, 17, "A seek committed between surfaces must beat the retained position")
         inline.detach()
         try await Task.sleep(for: .milliseconds(5200))
-        XCTAssertEqual(looper.status, .cancelled)
         XCTAssertTrue(player.items().isEmpty)
     }
 
@@ -172,7 +179,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
             VideoPlaybackSession.releaseIdleBuffer()
         }
         video.begin()
-        video.update(session, url: url.absoluteString, playing: true, rate: 1)
+        video.update(session, media: testVideo(url.absoluteString), playing: true, rate: 1)
         let player = try XCTUnwrap(session.player)
         try await waitUntilReady(player)
 
@@ -185,7 +192,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
         XCTAssertTrue(session.player === player)
         XCTAssertEqual(player.rate, 1, "Returning to the video must preserve its requested playback")
 
-        video.update(session, url: url.absoluteString, playing: false, rate: 1)
+        video.update(session, media: testVideo(url.absoluteString), playing: false, rate: 1)
         image.begin()
         image.end()
         XCTAssertEqual(player.rate, 0, "An explicit user pause must survive preemption")
@@ -206,12 +213,12 @@ final class VideoPlaybackSessionTests: XCTestCase {
             VideoPlaybackSession.releaseIdleBuffer()
         }
         try AVAudioSession.sharedInstance().setCategory(.ambient, options: .mixWithOthers)
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         let player = try XCTUnwrap(inline.player)
         try await waitUntilReady(player)
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
 
-        detail.play(url: url.absoluteString, muted: false)
+        detail.play(media: testVideo(url.absoluteString), muted: false)
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback,
                        "Configure detail audio before starting its playback")
         detail.setPlaying(false)
@@ -221,14 +228,14 @@ final class VideoPlaybackSessionTests: XCTestCase {
         VideoPlaybackSession.continuePlayback(to: url.absoluteString)
         detail.detach()
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .playback)
-        inline.play(url: url.absoluteString)
+        inline.play(media: testVideo(url.absoluteString))
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
 
-        detail.play(url: url.absoluteString, muted: false)
+        detail.play(media: testVideo(url.absoluteString), muted: false)
         detail.detach()
         XCTAssertEqual(AVAudioSession.sharedInstance().category, .ambient)
 
-        detail.play(url: url.absoluteString, muted: false)
+        detail.play(media: testVideo(url.absoluteString), muted: false)
         VideoPlaybackSession.continuePlayback(to: url.absoluteString)
         detail.detach()
         try await Task.sleep(for: .milliseconds(600))
@@ -259,10 +266,10 @@ final class VideoPlaybackSessionTests: XCTestCase {
             VideoPlaybackSession.releaseIdleBuffer()
             window.isHidden = true
         }
-        session.play(url: url.absoluteString)
+        session.play(media: testVideo(url.absoluteString))
         surface.playerLayer.videoGravity = .resizeAspect
         surface.player = session.player
-        for _ in 0..<200 {
+        for _ in 0..<1000 {
             if surface.playerLayer.isReadyForDisplay, surface.alpha == 1, session.hasDisplayedFrame { break }
             try await Task.sleep(for: .milliseconds(10))
         }
@@ -289,7 +296,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
     #endif
 
     @MainActor
-    private func waitUntilReady(_ player: AVPlayer) async throws {
+    func waitUntilReady(_ player: AVPlayer) async throws {
         for _ in 0..<200 {
             if player.currentItem?.status == .readyToPlay { break }
             try await Task.sleep(for: .milliseconds(10))
@@ -298,7 +305,7 @@ final class VideoPlaybackSessionTests: XCTestCase {
     }
 
     @MainActor
-    private func makeVideo() async throws -> URL {
+    func makeVideo(frameDuration: Double = 30) async throws -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("playback-\(UUID()).mp4")
         let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
         let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
@@ -311,10 +318,12 @@ final class VideoPlaybackSessionTests: XCTestCase {
         var buffer: CVPixelBuffer?
         XCTAssertEqual(CVPixelBufferCreate(nil, 16, 16, kCVPixelFormatType_32ARGB, nil, &buffer), kCVReturnSuccess)
         let frame = try XCTUnwrap(buffer)
-        for seconds in [0, 30, 60] {
+        for index in 0..<3 {
             while !input.isReadyForMoreMediaData { try await Task.sleep(for: .milliseconds(10)) }
-            XCTAssertTrue(adaptor.append(frame, withPresentationTime: CMTime(seconds: Double(seconds), preferredTimescale: 600)))
+            let time = CMTime(seconds: Double(index) * frameDuration, preferredTimescale: 600)
+            XCTAssertTrue(adaptor.append(frame, withPresentationTime: time))
         }
+        writer.endSession(atSourceTime: CMTime(seconds: 3 * frameDuration, preferredTimescale: 600))
         input.markAsFinished()
         await writer.finishWriting()
         XCTAssertEqual(writer.status, .completed)
@@ -330,12 +339,12 @@ final class VideoPlaybackSessionTests: XCTestCase {
         let session = VideoPlaybackSession()
         let url = URL(fileURLWithPath: "/video-presentation-test.mp4").absoluteString
         video.begin()
-        video.update(session, url: url, position: 37, playing: true, rate: 1)
+        video.update(session, media: testVideo(url), position: 37, playing: true, rate: 1)
         let player = session.player
         XCTAssertNotNil(player)
         image.begin()
         XCTAssertNil(session.player)
-        video.update(session, url: url, position: 37, playing: true, rate: 1)
+        video.update(session, media: testVideo(url), position: 37, playing: true, rate: 1)
         XCTAssertNil(session.player)
         let backgroundTimeline = NSObject()
         arbiter.interacted(backgroundTimeline)
@@ -346,4 +355,9 @@ final class VideoPlaybackSessionTests: XCTestCase {
         XCTAssertNil(session.player)
         XCTAssertEqual(player?.rate, 0)
     }
+}
+
+@MainActor
+func testVideo(_ url: String) -> UiMediaVideo {
+    UiMediaVideo(url: url, thumbnailUrl: "", description: nil, height: 0, width: 0, customHeaders: nil, proxy: ProxyRef.System.shared, downloadUrl: nil)
 }

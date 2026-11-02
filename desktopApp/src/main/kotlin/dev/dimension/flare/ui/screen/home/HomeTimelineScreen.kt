@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -217,15 +218,28 @@ internal fun HomeTimelineScreen(
     } else {
         state.tabState.onSuccess { tabState ->
             state.selectedTab.onSuccess { currentTab ->
+                val showComposeHeader =
+                    LocalGlobalAppearance.current.showComposeInHomeTimeline &&
+                        canComposeState.canCompose.takeSuccess() == true
                 val currentTabTimelineState =
                     key(currentTab.id) {
                         rememberTimelineItemPresenterWithLazyListState(
                             item = currentTab,
                             isHomeTimeline = true,
+                            leadingItemCount = if (showComposeHeader) 1 else 0,
                         )
                     }
                 val autoRefreshInterval = LocalAppSettings.current.homeTimelineAutoRefreshInterval
                 val latestTimelineState by rememberUpdatedState(currentTabTimelineState)
+                val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    val observer =
+                        androidx.lifecycle.LifecycleEventObserver { _, event ->
+                            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP) latestTimelineState.reading?.savePosition()
+                        }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+                    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+                }
                 LaunchedEffect(currentTab.id, autoRefreshInterval) {
                     if (autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
                         return@LaunchedEffect
@@ -267,9 +281,7 @@ internal fun HomeTimelineScreen(
                                 state.setTopBarExpanded(true)
                             },
                             header =
-                                if (LocalGlobalAppearance.current.showComposeInHomeTimeline &&
-                                    canComposeState.canCompose.takeSuccess() == true
-                                ) {
+                                if (showComposeHeader) {
                                     {
                                         Box(
                                             contentAlignment = Alignment.Center,
@@ -483,29 +495,30 @@ private fun presenter(accountType: AccountType) =
     run {
         var isTopBarExpanded by remember { mutableStateOf(true) }
         val state = remember { HomeTimelineWithTabsPresenter() }.invoke()
-        var selectedIndex by remember {
-            mutableStateOf(0)
-        }
+        var selectedId by remember { mutableStateOf<String?>(null) }
 
-        state.tabState.onSuccess {
-            LaunchedEffect(it.size) {
-                selectedIndex = 0
+        state.tabState.onSuccess { tabs ->
+            LaunchedEffect(tabs.map { it.id }, selectedId, state.selectionReady) {
+                if (state.selectionReady) {
+                    selectedId = tabs.firstOrNull { it.id == (selectedId ?: state.initialSelectedTabId) }?.id ?: tabs.firstOrNull()?.id
+                    selectedId?.let(state::selectTab)
+                }
             }
         }
 
         val selectedTab =
             remember(
                 state.tabState,
-                selectedIndex,
+                selectedId,
             ) {
-                state.tabState.map { it.elementAt(selectedIndex) }
+                state.tabState.map { tabs -> tabs.firstOrNull { it.id == selectedId } ?: tabs.first() }
             }
 
         object : HomeTimelineWithTabsPresenter.State by state {
             val selectedTab = selectedTab
 
             fun setSelectedIndex(index: Int) {
-                selectedIndex = index
+                state.tabState.onSuccess { selectedId = it.getOrNull(index)?.id }
             }
 
             val isTopBarExpanded: Boolean

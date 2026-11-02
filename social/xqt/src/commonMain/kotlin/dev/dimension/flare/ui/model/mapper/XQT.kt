@@ -7,10 +7,12 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
+import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.Entities
@@ -68,8 +70,11 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.model.uiArticleContentOf
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -82,7 +87,6 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
@@ -149,12 +153,33 @@ internal fun List<InstructionUnion>.renderNotifications(accountKey: MicroBlogKey
             is TimelineAddEntries -> instruction.propertyEntries
             else -> emptyList()
         }
-    }.mapNotNull { entry ->
-        val itemContent = (entry.content as? TimelineTimelineItem)?.itemContent
-        when (itemContent) {
-            is TimelineNotification -> itemContent.renderNotification(accountKey)
-            is TimelineTweet -> itemContent.renderMention(accountKey)
-            else -> null
+    }.flatMap { entry ->
+        when (val content = entry.content) {
+            is TimelineTimelineItem -> {
+                listOfNotNull(
+                    when (val item = content.itemContent) {
+                        is TimelineNotification -> item.renderNotification(accountKey)
+                        is TimelineTweet -> item.renderMention(accountKey, entry.entryId)
+                        else -> null
+                    },
+                )
+            }
+
+            is TimelineTimelineModule -> {
+                listOf<InstructionUnion>(TimelineAddEntries(listOf(entry))).tweets().mapNotNull { module ->
+                    val post = module.render(accountKey)?.asTimelinePostItem() ?: return@mapNotNull null
+                    post.copy(
+                        presentation =
+                            post.presentation.copy(
+                                notificationKey = MicroBlogKey("${entry.entryId}:${module.id}", accountKey.host),
+                            ),
+                    )
+                }
+            }
+
+            else -> {
+                emptyList()
+            }
         }
     }
 
@@ -177,7 +202,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 reference.tweetResults
                     ?.result
                     ?.toTweetOrNull()
-                    ?.renderStatus(accountKey)
+                    ?.render(accountKey)
             }
     val url = notificationUrl.url
     val message =
@@ -207,7 +232,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                     }
                 },
             accountType = AccountType.Specific(accountKey),
-        )
+        ).bindMediaProxy()
 
     return when {
         notificationIcon == "person_icon" && users.size == 1 -> {
@@ -215,9 +240,9 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 message = message,
                 value = users.first(),
                 createdAt = createdAt,
-                statusKey = users.first().key,
+                statusKey = statusKey,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         }
 
         notificationIcon == "person_icon" && users.isNotEmpty() -> {
@@ -228,7 +253,7 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
                 statusKey = statusKey,
                 post = null,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         }
 
         post != null -> {
@@ -241,13 +266,20 @@ private fun TimelineNotification.renderNotification(accountKey: MicroBlogKey): U
     }
 }
 
-private fun TimelineTweet.renderMention(accountKey: MicroBlogKey): UiTimelineV2? {
-    val post = tweetResults.result?.toTweetOrNull()?.renderStatus(accountKey) ?: return null
-    val user = post.user
+private fun TimelineTweet.renderMention(
+    accountKey: MicroBlogKey,
+    entryId: String,
+): UiTimelineV2? {
+    val post =
+        tweetResults.result
+            ?.toTweetOrNull()
+            ?.render(accountKey)
+            ?.asTimelinePostItem() ?: return null
+    val user = post.displayPost.user
     return post.withPresentationMessage(
         UiTimelineV2.Message(
             user = user,
-            statusKey = post.statusKey,
+            statusKey = MicroBlogKey(entryId, accountKey.host),
             icon = UiIcon.Mention,
             type =
                 UiTimelineV2.Message.Type.Localized(
@@ -267,7 +299,7 @@ private fun TimelineTweet.renderMention(accountKey: MicroBlogKey): UiTimelineV2?
                     ClickEvent.Noop
                 },
             accountType = AccountType.Specific(accountKey),
-        ),
+        ).bindMediaProxy(),
     )
 }
 
@@ -291,6 +323,7 @@ private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message):
         presentation =
             post.presentation.copy(
                 message = message,
+                notificationKey = message.statusKey,
             ),
     )
 }
@@ -322,7 +355,7 @@ internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2 {
                     ),
                 statusKey = currentTweet.statusKey,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         } else {
             null
         }
@@ -340,7 +373,7 @@ internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2 {
         UiTimelineV2.TimelinePostItem(
             post = currentTweet,
             presentation = presentation,
-        )
+        ).bindMediaProxy()
     } else {
         currentTweet
     }
@@ -398,7 +431,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
                     ),
                 statusKey = currentTweet.statusKey,
                 accountType = AccountType.Specific(accountKey),
-            )
+            ).bindMediaProxy()
         } else {
             null
         }
@@ -418,7 +451,7 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
         UiTimelineV2.TimelinePostItem(
             post = currentTweet,
             presentation = presentation,
-        )
+        ).bindMediaProxy()
     } else {
         currentTweet
     }
@@ -893,7 +926,7 @@ internal fun Tweet.renderStatus(
                 ),
             ),
         accountType = AccountType.Specific(accountKey),
-    )
+    ).bindMediaProxy()
 }
 
 internal fun User.render(accountKey: MicroBlogKey): UiProfile {
@@ -1001,7 +1034,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 null
             },
         platformId = XQT_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
+        platformIcon = UiIcon.X.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1012,7 +1045,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
@@ -1126,6 +1159,7 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList.List {
             }
         }
     return UiList.List(
+        proxy = ProxyRef.forAccount(accountKey),
         id = idStr.orEmpty(),
         title = name.orEmpty(),
         description = description.orEmpty(),
@@ -1285,7 +1319,7 @@ internal fun AudioSpace.render(
     accountKey: MicroBlogKey,
     url: String?,
 ) = UiPodcast(
-    id = metadata?.restID ?: throw Exception("No ID"),
+                        proxy = ProxyRef.forAccount(accountKey),    id = metadata?.restID ?: throw Exception("No ID"),
     title = metadata.title.orEmpty(),
     playbackUrl = url,
     creator =
@@ -1331,7 +1365,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
                 host = accountKey.host,
             ),
         platformId = XQT_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.X,
+        platformIcon = UiIcon.X.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1347,7 +1381,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
         matrices = UiProfile.Matrices(0, 0, 0),
         mark = persistentListOf(),
         bottomContent = null,
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal val User.name: String
@@ -1438,21 +1472,19 @@ internal fun Tweet.renderContent(
             legacy
                 ?.fullText
                 ?.let {
-                    val displayText =
-                        if (legacy.displayTextRange.size == 2) {
-                            it
-                                .codePointSequence()
-                                .drop(legacy.displayTextRange[0])
-                                .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                                .flatMap { codePoint ->
-                                    codePoint
-                                        .toChars()
-                                        .toList()
-                                }.joinToString("")
-                        } else {
-                            it
-                        }
-                    displayText.decodeHtmlEntities()
+                    if (legacy.displayTextRange.size == 2) {
+                        it
+                            .codePointSequence()
+                            .drop(legacy.displayTextRange[0])
+                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                            .flatMap { codePoint ->
+                                codePoint
+                                    .toChars()
+                                    .toList()
+                            }.joinToString("")
+                    } else {
+                        it
+                    }
                 }.orEmpty()
         return renderRichText(text, legacy?.entities, accountKey, sourceLanguages)
     } else {
@@ -1745,7 +1777,7 @@ private fun List<Token>.toUiRichText(
                                             DeeplinkRoute.Profile
                                                 .UserNameWithHost(
                                                     accountType = AccountType.Specific(accountKey),
-                                                    userName = token.value.trimStart('@'),
+                                                    userName = token.value.trimStart('@', '＠'),
                                                     host = accountKey.host,
                                                 ).toUri(),
                                     ),
@@ -1789,7 +1821,7 @@ private fun renderRichText(
     sourceLanguages: List<String> = emptyList(),
 ): UiRichText =
     twitterParser
-        .parse(text)
+        .parse(text.decodeHtmlEntities())
         .map { token ->
             if (token is UrlToken) {
                 val actual =
@@ -1870,14 +1902,35 @@ private fun TwitterArticleBlock.toArticleBlocks(
         val entity = entities.entityValue(entityKey) ?: return emptyList()
         if (entity.type.equals("MEDIA", ignoreCase = true)) {
             return entity.data.mediaItems.mapIndexedNotNull { mediaIndex, mediaItem ->
-                mediaMap[mediaItem.mediaId]
-                    ?.toUiArticleImage(description = entity.data.caption)
-                    ?.let { media ->
+                val media = mediaMap[mediaItem.mediaId] ?: return@mapIndexedNotNull null
+                val info = media.mediaInfo
+                val videoUrl =
+                    info
+                        ?.takeIf { it.typeName == "ApiVideo" }
+                        ?.variants
+                        ?.filter { !it.url.isNullOrBlank() }
+                        ?.maxByOrNull { it.bitRate ?: 0 }
+                        ?.url
+                if (videoUrl != null) {
+                    UiArticleBlock.Video(
+                        key = "$blockKey:video:$mediaIndex",
+                        media =
+                            UiMedia.Video(
+                                url = videoUrl,
+                                thumbnailUrl = media.displayImageUrl().orEmpty(),
+                                height = info.displayHeight()?.toFloat() ?: 0f,
+                                width = info.displayWidth()?.toFloat() ?: 0f,
+                                description = entity.data.caption?.takeIf { it.isNotBlank() },
+                            ),
+                    )
+                } else {
+                    media.toUiArticleImage(description = entity.data.caption)?.let { image ->
                         UiArticleBlock.Image(
                             key = "$blockKey:image:$mediaIndex",
-                            media = media,
+                            media = image,
                         )
                     }
+                }
             }
         }
         return emptyList()
@@ -1987,4 +2040,4 @@ private fun List<TwitterArticleInlineStyleRange>.hasStyle(
     }
 
 private fun List<dev.dimension.flare.data.network.xqt.model.TwitterArticleEntityEntry>.entityValue(key: Int): TwitterArticleEntity? =
-    getOrNull(key)?.value ?: firstOrNull { it.key == key.toString() }?.value
+    firstOrNull { it.key == key.toString() }?.value

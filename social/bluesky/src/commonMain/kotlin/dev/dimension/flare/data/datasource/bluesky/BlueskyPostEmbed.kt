@@ -10,8 +10,11 @@ import app.bsky.embed.Record
 import app.bsky.embed.RecordWithMedia
 import app.bsky.embed.RecordWithMediaMediaUnion
 import app.bsky.embed.Video
+import app.bsky.embed.VideoPresentation
 import app.bsky.feed.PostEmbedUnion
+import dev.dimension.flare.common.UploadMedia
 import kotlinx.collections.immutable.toImmutableList
+import sh.christian.ozone.api.model.Blob
 
 internal const val BLUESKY_LEGACY_IMAGE_LIMIT = 4
 internal const val BLUESKY_GALLERY_AUTHOR_LIMIT = 10
@@ -30,6 +33,18 @@ internal sealed interface BlueskyMediaEmbed {
         val value: Gallery,
     ) : BlueskyMediaEmbed
 }
+
+internal fun UploadMedia.toBlueskyMediaEmbed(
+    blob: Blob,
+    altText: String?,
+): BlueskyMediaEmbed.VideoMedia =
+    BlueskyMediaEmbed.VideoMedia(
+        Video(
+            video = blob,
+            alt = altText,
+            presentation = if (isGif) VideoPresentation.Gif else null,
+        ),
+    )
 
 internal fun List<ImagesImage>.toBlueskyMediaEmbed(): BlueskyMediaEmbed? {
     require(size <= BLUESKY_GALLERY_AUTHOR_LIMIT) {

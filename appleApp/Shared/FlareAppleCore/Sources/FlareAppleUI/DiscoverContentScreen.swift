@@ -36,6 +36,17 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     public var body: some View {
         scrollingContent
         .modifier(DiscoverListStyle())
+        .overlay {
+            if searchPresenter.state.searching {
+                if searchPresenter.state.users.isEmpty && searchPresenter.state.status.isEmpty {
+                    ListEmptyView("search_empty_title", icon: .magnifyingGlass)
+                        .allowsHitTesting(false)
+                }
+            } else if presenter.state.users.isEmpty && presenter.state.hashtags.isEmpty && presenter.state.status.isEmpty {
+                ListEmptyView("discover_empty_title", icon: .globe)
+                    .allowsHitTesting(false)
+            }
+        }
         .refreshable {
             if searchPresenter.state.searching {
                 try? await searchPresenter.state.refreshSuspend()
@@ -94,15 +105,13 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                 }
             }
         }
-        .onChange(of: presenter.state.selectedAccount?.key) { _, _ in
+        .onChange(of: presenter.state.selectedAccountKey, initial: true) { _, _ in
             listScope = UUID().uuidString
-            if listRenderer != nil {
-                search(query: committedSearchText)
-            }
+            search(query: committedSearchText)
         }
-        .onChange(of: presenter.state.selectedAccount) { _, newAccount in
-            if listRenderer == nil, let newAccount {
-                searchPresenter.state.setAccount(profile: newAccount)
+        .onChange(of: presenter.state.isAccountReady) { _, ready in
+            if ready && presenter.state.selectedAccountKey == nil {
+                search(query: committedSearchText)
             }
         }
     }
@@ -142,10 +151,8 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
         if showsPosts { headers.append(.title(searching ? "local_history_status" : "discover_status")) }
         return TimelineListRequest(
             key: "\(listScope):\(searching ? searchPresenter.key : "discover")",
-            positionScope: listScope,
             content: showsPosts ? .posts(posts) : .none,
-            headers: headers,
-            positionOwner: searching ? searchPresenter : presenter
+            headers: headers
         )
     }
 
@@ -154,25 +161,22 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     private var accountToolbarItem: some ToolbarContent {
         if case .success(let data) = onEnum(of: presenter.state.accounts) {
             let accounts = data.data
-            if accounts.count > 1 {
+            if presenter.state.canSwitchAccount {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         ForEach(0..<accounts.count, id: \.self) { index in
                             let account = accounts[index] as! UiProfile
                             Toggle(isOn: Binding(get: {
-                                presenter.state.selectedAccount?.key == account.key
+                                presenter.state.selectedAccountKey == account.key
                             }, set: { value in
                                 if value {
-                                    presenter.state.setAccount(profile: account)
-                                    if listRenderer == nil {
-                                        searchPresenter.state.setAccount(profile: account)
-                                    }
+                                    selectAccount(account)
                                 }
                             })) {
                                 Label {
-                                    Text(account.handle.canonical)
+                                    Text(account.handle.display)
                                 } icon: {
-                                    AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                                    AvatarView(data: account.avatar)
                                 }
                             }
                         }
@@ -180,11 +184,10 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                         if let selectedAccount = presenter.state.selectedAccount {
                             HStack(spacing: 8) {
                                 AvatarView(
-                                    data: selectedAccount.avatar?.url,
-                                    customHeader: selectedAccount.avatar?.customHeaders
+                                    data: selectedAccount.avatar
                                 )
                                 .frame(width: 24, height: 24)
-                                Text(selectedAccount.handle.canonical)
+                                Text(selectedAccount.handle.display)
                                 Image(fontAwesome: .chevronDown)
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -196,6 +199,12 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                                             .fill(Color.secondary.opacity(0.2))
                                     )
                                     .scaleEffect(0.66)
+                            }
+                        } else {
+                            Label {
+                                Text("discover_title", bundle: FlareAppleUILocalization.bundle)
+                            } icon: {
+                                Image(systemName: "person.crop.circle")
                             }
                         }
                     }
@@ -222,23 +231,30 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
             let accounts: [UiProfile] = (0..<rawAccounts.count).compactMap { index in
                 rawAccounts[index] as? UiProfile
             }
-            if !accounts.isEmpty, let toolbarAccount = presenter.state.selectedAccount ?? accounts.first {
+            if !accounts.isEmpty {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         isMacAccountPopoverPresented.toggle()
                     } label: {
-                        AvatarView(
-                            data: toolbarAccount.avatar?.url,
-                            customHeader: toolbarAccount.avatar?.customHeaders
-                        )
-                        .frame(width: 26, height: 26)
+                        if let toolbarAccount = presenter.state.selectedAccount {
+                            AvatarView(
+                                data: toolbarAccount.avatar
+                            )
+                            .frame(width: 26, height: 26)
+                        } else {
+                            Label {
+                                Text("discover_title", bundle: FlareAppleUILocalization.bundle)
+                            } icon: {
+                                Image(systemName: "person.crop.circle")
+                            }
+                        }
                     }
                     .buttonStyle(.plain)
-                    .help(toolbarAccount.handle.canonical)
+                    .help(presenter.state.selectedAccount?.handle.display ?? String(localized: "discover_title", bundle: FlareAppleUILocalization.bundle))
                     .popover(isPresented: $isMacAccountPopoverPresented, arrowEdge: .top) {
                         MacDiscoverAccountPopover(
                             accounts: accounts,
-                            selectedAccount: presenter.state.selectedAccount,
+                            selectedAccountKey: presenter.state.selectedAccountKey,
                             onSelect: selectAccount
                         )
                     }
@@ -315,14 +331,10 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
     }
 
     private func search(query: String) {
-        guard listRenderer != nil else {
-            searchPresenter.state.search(query: query)
-            return
-        }
-        let accountType = presenter.state.selectedAccount.map {
-            AccountType.Specific(accountKey: $0.key)
-        } ?? presenter.state.selectedAccountType
-        searchPresenter = KotlinPresenter(presenter: SearchPresenter(accountType: accountType, initialQuery: query))
+        guard presenter.state.isAccountReady else { return }
+        searchPresenter = KotlinPresenter(
+            presenter: SearchPresenter(accountType: presenter.state.selectedAccountType, initialQuery: query)
+        )
     }
 
     private func askAi() {
@@ -333,7 +345,6 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
 
     private func selectAccount(_ account: UiProfile) {
         presenter.state.setAccount(profile: account)
-        searchPresenter.state.setAccount(profile: account)
         #if os(macOS)
         isMacAccountPopoverPresented = false
         #endif
@@ -354,7 +365,7 @@ public extension DiscoverContentScreen where AskAiOverlay == EmptyView {
 #if os(macOS)
 private struct MacDiscoverAccountPopover: View {
     let accounts: [UiProfile]
-    let selectedAccount: UiProfile?
+    let selectedAccountKey: MicroBlogKey?
     let onSelect: (UiProfile) -> Void
 
     var body: some View {
@@ -363,7 +374,7 @@ private struct MacDiscoverAccountPopover: View {
                 let account = accounts[index]
                 MacDiscoverAccountRow(
                     account: account,
-                    isSelected: selectedAccount?.key == account.key,
+                    isSelected: selectedAccountKey == account.key,
                     action: {
                         onSelect(account)
                     }
@@ -387,10 +398,10 @@ private struct MacDiscoverAccountRow: View {
                     .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
                     .frame(width: 18)
 
-                AvatarView(data: account.avatar?.url, customHeader: account.avatar?.customHeaders)
+                AvatarView(data: account.avatar)
                     .frame(width: 28, height: 28)
 
-                Text(account.handle.canonical)
+                Text(account.handle.display)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -503,7 +514,11 @@ private struct DiscoverTimelineSection: View {
 
     var body: some View {
         Section {
+            #if os(iOS)
+            TimelinePagingListContent(data: data)
+            #else
             TimelinePagingListContent(data: data, usesDefaultHorizontalPadding: true)
+            #endif
         } header: {
             Text(FlareAppleUILocalization.string(titleKey))
         }

@@ -14,9 +14,8 @@ internal class SaveDraftUseCase(
     private val draftRepository: DraftRepository,
     private val draftMediaStore: DraftMediaStore,
 ) {
-    suspend operator fun invoke(bundle: ComposeDraftBundle): String {
-        val persistedMedia = draftMediaStore.persist(groupId = bundle.groupId, medias = bundle.template.medias)
-        return draftRepository.saveDraft(
+    suspend operator fun invoke(bundle: ComposeDraftBundle): String =
+        draftRepository.saveDraft(
             SaveDraftInput(
                 groupId = bundle.groupId,
                 content = bundle.template.toDraftContent(),
@@ -26,10 +25,8 @@ internal class SaveDraftUseCase(
                             accountKey = it.accountKey,
                         )
                     },
-                medias = persistedMedia,
             ),
-        )
-    }
+        ) { draftMediaStore.persist(groupId = bundle.groupId, medias = bundle.template.medias) }
 }
 
 internal fun dev.dimension.flare.data.datasource.microblog.ComposeData.toDraftContent(): DraftContent =

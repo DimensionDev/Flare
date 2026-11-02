@@ -5,6 +5,7 @@ import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -22,12 +23,13 @@ public fun ktorfit(
     baseUrl: String,
     json: Json = JSON,
     extraConverterFactories: List<Converter.Factory> = emptyList(),
+    proxy: ProxyRef = ProxyRef.Global,
     config: HttpClientConfig<*>.() -> Unit = {},
 ): Ktorfit =
     de.jensklingenberg.ktorfit.ktorfit {
         baseUrl(baseUrl)
         httpClient(
-            ktorClient {
+            ktorClient(proxy) {
                 install(ContentNegotiation) {
                     nullableFallbackJson(json)
                 }
@@ -43,13 +45,14 @@ public fun ktorfit(
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public fun ktorClient(
+    proxy: ProxyRef = ProxyRef.Global,
     config: HttpClientConfig<*>.() -> Unit = {
         install(ContentNegotiation) {
             nullableFallbackJson(JSON)
         }
     },
 ): HttpClient =
-    HttpClient(httpClientEngine) {
+    HttpClient(ProxyRoutingEngine(proxy)) {
         config.invoke(this)
         install(Logging) {
             logger = FlareLogger
@@ -65,7 +68,7 @@ public fun ktorClient(
         }
     }
 
-internal expect val httpClientEngine: HttpClientEngine
+internal val httpClientEngine: HttpClientEngine get() = ProxyRoutingEngine(ProxyRef.Global)
 
 // Logging's BODY mode collects the entire outgoing stream. Keep upload payloads out of it,
 // including X's base64 form chunks and the authenticated retry of a Bluesky upload.

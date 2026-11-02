@@ -17,8 +17,10 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.ShareRepliesLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineSpec
@@ -56,7 +58,7 @@ internal class FanboxDataSource(
     PostEventHandler.Handler {
     private val service =
         FanboxService(
-            credentialFlow = credentialFlow,
+            proxy = ProxyRef.forAccount(accountKey),            credentialFlow = credentialFlow,
             onCredentialRefreshed = updateCredential,
         )
     private val loader by lazy {
@@ -68,6 +70,7 @@ internal class FanboxDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )
@@ -176,6 +179,9 @@ internal class FanboxDataSource(
             accountKey = accountKey,
             creatorKey = userKey,
         )
+
+    override fun shareReplies(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        ShareRepliesLoader(articleComments(statusKey), statusKey, comments = true)
 
     override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
         FanboxStatusDetailLoader(

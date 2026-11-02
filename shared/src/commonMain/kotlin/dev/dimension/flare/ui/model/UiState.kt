@@ -8,9 +8,13 @@ import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.CacheableState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
@@ -179,6 +183,15 @@ public val <T : Any> UiState<T>.isError: Boolean get() = this is UiState.Error
 @HiddenFromObjC
 public val <T : Any> UiState<T>.isLoading: Boolean get() = this is UiState.Loading
 
+// Keep observing replacement services after a removed capability or failed request.
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun <T, R : Any> Flow<T>.flatMapLatestUiState(transform: suspend (T) -> Flow<UiState<R>>): Flow<UiState<R>> =
+    flatMapLatest { value ->
+        flow { emitAll(transform(value)) }
+            .onStart { emit(UiState.Loading()) }
+            .catch { emit(UiState.Error(it)) }
+    }
+
 @OptIn(ExperimentalObjCRefinement::class)
 @Composable
 @HiddenFromObjC
@@ -213,8 +226,11 @@ public fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
     } ?: run {
         when (val state = refreshState) {
             is LoadState.Error -> UiState.Error(state.error)
+
             LoadState.Loading -> UiState.Loading()
-            is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
+
+            // Fetch completion can precede the first cache emission.
+            is LoadState.NotLoading -> UiState.Loading()
         }
     }
 
@@ -225,8 +241,11 @@ public fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> =
         } else {
             when (refresh) {
                 is LoadState.Error -> UiState.Error(refresh.error)
+
                 LoadState.Loading -> UiState.Loading()
-                is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
+
+                // Fetch completion can precede the first cache emission.
+                is LoadState.NotLoading -> UiState.Loading()
             }
         }
     }

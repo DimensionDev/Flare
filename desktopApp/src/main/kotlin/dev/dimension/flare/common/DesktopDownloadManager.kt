@@ -1,6 +1,7 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.Res
+import dev.dimension.flare.data.network.applyMedia
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.media_download_started
 import dev.dimension.flare.media_save_fail
@@ -9,10 +10,10 @@ import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.model.UiMedia
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
+import io.ktor.http.isSuccess
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
@@ -30,14 +31,14 @@ internal class DesktopDownloadManager(
     private val client: HttpClient = ktorClient(),
 ) : Closeable {
     suspend fun download(
-        url: String,
+        media: UiMedia,
         targetFile: File,
         overwrite: Boolean = true,
-        customHeaders: Map<String, String>? = null,
         onProgress: (DownloadProgress) -> Unit = {},
         notify: Boolean = true,
     ): Boolean =
         withContext(Dispatchers.IO) {
+            val url = media.urlForDownload
             require(url.isNotBlank()) { "url must not be blank" }
             require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
             if (targetFile.exists() && !overwrite) {
@@ -52,21 +53,29 @@ internal class DesktopDownloadManager(
             }
 
             try {
+                val resourcePath = url.substringBefore('?').substringBefore('#').lowercase()
+                require(!resourcePath.endsWith(".m3u8") && !resourcePath.endsWith(".mpd") && !resourcePath.endsWith(".ism/manifest")) {
+                    "Adaptive streams require a downloadable media URL"
+                }
                 if (notify) {
                     inAppNotification.message(Res.string.media_download_started)
                 }
-                client
-                    .prepareGet(url) {
-                        customHeaders?.forEach { (key, value) ->
-                            header(key, value)
+                if (url.startsWith("file://")) {
+                    require(isImageTranslationFile(media, FileSystemUtilsExt.flareCacheDirectory())) { "Unsupported local media" }
+                    File(java.net.URI(url)).copyTo(tempFile, overwrite = true)
+                } else {
+                    client
+                        .prepareGet(url) {
+                            applyMedia(media)
+                        }.execute { response ->
+                            check(response.status.isSuccess()) { "Media download failed: HTTP ${response.status.value}" }
+                            writeResponseToFile(
+                                response = response,
+                                outputFile = tempFile,
+                                onProgress = onProgress,
+                            )
                         }
-                    }.execute { response ->
-                        writeResponseToFile(
-                            response = response,
-                            outputFile = tempFile,
-                            onProgress = onProgress,
-                        )
-                    }
+                }
                 moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
                 if (notify) {
                     inAppNotification.message(Res.string.media_save_success)
@@ -91,7 +100,7 @@ internal class DesktopDownloadManager(
     ): MediaDownloadBatchResult {
         val succeededFileNames = mutableListOf<String>()
         val failedFileNames = mutableListOf<String>()
-        mediaByFileName.forEach { (fileName, media) ->
+        mediaByFileName.filterValues { it !is UiMedia.Ugoira }.forEach { (fileName, media) ->
             val targetFile =
                 File(
                     targetDirectory,
@@ -100,10 +109,9 @@ internal class DesktopDownloadManager(
             val success =
                 runCatching {
                     download(
-                        url = media.url,
+                        media = media,
                         targetFile = targetFile,
                         overwrite = overwrite,
-                        customHeaders = media.customHeaders,
                         notify = false,
                     )
                 }.getOrDefault(false)
@@ -160,6 +168,7 @@ private suspend fun writeResponseToFile(
                 ),
             )
         }
+        channel.closedCause?.let { throw it }
         output.flush()
     }
 }

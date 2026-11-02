@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -55,6 +54,7 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.R
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiRssSource
@@ -64,14 +64,15 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
+import dev.dimension.flare.ui.presenter.home.rss.RssReadingMode
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import dev.dimension.flare.ui.theme.single
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -158,7 +159,7 @@ internal fun RssSourceEditSheet(
                             rssState.icon?.let {
                                 {
                                     NetworkImage(
-                                        it,
+                                        it.toUiImage(proxy = ProxyRef.Global),
                                         contentDescription = null,
                                         modifier =
                                             Modifier
@@ -238,7 +239,7 @@ internal fun RssSourceEditSheet(
                                     ),
                                 leadingContent = {
                                     NetworkImage(
-                                        source.favIcon,
+                                        source.favIcon.toUiImage(proxy = ProxyRef.Global),
                                         contentDescription = null,
                                         modifier =
                                             Modifier
@@ -261,6 +262,11 @@ internal fun RssSourceEditSheet(
                                     )
                                 },
                             )
+                            if (state.selectedSource.contains(source)) {
+                                state.readingModes.firstOrNull { it.url == source.url }?.let { mode ->
+                                    RssReadingModePicker(mode) { state.setSourceDisplayMode(source.url, it) }
+                                }
+                            }
                         }
                     }
                 }
@@ -295,7 +301,7 @@ internal fun RssSourceEditSheet(
                                     rssState.icon?.let {
                                         {
                                             NetworkImage(
-                                                it,
+                                                it.toUiImage(proxy = ProxyRef.Global),
                                                 contentDescription = null,
                                                 modifier =
                                                     Modifier
@@ -323,58 +329,12 @@ internal fun RssSourceEditSheet(
         }
 
         state.inputState.onSuccess { inputState ->
-            if (inputState !is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance) {
-                val openInBrowserString = stringResource(id = R.string.rss_sources_open_in_browser)
-                val fullContentString = stringResource(id = R.string.rss_sources_full_content)
-                val descriptionOnlyString =
-                    stringResource(id = R.string.rss_sources_description_only)
-                var expanded by remember { mutableStateOf(false) }
-                SegmentedListItem(
-                    selected = expanded,
-                    onClick = {
-                        expanded = !expanded
-                    },
-                    shapes = ListItemDefaults.single(),
-                    content = {
-                        Text(stringResource(id = R.string.rss_sources_display_mode))
-                    },
-                    trailingContent = {
-                        Text(
-                            when (state.displayMode) {
-                                RssDisplayMode.OPEN_IN_BROWSER -> openInBrowserString
-                                RssDisplayMode.FULL_CONTENT -> fullContentString
-                                RssDisplayMode.DESCRIPTION_ONLY -> descriptionOnlyString
-                            },
-                        )
-
-                        androidx.compose.material3.DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                        ) {
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(fullContentString) },
-                                onClick = {
-                                    state.setDisplayMode(RssDisplayMode.FULL_CONTENT)
-                                    expanded = false
-                                },
-                            )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(openInBrowserString) },
-                                onClick = {
-                                    state.setDisplayMode(RssDisplayMode.OPEN_IN_BROWSER)
-                                    expanded = false
-                                },
-                            )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(descriptionOnlyString) },
-                                onClick = {
-                                    state.setDisplayMode(RssDisplayMode.DESCRIPTION_ONLY)
-                                    expanded = false
-                                },
-                            )
-                        }
-                    },
-                )
+            if (inputState !is EditRssSourcePresenter.State.RssInputState.RssSources &&
+                inputState !is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance
+            ) {
+                state.readingModes.firstOrNull()?.let { readingMode ->
+                    RssReadingModePicker(readingMode, state::setDisplayMode)
+                }
             }
             Row(
                 horizontalArrangement =
@@ -466,7 +426,6 @@ internal fun RssSourceEditSheet(
                         onClick = {
                             inputState.save(
                                 sources = state.selectedSource,
-                                displayMode = state.displayMode,
                             )
                             state.save(
                                 sources = state.selectedSource,
@@ -583,7 +542,6 @@ private fun presenter(
     val selectedSource = remember { mutableStateListOf<UiRssSource>() }
     val selectedMastodonTypes = remember { mutableStateListOf<SubscriptionType>() }
     var pinnedInTabs by remember { mutableStateOf(false) }
-    var displayMode by remember { mutableStateOf(RssDisplayMode.FULL_CONTENT) }
     state.data.onSuccess {
         LaunchedEffect(Unit) {
             titleText.edit {
@@ -592,7 +550,6 @@ private fun presenter(
             urlText.edit {
                 append(it.url)
             }
-            displayMode = it.displayMode
         }
     }
 
@@ -627,9 +584,12 @@ private fun presenter(
             }
         }
     }
+    LaunchedEffect(state.checkState) {
+        selectedSource.clear()
+        state.clearSelectedSources()
+    }
     LaunchedEffect(Unit) {
         snapshotFlow { urlText.text }
-            .debounce(666)
             .collect {
                 state.checkUrl(it.toString())
             }
@@ -639,11 +599,6 @@ private fun presenter(
         val selectedSource = selectedSource
         val selectedMastodonTypes: List<SubscriptionType> = selectedMastodonTypes
         val rssHubHostText = rssHubHostText
-        val displayMode = displayMode
-
-        fun setDisplayMode(value: RssDisplayMode) {
-            displayMode = value
-        }
 
         fun setPinnedInTabs(value: Boolean) {
             pinnedInTabs = value
@@ -655,6 +610,7 @@ private fun presenter(
             } else {
                 selectedSource.add(source)
             }
+            state.selectSource(source.url, selectedSource.contains(source))
         }
 
         fun toggleMastodonType(type: SubscriptionType) {
@@ -685,4 +641,54 @@ private val publicRssHubServer =
         "https://rsshub.rssforever.com",
         "https://hub.slarker.me",
         "https://rsshub.pseudoyu.com",
+    )
+
+@Composable
+private fun RssReadingModePicker(
+    mode: RssReadingMode,
+    onSelect: (RssDisplayMode) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    SegmentedListItem(
+        selected = expanded,
+        onClick = { expanded = !expanded },
+        shapes = ListItemDefaults.single(),
+        content = { Text(stringResource(R.string.rss_sources_display_mode)) },
+        trailingContent = {
+            Text(rssReadingModeLabel(mode.displayMode))
+            androidx.compose.material3.DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                RssDisplayMode.entries.forEach { value ->
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(rssReadingModeLabel(value)) },
+                        onClick = {
+                            onSelect(value)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        },
+    )
+    if (mode.automatic) {
+        Text(
+            stringResource(
+                when {
+                    mode.checking -> R.string.rss_open_mode_checking
+                    mode.recommended != null -> R.string.rss_open_mode_recommended
+                    else -> R.string.rss_open_mode_unknown
+                },
+            ),
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+@Composable
+private fun rssReadingModeLabel(mode: RssDisplayMode): String =
+    stringResource(
+        when (mode) {
+            RssDisplayMode.FULL_CONTENT -> R.string.rss_sources_full_content
+            RssDisplayMode.DESCRIPTION_ONLY -> R.string.rss_sources_description_only
+            RssDisplayMode.OPEN_IN_BROWSER -> R.string.rss_sources_open_in_browser
+        },
     )

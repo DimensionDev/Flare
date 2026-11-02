@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 public data class UiHandle(
     val raw: String,
     val host: String,
+    private val displayOverride: String? = null,
 ) {
     val normalizedRaw: String
         get() = raw.trim().removePrefix("@").substringBefore("@")
@@ -17,4 +18,7 @@ public data class UiHandle(
 
     val canonical: String
         get() = "@$normalizedRaw@$normalizedHost"
+
+    val display: String
+        get() = displayOverride ?: canonical
 }

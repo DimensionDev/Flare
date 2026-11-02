@@ -172,7 +172,8 @@ struct AgentChatScreen: View {
             messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
-            errorMessage: presenter.state.room.errorMessage,
+            error: presenter.state.room.error,
+            onRetry: presenter.state.retry,
             runningTrace: presenter.state.room.currentTrace?.localizedLabel ?? String(localized: "agent_chat_thinking", bundle: .main),
             inputPlaceholder: String(localized: "agent_chat_input_placeholder", bundle: .main),
             onInputChange: presenter.state.setInput,
@@ -224,7 +225,8 @@ struct LocalHistoryAgentScreen: View {
             messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
-            errorMessage: presenter.state.room.errorMessage,
+            error: presenter.state.room.error,
+            onRetry: presenter.state.retry,
             runningTrace: presenter.state.room.currentTrace?.localizedLabel ?? String(localized: "agent_chat_thinking", bundle: .main),
             inputPlaceholder: String(localized: "agent_chat_input_placeholder", bundle: .main),
             onInputChange: presenter.state.setInput,
@@ -278,7 +280,8 @@ struct StatusInsightScreen: View {
             messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
-            errorMessage: presenter.state.room.errorMessage,
+            error: presenter.state.room.error,
+            onRetry: presenter.state.retry,
             runningTrace: presenter.state.room.currentTrace?.localizedLabel ?? String(localized: "status_insight_analyzing", bundle: .main),
             inputPlaceholder: String(localized: "agent_chat_input_placeholder", bundle: .main),
             onInputChange: presenter.state.setInput,
@@ -330,7 +333,8 @@ struct ProfileInsightScreen: View {
             messages: presenter.state.messages,
             isRunning: presenter.state.room.isRunning,
             canSend: presenter.state.canSend,
-            errorMessage: presenter.state.room.errorMessage,
+            error: presenter.state.room.error,
+            onRetry: presenter.state.retry,
             runningTrace: presenter.state.room.currentTrace?.localizedLabel ?? String(localized: "profile_insight_analyzing", defaultValue: "Analyzing this profile...", bundle: .main),
             inputPlaceholder: String(localized: "agent_chat_input_placeholder", bundle: .main),
             onInputChange: presenter.state.setInput,
@@ -396,7 +400,7 @@ extension AgentTrace {
         case .preparingImages:
             localizedAgentPresentationString("status_insight_trace_preparing_images", fallback: "Preparing images")
         case .imagesUnsupportedFallback:
-            localizedAgentPresentationString("status_insight_trace_images_unsupported_fallback", fallback: "Images are not supported, using text fallback")
+            localizedAgentPresentationString("status_insight_trace_images_unsupported_fallback", fallback: "Images could not be read; continuing with text only")
         case .agentStarted:
             localizedAgentPresentationString("status_insight_trace_agent_started", fallback: "Agent started")
         case .strategyStarted:

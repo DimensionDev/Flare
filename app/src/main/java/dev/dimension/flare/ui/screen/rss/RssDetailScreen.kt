@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailTranslatePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.theme.isLightTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
@@ -86,10 +87,11 @@ internal fun RssDetailScreen(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
+    fallbackHtml: String? = null,
     onBack: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle) }
+    val state by producePresenter(url) { presenter(url, descriptionHtml, descriptionTitle, fallbackHtml) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val color =
@@ -203,12 +205,12 @@ internal fun RssDetailScreen(
                                     else -> documentData.title
                                 }
                             } ?: documentData.title
-                        Text(
-                            text = displayTitle,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier =
-                            Modifier,
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = displayTitle,
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                        }
                         if (documentData.siteName != null || documentData.byline != null || documentData.publishDateTime != null) {
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -255,6 +257,8 @@ internal fun RssDetailScreen(
                                 }
                             }
                         }
+                    }.onError {
+                        Text(stringResource(R.string.rss_detail_unavailable))
                     }.onLoading {
                         Text(
                             "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -334,8 +338,6 @@ internal fun RssDetailScreen(
                             modifier =
                             Modifier,
                         ) {
-                            // Use translated content if available by creating a new DocumentData
-                            // whose lazy .element will re-parse the translated HTML
                             val displayData =
                                 state.translateState?.translatedHtml?.let { htmlState ->
                                     when (htmlState) {
@@ -344,7 +346,7 @@ internal fun RssDetailScreen(
                                     }
                                 } ?: data
                             RssRichText(
-                                element = displayData.element,
+                                element = remember(displayData.content, url) { parseHtml(displayData.content, baseUri = url) },
                                 imageHeader = state.headers,
                             )
                         }
@@ -377,11 +379,12 @@ private fun presenter(
     url: String,
     descriptionHtml: String? = null,
     descriptionTitle: String? = null,
+    fallbackHtml: String? = null,
     settingsRepository: SettingsRepository = koinInject(),
 ) = run {
     val state =
-        remember(url, descriptionHtml) {
-            RssDetailPresenter(url, descriptionHtml, descriptionTitle)
+        remember(url, descriptionHtml, descriptionTitle, fallbackHtml) {
+            RssDetailPresenter(url, descriptionHtml, descriptionTitle, fallbackHtml)
         }.invoke()
     val headers =
         remember(url) {

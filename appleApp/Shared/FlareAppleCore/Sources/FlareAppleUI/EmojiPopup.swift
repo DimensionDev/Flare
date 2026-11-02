@@ -44,6 +44,14 @@ public struct EmojiPopup: View {
             }
         }
         .listStyle(.sidebar)
+        .overlay {
+            if showsEmptyState {
+                ListEmptyView(
+                    filterText.isEmpty ? "emoji_empty" : "emoji_search_empty",
+                    icon: .faceSmile
+                )
+            }
+        }
         .safeAreaInset(edge: .bottom) {
             TextField(
                 FlareAppleUILocalization.string(
@@ -77,17 +85,29 @@ public struct EmojiPopup: View {
         )
     }
 
+    private var showsEmptyState: Bool {
+        guard filteredSections.isEmpty else { return false }
+        switch onEnum(of: presenter.state.history) {
+        case .success(let history):
+            return history.data.count == 0
+        case .error:
+            return true
+        case .loading:
+            return false
+        }
+    }
+
     private var filteredSections: [(key: String, value: [UiEmoji])] {
         data.data
             .sorted { $0.key < $1.key }
             .filter { key, value in
-                filterText.isEmpty ||
+                !value.isEmpty && (filterText.isEmpty ||
                     key.localizedCaseInsensitiveContains(filterText) ||
                     value.contains { item in
                         item.searchKeywords.contains { keyword in
                             keyword.localizedCaseInsensitiveContains(filterText)
                         }
-                    }
+                    })
             }
     }
 }
@@ -116,7 +136,7 @@ private struct EmojiGrid: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
             ForEach(items, id: \.shortcode) { item in
-                NetworkImage(data: item.url)
+                NetworkImage(data: item.media)
                     .scaledToFit()
                     .frame(width: 32, height: 32)
                     .onTapGesture {

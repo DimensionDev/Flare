@@ -206,13 +206,13 @@ private struct MacDMUserRow: View {
     var body: some View {
         StateView(state: item.profile) { user in
             HStack(spacing: 10) {
-                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                AvatarView(data: user.avatar)
                     .frame(width: 34, height: 34)
 
                 VStack(alignment: .leading, spacing: 2) {
                     RichText(text: user.name)
                         .lineLimit(1)
-                    Text(user.handle.canonical)
+                    Text(user.handle.display)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -559,7 +559,7 @@ private struct MacDMConversationColumn: View {
         case .success(let success):
             let users = success.data.cast(UiProfile.self)
             if users.count == 1, let user = users.first {
-                return user.name.raw.isEmpty ? user.handle.canonical : user.name.raw
+                return user.name.raw.isEmpty ? user.handle.display : user.name.raw
             }
             return String(localized: "dm_conversation", bundle: .main)
         case .loading, .error:
@@ -619,7 +619,7 @@ private struct MacDMMessageRow: View {
                 if item.isFromMe {
                     Spacer(minLength: 56)
                 } else if item.showSender {
-                    AvatarView(data: item.user.avatar?.url, customHeader: item.user.avatar?.customHeaders)
+                    AvatarView(data: item.user.avatar)
                         .frame(width: 32, height: 32)
                 }
 
@@ -751,7 +751,7 @@ private struct MacDMRoomAvatar: View {
 
     var body: some View {
         if room.hasUser, let firstUser = room.users.first {
-            AvatarView(data: firstUser.avatar?.url, customHeader: firstUser.avatar?.customHeaders)
+            AvatarView(data: firstUser.avatar)
                 .frame(width: 42, height: 42)
         } else {
             Image(fontAwesome: .circleUser)
@@ -871,7 +871,7 @@ private extension UiDMRoom {
     var dmTitle: String {
         if users.count == 1, let user = users.first {
             let name = user.name.raw
-            return name.isEmpty ? user.handle.canonical : name
+            return name.isEmpty ? user.handle.display : name
         }
         return String(localized: "direct_messages_title", bundle: .main)
     }
@@ -888,6 +888,8 @@ private extension UiMedia {
         switch onEnum(of: self) {
         case .image(let image):
             URL(string: image.url)
+        case .ugoira(let animation):
+            URL(string: animation.url)
         case .gif(let gif):
             URL(string: gif.url)
         case .video(let video):

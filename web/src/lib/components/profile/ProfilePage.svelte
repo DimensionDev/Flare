@@ -7,7 +7,7 @@
     import ProfileTimelineTabPanel from "$lib/components/profile/ProfileTimelineTabPanel.svelte";
     import TimelineLoadingPlaceholderList from "$lib/components/UiTimeline/TimelineLoadingPlaceholderList.svelte";
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
-    import { localizedUiString } from "$lib/i18n/uiStrings";
+    import { localizedUiText } from "$lib/i18n/uiStrings";
     import { m } from "$lib/paraglide/messages.js";
     import {
         type RetainedPresenterController,
@@ -315,7 +315,7 @@
     });
 
     function profileNameText(user: UiProfile): string {
-        return user.name.innerText || user.handle.canonical;
+        return user.name.innerText || user.handle.display;
     }
 
     function profileStats(user: UiProfile) {
@@ -334,7 +334,7 @@
     }
 
     function profileTabTitle(tab: ProfileStateTab): string {
-        return localizedUiString(tab.name);
+        return localizedUiText(tab.name);
     }
 
     function timelinePresenterForTab(tab: ProfileStateTab): TimelinePresenter {
@@ -608,7 +608,7 @@
                             />
                         </div>
                         <div class="profile-handle-row">
-                            <span>{displayProfile.handle.canonical}</span>
+                            <span>{displayProfile.handle.display}</span>
                             {#each displayProfile.mark as mark}
                                 <span
                                     class="profile-mark"

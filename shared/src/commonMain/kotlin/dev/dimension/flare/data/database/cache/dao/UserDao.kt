@@ -108,4 +108,7 @@ internal interface UserDao {
 
     @Query("DELETE FROM DbUserRelation")
     suspend fun clearUserRelations()
+
+    @Query("DELETE FROM DbUserRelation WHERE accountType = :accountType")
+    suspend fun deleteRelationsByAccountType(accountType: DbAccountType)
 }

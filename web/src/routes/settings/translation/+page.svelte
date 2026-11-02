@@ -10,7 +10,7 @@
 	} from '@flare/web-presenters/aiConfig.svelte';
 	import { createAiTranslationTestPresenter } from '@flare/web-presenters/aiTranslationTest.svelte';
 
-	const ai = createAiConfigPresenter();
+	const ai = createAiConfigPresenter(false);
 	const aiTranslationTest = createAiTranslationTestPresenter();
 
 	function checked(event: Event): boolean {

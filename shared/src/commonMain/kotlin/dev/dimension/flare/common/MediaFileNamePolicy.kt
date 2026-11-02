@@ -33,7 +33,10 @@ public object MediaFileNamePolicy {
         }
 
     public fun rawMediaFileName(media: UiMedia): String {
-        val path = media.url.cleanUrlPath()
+        val path = (if (media is UiMedia.Ugoira) "${media.statusKey.id}.mp4" else media.urlForDownload).cleanUrlPath()
+        if (path.endsWith("/xrpc/com.atproto.sync.getBlob")) {
+            return "media.${media.fallbackExtension}"
+        }
         var fileName = path.substringAfterLast("/").substringAfterLast("\\")
         val lastAtIndex = fileName.lastIndexOf('@')
         val lastDotIndex = fileName.lastIndexOf('.')
@@ -123,6 +126,7 @@ public object MediaFileNamePolicy {
         fallbackExtension: String,
     ): String =
         extensionFromName(url.cleanUrlPath().substringAfterLast("/").substringAfterLast("\\"))
+            ?.takeUnless { url.cleanUrlPath().endsWith("/xrpc/com.atproto.sync.getBlob") }
             ?: fallbackExtension.trim().trimStart('.').ifBlank { "bin" }
 
     private fun fileNameFromUrl(url: String): String? =
@@ -157,7 +161,11 @@ public object MediaFileNamePolicy {
     ): String {
         val key = sanitizeFileName(statusKey)
         val handle = sanitizeFileName(userHandle)
-        val extension = extensionFromUrl(url = media.url, fallbackExtension = media.fallbackExtension)
+        val extension =
+            extensionFromUrl(
+                url = (if (media is UiMedia.Ugoira) "${media.statusKey.id}.mp4" else media.urlForDownload),
+                fallbackExtension = media.fallbackExtension,
+            )
         return "${key}_$handle.$extension"
     }
 
@@ -215,9 +223,14 @@ private val UiMedia.fallbackExtension: String
     get() =
         when (this) {
             is UiMedia.Audio -> "mp3"
+
             is UiMedia.Gif -> "gif"
+
             is UiMedia.Image -> "jpg"
-            is UiMedia.Video -> "mp4"
+
+            is UiMedia.Ugoira,
+            is UiMedia.Video,
+            -> "mp4"
         }
 
 private val UnsafeFileNameCharacterRegex = Regex("[^A-Za-z0-9._-]")

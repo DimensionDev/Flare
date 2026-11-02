@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
@@ -35,9 +39,11 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.SettingsPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -102,6 +108,18 @@ internal fun BehaviorScreen(
                     Switch(
                         checked = appSettings.refreshHomeTimelineOnLaunch,
                         onCheckedChange = state::updateRefreshHomeTimelineOnLaunch,
+                    )
+                },
+            )
+            SegmentedListItem(
+                onClick = { state.updateRememberHomeTimelinePosition(!appSettings.rememberHomeTimelinePosition) },
+                shapes = ListItemDefaults.item(),
+                content = { Text(stringResource(R.string.settings_remember_home_timeline_position)) },
+                supportingContent = { Text(stringResource(R.string.settings_remember_home_timeline_position_description)) },
+                trailingContent = {
+                    Switch(
+                        checked = appSettings.rememberHomeTimelinePosition,
+                        onCheckedChange = state::updateRememberHomeTimelinePosition,
                     )
                 },
             )
@@ -197,6 +215,13 @@ internal fun LinkOpenDefaultsScreen(onBack: () -> Unit) {
                     .padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
+            if (linkOpenDefaultsState.targets.takeSuccess()?.isEmpty() == true) {
+                ListEmptyView(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                    text = stringResource(R.string.empty_link_defaults),
+                    icon = FontAwesomeIcons.Solid.Link,
+                )
+            }
             linkOpenTargets.forEachIndexed { index, target ->
                 LinkOpenDefaultSettingsItem(
                     target = target,
@@ -282,7 +307,7 @@ private fun LinkOpenDefaultAccountOption(account: LinkOpenDefaultsPresenter.Acco
                 AvatarComponent(data = user.avatar, size = 24.dp)
                 Column {
                     RichText(text = user.name, maxLines = 1)
-                    Text(text = user.handle.canonical, maxLines = 1)
+                    Text(text = user.handle.display, maxLines = 1)
                 }
             }
         }.onLoading {

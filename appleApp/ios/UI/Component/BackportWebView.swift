@@ -34,6 +34,12 @@ public struct BackportWebView: WebViewRepresentable {
     }
 
     public func updateUIView(_ uiView: WKWebView, context: Context) {}
+
+    public static func dismantleUIView(_ uiView: WKWebView, coordinator: ()) {
+        uiView.stopLoading()
+        uiView.navigationDelegate = nil
+        uiView.loadHTMLString("", baseURL: nil)
+    }
     #endif
 
     #if os(macOS)

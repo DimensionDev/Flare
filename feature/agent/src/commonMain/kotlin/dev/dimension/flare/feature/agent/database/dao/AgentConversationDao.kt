@@ -4,12 +4,22 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import dev.dimension.flare.feature.agent.database.model.DbAgentContext
 import dev.dimension.flare.feature.agent.database.model.DbAgentConversation
 import dev.dimension.flare.feature.agent.database.model.DbAgentMessage
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface AgentConversationDao {
+    @Query("SELECT * FROM agent_contexts WHERE conversationId = :conversationId")
+    suspend fun getContext(conversationId: String): DbAgentContext?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertContext(context: DbAgentContext)
+
+    @Query("DELETE FROM agent_contexts WHERE conversationId = :conversationId")
+    suspend fun deleteContext(conversationId: String)
+
     @Query(
         """
         SELECT

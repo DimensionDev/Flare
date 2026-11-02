@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.model.IconType
 
 @Immutable
 public data class UiInstance(
@@ -12,5 +13,5 @@ public data class UiInstance(
     val bannerUrl: String?,
     val usersCount: Long,
     val platformDisplayName: String = platformId,
-    val platformIcon: UiIcon = UiIcon.World,
+    val platformIcon: IconType = UiIcon.World.asType(),
 )

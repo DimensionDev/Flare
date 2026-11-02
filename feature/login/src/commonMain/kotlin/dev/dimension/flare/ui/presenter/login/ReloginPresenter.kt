@@ -2,9 +2,11 @@ package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.di.koinInject
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 public class ReloginPresenter(
     private val target: ReloginTarget,
@@ -18,7 +20,7 @@ public class ReloginPresenter(
             override val target: ReloginTarget = this@ReloginPresenter.target
             override val methods: List<LoginMethodSpec> = loginPlatformRegistry.methods(target.platformId)
 
-            override fun platformIcon(): UiIcon = loginPlatformRegistry.require(target.platformId).metadata.icon
+            override fun platformIcon(): IconType = loginPlatformRegistry.require(target.platformId).metadata.icon
 
             override fun agreementUrl(): String? =
                 loginPlatformRegistry
@@ -31,7 +33,9 @@ public class ReloginPresenter(
                         host = target.accountKey.host,
                         methodType = methodType,
                         onSuccess = {
-                            onSuccess()
+                            withContext(Dispatchers.Main) {
+                                onSuccess()
+                            }
                         },
                         reloginTarget = target,
                     ),
@@ -44,7 +48,7 @@ public interface ReloginState {
     public val target: ReloginTarget
     public val methods: List<LoginMethodSpec>
 
-    public fun platformIcon(): UiIcon
+    public fun platformIcon(): IconType
 
     public fun agreementUrl(): String?
 

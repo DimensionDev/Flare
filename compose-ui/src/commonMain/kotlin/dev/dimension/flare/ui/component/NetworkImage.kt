@@ -14,21 +14,16 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.theme.PlatformTheme
-import kotlinx.collections.immutable.ImmutableMap
 
 public val LocalNetworkImageAllowHardware: ProvidableCompositionLocal<Boolean> =
     compositionLocalOf { true }
 
 @Composable
 public fun NetworkImage(
-    model: String?,
+    model: UiMedia?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
@@ -37,41 +32,15 @@ public fun NetworkImage(
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
     placeholder: Painter? = null,
-    customHeaders: ImmutableMap<String, String>? = null,
 ) {
-    val platformContext = LocalPlatformContext.current
     val placeholderColor = PlatformTheme.colorScheme.outline
     val allowHardware = LocalNetworkImageAllowHardware.current
+    val shareObserver = shareImageObserver(model?.url)
     AsyncImage(
-        model =
-            remember(model, platformContext, customHeaders, allowHardware) {
-                ImageRequest
-                    .Builder(platformContext)
-                    .data(model)
-                    .crossfade(allowHardware)
-                    .let {
-                        if (customHeaders != null) {
-                            it.httpHeaders(
-                                NetworkHeaders
-                                    .Builder()
-                                    .apply {
-                                        customHeaders.forEach { (key, value) ->
-                                            set(key, value)
-                                        }
-                                    }.build(),
-                            )
-                        } else {
-                            it
-                        }
-                    }.let {
-                        if (model is String) {
-                            it.memoryCacheKey(model)
-                        } else {
-                            it
-                        }
-                    }.applyAllowHardware(allowHardware)
-                    .build()
-            },
+        onLoading = shareObserver,
+        onSuccess = shareObserver,
+        onError = shareObserver,
+        model = rememberMediaImageRequest(model, crossfade = allowHardware && shareObserver == null),
         contentDescription = contentDescription,
         alignment = alignment,
         contentScale = contentScale,
@@ -89,7 +58,7 @@ public fun NetworkImage(
 
 @Composable
 public fun SubcomposeNetworkImage(
-    model: String?,
+    model: UiMedia?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
@@ -97,40 +66,14 @@ public fun SubcomposeNetworkImage(
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
-    customHeaders: ImmutableMap<String, String>? = null,
 ) {
-    val platformContext = LocalPlatformContext.current
     val allowHardware = LocalNetworkImageAllowHardware.current
+    val shareObserver = shareImageObserver(model?.url)
     SubcomposeAsyncImage(
-        model =
-            remember(model, platformContext, customHeaders, allowHardware) {
-                ImageRequest
-                    .Builder(platformContext)
-                    .data(model)
-                    .crossfade(allowHardware)
-                    .let {
-                        if (customHeaders != null) {
-                            it.httpHeaders(
-                                NetworkHeaders
-                                    .Builder()
-                                    .apply {
-                                        customHeaders.forEach { (key, value) ->
-                                            set(key, value)
-                                        }
-                                    }.build(),
-                            )
-                        } else {
-                            it
-                        }
-                    }.let {
-                        if (model is String) {
-                            it.memoryCacheKey(model)
-                        } else {
-                            it
-                        }
-                    }.applyAllowHardware(allowHardware)
-                    .build()
-            },
+        onLoading = shareObserver,
+        onSuccess = shareObserver,
+        onError = shareObserver,
+        model = rememberMediaImageRequest(model, crossfade = allowHardware && shareObserver == null),
         contentDescription = contentDescription,
         alignment = alignment,
         contentScale = contentScale,
@@ -143,20 +86,12 @@ public fun SubcomposeNetworkImage(
 
 @Composable
 internal fun EmojiImage(
-    uri: String,
+    media: UiMedia,
     modifier: Modifier = Modifier,
 ) {
-    val platformContext = LocalPlatformContext.current
-    val allowHardware = LocalNetworkImageAllowHardware.current
     AsyncImage(
-        model =
-            remember(uri, platformContext, allowHardware) {
-                ImageRequest
-                    .Builder(platformContext)
-                    .data(uri)
-                    .applyAllowHardware(allowHardware)
-                    .build()
-            },
+        onState = shareImageObserver(media.url),
+        model = rememberMediaImageRequest(media, crossfade = false),
         modifier = modifier,
         contentDescription = null,
     )

@@ -20,11 +20,14 @@ private enum FlareEnvironmentDefaults {
     static let globalAppearance = GlobalAppearance.companion.Default
     static let timelineAppearance = TimelineAppearance.companion.Default
     static let aiConfig = AppSettings.AiConfig.companion.default
-    static let translateConfig = AppSettings.TranslateConfig()
+    static let translateConfig = AppSettings.companion.default.translateConfig
     static let appSettings = AppSettings.companion.default
 }
 
 public extension EnvironmentValues {
+    @Entry var timelineReading: TimelineReadingState? = nil
+    @Entry var timelineGapWillLoad: ((UiTimelineV2.Gap) -> Void)? = nil
+    @Entry var timelineGapDidLoad: ((UiTimelineV2.Gap, [String]) -> Void)? = nil
     @Entry var globalAppearance: GlobalAppearance = FlareEnvironmentDefaults.globalAppearance
     @Entry var timelineAppearance: TimelineAppearance = FlareEnvironmentDefaults.timelineAppearance
     @Entry var aiConfig: AppSettings.AiConfig = FlareEnvironmentDefaults.aiConfig

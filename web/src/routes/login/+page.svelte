@@ -2,6 +2,7 @@
     import AppBackButton from "$lib/components/AppBackButton.svelte";
     import AppTopBar from "$lib/components/AppTopBar.svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
+    import PlatformIcon from "$lib/components/PlatformIcon.svelte";
     import LoginFlowPanel from "$lib/components/login/LoginFlowPanel.svelte";
     import { m } from "$lib/paraglide/messages.js";
     import {
@@ -129,8 +130,8 @@
             <label class="input input-bordered service-input">
                 <span class="service-leading" aria-hidden="true">
                     {#if detectedNode}
-                        <FaIcon
-                            name={detectedNode.platformIcon}
+                        <PlatformIcon
+                            icon={detectedNode.platformIcon}
                             size={18}
                         />
                     {:else}
@@ -179,7 +180,7 @@
     >
         <header class="selected-service">
             <span class="service-icon bg-base-200 text-base-content">
-                <FaIcon name={node.platformIcon} size={18} />
+                <PlatformIcon icon={node.platformIcon} size={18} />
             </span>
             <span class="selected-copy">
                 <span class="selected-title"
@@ -262,8 +263,8 @@
                                             loading="lazy"
                                         />
                                     {:else}
-                                        <FaIcon
-                                            name={instance.platformIcon}
+                                        <PlatformIcon
+                                            icon={instance.platformIcon}
                                             size={28}
                                         />
                                     {/if}

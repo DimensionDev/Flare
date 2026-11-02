@@ -123,7 +123,7 @@ internal fun BlueskyFeedScreen(
                                     leadingContent = {
                                         if (item.avatar != null) {
                                             NetworkImage(
-                                                model = item.avatar,
+                                                model = item.media,
                                                 contentDescription = item.title,
                                                 modifier =
                                                     Modifier

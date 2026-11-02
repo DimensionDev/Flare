@@ -8,6 +8,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class DeeplinkRouteTest {
+    @Test
+    fun timelineSourceRoundTrips() {
+        val route = DeeplinkRoute.Timeline.Source(loaderKey = "timeline-loader-key")
+
+        assertEquals(route, DeeplinkRoute.parse(route.toUri()))
+    }
+
     private val activeAccountType = AccountType.Specific(MicroBlogKey("active", "example.com"))
 
     @Test

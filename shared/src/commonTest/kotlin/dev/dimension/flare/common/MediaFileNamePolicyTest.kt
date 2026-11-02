@@ -1,12 +1,60 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.ui.model.UiMedia
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 
 class MediaFileNamePolicyTest {
+    @Test
+    fun videoDownloadUsesItsOwnUrlAndMp4FileName() {
+        val media =
+            UiMedia.Video(
+                url = "https://video.example/playlist.m3u8",
+                thumbnailUrl = "",
+                description = null,
+                height = 0f,
+                width = 0f,
+                downloadUrl = "https://pds.example/xrpc/com.atproto.sync.getBlob?did=did%3Aplc%3Aauthor&cid=video",
+            )
+
+        assertEquals(media.downloadUrl, media.urlForDownload)
+        assertEquals("https://video.example/playlist.m3u8", media.url)
+        assertEquals("post_alice_01.mp4", MediaFileNamePolicy.statusMediaFileName("post", "alice", media, 0))
+        assertEquals("media.mp4", MediaFileNamePolicy.rawMediaFileName(media))
+        assertEquals(media, Json.decodeFromString<UiMedia.Video>(Json.encodeToString(media)))
+    }
+
+    @Test
+    fun oldCachedVideoDefaultsToItsOriginalUrlForDownloads() {
+        val media =
+            Json.decodeFromString<UiMedia.Video>(
+                """{"url":"https://example.com/video.mp4","thumbnailUrl":"","description":null,"height":0,"width":0}""",
+            )
+
+        assertEquals(null, media.downloadUrl)
+        assertEquals(media.url, media.urlForDownload)
+        assertEquals("video.mp4", MediaFileNamePolicy.rawMediaFileName(media))
+    }
+
+    @Test
+    fun alternateDownloadUrlControlsTheVideoExtension() {
+        val media =
+            UiMedia.Video(
+                url = "https://video.example/playlist.m3u8",
+                thumbnailUrl = "",
+                description = null,
+                height = 0f,
+                width = 0f,
+                downloadUrl = "https://video.example/original.mov?token=abc",
+            )
+
+        assertEquals("post_alice_01.mov", MediaFileNamePolicy.statusMediaFileName("post", "alice", media, 0))
+        assertEquals("original.mov", MediaFileNamePolicy.rawMediaFileName(media))
+    }
+
     @Test
     fun statusMediaFileNameUsesStatusContextAndUrlExtension() {
         val media = UiMedia.Image(url = "https://example.com/image.png")

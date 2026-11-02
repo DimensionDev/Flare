@@ -91,6 +91,8 @@ enum Route: Hashable, Identifiable {
             )
         case .settings:
             SettingsScreen()
+        case .pluginManagement:
+            PluginManagementView { onNavigate(.agentChat(Self.newGenericChatConversationId(), nil)) }
         case .notification:
             NotificationScreen()
         case .discover:
@@ -105,6 +107,7 @@ enum Route: Hashable, Identifiable {
             SearchScreen(accountType: accountType, initialQuery: query) { query in
                 onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
             }
+            .environment(\.timelineListRenderer, nil)
         case .composeNew:
             ComposeScreen(accountType: nil)
         case .composeCrossPost(let prefill):
@@ -164,8 +167,8 @@ enum Route: Hashable, Identifiable {
             TranslationConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
-        case .rssDetail(let url, let descriptionHtml, let title):
-            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title)
+        case .rssDetail(let url, let descriptionHtml, let title, let fallbackHtml):
+            RssDetailScreen(url: url, descriptionHtml: descriptionHtml, descriptionTitle: title, fallbackHtml: fallbackHtml)
         case .article(let accountType, let articleKey):
             ArticleScreen(
                 accountType: accountType,
@@ -181,13 +184,12 @@ enum Route: Hashable, Identifiable {
                 },
                 onDownloadFile: { block in
                     MediaSaver.shared.saveFile(
-                        url: block.url,
+                        media: block.media,
                         fileName: MediaFileNamePolicy.shared.articleFileName(
                             name: block.name,
                             url: block.url,
                             extensionName: block.extension
-                        ),
-                        customHeaders: block.customHeaders
+                        )
                     )
                 }
             )
@@ -223,8 +225,8 @@ enum Route: Hashable, Identifiable {
         case .dmConversation(let accountType, let roomKey, let title):
             DMConversationScreen(accountType: accountType, roomKey: roomKey)
                 .navigationTitle(title)
-        case .mediaImage(let url, let preview, let customHeaders):
-            MediaScreen(url: url, preview: preview, customHeaders: customHeaders)
+        case .mediaImage(let url, let preview, let customHeaders, let proxy):
+            MediaScreen(url: url, preview: preview, customHeaders: customHeaders, proxy: proxy)
         case .mediaRaw(let medias, let selectedIndex, let preview):
             RawMediaScreen(medias: medias, initialIndex: selectedIndex, preview: preview)
         case .mediaStatusMedia(
@@ -300,14 +302,14 @@ enum Route: Hashable, Identifiable {
     case composeQuote(AccountType, MicroBlogKey)
     case composeReply(AccountType, MicroBlogKey)
     case composeVVOReplyComment(AccountType, MicroBlogKey, String)
-    case mediaImage(String, String?, [String: String]?)
+    case mediaImage(String, String?, [String: String]?, ProxyRef)
     case mediaRaw([any UiMedia], Int, String?)
     case mediaPodcast(AccountType, String)
     case mediaStatusMedia(AccountType, MicroBlogKey, Int32, String?, Float, Bool)
     case profileUser(AccountType, MicroBlogKey)
     case profileUserNameWithHost(AccountType, String, String)
     case profileInsight(AccountType, MicroBlogKey)
-    case rssDetail(String, String?, String?)
+    case rssDetail(String, String?, String?, String?)
     case article(AccountType, MicroBlogKey)
     case search(AccountType, String)
     case statusAddReaction(AccountType, MicroBlogKey)
@@ -345,6 +347,7 @@ enum Route: Hashable, Identifiable {
     case linkOpenDefaults
     case appIconSettings
     case settings
+    case pluginManagement
     case about
     case notification
     case discover
@@ -394,7 +397,7 @@ enum Route: Hashable, Identifiable {
     fileprivate static func fromMedia(_ media: DeeplinkRoute.Media) -> Route? {
         switch onEnum(of: media) {
         case .image(let data):
-            return Route.mediaImage(data.uri, data.previewUrl, data.customHeaders)
+            return Route.mediaImage(data.uri, data.previewUrl, data.customHeaders, data.proxy)
         case .podcast(let data):
             return Route.mediaPodcast(data.accountType, data.id)
         case .statusMedia(let data):
@@ -473,7 +476,7 @@ enum Route: Hashable, Identifiable {
         case .rss(let rss):
             switch onEnum(of: rss) {
             case .detail(let data):
-                return Route.rssDetail(data.url, data.descriptionHtml, data.title)
+                return Route.rssDetail(data.url, data.descriptionHtml, data.title, data.fallbackHtml)
             }
         case .article(let data):
             return Route.article(data.accountType, data.articleKey)
@@ -537,6 +540,12 @@ enum Route: Hashable, Identifiable {
             return .allChannels(.Specific(accountKey: data.accountKey))
         case .timeline(let data):
             switch onEnum(of: data) {
+            case .source(let data):
+                if let tabItem = TimelineDeepLinkRouteResolver.shared.resolve(route: data) {
+                    return .timeline(tabItem)
+                } else {
+                    return nil
+                }
             case .xQTDeviceFollow(let data):
                 if let tabItem = XQTUiTimelineTabItemHelpers.shared.xqtDeviceFollow(accountType: data.accountType) {
                     return .timeline(tabItem)

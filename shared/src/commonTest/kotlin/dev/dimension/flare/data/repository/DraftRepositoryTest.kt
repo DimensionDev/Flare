@@ -7,6 +7,7 @@ import dev.dimension.flare.createTestFileItem
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
@@ -41,16 +42,24 @@ class DraftRepositoryTest : RobolectricTest() {
     private lateinit var mediaStore: DraftMediaStore
 
     @BeforeTest
-    fun setup() {
-        db =
-            Room
-                .memoryDatabaseBuilder<AppDatabase>()
-                .setDriver(createDatabaseDriver())
-                .setQueryCoroutineContext(Dispatchers.Unconfined)
-                .build()
-        mediaStore = DraftMediaStore(fileStorage)
-        repository = DraftRepository(db, mediaStore)
-    }
+    fun setup() =
+        runTest {
+            db =
+                Room
+                    .memoryDatabaseBuilder<AppDatabase>()
+                    .setDriver(createDatabaseDriver())
+                    .setQueryCoroutineContext(Dispatchers.Unconfined)
+                    .build()
+            mediaStore = DraftMediaStore(fileStorage)
+            repository = DraftRepository(db, mediaStore)
+            listOf(
+                MicroBlogKey("alice", "mastodon.social"),
+                MicroBlogKey("bob", "misskey.io"),
+                MicroBlogKey("a", "host"),
+                MicroBlogKey("b", "host"),
+                MicroBlogKey("alice", "example.com"),
+            ).forEach { db.accountDao().insert(DbAccount(it, "{}", "Mastodon", 0)) }
+        }
 
     @AfterTest
     fun tearDown() {

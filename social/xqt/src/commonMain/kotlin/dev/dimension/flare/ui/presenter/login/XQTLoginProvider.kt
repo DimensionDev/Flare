@@ -114,7 +114,7 @@ private class XQTWebCookieLoginHandler(
     }
 
     private suspend fun xqtLoginUseCase(chocolate: String) {
-        val xqtService = XQTService(flowOf(chocolate))
+        val xqtService = XQTService(flowOf(chocolate), context.reloginTarget?.accountKey)
         val userId = xqtService.getInitialUserId(chocolate = chocolate)
         requireNotNull(userId)
         val account =

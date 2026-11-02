@@ -2,6 +2,7 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
+import dev.dimension.flare.data.datasource.microblog.paging.HomeTimelineRefreshSessions
 import dev.dimension.flare.data.io.FileStorage
 import dev.dimension.flare.data.io.InMemoryFileStorage
 import dev.dimension.flare.data.model.tab.TimelineResolver
@@ -29,6 +30,9 @@ internal inline fun <reified T> KoinModule.testSingle(noinline definition: Defin
 @Module
 @Configuration("test")
 internal class SharedTestKoinModule {
+    @Single
+    fun homeTimelineRefreshSessions(): HomeTimelineRefreshSessions = HomeTimelineRefreshSessions()
+
     @Single
     fun platformRuntimeData(): PlatformRuntimeData = testPlatformRuntimeData()
 

@@ -17,6 +17,8 @@ public struct TimelineView: View {
 
     public var body: some View {
         switch onEnum(of: data) {
+        case .gap(let gap):
+            TimelineGapView(gap: gap)
         case .feed(let feed):
             FeedView(data: feed)
         case .post(let post):
@@ -96,5 +98,38 @@ public struct TimelinePlaceholderView: View {
             )
         }
         .redacted(reason: .placeholder)
+    }
+}
+
+public struct TimelineGapView: View {
+    public let gap: UiTimelineV2.Gap
+    @Environment(\.timelineGapWillLoad) private var willLoad
+    @Environment(\.timelineGapDidLoad) private var didLoad
+    @State private var activating = false
+
+    public init(gap: UiTimelineV2.Gap) { self.gap = gap }
+
+    public var body: some View {
+        Button {
+            guard let activate = gap.onActivate, !activating, !gap.loading else { return }
+            activating = true
+            willLoad?(gap)
+            activate { keys in
+                activating = false
+                didLoad?(gap, keys)
+                return KotlinUnit.shared
+            }
+        } label: {
+            HStack {
+                if gap.loading { ProgressView().controlSize(.small) }
+                Text(LocalizedStringKey(gap.loading ? "timeline_loading_missing_posts" :
+                    gap.failed ? "timeline_retry_missing_posts" : "timeline_load_missing_posts"))
+            }
+            .frame(maxWidth: .infinity, minHeight: 44)
+        }
+        .disabled(gap.loading || activating)
+        .onChange(of: gap.renderHash) { activating = false }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("timeline-gap")
     }
 }

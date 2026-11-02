@@ -22,6 +22,9 @@ public class UploadMedia private constructor(
     public val isVideo: Boolean get() = mimeType.startsWith("video/")
     public val isGif: Boolean get() = mimeType == "image/gif"
 
+    /** Opens a fresh stream. The caller owns and closes it. */
+    public fun openSource(): Source = openSource.invoke()
+
     /** The array is reused. Consumers must finish using it before returning. */
     public suspend fun forEachChunk(
         chunkSize: Int = 64 * 1024,

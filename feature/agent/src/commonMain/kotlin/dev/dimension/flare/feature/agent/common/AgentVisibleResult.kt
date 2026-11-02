@@ -24,10 +24,16 @@ internal fun resolveAgentVisibleResult(
 }
 
 private fun AgentPendingInputRequest.toInputRequest(metadata: AgentInputRequestUiMetadata?): AgentInputRequest? {
-    if (metadata?.requestId != null && metadata.requestId != requestId) {
+    val matchesRequest = metadata?.requestId == null || metadata.requestId == requestId
+    if (!matchesRequest && options.none { it.confirmationKey != null }) {
         return null
     }
-    val metadataById = metadata?.options.orEmpty().associateBy { it.id }
+    val metadataById =
+        metadata
+            ?.takeIf { matchesRequest }
+            ?.options
+            .orEmpty()
+            .associateBy { it.id }
     return AgentInputRequest(
         requestId = requestId,
         options =
@@ -37,16 +43,25 @@ private fun AgentPendingInputRequest.toInputRequest(metadata: AgentInputRequestU
                 AgentInputRequest.Option(
                     id = option.id,
                     label =
-                        optionMetadata
-                            ?.label
-                            ?.trim()
-                            ?.takeIf { it.isNotEmpty() }
-                            ?: if (hasRenderablePreview) "" else return null,
+                        if (option.confirmationKey != null) {
+                            option.value
+                        } else {
+                            optionMetadata
+                                ?.label
+                                ?.trim()
+                                ?.takeIf { it.isNotEmpty() }
+                                ?: if (hasRenderablePreview) "" else return null
+                        },
                     buttonType =
-                        optionMetadata?.buttonType
-                            ?: if (hasRenderablePreview) AgentInputRequestOptionButtonType.Secondary else return null,
+                        if (option.confirmationKey != null) {
+                            AgentInputRequestOptionButtonType.Destructive
+                        } else {
+                            optionMetadata?.buttonType
+                                ?: if (hasRenderablePreview) AgentInputRequestOptionButtonType.Secondary else return null
+                        },
                     value = option.value,
                     submit = option.submit,
+                    confirmationKey = option.confirmationKey,
                     userPreview = option.userPreview,
                     postPreview = option.postPreview,
                 )

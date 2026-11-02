@@ -6,6 +6,7 @@ import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 public sealed class IconType {
     @Immutable

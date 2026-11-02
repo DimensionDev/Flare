@@ -24,6 +24,7 @@ struct FlareApp: App {
         if firebaseEnabled {
             AppleSharedHelper.shared.setupCrashlytics()
         }
+        ProxySessionConfigurator.install()
         AppleSharedHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,
@@ -35,7 +36,7 @@ struct FlareApp: App {
     var body: some Scene {
         Window("Flare", id: MacWindowID.main) {
             FlareTheme {
-                RootView()
+                RootView().ugoiraExportStatus()
             }
         }
         .defaultSize(width: 480, height: 600)
@@ -58,7 +59,7 @@ struct FlareApp: App {
 
         WindowGroup("Media", id: MacWindowID.media, for: MacMediaWindowValue.self) { request in
             FlareTheme {
-                MacMediaWindowRoot(value: request.wrappedValue)
+                MacMediaWindowRoot(value: request.wrappedValue).ugoiraExportStatus()
             }
         }
         .defaultSize(width: 960, height: 720)
@@ -116,6 +117,15 @@ private func configureKingfisherCache() {
     let memoryLimit = min(max(scaledLimit, minimumLimit), maximumLimit)
 
     KingfisherManager.shared.cache.memoryStorage.config.totalCostLimit = Int(memoryLimit)
+    let ordinaryRetention: TimeInterval
+    switch KingfisherManager.shared.cache.diskStorage.config.expiration {
+    case .days(let days): ordinaryRetention = TimeInterval(days) * 24 * 60 * 60
+    case .seconds(let seconds): ordinaryRetention = seconds
+    case .date(let date): ordinaryRetention = date.timeIntervalSinceNow
+    default: ordinaryRetention = 14 * 24 * 60 * 60
+    }
+    ImageTranslationCachePolicy.shared.configure(ordinaryRetentionSeconds: ordinaryRetention)
+
 }
 
 extension Scene {
@@ -240,7 +250,7 @@ private struct MacAppCommands: Commands {
                         Button {
                             openMainWindow(route: .accountNotification(item.profile.key))
                         } label: {
-                            Text(verbatim: item.profile.handle.canonical)
+                            Text(verbatim: item.profile.handle.display)
                         }
                     }
                 }
@@ -295,8 +305,7 @@ private struct MacAppCommands: Commands {
                                 } icon: {
                                     if let avatar = data.data.avatar {
                                         AvatarView(
-                                            data: avatar.url,
-                                            customHeader: avatar.customHeaders
+                                            data: avatar
                                         )
                                         .frame(width: 16, height: 16)
                                         .clipShape(Circle())
@@ -374,7 +383,7 @@ private struct MacAppCommands: Commands {
 
     private func accountTitle(_ profile: UiProfile) -> String {
         let name = profile.name.raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty ? profile.handle.canonical : "\(name) (\(profile.handle.canonical))"
+        return name.isEmpty ? profile.handle.display : "\(name) (\(profile.handle.display))"
     }
 }
 

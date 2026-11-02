@@ -288,8 +288,9 @@ internal class PostContextRemoteMediator(
                 saveToDatabase(database, mapped)
                 val removed = stale + (posts.keys - positions.keys)
                 if (removed.isNotEmpty()) {
-                    dao.deletePresentationReferences(pagingKey, removed.toList())
-                    dao.delete((existing + mapped.map { it.timeline }).filter { it.statusId in removed }.distinctBy { it.statusId })
+                    val removedRows = (existing + mapped.map { it.timeline }).filter { it.statusId in removed }.distinctBy { it._id }
+                    dao.deletePresentationReferences(pagingKey, removedRows.map { it._id })
+                    dao.delete(removedRows)
                 }
                 dao.insertPagingKey(keys)
                 mapped

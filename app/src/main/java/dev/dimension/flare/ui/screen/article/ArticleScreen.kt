@@ -487,7 +487,7 @@ private fun LazyListScope.articleComments(
             articleCommentsTitle()
             items(
                 count = comments.itemCount,
-                key = comments.itemKey { item -> item.itemKey ?: item.hashCode() },
+                key = comments.itemKey { item -> item.stableItemKey },
                 contentType = comments.itemContentType { item -> item.itemType },
             ) { index ->
                 ArticleBodyContainer {
@@ -555,9 +555,8 @@ private fun ArticleCover(
     onOpenMedia: (UiMedia) -> Unit,
 ) {
     NetworkImage(
-        model = cover.url,
+        model = cover,
         contentDescription = title,
-        customHeaders = cover.customHeaders,
         contentScale = ContentScale.Crop,
         modifier =
             Modifier
@@ -658,7 +657,7 @@ private fun ArticleRssAuthor(
                         size = 16.dp,
                     )
                 } else {
-                    author.iconUrl?.let {
+                    author.media?.let {
                         NetworkImage(
                             model = it,
                             contentDescription = siteName,
@@ -700,7 +699,7 @@ private fun ArticleRssAuthor(
 }
 
 @Composable
-private fun ArticleBlock(
+internal fun ArticleBlock(
     block: UiArticleBlock,
     onOpenUrl: (String) -> Unit,
     onDownloadFile: (UiArticleBlock.File) -> Unit,
@@ -738,7 +737,7 @@ private fun ArticleBlock(
         is UiArticleBlock.Embed -> {
             ArticleEmbedBlock(
                 block = block,
-                onOpenUrl = onOpenUrl,
+                onOpenUrl = LocalUriHandler.current::openUri,
             )
         }
 
@@ -757,9 +756,8 @@ private fun ArticleImageBlock(
     onOpenMedia: (UiMedia) -> Unit,
 ) {
     NetworkImage(
-        model = media.url,
+        model = media,
         contentDescription = media.accessibleDescription(),
-        customHeaders = media.customHeaders,
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -790,9 +788,7 @@ private fun ArticleVideoBlock(
             contentAlignment = Alignment.Center,
         ) {
             VideoPlayer(
-                uri = media.url,
-                customHeaders = media.customHeaders,
-                previewUri = media.thumbnailUrl,
+                media = media,
                 contentDescription = media.accessibleDescription(),
                 modifier = Modifier.fillMaxSize(),
                 muted = true,
@@ -889,7 +885,7 @@ private fun ArticleEmbedBlockContent(block: UiArticleBlock.Embed) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        block.imageUrl?.let {
+        block.media?.let {
             NetworkImage(
                 model = it,
                 contentDescription = block.title,
@@ -951,6 +947,7 @@ private fun UiMedia.previewUrl(): String? =
     when (this) {
         is UiMedia.Audio -> previewUrl
         is UiMedia.Gif -> previewUrl
+        is UiMedia.Ugoira -> previewUrl
         is UiMedia.Image -> previewUrl
         is UiMedia.Video -> thumbnailUrl
     }
@@ -1120,14 +1117,13 @@ private fun downloadArticleFile(
     scope.launch {
         runCatching {
             mediaDownloadManager.downloadMedia(
-                uri = block.url,
+                media = block.media,
                 fileName =
                     MediaFileNamePolicy.articleFileName(
                         name = block.name,
                         url = block.url,
                         extensionName = block.extension,
                     ),
-                customHeaders = block.customHeaders,
                 callback =
                     object : AndroidDownloadManager.DownloadCallback {
                         override fun onDownloadStarted(downloadId: Long) {

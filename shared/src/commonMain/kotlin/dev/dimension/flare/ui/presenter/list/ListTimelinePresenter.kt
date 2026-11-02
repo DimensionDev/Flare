@@ -1,7 +1,8 @@
 package dev.dimension.flare.ui.presenter.list
 
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.di.koinInject
@@ -25,8 +26,7 @@ public class ListTimelinePresenter(
             accountType = accountType,
             repository = accountRepository,
         ).map { service ->
-            require(service is ListDataSource)
-            service.listTimeline(listId = listId)
+            service.capabilities.list?.listTimeline(listId = listId) ?: notSupported()
         }
     }
 }

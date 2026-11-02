@@ -31,6 +31,45 @@ public sealed interface PostEvent {
     public val postKey: MicroBlogKey
 
     @Serializable
+    public data class Semantic(
+        public override val postKey: MicroBlogKey,
+        public val action: SemanticPostAction,
+        public val actionToken: String? = null,
+        public val count: Long = 0,
+        public val accountKey: MicroBlogKey,
+    ) : PostEvent,
+        UpdatePostActionMenuEvent {
+        override fun nextActionMenu(): ActionMenu.Item =
+            semanticPostActionMenu(
+                postKey = postKey,
+                action = action.opposite,
+                actionToken = actionToken,
+                count = (count + action.countDelta).coerceAtLeast(0),
+                accountKey = accountKey,
+            )
+    }
+
+    @Serializable
+    public data class PluginAction(
+        override val postKey: MicroBlogKey,
+        val entityKey: MicroBlogKey,
+        val action: String,
+        val actionToken: String? = null,
+        val parameters: Map<String, String> = emptyMap(),
+        val profileAction: Boolean = false,
+    ) : PostEvent
+
+    @Serializable
+    public data class PluginVote(
+        override val postKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        override val options: SerializableImmutableList<Int>,
+        val actionToken: String? = null,
+    ) : PollEvent {
+        override fun copyWithOptions(options: List<Int>): PollEvent = copy(options = options.toImmutableList())
+    }
+
+    @Serializable
     public sealed interface PollEvent : PostEvent {
         public val accountKey: MicroBlogKey
         public val options: SerializableImmutableList<Int>
@@ -479,6 +518,42 @@ public sealed interface PostEvent {
                 )
         }
     }
+}
+
+@Serializable
+public enum class SemanticPostAction {
+    Favourite,
+    Unfavourite,
+    Repost,
+    Unrepost,
+    Bookmark,
+    Unbookmark,
+    ;
+
+    public val opposite: SemanticPostAction
+        get() =
+            when (this) {
+                Favourite -> Unfavourite
+                Unfavourite -> Favourite
+                Repost -> Unrepost
+                Unrepost -> Repost
+                Bookmark -> Unbookmark
+                Unbookmark -> Bookmark
+            }
+
+    internal val countDelta: Long
+        get() =
+            when (this) {
+                Favourite,
+                Repost,
+                Bookmark,
+                -> 1
+
+                Unfavourite,
+                Unrepost,
+                Unbookmark,
+                -> -1
+            }
 }
 
 @HiddenFromObjC

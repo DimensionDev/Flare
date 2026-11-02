@@ -124,7 +124,7 @@ class MicroblogTest : RobolectricTest() {
                     user = user,
                     statusKey = MicroBlogKey(id = "status-1", host = "test.com"),
                     text = "status text",
-                )
+                ).copy(authorSubtitleInternal = "发布于 北京")
 
             val timelineItem = TimelinePagingMapper.toDb(post, pagingKey = "home")
             saveToDatabase(db, listOf(timelineItem))
@@ -133,11 +133,14 @@ class MicroblogTest : RobolectricTest() {
             assertNotNull(savedUser)
             assertEquals(user.key, savedUser.userKey)
             assertEquals("User One", savedUser.content.name.raw)
+            assertEquals(user.handle.canonical, savedUser.canonicalHandle)
+            assertEquals(user, savedUser.content)
 
             val savedStatus =
                 db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
             assertEquals(post.statusKey, savedStatus.content.statusKey)
+            assertEquals("发布于 北京", assertIs<UiTimelineV2.Post>(savedStatus.content).authorSubtitle)
             requireNotNull(savedStatus.text)
             kotlin.test.assertTrue(savedStatus.text.contains("status text"))
         }

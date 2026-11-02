@@ -117,9 +117,7 @@ struct ServiceSelectionScreen: View {
         ZStack {
             switch onEnum(of: state.detectedPlatformId) {
             case .success(let success):
-                Image(fontAwesome: success.data.platformIcon.fontAwesomeIcon)
-                    .resizable()
-                    .scaledToFit()
+                TabIcon(icon: success.data.platformIcon, size: 24)
                     .transition(ServiceSelectionAnimation.inline)
                     .accessibilityLabel(
                         Text(
@@ -146,10 +144,8 @@ struct ServiceSelectionScreen: View {
 
     @ViewBuilder
     private func loginContent(state: ServiceSelectState, node: NodeData) -> some View {
-        let methods = node.loginMethods
-        if let firstMethod = methods.first {
+        if !node.loginMethods.isEmpty {
             let key = "\(node.platformId)-\(node.host)"
-            let selectedMethod = selectedMethods[key] ?? firstMethod.type
             VStack(spacing: 14) {
                 platformHeader(state: state, node: node)
 
@@ -161,51 +157,31 @@ struct ServiceSelectionScreen: View {
                         .transition(ServiceSelectionAnimation.inline)
                 }
 
-                if methods.count > 1 {
-                    Picker("", selection: Binding(
-                        get: { selectedMethod },
-                        set: { method in
-                            withAnimation(ServiceSelectionAnimation.standard) {
-                                selectedMethods[key] = method
-                            }
-                        }
-                    )) {
-                        ForEach(methods.indices, id: \.self) { index in
-                            Text(methods[index].title.text).tag(methods[index].type)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .transition(ServiceSelectionAnimation.inline)
-                }
-
-                LoginFlowView {
+                LoginPanel(
+                    methods: node.loginMethods,
+                    selectedMethod: Binding(
+                        get: { selectedMethods[key] },
+                        set: { selectedMethods[key] = $0 }
+                    ),
+                    flowId: key,
+                    agreementUrl: state.agreementUrl(platformId: node.platformId, host: node.host)
+                ) { method in
                     state.createLoginHandler(
                         platformId: node.platformId,
                         host: node.host,
-                        methodType: selectedMethod,
+                        methodType: method,
                         redirectUri: nil,
                     )
                 }
-                    .id("\(key)-\(selectedMethod)")
-                    .transition(ServiceSelectionAnimation.panel)
-
-                LoginAgreementView(
-                    urlString: state.agreementUrl(platformId: node.platformId, host: node.host)
-                )
-                .transition(ServiceSelectionAnimation.inline)
             }
-            .animation(ServiceSelectionAnimation.standard, value: "\(selectedMethod)")
         }
     }
 
     private func platformHeader(state: ServiceSelectState, node: NodeData) -> some View {
         HStack(spacing: 8) {
-            Image(fontAwesome: node.platformIcon.fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
+            TabIcon(icon: node.platformIcon, size: 24)
             VStack(alignment: .leading, spacing: 2) {
-                Text(node.platformDisplayName)
+                Text(node.platformDisplayNameText.text)
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
@@ -220,8 +196,7 @@ struct ServiceSelectionScreen: View {
             data: state.instances,
             successContent: { instance in
                 ServiceInstanceRow(
-                    instance: instance,
-                    icon: instance.platformIcon.fontAwesomeIcon
+                    instance: instance
                 ) {
                     select(instance: instance, state: state)
                 }
@@ -299,8 +274,14 @@ struct ReloginScreen: View {
             }
 
             Section {
-                loginContent(state: presenter.state)
-                    .id("\(target.accountKey)-\(selectedMethod.map { String(describing: $0) } ?? "default")")
+                LoginPanel(
+                    methods: presenter.state.methods,
+                    selectedMethod: $selectedMethod,
+                    flowId: "\(target.platformId)-\(target.accountKey)",
+                    agreementUrl: presenter.state.agreementUrl()
+                ) { method in
+                    presenter.state.createLoginHandler(methodType: method)
+                }
             }
         }
         .listStyle(.insetGrouped)
@@ -322,10 +303,7 @@ struct ReloginScreen: View {
 
     private var header: some View {
         VStack(spacing: 8) {
-            Image(fontAwesome: presenter.state.platformIcon().fontAwesomeIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 36, height: 36)
+            TabIcon(icon: presenter.state.platformIcon(), size: 36)
             Text(ServiceSelectCopy.loginExpired)
                 .font(.title2.weight(.semibold))
                 .multilineTextAlignment(.center)
@@ -339,19 +317,25 @@ struct ReloginScreen: View {
         }
         .frame(maxWidth: .infinity)
     }
+}
 
-    @ViewBuilder
-    private func loginContent(state: ReloginState) -> some View {
-        let methods = state.methods
+struct LoginPanel: View {
+    let methods: [LoginMethodSpec]
+    @Binding var selectedMethod: LoginMethodType?
+    let flowId: String
+    let agreementUrl: String?
+    let createLoginHandler: (LoginMethodType) -> LoginMethodHandler
+
+    var body: some View {
         if let firstMethod = methods.first {
-            let selectedMethod = selectedMethod ?? firstMethod.type
+            let method = selectedMethod ?? firstMethod.type
             VStack(spacing: 14) {
                 if methods.count > 1 {
                     Picker("", selection: Binding(
-                        get: { selectedMethod },
+                        get: { method },
                         set: { method in
                             withAnimation(ServiceSelectionAnimation.standard) {
-                                self.selectedMethod = method
+                                selectedMethod = method
                             }
                         }
                     )) {
@@ -360,15 +344,19 @@ struct ReloginScreen: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .transition(ServiceSelectionAnimation.inline)
                 }
 
                 LoginFlowView {
-                    state.createLoginHandler(methodType: selectedMethod)
+                    createLoginHandler(method)
                 }
-                    .id("\(target.accountKey)-\(selectedMethod)")
+                    .id("\(flowId)-\(method)")
+                    .transition(ServiceSelectionAnimation.panel)
 
-                LoginAgreementView(urlString: state.agreementUrl())
+                LoginAgreementView(urlString: agreementUrl)
+                    .transition(ServiceSelectionAnimation.inline)
             }
+            .animation(ServiceSelectionAnimation.standard, value: "\(method)")
         }
     }
 }
@@ -379,6 +367,8 @@ private struct LoginFlowView: View {
     @State private var presenter: KotlinPresenter<LoginFlowPresenterState>
     @State private var qrContent: String?
     @State private var webCookieUrl: String?
+    @State private var webCookieProbes: [LoginCookieProbe] = []
+    @State private var checkingCookies = false
 
     init(handler: @escaping () -> LoginMethodHandler) {
         self._presenter = .init(wrappedValue: .init(presenter: LoginFlowPresenter(handler: handler())))
@@ -405,7 +395,7 @@ private struct LoginFlowView: View {
             ForEach(presenter.state.flowState.actions, id: \.id) { action in
                 Button {
                     presenter.state.perform(actionId: action.id)
-                    if action.label == .cancel {
+                    if action.id == "cancel" {
                         withAnimation(ServiceSelectionAnimation.standard) {
                             qrContent = nil
                         }
@@ -436,16 +426,12 @@ private struct LoginFlowView: View {
         )) {
             if let webCookieUrl {
                 if #available(iOS 26.0, *) {
-                    WebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else { return }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    WebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                 } else {
-                    BackportWebLoginScreen(onCookie: { cookie in
-                        guard presenter.state.canResume(value: cookie) else { return }
-                        presenter.state.resume(value: cookie)
-                        self.webCookieUrl = nil
+                    BackportWebLoginScreen(onCookie: { cookies in
+                        checkCookies(cookies, sourceUrl: webCookieUrl)
                     }, url: webCookieUrl)
                 }
             }
@@ -462,7 +448,20 @@ private struct LoginFlowView: View {
                     qrContent = showQr.content
                 }
             case .openWebCookieLogin(let webCookie):
+                webCookieProbes = webCookie.probes
                 webCookieUrl = webCookie.url
+            }
+        }
+    }
+
+    private func checkCookies(_ cookies: [HTTPCookie], sourceUrl: String) {
+        Task { @MainActor in
+            guard !checkingCookies else { return }
+            checkingCookies = true
+            defer { checkingCookies = false }
+            let snapshot = loginCookieSnapshot(cookies: cookies, probes: webCookieProbes, fallbackUrl: sourceUrl)
+            if (try? await presenter.state.checkCookies(snapshot: snapshot)) == true {
+                webCookieUrl = nil
             }
         }
     }
@@ -618,7 +617,6 @@ private struct QRLoginView: View {
 
 private struct ServiceInstanceRow: View {
     let instance: UiInstance
-    let icon: FontAwesomeIcon
     let onSelect: () -> Void
 
     var body: some View {
@@ -644,13 +642,11 @@ private struct ServiceInstanceRow: View {
     @ViewBuilder
     private var instanceIcon: some View {
         if let iconUrl = instance.iconUrl, !iconUrl.isEmpty {
-            NetworkImage(data: iconUrl)
+            NetworkImage(data: UiMediaImage(url: iconUrl, proxy: ProxyRef.Global.shared))
                 .frame(maxWidth: 32)
                 .clipShape(RoundedRectangle(cornerRadius: 4))
         } else {
-            Image(fontAwesome: icon)
-                .resizable()
-                .scaledToFit()
+            TabIcon(icon: instance.platformIcon, size: 32)
         }
     }
 }

@@ -15,6 +15,21 @@ import kotlin.test.assertIs
 
 class PixivMapperTest {
     @Test
+    fun ugoiraKeepsAccountPosterAndOriginalFrames() {
+        val account = MicroBlogKey("viewer", "pixiv.net")
+        val media =
+            pixivIllust(
+                imageUrls = PixivImageUrls(medium = "poster.jpg"),
+                metaSinglePage = PixivMetaSinglePage(originalImageUrl = "https://i.pximg.net/img-original/123_ugoira0.png"),
+            ).copy(type = "ugoira").toUiMedia(account).single()
+        val animation = assertIs<UiMedia.Ugoira>(media)
+        assertEquals(account, animation.accountKey)
+        assertEquals("poster.jpg", animation.previewUrl)
+        assertEquals("https://i.pximg.net/img-original/123_ugoira0.png", animation.originalFrameUrl)
+        assertEquals("https://www.pixiv.net/artworks/146347478", animation.url)
+    }
+
+    @Test
     fun viewCountUsesEyeIcon() {
         val post =
             pixivIllust(
@@ -41,7 +56,7 @@ class PixivMapperTest {
                     PixivMetaSinglePage(
                         originalImageUrl = "https://example.com/original.png",
                     ),
-            ).toUiMedia()
+            ).toUiMedia(MicroBlogKey("viewer", "pixiv.net"))
 
         val image = assertIs<UiMedia.Image>(post.single())
         assertEquals("https://example.com/original.png", image.url)
@@ -72,7 +87,7 @@ class PixivMapperTest {
                                 ),
                         ),
                     ),
-            ).toUiMedia()
+            ).toUiMedia(MicroBlogKey("viewer", "pixiv.net"))
 
         val image = assertIs<UiMedia.Image>(post.single())
         assertEquals("https://example.com/page-0-original.png", image.url)

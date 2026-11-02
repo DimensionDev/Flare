@@ -11,18 +11,13 @@ public struct TimelineListRequest {
     }
 
     public let key: String
-    public let positionScope: String
     public let content: Content
     public let headers: [TimelineListHeader]
-    /// Query-specific bookmarks live only as long as their presenter.
-    public let positionOwner: AnyObject?
 
-    public init(key: String, positionScope: String, content: Content, headers: [TimelineListHeader] = [], positionOwner: AnyObject? = nil) {
+    public init(key: String, content: Content, headers: [TimelineListHeader] = []) {
         self.key = key
-        self.positionScope = positionScope
         self.content = content
         self.headers = headers
-        self.positionOwner = positionOwner
     }
 }
 

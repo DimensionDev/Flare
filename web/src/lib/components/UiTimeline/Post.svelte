@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { tick } from "svelte";
     import FaIcon from "$lib/components/FaIcon.svelte";
     import { useDeepLink } from "$lib/deeplink/deepLink.svelte";
     import { useEnvironmentSettings } from "$lib/environment/environmentSettings.svelte";
@@ -7,6 +6,7 @@
     import type { UiTimelineV2Message, UiTimelineV2Post, UiTimelineV2TimelinePostItem } from "@flare/web-presenters/timeline.svelte";
     import PostActions from "./post/PostActions.svelte";
     import PostAvatar from "./post/PostAvatar.svelte";
+    import PostBody from "./post/PostBody.svelte";
     import PostCard from "./post/PostCard.svelte";
     import PostHeader from "./post/PostHeader.svelte";
     import PostMediaGrid from "./post/PostMediaGrid.svelte";
@@ -73,8 +73,6 @@
     let mediaExpanded = $state(false);
     let sensitiveRevealed = $state(false);
     let selectedPollOptions = $state<number[]>([]);
-    let bodyTextElement = $state<HTMLElement | null>(null);
-    let bodyOverflows = $state(false);
 
     $effect(() => {
         const nextKey = postKey(post);
@@ -117,20 +115,6 @@
         !hasContentWarning || contentExpanded || appearance.expandContentWarning,
     );
     const lineLimit = $derived(Math.max(appearance.lineLimit || 5, 1));
-    const shouldExpandTextByDefault = $derived(
-        !hasContentWarning &&
-            visibleContents.reduce((length, content) => length + content.innerText.length, 0) <= 500,
-    );
-    const shouldClampBody = $derived(
-        !bodyExpanded &&
-            !isDetail &&
-            !isQuote &&
-            !shouldExpandTextByDefault &&
-            lineLimit > 0 &&
-            visibleContents.some((content) => !content.isEmpty) &&
-            contentVisible,
-    );
-    const shouldShowBodyExpand = $derived(shouldClampBody && bodyOverflows);
     const shouldShowMediaGrid = $derived(
         showMedia && post.images.length > 0 && (appearance.showMedia || mediaExpanded),
     );
@@ -155,25 +139,6 @@
             hasActionControls(post.actions),
     );
     const postClickable = $derived(!isDetail && deepLink.canPerformClickEvent(post.clickEvent));
-
-    $effect(() => {
-        const element = bodyTextElement;
-        const shouldMeasure = shouldClampBody;
-        postKey(post);
-        lineLimit;
-        showOriginalWithTranslation;
-
-        if (!element || !shouldMeasure) {
-            bodyOverflows = false;
-            return;
-        }
-
-        tick().then(() => {
-            if (bodyTextElement !== element || !shouldMeasure) return;
-            bodyOverflows = Array.from(element.querySelectorAll<HTMLElement>(".post-text-block"))
-                .some((block) => block.scrollHeight > block.clientHeight + 1);
-        });
-    });
 
     function togglePollOption(index: number, multiple: boolean): void {
         selectedPollOptions = multiple
@@ -287,31 +252,14 @@
                 {/if}
 
                 {#if contentVisible && visibleContents.some((content) => !content.isEmpty)}
-                    <div
-                        bind:this={bodyTextElement}
-                        class="post-text"
-                        style={`--line-limit: ${lineLimit};`}
-                    >
-                        {#each visibleContents as content}
-                            {#if !content.isEmpty}
-                                <div class:clamped={shouldClampBody} class="post-text-block">
-                                    <RichText
-                                        text={content}
-                                        className="rich-body"
-                                    />
-                                </div>
-                            {/if}
-                        {/each}
+                    <div class="post-text">
+                        <PostBody
+                            contents={visibleContents}
+                            {lineLimit}
+                            {isDetail}
+                            bind:expanded={bodyExpanded}
+                        />
                     </div>
-                    {#if shouldShowBodyExpand}
-                        <button
-                            class="btn btn-link btn-xs h-auto min-h-0 rounded-box p-0 text-button"
-                            type="button"
-                            onclick={() => (bodyExpanded = true)}
-                        >
-                            {m.postShowMore()}
-                        </button>
-                    {/if}
                 {/if}
 
                 {#if post.poll}
@@ -588,7 +536,7 @@
 
     .post-text {
         display: grid;
-        gap: 0.25rem;
+        gap: var(--post-gap);
         color: var(--post-text-readable);
         font-size: 0.96rem;
         line-height: 1.5;
@@ -606,14 +554,6 @@
         color: var(--post-text-muted);
         font-size: 0.82rem;
         line-height: 1.35;
-    }
-
-    .post-text-block.clamped {
-        display: -webkit-box;
-        overflow: hidden;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: var(--line-limit);
-        line-clamp: var(--line-limit);
     }
 
     .show-media-button {

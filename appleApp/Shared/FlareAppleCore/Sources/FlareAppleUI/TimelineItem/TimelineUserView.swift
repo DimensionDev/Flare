@@ -6,6 +6,7 @@ public struct TimelineUserView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.showNumbers) private var showNumbers
     @ScaledMetric(relativeTo: .footnote) private var fontSize = 13
+    @Environment(\.displayScale) private var displayScale
     private let data: UiTimelineV2.User
 
     public init(data: UiTimelineV2.User) {
@@ -21,7 +22,9 @@ public struct TimelineUserView: View {
             if !data.button.isEmpty {
                 HStack(spacing: 8) {
                     ForEach(Array(data.button.enumerated()), id: \.offset) { _, button in
-                        StatusActionItemView(data: button, useText: true, isFixedWidth: false, fontSize: fontSize, showNumbers: showNumbers, openURL: openURL)
+                        StatusActionItemView(data: button, useText: true, isFixedWidth: false,
+                                             metrics: StatusActionLayoutMetrics(fontSize: fontSize, scale: displayScale),
+                                             showNumbers: showNumbers, openURL: openURL)
                     }
                 }
             }

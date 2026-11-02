@@ -121,9 +121,10 @@ class NostrWebSocketTest {
                 socket.connect()
                 started.await()
                 socket.disconnect()
+                assertTrue(listener.closed.isCompleted)
+                assertEquals(1000 to "Client disconnect", listener.closed.await())
                 finished.await()
                 assertFalse(socket.send("after disconnect"))
-                assertFalse(listener.closed.isCompleted)
                 assertFalse(listener.failed.isCompleted)
                 assertTrue(socket.needsReconnect())
             }

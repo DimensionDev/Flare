@@ -56,9 +56,6 @@ class FlareRootConventionsPlugin : Plugin<Project> {
                     }
                 }
             }
-            subproject.tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
-                dependsOn(subproject.tasks.matching { it.name.startsWith("ksp") })
-            }
         }
     }
 }

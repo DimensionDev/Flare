@@ -1,3 +1,4 @@
+import AppKit
 import FlareAppleCore
 import FlareAppleUI
 @preconcurrency import KotlinSharedUI
@@ -338,7 +339,14 @@ private struct RssTimelineItemList: View {
             return
         }
 
-        selectedItem = selection(for: id)
+        let selection = selection(for: id)
+        if let selection, selection.openInBrowser, let url = URL(string: selection.url) {
+            selectedItemID = nil
+            selectedItem = nil
+            NSWorkspace.shared.open(url)
+        } else {
+            selectedItem = selection
+        }
     }
 
     @MainActor
@@ -422,8 +430,9 @@ private struct RssTimelineItemDetailScaffold: View {
             if let selection {
                 RssDetailScreen(
                     url: selection.url,
-                    descriptionHtml: nil,
-                    descriptionTitle: selection.title
+                    descriptionHtml: selection.descriptionHtml,
+                    descriptionTitle: selection.title,
+                    fallbackHtml: selection.fallbackHtml
                 )
                 .id(selection.id)
             } else {
@@ -444,6 +453,8 @@ private struct RssTimelineItemSelection: Identifiable {
     let url: String
     let title: String?
     let descriptionHtml: String?
+    let fallbackHtml: String?
+    let openInBrowser: Bool
 
     init?(_ item: UiTimelineV2) {
         switch onEnum(of: item) {
@@ -451,7 +462,11 @@ private struct RssTimelineItemSelection: Identifiable {
             id = rssTimelineItemID(for: item)
             url = feed.url
             title = feed.title
-            descriptionHtml = feed.descriptionHtml
+            let event = feed.clickEvent as? ClickEventDeeplink
+            let route = event.flatMap { DeeplinkRoute.companion.parse(uri: $0.url) }
+            descriptionHtml = (route as? DeeplinkRoute.RssDetail)?.descriptionHtml
+            openInBrowser = route is DeeplinkRoute.OpenLinkDirectly
+            fallbackHtml = feed.descriptionHtml
         default:
             return nil
         }
@@ -468,7 +483,7 @@ struct RssDetailScreen: View {
     @State private var showTLDR = false
     @State private var showTranslate = false
 
-    init(url: String, descriptionHtml: String? = nil, descriptionTitle: String? = nil) {
+    init(url: String, descriptionHtml: String? = nil, descriptionTitle: String? = nil, fallbackHtml: String? = nil) {
         self.url = url
         self.fallbackTitle = descriptionTitle
         _presenter = State(
@@ -476,7 +491,8 @@ struct RssDetailScreen: View {
                 presenter: RssDetailPresenter(
                     url: url,
                     descriptionHtml: descriptionHtml,
-                    descriptionTitle: descriptionTitle
+                    descriptionTitle: descriptionTitle,
+                    fallbackHtml: fallbackHtml
                 )
             )
         )
@@ -526,11 +542,11 @@ struct RssDetailScreen: View {
                     showTranslateButton: true
                 )
             }
-        } errorContent: { error in
+        } errorContent: { _ in
             ContentUnavailableView {
                 Label("rss_detail_title", systemImage: "exclamationmark.triangle")
             } description: {
-                Text(error.message ?? "Unknown error")
+                Text("rss_detail_unavailable")
             }
         } loadingContent: {
             RssArticleLoadingView()
@@ -622,11 +638,14 @@ private struct RssArticleContentView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        MacRssHtmlWebView(
-            htmlString: translatedHtml ?? document.content,
-            baseURL: URL(string: url),
-            onOpenURL: { url in openURL(url) }
-        )
+        ProxyWebContent { route in
+            MacRssHtmlWebView(
+                htmlString: translatedHtml ?? document.content,
+                baseURL: URL(string: url),
+                onOpenURL: { url in openURL(url) },
+                route: route
+            )
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .top)
         .background(Color(nsColor: .textBackgroundColor))
@@ -709,6 +728,7 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
     let htmlString: String?
     let baseURL: URL?
     let onOpenURL: ((URL) -> Void)?
+    let route: WebViewProxyRoute
 
     final class Coordinator: NSObject, WKNavigationDelegate {
         var parent: MacRssHtmlWebView
@@ -719,12 +739,25 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
             self.parent = parent
         }
 
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            parent.route.report(error)
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            parent.route.report(error)
+        }
+
         @MainActor
         func webView(
             _ webView: WKWebView,
             decidePolicyFor navigationAction: WKNavigationAction,
             decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void
         ) {
+            guard parent.route.isValid else {
+                decisionHandler(.cancel)
+                return
+            }
+
             guard let targetURL = navigationAction.request.url else {
                 decisionHandler(.allow)
                 return
@@ -762,9 +795,11 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.websiteDataStore = route.dataStore
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
+        route.bind(webView)
 
         loadHTMLIfNeeded(in: webView, context: context)
         return webView
@@ -776,11 +811,13 @@ private struct MacRssHtmlWebView: NSViewRepresentable {
     }
 
     static func dismantleNSView(_ nsView: WKWebView, coordinator: Coordinator) {
+        nsView.stopLoading()
         nsView.navigationDelegate = nil
+        nsView.loadHTMLString("", baseURL: nil)
     }
 
     private func loadHTMLIfNeeded(in webView: WKWebView, context: Context) {
-        guard let html = htmlString else {
+        guard route.isValid, let html = htmlString else {
             return
         }
 

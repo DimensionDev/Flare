@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
 import dev.dimension.flare.data.network.misskey.api.model.Channel
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
@@ -35,7 +36,11 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderBlockStyle
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
@@ -222,7 +227,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                     )
                 } ?: ClickEvent.Noop,
             accountType = accountKey.toAccountType(),
-        )
+        ).bindMediaProxy()
 
     if (notificationType in
         listOf(
@@ -237,7 +242,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             createdAt = createdAt,
             statusKey = statusKey,
             accountType = accountKey.toAccountType(),
-        )
+        ).bindMediaProxy()
     }
 
     if (notificationType == NotificationType.ReceiveFollowRequest && user != null) {
@@ -277,7 +282,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             createdAt = createdAt,
             statusKey = statusKey,
             accountType = accountKey.toAccountType(),
-        )
+        ).bindMediaProxy()
     }
 
     val status =
@@ -288,13 +293,13 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 } else {
                     it
                 }
-            }?.renderStatus(accountKey)
+            }?.renderNotificationPost(accountKey)
     return status?.let {
-        UiTimelineV2.TimelinePostItem(
-            post = it,
+        it.copy(
             presentation =
-                UiTimelineV2.PostPresentation(
+                it.presentation.copy(
                     message = message,
+                    notificationKey = message.statusKey,
                 ),
         )
     }
@@ -305,7 +310,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 createdAt = createdAt,
                 statusKey = statusKey,
                 accountType = accountKey.toAccountType(),
-            )
+            ).bindMediaProxy()
         } else {
             message
         }
@@ -399,6 +404,21 @@ public enum class MisskeyAchievement(
     }
 }
 
+private fun Note.renderNotificationPost(accountKey: MicroBlogKey): UiTimelineV2.TimelinePostItem {
+    val post = requireNotNull(render(accountKey).asTimelinePostItem())
+    return post.copy(
+        presentation =
+            post.presentation.copy(
+                inlineParents =
+                    generateSequence(reply) { it.reply }
+                        .toList()
+                        .asReversed()
+                        .map { requireNotNull(it.render(accountKey).asTimelinePostItem()) }
+                        .toImmutableList(),
+            ),
+    )
+}
+
 internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
     val wrapperStatus = this.renderStatus(accountKey)
     val actualStatus =
@@ -424,7 +444,7 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
                         ),
                     ),
                 accountType = accountKey.toAccountType(),
-            )
+            ).bindMediaProxy()
         } else {
             null
         }
@@ -453,7 +473,7 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
         UiTimelineV2.TimelinePostItem(
             post = wrapperStatus,
             presentation = presentation,
-        )
+        ).bindMediaProxy()
     } else {
         wrapperStatus
     }
@@ -787,7 +807,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 val host = it.host?.takeIf { host -> host.isNotEmpty() } ?: accountKey.host
                 "@${it.username}@$host"
             },
-    )
+    ).bindMediaProxy()
 }
 
 private fun DriveFile.toUi(): UiMedia? {
@@ -847,7 +867,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = MISSKEY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Misskey,
+        platformIcon = UiIcon.Misskey.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -856,7 +876,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun User.render(accountKey: MicroBlogKey): UiProfile {
@@ -921,7 +941,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformId = MISSKEY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Misskey,
+        platformIcon = UiIcon.Misskey.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -930,7 +950,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun EmojiSimple.toUi(): UiEmoji =
@@ -1320,6 +1340,7 @@ internal fun Antenna.render(): UiList.Antenna =
 
 internal fun Channel.render(accountKey: MicroBlogKey): UiList.Channel =
     UiList.Channel(
+        proxy = ProxyRef.forAccount(accountKey),
         id = id,
         title = name,
         description =
@@ -1327,7 +1348,7 @@ internal fun Channel.render(accountKey: MicroBlogKey): UiList.Channel =
                 ?.takeIf {
                     it.isNotEmpty()
                 }?.let {
-                    parseMisskeyText(it, accountKey, emptyMap(), accountKey.host)
+                    parseMisskeyText(it, accountKey, emptyMap(), accountKey.host).withProxy(ProxyRef.forAccount(accountKey))
                 },
         isArchived = isArchived ?: false,
         notesCount = notesCount ?: 0.0,

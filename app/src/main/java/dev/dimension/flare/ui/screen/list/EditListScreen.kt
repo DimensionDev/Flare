@@ -69,6 +69,7 @@ import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.ListEditPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
@@ -161,7 +162,7 @@ internal fun EditListScreen(
                                 ) {
                                     if (state.avatar != null) {
                                         NetworkImage(
-                                            model = state.avatar.toString(),
+                                            model = state.avatar.toString().toUiImage(),
                                             contentDescription = stringResource(R.string.list_choose_image),
                                             modifier =
                                                 Modifier
@@ -174,7 +175,7 @@ internal fun EditListScreen(
                                                 val avatar = it.avatar
                                                 if (avatar != null) {
                                                     NetworkImage(
-                                                        model = avatar,
+                                                        model = it.media,
                                                         contentDescription = stringResource(R.string.list_choose_image),
                                                         modifier =
                                                             Modifier

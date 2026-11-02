@@ -127,6 +127,30 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         deleteTestRootPath(root)
     }
 
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun totalMixedRefreshFailureRetainsTheVisibleCacheAndItsContinuation() =
+        runTest {
+            for (policy in TimelineMergePolicy.entries) {
+                var offline = false
+                val first =
+                    FakeLoader("failure-${policy.name}") {
+                        check(!offline) { "offline" }
+                        PagingResult(data = listOf(feed("retained", 1000)), nextKey = "more")
+                    }
+                val mixed = MixedRemoteMediator(db, listOf(first), policy)
+                val mediator = TimelineRemoteMediator(mixed, db, false)
+                val state = PagingState<OffsetFromStartPagingKey, TimelinePageItem>(emptyList(), null, PagingConfig(20), 0)
+                assertIs<androidx.paging.RemoteMediator.MediatorResult.Success>(mediator.load(LoadType.REFRESH, state))
+                val before = db.pagingTimelineDao().getByPagingKey(mixed.pagingKey)
+                val cursor = db.pagingTimelineDao().getPagingKey(mixed.pagingKey)
+                offline = true
+                assertIs<androidx.paging.RemoteMediator.MediatorResult.Error>(mediator.load(LoadType.REFRESH, state))
+                assertEquals(before, db.pagingTimelineDao().getByPagingKey(mixed.pagingKey))
+                assertEquals(cursor, db.pagingTimelineDao().getPagingKey(mixed.pagingKey))
+            }
+        }
+
     @Test
     fun prependReturnsEndWithoutLoadingSubMediators() =
         runTest {
@@ -190,8 +214,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
 
             val mediator = MixedRemoteMediator(db, listOf(first, second))
 
-            mediator.load(pageSize = 20, request = PagingRequest.Refresh)
-            val appendResult = mediator.load(pageSize = 20, request = PagingRequest.Append("mixed_next_key"))
+            val refreshed = mediator.load(pageSize = 20, request = PagingRequest.Refresh)
+            val appendResult = mediator.load(pageSize = 20, request = PagingRequest.Append(checkNotNull(refreshed.nextKey)))
 
             assertNull(appendResult.nextKey)
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Append("a_next")), first.requests)
@@ -240,8 +264,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(1, healthy.requests.size)
             assertEquals(1, result.data.size)
             assertEquals("https://example.com/healthy", (result.data.first() as UiTimelineV2.Feed).url)
-            assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_failing"))
-            assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_healthy"))
+            assertEquals(1, result.sourceFailures.size)
+            assertNull(db.pagingTimelineDao().getPagingKey(mediator.pagingKey), "Loading cannot commit progress before the visible page")
         }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -583,12 +607,13 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             val refreshResult = refreshMediator.load(loadType = LoadType.REFRESH, state = state)
             assertTrue(refreshResult is androidx.paging.RemoteMediator.MediatorResult.Success)
 
+            val savedCursor = checkNotNull(db.pagingTimelineDao().getPagingKey(refreshMediator.pagingKey)?.nextKey)
             val firstAppend =
                 MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time)
-                    .load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+                    .load(pageSize = 1, request = PagingRequest.Append(savedCursor))
             val retriedFirstAppend =
                 MixedRemoteMediator(db, listOf(first, second), TimelineMergePolicy.Time)
-                    .load(pageSize = 1, request = PagingRequest.Append("mixed_next_key"))
+                    .load(pageSize = 1, request = PagingRequest.Append(savedCursor))
             val committedFirstAppend = mediator().load(loadType = LoadType.APPEND, state = state)
             val committedSecondAppend = mediator().load(loadType = LoadType.APPEND, state = state)
 
@@ -611,7 +636,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     .getTimelinePage(refreshMediator.pagingKey, offset = 0, limit = 20)
                     .mapNotNull { (it.status.status.data.content as? UiTimelineV2.Feed)?.url },
             )
-            assertEquals(listOf<PagingRequest>(PagingRequest.Refresh, PagingRequest.Append("a_next")), first.requests)
+            assertEquals(PagingRequest.Refresh, first.requests.first())
+            assertTrue(first.requests.drop(1).all { it == PagingRequest.Append("a_next") })
             assertEquals(listOf<PagingRequest>(PagingRequest.Refresh), second.requests)
             assertNull(db.pagingTimelineDao().getPagingKey(refreshMediator.pagingKey)?.nextKey)
         }
@@ -1374,6 +1400,38 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         }
 
     @Test
+    fun timelinePreservesSharedAncestorsForEachReplyBranch() =
+        runTest {
+            val accountType = AccountType.Specific(MicroBlogKey("timeline", "test.social"))
+            val user = profile(MicroBlogKey("user", "test.social"), "User")
+            val root = createPost(accountType, user, MicroBlogKey("root", "test.social"), "Root")
+            val parent = createPost(accountType, user, MicroBlogKey("parent", "test.social"), "Parent", listOf(root))
+            val extra = createPost(accountType, user, MicroBlogKey("extra", "test.social"), "Extra")
+            val first =
+                timelinePostItem(
+                    createPost(accountType, user, MicroBlogKey("first", "test.social"), "First", listOf(parent)),
+                    inlineParents = listOf(root, extra, parent),
+                )
+            val second = createPost(accountType, user, MicroBlogKey("second", "test.social"), "Second", listOf(parent))
+
+            for (data in listOf(listOf(first, second, parent, root), listOf(root, parent, first, second))) {
+                val loader = FakeLoader("branching_reply_chain") { PagingResult(data = data) }
+                val result = TimelineRemoteMediator(loader, db, allowLongText = false).timeline(20, PagingRequest.Refresh)
+                val posts = result.data.map { assertIs<UiTimelineV2.TimelinePostItem>(it) }
+
+                assertEquals(listOf(first.statusKey, second.statusKey), posts.map { it.statusKey })
+                assertEquals(
+                    listOf(root.statusKey, extra.statusKey, parent.statusKey),
+                    posts[0].presentation.inlineParents.map { it.statusKey },
+                )
+                assertEquals(
+                    listOf(root.statusKey, parent.statusKey),
+                    posts[1].presentation.inlineParents.map { it.statusKey },
+                )
+            }
+        }
+
+    @Test
     fun timelineDoesNotOverflowWhenReplyChainIsVeryLong() =
         runTest {
             val accountKey = MicroBlogKey(id = "timeline", host = "mastodon.example")
@@ -2012,6 +2070,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         .toDb(post, pagingKey = "home")
                         .status.status.data
 
+                db.statusDao().insertAll(listOf(status))
                 service.enqueueStatuses(listOf(status))
 
                 val platformTranslation =
@@ -2033,6 +2092,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         translateConfig = it.translateConfig.copy(preferPlatformTranslation = false),
                     )
                 }
+                db.statusDao().insertAll(listOf(status))
                 service.enqueueStatuses(listOf(status))
 
                 val providerTranslation =
@@ -2107,6 +2167,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         .toDb(post, pagingKey = "home")
                         .status.status.data
 
+                db.statusDao().insertAll(listOf(status))
                 service.enqueueStatuses(listOf(status))
 
                 val translation =
@@ -2239,11 +2300,13 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                             pagingKey = "home",
                         ).status.status.data
 
+                db.statusDao().insertAll(listOf(firstStatus))
                 preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
                 withTimeout(5_000) {
                     started.await()
                 }
 
+                db.statusDao().insertAll(listOf(secondStatus))
                 preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
 
                 val pendingTranslation =
@@ -2342,6 +2405,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                             pagingKey = "home",
                         ).status.status.data
 
+                db.statusDao().insertAll(listOf(firstStatus))
                 preTranslationService.enqueueStatuses(listOf(firstStatus), allowLongText = false)
                 withTimeout(5_000) {
                     started.await()
@@ -2365,6 +2429,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                         ).first { it == null }
                 }
 
+                db.statusDao().insertAll(listOf(secondStatus))
                 preTranslationService.enqueueStatuses(listOf(secondStatus), allowLongText = false)
 
                 val secondTranslation =

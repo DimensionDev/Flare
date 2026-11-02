@@ -2,6 +2,7 @@
 	import AppBackButton from '$lib/components/AppBackButton.svelte';
 	import AppTopBar from '$lib/components/AppTopBar.svelte';
 	import FaIcon from '$lib/components/FaIcon.svelte';
+	import PlatformIcon from '$lib/components/PlatformIcon.svelte';
 	import UserDisplay from '$lib/components/user/UserDisplay.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import {
@@ -17,7 +18,7 @@
 	let pendingRemoval = $state<AccountsStateAccountItem | null>(null);
 
 	function profileNameText(user: UiProfile): string {
-		return user.name.innerText || user.handle.canonical || user.handle.raw;
+		return user.name.innerText || user.handle.display || user.handle.raw;
 	}
 
 	function accountTitle(item: AccountsStateAccountItem): string {
@@ -28,7 +29,7 @@
 
 	function accountDescription(item: AccountsStateAccountItem): string {
 		return item.profile.type === 'Success'
-			? item.profile.data.handle.canonical
+			? item.profile.data.handle.display
 			: accountKeyText(item.account.accountKey);
 	}
 
@@ -62,6 +63,9 @@
 	<div class="accounts-content">
 		<section class="accounts-section" aria-labelledby="signed-in-heading">
 			<h2 id="signed-in-heading" class="section-title">{m.settingsAccountsSignedIn()}</h2>
+			{#if accountsPresenter.removalFailed}
+				<p role="alert" class="text-error">{m.settingsAccountsRemoveFailed()}</p>
+			{/if}
 
 			{#if accountsState.type === 'Success'}
 				{#if accountsState.data.length > 0}
@@ -74,7 +78,7 @@
 									</div>
 								{:else}
 									<div class="account-avatar bg-base-200 text-base-content">
-										<FaIcon name={item.account.platformIcon} size={18} />
+										<PlatformIcon icon={item.account.platformIcon} size={18} />
 									</div>
 									<div class="account-copy">
 										<span class="account-title">{accountTitle(item)}</span>
@@ -166,7 +170,7 @@
 					{:else}
 						<div class="flex items-center gap-3">
 							<span class="account-avatar bg-base-200 text-base-content">
-								<FaIcon name={pendingRemoval.account.platformIcon} size={18} />
+								<PlatformIcon icon={pendingRemoval.account.platformIcon} size={18} />
 							</span>
 							<span class="account-copy">
 								<span class="account-title">{accountTitle(pendingRemoval)}</span>

@@ -223,6 +223,10 @@ private val UiStrings.androidStringRes: Int
 
             UiStrings.Articles -> R.string.profile_tab_articles
 
+            UiStrings.WeiboFriendsCircle -> R.string.weibo_friends_circle_title
+
+            UiStrings.WeiboPrivateFollowing -> R.string.weibo_private_following_title
+
             UiStrings.Media -> R.string.profile_tab_media
 
             UiStrings.Channel -> R.string.channel_title

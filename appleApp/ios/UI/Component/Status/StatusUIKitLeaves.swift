@@ -1,13 +1,14 @@
 import UIKit
 import Kingfisher
+import FlareAppleUI
 import KotlinSharedUI
 import FlareAppleCore
 
 // MARK: - AvatarUIView
 // Mirrors AvatarView.swift (NetworkImage + clipShape by avatarShape).
 final class AvatarUIView: UIView {
-    private let imageView: UIImageView = {
-        let v = UIImageView()
+    private let imageView: NetworkImageView = {
+        let v = NetworkImageView()
         v.contentMode = .scaleAspectFill
         v.clipsToBounds = true
         v.backgroundColor = .secondarySystemBackground
@@ -24,26 +25,8 @@ final class AvatarUIView: UIView {
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func set(url: String?, customHeaders: [String: String]? = nil) {
-        imageView.kf.cancelDownloadTask()
-        imageView.image = nil
-        if let url = url.flatMap(URL.init(string:)) {
-            imageView.kf.setImage(
-                with: url,
-                options: [
-                    .transition(.fade(0.25)),
-                    .cacheOriginalImage,
-                    .backgroundDecode,
-                    .requestModifier(AnyModifier { request in
-                        var request = request
-                        customHeaders?.forEach { key, value in
-                            request.setValue(value, forHTTPHeaderField: key)
-                        }
-                        return request
-                    }),
-                ]
-            )
-        }
+    func set(media: UiMedia?) {
+        imageView.setImage(media: media)
     }
 
     override func layoutSubviews() {
@@ -143,6 +126,12 @@ final class StatusVisibilityImageView: UIImageView {
         case .channel:
             icon = .tv
             accessibilityLabel = String(localized: "channel_title")
+        case .friends:
+            icon = .heart
+            accessibilityLabel = String(localized: "visibility_friends")
+        case .selfOnly:
+            icon = .lock
+            accessibilityLabel = String(localized: "visibility_self")
         default:
             icon = .globe
             accessibilityLabel = String(localized: "status_visibility_public")
@@ -326,10 +315,10 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
                       height: preferredSingleLineHeight(width: width))
     }
 
-    func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
-        avatar.set(url: data.avatar?.url, customHeaders: data.avatar?.customHeaders)
+    func configure(data: UiProfile, subtitle: String? = nil, trailing: UIView?, onClicked: (() -> Void)?) {
+        avatar.set(media: data.avatar)
         name.text = data.name
-        handleLabel.text = data.handle.canonical
+        handleLabel.text = subtitle ?? data.handle.display
         if trailingView !== trailing {
             trailingView?.removeFromSuperview()
             trailingView = trailing
@@ -343,7 +332,7 @@ final class UserOnelineUIView: UIView, ManualLayoutMeasurable, TimelineHeightPro
         }
         onTapped = onClicked
         avatar.isAccessibilityElement = showsAvatar && onClicked != nil
-        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.display)
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -480,10 +469,10 @@ final class UserCompatUIView: UIStackView {
     }
     required init(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    func configure(data: UiProfile, trailing: UIView?, onClicked: (() -> Void)?) {
-        avatar.set(url: data.avatar?.url, customHeaders: data.avatar?.customHeaders)
+    func configure(data: UiProfile, subtitle: String? = nil, trailing: UIView?, onClicked: (() -> Void)?) {
+        avatar.set(media: data.avatar)
         name.text = data.name
-        handleLabel.text = data.handle.canonical
+        handleLabel.text = subtitle ?? data.handle.display
         if let trailing = trailing {
             trailing.setContentHuggingPriority(.required, for: .horizontal)
             trailing.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -493,7 +482,7 @@ final class UserCompatUIView: UIStackView {
         }
         onTapped = onClicked
         avatar.isAccessibilityElement = onClicked != nil
-        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.canonical)
+        avatar.accessibilityLabel = openProfileAccessibilityLabel(handle: data.handle.display)
     }
 
     @objc private func onTapFired() { onTapped?() }
@@ -506,9 +495,35 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
     private let visibility = StatusVisibilityImageView()
     private let translation = TranslateStatusStateView()
     private let platformLogo = UIImageView()
+    private var platformIcon: IconType?
     private let time = DateTimeUILabel()
     private let insightButton = UIButton(type: .system)
     private var onInsightTapped: (() -> Void)?
+
+    private func setPlatformIcon(_ icon: IconType?) {
+        guard platformIcon != icon else { return }
+        if platformIcon is IconType.Url { platformLogo.cancelMediaLoad() }
+        platformIcon = icon
+        guard let icon else {
+            platformLogo.image = nil
+            return
+        }
+        switch onEnum(of: icon) {
+        case .material(let material):
+            platformLogo.image = UIImage(fontAwesome: material.icon.fontAwesomeIcon)
+        case .url(let url):
+            let scale = traitCollection.displayScale
+            platformLogo.setMedia(
+                UiMediaImage(url: url.url, proxy: ProxyRef.Global.shared),
+                options: [
+                    .processor(ImageDownsamplingProcessor(pixelSize: CGSize(width: 14 * scale, height: 14 * scale), fillsBounds: false)),
+                    .scaleFactor(scale), .backgroundDecode, .asyncCacheTypeCheck,
+                ]
+            )
+        default:
+            platformLogo.image = nil
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -617,13 +632,14 @@ final class StatusTopEndView: UIView, ManualLayoutMeasurable, TimelineHeightProv
 
         if showPlatformLogo {
             platformLogo.isHidden = false
-            platformLogo.image = UIImage(fontAwesome: post.platformIcon.fontAwesomeIcon)
+            setPlatformIcon(post.platformIcon)
             platformLogo.isAccessibilityElement = true
             platformLogo.accessibilityLabel = String(
                 format: String(localized: "status_platform", defaultValue: "Platform: %@"),
                 post.platformId
             )
         } else {
+            setPlatformIcon(nil)
             platformLogo.isHidden = true
             platformLogo.isAccessibilityElement = false
             platformLogo.accessibilityLabel = nil

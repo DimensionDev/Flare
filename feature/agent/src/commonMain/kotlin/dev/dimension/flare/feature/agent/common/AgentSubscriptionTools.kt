@@ -340,6 +340,7 @@ internal class LoadRssArticleTool(
                 url = url,
                 descriptionHtml = feed?.descriptionHtml?.takeIf { feed.agentRssDisplayMode() == RssDisplayMode.DESCRIPTION_ONLY },
                 descriptionTitle = feed?.title,
+                fallbackHtml = feed?.descriptionHtml,
             )
         return document.toRssArticleToolText(
             url = url,
@@ -754,6 +755,7 @@ private fun List<UiTimelineV2>.toSubscriptionTimelineToolText(
 
 private fun UiTimelineV2.toSubscriptionTimelineItemToolText(): String =
     when (this) {
+        is UiTimelineV2.Gap -> ""
         is UiTimelineV2.Feed -> toSubscriptionFeedToolText()
         is UiTimelineV2.TimelinePostItem -> displayPost.toSubscriptionPostToolText()
         is UiTimelineV2.Post -> toSubscriptionPostToolText()
@@ -885,7 +887,7 @@ private fun UiTimelineV2.Feed.agentRssDisplayMode(): RssDisplayMode =
                 }
 
                 is DeeplinkRoute.Rss.Detail -> {
-                    if (route.descriptionHtml != null || route.title != null) {
+                    if (route.descriptionHtml != null) {
                         RssDisplayMode.DESCRIPTION_ONLY
                     } else {
                         RssDisplayMode.FULL_CONTENT

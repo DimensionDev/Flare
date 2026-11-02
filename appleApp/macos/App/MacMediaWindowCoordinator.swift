@@ -13,19 +13,22 @@ struct MacMediaWindowRequest: Identifiable {
     let initialIndex: Int
     let preview: String?
     let shareContext: MacMediaShareContext?
+    let accountType: AccountType?
 
     init(
         id: UUID = UUID(),
         medias: [any UiMedia],
         initialIndex: Int,
         preview: String?,
-        shareContext: MacMediaShareContext? = nil
+        shareContext: MacMediaShareContext? = nil,
+        accountType: AccountType? = nil
     ) {
         self.id = id
         self.medias = medias
         self.initialIndex = initialIndex
         self.preview = preview
         self.shareContext = shareContext
+        self.accountType = accountType
     }
 }
 
@@ -48,7 +51,7 @@ final class MacMediaWindowCoordinator {
 
     func open(route: Route, openWindow: OpenWindowAction) {
         switch route {
-        case .mediaImage(let url, let preview, let customHeaders):
+        case .mediaImage(let url, let preview, let customHeaders, let proxy):
             open(
                 medias: [
                     UiMediaImage(
@@ -58,7 +61,8 @@ final class MacMediaWindowCoordinator {
                         height: 0,
                         width: 0,
                         sensitive: false,
-                        customHeaders: customHeaders
+                        customHeaders: customHeaders,
+                        proxy: proxy
                     )
                 ],
                 initialIndex: 0,
@@ -98,6 +102,7 @@ final class MacMediaWindowCoordinator {
                 statusKey: post.statusKey.description(),
                 userHandle: post.user?.handle.canonical
             ),
+            accountType: post.accountType,
             openWindow: openWindow
         )
     }
@@ -107,6 +112,7 @@ final class MacMediaWindowCoordinator {
         initialIndex: Int,
         preview: String?,
         shareContext: MacMediaShareContext? = nil,
+        accountType: AccountType? = nil,
         openWindow: OpenWindowAction
     ) {
         guard !medias.isEmpty else {
@@ -116,7 +122,8 @@ final class MacMediaWindowCoordinator {
             medias: medias,
             initialIndex: initialIndex,
             preview: preview,
-            shareContext: shareContext
+            shareContext: shareContext,
+            accountType: accountType
         )
         requests[request.id] = request
         pendingPlacementAspectRatios.append(
@@ -197,7 +204,8 @@ struct MacMediaWindowRoot: View {
                     medias: request.medias,
                     initialIndex: request.initialIndex,
                     preview: request.preview,
-                    shareContext: request.shareContext
+                    shareContext: request.shareContext,
+                    accountType: request.accountType
                 )
                 .navigationBarBackButtonHidden()
             }
@@ -222,6 +230,8 @@ private extension UiMedia {
             image.previewUrl
         case .video(let video):
             video.thumbnailUrl
+        case .ugoira(let animation):
+            animation.previewUrl
         case .gif(let gif):
             gif.previewUrl
         case .audio:

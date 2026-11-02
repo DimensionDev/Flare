@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.mastodon
 
 import dev.dimension.flare.common.UploadMedia
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.appendMedia
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
@@ -62,8 +63,10 @@ private val MastodonHeaderPlugin =
 private fun config(
     baseUrl: String,
     accessTokenFlow: Flow<String>,
+    proxy: ProxyRef = ProxyRef.Global,
 ) = ktorfit(
     baseUrl = baseUrl,
+    proxy = proxy,
     extraConverterFactories = listOf(MastodonPagingConverterFactory()),
 ) {
     expectSuccess = true
@@ -87,16 +90,17 @@ private fun config(
 internal class MastodonService(
     baseUrl: String,
     accessTokenFlow: Flow<String>,
-) : TimelineResources by config(baseUrl, accessTokenFlow).createTimelineResources(),
-    LookupResources by config(baseUrl, accessTokenFlow).createLookupResources(),
-    FriendshipResources by config(baseUrl, accessTokenFlow).createFriendshipResources(),
-    AccountResources by config(baseUrl, accessTokenFlow).createAccountResources(),
-    SearchResources by config(baseUrl, accessTokenFlow).createSearchResources(),
-    StatusResources by config(baseUrl, accessTokenFlow).createStatusResources(),
-    ListsResources by config(baseUrl, accessTokenFlow).createListsResources(),
-    TrendsResources by config(baseUrl, accessTokenFlow).createTrendsResources(),
-    InstanceResources by config(baseUrl, accessTokenFlow).createInstanceResources(),
-    MastodonResources by config(baseUrl, accessTokenFlow).createMastodonResources() {
+    proxy: ProxyRef = ProxyRef.Global,
+) : TimelineResources by config(baseUrl, accessTokenFlow, proxy).createTimelineResources(),
+    LookupResources by config(baseUrl, accessTokenFlow, proxy).createLookupResources(),
+    FriendshipResources by config(baseUrl, accessTokenFlow, proxy).createFriendshipResources(),
+    AccountResources by config(baseUrl, accessTokenFlow, proxy).createAccountResources(),
+    SearchResources by config(baseUrl, accessTokenFlow, proxy).createSearchResources(),
+    StatusResources by config(baseUrl, accessTokenFlow, proxy).createStatusResources(),
+    ListsResources by config(baseUrl, accessTokenFlow, proxy).createListsResources(),
+    TrendsResources by config(baseUrl, accessTokenFlow, proxy).createTrendsResources(),
+    InstanceResources by config(baseUrl, accessTokenFlow, proxy).createInstanceResources(),
+    MastodonResources by config(baseUrl, accessTokenFlow, proxy).createMastodonResources() {
     suspend fun mediaLimits(): MediaAttachments? =
         withTimeoutOrNull(5_000) {
             suspend fun fetch(v2: Boolean): MediaAttachments? =

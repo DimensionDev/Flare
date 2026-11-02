@@ -5,6 +5,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 public class ServiceSelectPresenter(
     private val toHome: () -> Unit,
@@ -35,7 +37,9 @@ public class ServiceSelectPresenter(
                         methodType = methodType,
                         redirectUri = redirectUri,
                         onSuccess = {
-                            toHome.invoke()
+                            withContext(Dispatchers.Main) {
+                                toHome()
+                            }
                         },
                     ),
                 )

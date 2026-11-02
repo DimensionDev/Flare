@@ -34,6 +34,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.mastodon.DefaultMastodonMaxStatusCharactersProvider
@@ -44,7 +45,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
-import dev.dimension.flare.data.network.mastodon.mastodonMaxStatusCharactersFlow
+import dev.dimension.flare.data.network.mastodon.mastodonTextLimitsFlow
 import dev.dimension.flare.data.platform.CommonTimelineSpecs
 import dev.dimension.flare.data.platform.MastodonCredential
 import dev.dimension.flare.data.platform.MastodonPlatformSpec
@@ -98,13 +99,14 @@ internal open class MastodonDataSource(
     private val imageCompressor: ImageCompressor by koinInject()
     private val service by lazy {
         MastodonService(
+            proxy = ProxyRef.forAccount(accountKey),
             baseUrl = "https://$instance/",
             accessTokenFlow = credentialFlow.map { it.accessToken },
         )
     }
 
-    private val maxStatusCharactersFlow by lazy {
-        mastodonMaxStatusCharactersFlow(
+    private val textLimitsFlow by lazy {
+        mastodonTextLimitsFlow(
             host = instance,
             resources = service,
             provider = maxStatusCharactersProvider,
@@ -134,6 +136,7 @@ internal open class MastodonDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )
@@ -276,7 +279,7 @@ internal open class MastodonDataSource(
             statusOnly = false,
         )
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -319,12 +322,13 @@ internal open class MastodonDataSource(
             PostStatus(
                 status = data.content,
                 visibility =
-                    when (data.visibility) {
+                    when (requireNotNull(data.visibility)) {
                         UiTimelineV2.Post.Visibility.Public -> Visibility.Public
                         UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
                         UiTimelineV2.Post.Visibility.Followers -> Visibility.Private
                         UiTimelineV2.Post.Visibility.Specified -> Visibility.Direct
                         UiTimelineV2.Post.Visibility.Channel -> Visibility.Public
+                        UiTimelineV2.Post.Visibility.Friends, UiTimelineV2.Post.Visibility.SelfOnly -> error("Unsupported visibility")
                     },
                 inReplyToID = inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
@@ -442,9 +446,27 @@ internal open class MastodonDataSource(
             host = accountKey.host,
         )
 
+    protected open fun countComposeText(
+        content: String,
+        spoilerText: String?,
+        urlCharacters: Int,
+    ): Long = mastodonTextLength(content, spoilerText, urlCharacters)
+
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(maxStatusCharactersFlow),
+            text =
+                ComposeConfig.Text.withValidation(
+                    maxLength = textLimitsFlow.map { it.maxCharacters },
+                    check = { content, spoilerText ->
+                        textLimitsFlow.map { limits ->
+                            ComposeConfig.Text.Check(
+                                (limits.maxCharacters - countComposeText(content, spoilerText, limits.urlCharacters))
+                                    .coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())
+                                    .toInt(),
+                            )
+                        }
+                    },
+                ),
             media =
                 if (type == ComposeType.Quote) {
                     null

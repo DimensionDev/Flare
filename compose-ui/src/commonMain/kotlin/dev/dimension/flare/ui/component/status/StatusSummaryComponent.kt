@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimelineV2
 
@@ -23,6 +25,7 @@ public fun StatusSummaryComponent(
         item.user?.let { user ->
             UserCompat(
                 user = user,
+                subtitle = item.authorSubtitle,
                 nameModifier = nameModifier,
                 handleModifier = handleModifier,
                 avatarModifier = avatarModifier,
@@ -31,6 +34,8 @@ public fun StatusSummaryComponent(
                 },
             ) {}
         }
-        StatusActions(items = item.actions, modifier = Modifier.fillMaxWidth().then(actionsModifier))
+        if (LocalTimelineAppearance.current.postActionStyle != PostActionStyle.Hidden) {
+            StatusActions(items = item.actions, modifier = Modifier.fillMaxWidth().then(actionsModifier))
+        }
     }
 }

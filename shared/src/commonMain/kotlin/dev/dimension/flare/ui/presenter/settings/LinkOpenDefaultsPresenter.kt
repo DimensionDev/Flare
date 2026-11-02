@@ -5,8 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.datastore.model.LinkOpenDefaultMethod
 import dev.dimension.flare.data.datastore.model.methodFor
@@ -21,7 +20,6 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebIgnore
 import io.ktor.http.Url
@@ -119,11 +117,10 @@ public class LinkOpenDefaultsPresenter : PresenterBase<LinkOpenDefaultsPresenter
                         return@mapNotNull null
                     }
                     val dataSource = service.dataSource
+                    val accountProfile = dataSource.accountProfileFlow()
                     val profileFlow =
-                        if (dataSource is UserDataSource && dataSource is AuthenticatedMicroblogDataSource) {
-                            dataSource.userHandler
-                                .userById(dataSource.accountKey.id)
-                                .toUi()
+                        if (accountProfile != null) {
+                            accountProfile
                                 .distinctUntilChangedBy { state ->
                                     state.takeSuccess()?.let { user ->
                                         buildString {

@@ -53,6 +53,7 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.compose.DraftBoxPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -243,7 +244,7 @@ private fun DraftBoxItem(
                             when (media.type) {
                                 UiDraftMediaType.IMAGE -> {
                                     NetworkImage(
-                                        model = media.cachePath,
+                                        model = media.cachePath.toUiImage(),
                                         contentDescription = mediaDescription,
                                         modifier = Modifier.size(60.dp),
                                         contentScale = ContentScale.Crop,

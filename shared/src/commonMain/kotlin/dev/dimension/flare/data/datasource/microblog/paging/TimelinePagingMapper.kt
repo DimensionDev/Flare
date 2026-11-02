@@ -19,6 +19,7 @@ import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.withItemKey
 import kotlinx.collections.immutable.toImmutableList
 
@@ -66,6 +67,13 @@ internal object TimelinePagingMapper {
         val timelineItem = data.asTimelinePostItem()
         val presentation = timelineItem?.presentation
         val rootStatus = context.status(root)
+        val timelineId =
+            DbPagingTimeline.createId(
+                pagingKey,
+                presentation?.notificationKey?.let {
+                    "notification:${DbStatus.createId(root.accountType as DbAccountType, it)}"
+                } ?: rootStatus.data.id,
+            )
         val semanticReferences =
             when (root) {
                 is UiTimelineV2.Post -> collectPostReferences(root, presentation, rootStatus.data.id, context)
@@ -76,7 +84,7 @@ internal object TimelinePagingMapper {
             if (root is UiTimelineV2.Post && presentation != null) {
                 collectPresentationReferences(
                     pagingKey = pagingKey,
-                    rootStatusId = rootStatus.data.id,
+                    timelineId = timelineId,
                     presentation = presentation,
                     context = context,
                 )
@@ -89,7 +97,10 @@ internal object TimelinePagingMapper {
                     pagingKey = pagingKey,
                     statusId = rootStatus.data.id,
                     sortId = sortId ?: SnowflakeIdGenerator.nextId(),
+                    isGap = data is UiTimelineV2.Gap,
                     message = presentation?.message,
+                    notificationKey = presentation?.notificationKey,
+                    _id = timelineId,
                     semanticReferenceSignature =
                         semanticReferenceSignature(
                             semanticReferences.map { it.reference } +
@@ -164,7 +175,7 @@ internal object TimelinePagingMapper {
                         pagingKey = pagingKey,
                         translationDisplayOptions = translationDisplayOptions,
                     ),
-                itemKey = "${pagingKey}_${item.status.status.data.id}",
+                itemKey = item.timeline.notificationKey?.let { item.timeline._id } ?: "${pagingKey}_${item.statusData.id}",
             )
         } else {
             root
@@ -224,7 +235,7 @@ internal object TimelinePagingMapper {
             items.forEachIndexed { index, item ->
                 val root = contentByStatusId.getValue(item.statusData.id)
                 val resolvedRoot = root.resolveSemanticReferences(item.references, contentByStatusId)
-                val itemKey = "${pagingKey}_${item.statusData.id}"
+                val itemKey = item.timeline.notificationKey?.let { item.timeline._id } ?: "${pagingKey}_${item.statusData.id}"
                 val baseItem =
                     if (resolvedRoot is UiTimelineV2.Post) {
                         UiTimelineV2.TimelinePostItem(
@@ -340,6 +351,7 @@ internal object TimelinePagingMapper {
             }
         return UiTimelineV2.PostPresentation(
             message = item.timeline.message,
+            notificationKey = item.timeline.notificationKey,
             inlineParents =
                 references
                     .filter { it.first == DbTimelineItemPresentationType.InlineParent }
@@ -435,6 +447,7 @@ internal object TimelinePagingMapper {
         val semantic = semanticPresentation(item.references, ::resolve)
         return UiTimelineV2.PostPresentation(
             message = item.timeline.message?.canonicalizeProfiles(canonicalProfiles) as? UiTimelineV2.Message,
+            notificationKey = item.timeline.notificationKey,
             inlineParents = inlineParents.toImmutableList(),
             quotes = quotes.toImmutableList().ifEmpty { semantic.quotes },
             repost = repost ?: semantic.repost,
@@ -452,7 +465,7 @@ internal object TimelinePagingMapper {
 
     private fun UiTimelineV2.canonicalizeProfiles(canonicalProfiles: MutableMap<MicroBlogKey, UiProfile>): UiTimelineV2 =
         when (this) {
-            is UiTimelineV2.Feed -> {
+            is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {
                 this
             }
 
@@ -554,7 +567,7 @@ internal object TimelinePagingMapper {
 
     private fun UiTimelineV2.collectProfiles(collect: (UiProfile) -> Unit) {
         when (this) {
-            is UiTimelineV2.Feed -> {}
+            is UiTimelineV2.Gap, is UiTimelineV2.Feed -> {}
 
             is UiTimelineV2.Message -> {
                 user?.let(collect)
@@ -666,7 +679,7 @@ internal object TimelinePagingMapper {
 
     private fun collectPresentationReferences(
         pagingKey: String,
-        rootStatusId: String,
+        timelineId: String,
         presentation: UiTimelineV2.PostPresentation,
         context: MappingContext,
     ): List<DbTimelineItemPresentationReferenceWithStatus> {
@@ -676,7 +689,7 @@ internal object TimelinePagingMapper {
                 add(
                     presentationReferenceWithStatus(
                         pagingKey,
-                        rootStatusId,
+                        timelineId,
                         post,
                         DbTimelineItemPresentationType.InlineParent,
                         order++,
@@ -688,7 +701,7 @@ internal object TimelinePagingMapper {
                 add(
                     presentationReferenceWithStatus(
                         pagingKey,
-                        rootStatusId,
+                        timelineId,
                         UiTimelineV2.TimelinePostItem(post),
                         DbTimelineItemPresentationType.Quote,
                         order++,
@@ -700,7 +713,7 @@ internal object TimelinePagingMapper {
                 add(
                     presentationReferenceWithStatus(
                         pagingKey,
-                        rootStatusId,
+                        timelineId,
                         UiTimelineV2.TimelinePostItem(post),
                         DbTimelineItemPresentationType.Repost,
                         order++,
@@ -748,7 +761,7 @@ internal object TimelinePagingMapper {
 
     private fun presentationReferenceWithStatus(
         pagingKey: String,
-        rootStatusId: String,
+        timelineId: String,
         post: UiTimelineV2.TimelinePostItem,
         type: DbTimelineItemPresentationType,
         referenceOrder: Int,
@@ -757,7 +770,7 @@ internal object TimelinePagingMapper {
         reference =
             DbTimelineItemPresentationReference(
                 pagingKey = pagingKey,
-                statusId = rootStatusId,
+                timelineId = timelineId,
                 referenceStatusId = DbStatus.createId(post.accountType as DbAccountType, post.statusKey),
                 presentationType = type,
                 referenceOrder = referenceOrder,
@@ -807,6 +820,6 @@ internal object TimelinePagingMapper {
                 options = translationDisplayOptions,
                 translations = data.translations,
             )
-        return root.withItemKey(rootItemKey)
+        return root.withItemKey(rootItemKey).bindMediaProxy()
     }
 }

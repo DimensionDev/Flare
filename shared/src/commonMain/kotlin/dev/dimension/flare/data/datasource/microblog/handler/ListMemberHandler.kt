@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -23,8 +24,13 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.withProxy
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlin.native.HiddenFromObjC
 
 @OptIn(ExperimentalPagingApi::class)
@@ -36,6 +42,7 @@ public class ListMemberHandler(
 ) {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
     private val database: CacheDatabase by koinInject()
+    private val pendingAdds = MutableStateFlow(emptySet<Pair<String, MicroBlogKey>>())
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 
@@ -76,7 +83,7 @@ public class ListMemberHandler(
             },
         ).flow.map {
             it.map {
-                it.user.content
+                it.user.content.withProxy(ProxyRef.forAccount(accountKey))
             }
         }
     }
@@ -88,40 +95,44 @@ public class ListMemberHandler(
                 listKey = MicroBlogKey(listId, accountKey.host),
             ).map { members ->
                 members.map { member ->
-                    member.user.content
+                    member.user.content.withProxy(ProxyRef.forAccount(accountKey))
                 }
             }
+
+    public fun listMemberKeysFlow(listId: String): Flow<Set<MicroBlogKey>> =
+        database
+            .listDao()
+            .getListMemberKeysFlow(MicroBlogKey(listId, accountKey.host))
+            .map { it.toSet() }
 
     public suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        val listKey = MicroBlogKey(listId, accountKey.host)
-        database.connect {
-            database.listDao().insertAllMember(
-                listOf(
-                    DbListMember(
-                        listKey = listKey,
-                        memberKey = userKey,
-                    ),
-                ),
-            )
-        }
-        tryRun {
-            loader.addMember(listId, userKey)
-        }.onSuccess { user ->
-            database.connect {
-                database.upsertUsers(
-                    listOf(user.toDbUser()),
-                )
+        val requestKey = listId to userKey
+        if (requestKey in pendingAdds.getAndUpdate { it + requestKey }) return
+        try {
+            if (userKey in listMemberKeysFlow(listId).first()) return
+            val listKey = MicroBlogKey(listId, accountKey.host)
+            tryRun {
+                loader.addMember(listId, userKey)
+            }.onSuccess { user ->
+                database.connect {
+                    database.upsertUsers(
+                        listOf(user.toDbUser()),
+                    )
+                    database.listDao().insertAllMember(
+                        listOf(
+                            DbListMember(
+                                listKey = listKey,
+                                memberKey = user.key,
+                            ),
+                        ),
+                    )
+                }
             }
-        }.onFailure {
-            database.connect {
-                database.listDao().deleteMemberFromList(
-                    listKey = listKey,
-                    memberKey = userKey,
-                )
-            }
+        } finally {
+            pendingAdds.update { it - requestKey }
         }
     }
 
@@ -193,7 +204,7 @@ public class ListMemberHandler(
                     .getUserByKeyFlow(userKey)
                     .map {
                         it.listMemberships.map {
-                            it.list.content.data
+                            it.list.content.data.withProxy(ProxyRef.forAccount(accountKey))
                         }
                     }
             },

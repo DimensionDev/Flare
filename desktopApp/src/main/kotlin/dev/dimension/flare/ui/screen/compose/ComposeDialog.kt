@@ -127,6 +127,7 @@ import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.component.toImageVector
@@ -141,11 +142,16 @@ import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.visibility_friends
+import dev.dimension.flare.visibility_friends_description
+import dev.dimension.flare.visibility_self
+import dev.dimension.flare.visibility_self_description
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalTextStyle
 import io.github.composefluent.component.AccentButton
@@ -342,7 +348,7 @@ fun ComposeDialog(
                                 } else {
                                     stringResource(
                                         Res.string.compose_select_accounts_current,
-                                        selectedProfiles.joinToString { it.handle.canonical },
+                                        selectedProfiles.joinToString { it.handle.display },
                                     )
                                 }
                             MenuFlyoutContainer(
@@ -356,7 +362,7 @@ fun ComposeDialog(
                                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 ) {
                                                     Column(modifier = Modifier.weight(1f)) {
-                                                        Text(text = data.handle.canonical)
+                                                        Text(text = data.handle.display)
                                                         Text(
                                                             text = data.key.host,
                                                             style = FluentTheme.typography.caption,
@@ -550,7 +556,7 @@ fun ComposeDialog(
                                         )
                                 Box {
                                     NetworkImage(
-                                        model = media.file.absolutePath,
+                                        model = media.file.absolutePath.toUiImage(),
                                         contentDescription = mediaDescription,
                                         modifier =
                                             Modifier
@@ -1082,10 +1088,10 @@ private fun ComposeAccountAvatar(
                     .padding(2.dp),
             contentAlignment = Alignment.Center,
         ) {
-            FAIcon(
-                imageVector = user.platformIcon.toImageVector(),
+            TabIcon(
+                icon = user.platformIcon,
                 contentDescription = null,
-                modifier = Modifier.size(size * 0.24f),
+                size = size * 0.24f,
             )
         }
     }
@@ -1174,8 +1180,9 @@ private fun composePresenter(
             }
 
     mediaState.onSuccess {
-        LaunchedEffect(it.medias.size) {
-            state.setMediaSize(it.medias.size)
+        val mimeTypes = it.medias.map { media -> FileItem(media.file).mimeType.orEmpty() }
+        LaunchedEffect(mimeTypes) {
+            state.setMediaMimeTypes(mimeTypes)
         }
     }
 
@@ -1186,6 +1193,15 @@ private fun composePresenter(
             }.map {
                 contentWarningPresenter()
             }
+
+    val spoilerText =
+        contentWarningState
+            .takeSuccess()
+            ?.takeIf { it.enabled }
+            ?.textFieldState
+            ?.text
+            ?.toString()
+    LaunchedEffect(spoilerText) { state.setSpoilerText(spoilerText) }
 
     val languageState =
         state.composeConfig
@@ -1226,7 +1242,6 @@ private fun composePresenter(
             mediaState.takeSuccess()?.setMediaSensitive(draft.data.sensitive)
             pollState.takeSuccess()?.setPoll(draft.data.poll)
             contentWarningState.takeSuccess()?.setText(draft.data.spoilerText)
-            state.visibilityState.takeSuccess()?.setVisibility(draft.data.visibility)
             languageState.takeSuccess()?.setSelectedLanguages(draft.data.language)
             state.consumeLoadedDraft()
         }
@@ -1289,15 +1304,8 @@ private fun composePresenter(
                         )
                     },
                 sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                spoilerText =
-                    contentWarningState
-                        .takeSuccess()
-                        ?.textFieldState
-                        ?.text
-                        ?.toString(),
-                visibility =
-                    state.visibilityState.takeSuccess()?.visibility
-                        ?: UiTimelineV2.Post.Visibility.Public,
+                spoilerText = spoilerText,
+                visibility = state.visibility,
                 referenceStatus =
                     state.composeStatus?.let {
                         ComposeData.ReferenceStatus(
@@ -1629,6 +1637,14 @@ internal val UiTimelineV2.Post.Visibility.localName: StringResource
                 Res.string.misskey_visibility_specified
             }
 
+            UiTimelineV2.Post.Visibility.Friends -> {
+                Res.string.visibility_friends
+            }
+
+            UiTimelineV2.Post.Visibility.SelfOnly -> {
+                Res.string.visibility_self
+            }
+
             UiTimelineV2.Post.Visibility.Channel -> {
                 Res.string.misskey_visibility_public
             }
@@ -1651,6 +1667,14 @@ internal val UiTimelineV2.Post.Visibility.localDescription: StringResource
 
             UiTimelineV2.Post.Visibility.Specified -> {
                 Res.string.misskey_visibility_specified_description
+            }
+
+            UiTimelineV2.Post.Visibility.Friends -> {
+                Res.string.visibility_friends_description
+            }
+
+            UiTimelineV2.Post.Visibility.SelfOnly -> {
+                Res.string.visibility_self_description
             }
 
             UiTimelineV2.Post.Visibility.Channel -> {

@@ -6,8 +6,11 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.route.Route
+import kotlinx.collections.immutable.toImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
@@ -27,6 +30,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
             uri = args.uri,
             previewUrl = args.previewUrl,
             customHeaders = args.customHeaders,
+            proxy = args.proxy,
             onDismiss = onBack,
             toAltText = { media ->
                 media.description?.let { navigate(Route.Status.AltText(it)) }
@@ -43,7 +47,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
         )
     ) { args ->
         RawMediaScreen(
-            medias = args.medias,
+            medias = args.medias.mapIndexed { index, media -> media.withProxy(args.proxies.getOrElse(index) { ProxyRef.Global }) }.toImmutableList(),
             index = args.index,
             preview = args.preview,
             onDismiss = onBack,

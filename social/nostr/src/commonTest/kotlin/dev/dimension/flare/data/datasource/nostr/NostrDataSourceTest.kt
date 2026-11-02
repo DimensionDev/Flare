@@ -27,7 +27,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -230,7 +229,7 @@ class NostrDataSourceTest {
 
     private suspend fun TestScope.withDataSource(block: suspend (NostrDataSource, QuartzTestRelays, NostrServiceManager) -> Unit) {
         stopKoin()
-        startKoin { modules(module { single<CoroutineScope> { backgroundScope } }) }
+        startKoin().koin.declare<CoroutineScope>(backgroundScope)
         QuartzTestRelays(this).use { network ->
             val credentials = MutableStateFlow(credential.copy(relays = network.relays.map { it.url }))
             val manager = SwitchingServiceManager(credentials, backgroundScope) { network.service(it) }

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.repository.AccountRepository
@@ -72,8 +72,7 @@ public class ListEditPresenter(
             ListInfoState by listInfoState {
             override val supportedMetaData =
                 serviceState.map {
-                    require(it is ListDataSource)
-                    it.listHandler.supportedMetaData
+                    requireNotNull(it.capabilities.list).listHandler.supportedMetaData
                 }
 
             override fun refresh() {
@@ -84,8 +83,7 @@ public class ListEditPresenter(
 
             override suspend fun updateList(listMetaData: ListMetaData) {
                 serviceState.onSuccess {
-                    require(it is ListDataSource)
-                    it.listHandler.update(listId, listMetaData)
+                    requireNotNull(it.capabilities.list).listHandler.update(listId, listMetaData)
                 }
             }
         }

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://unpkg.com/flare-plugin-sdk@next/skill/flare-plugin/manifest.schema.json",
+  "schemaVersion": 1,
+  "apiVersion": 1,
+  "id": "dev.dimension.flare.sample.timeline",
+  "version": "0.1.0",
+  "name": "Timeline Showcase",
+  "description": "Offline examples of mixed timeline items and interactions",
+  "platform": {
+    "id": "TimelineShowcase",
+    "name": "Timeline Showcase",
+    "loginMethods": [
+      {
+        "id": "demo",
+        "interaction": "Form",
+        "title": "Open demo account",
+        "fields": [
+          {
+            "id": "name",
+            "type": "Text",
+            "label": "Demo name (optional)",
+            "required": false
+          }
+        ]
+      }
+    ],
+    "capabilities": {
+      "flare.datasource.timeline/v1": {
+        "operations": {
+          "page": {
+            "directions": [
+              "refresh"
+            ]
+          }
+        }
+      },
+      "flare.datasource.post/v1": {
+        "operations": {
+          "detail": {},
+          "mutate": {}
+        }
+      },
+      "flare.datasource.profile/v1": {
+        "operations": {
+          "byId": {},
+          "byHandle": {}
+        }
+      },
+      "flare.datasource.notification/v1": {
+        "operations": {
+          "page": {
+            "directions": [
+              "refresh"
+            ]
+          }
+        },
+        "notificationFilters": [
+          "all"
+        ]
+      },
+      "flare.datasource.relation/v1": {
+        "operations": {
+          "state": {},
+          "mutate": {}
+        },
+        "relationActions": [
+          "follow"
+        ]
+      }
+    },
+    "timelines": [
+      {
+        "id": "home",
+        "title": "All item types",
+        "icon": "Home",
+        "defaultForNewAccount": true
+      }
+    ]
+  }
+}

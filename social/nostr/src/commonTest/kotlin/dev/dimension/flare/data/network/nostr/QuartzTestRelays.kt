@@ -16,6 +16,9 @@ import dev.dimension.flare.data.platform.NostrSignerCredential
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respondOk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -36,9 +39,11 @@ internal class QuartzTestRelays(
     val storedEvents = mutableListOf<QuartzEvent>()
     val queries = mutableListOf<Pair<NormalizedRelayUrl, List<JsonObject>>>()
     val published = mutableListOf<QuartzEvent>()
+    val acceptedPublications = mutableListOf<Pair<NormalizedRelayUrl, QuartzEvent>>()
     var endStoredEvents = true
     var acceptedRelays = relays
     var requireAuthentication = false
+    var acceptAuthentication = true
     val authenticatedRelays = mutableSetOf<NormalizedRelayUrl>()
     var onPublished: suspend (QuartzEvent) -> Unit = {}
     private val sockets = mutableListOf<Socket>()
@@ -86,8 +91,11 @@ internal class QuartzTestRelays(
         }
 
         override fun disconnect() {
+            if (!connected) return
             connected = false
             subscriptions.clear()
+            authenticatedRelays -= url
+            out.onClosed(1000, "client disconnect")
         }
 
         suspend fun event(
@@ -122,8 +130,12 @@ internal class QuartzTestRelays(
                     "EVENT" -> {
                         val event = QuartzEvent.fromJson(frame[1].toString())
                         published += event
-                        out.onMessage("[\"OK\",\"${event.id}\",${url in acceptedRelays},\"test relay\"]")
-                        onPublished(event)
+                        val needsAuth = requireAuthentication && url !in authenticatedRelays
+                        val accepted = !needsAuth && url in acceptedRelays
+                        val message = if (needsAuth) "auth-required: authenticate first" else "test relay"
+                        if (accepted) acceptedPublications += url to event
+                        out.onMessage("[\"OK\",\"${event.id}\",$accepted,\"$message\"]")
+                        if (accepted) onPublished(event)
                     }
 
                     "AUTH" -> {
@@ -131,8 +143,8 @@ internal class QuartzTestRelays(
                         check(auth.kind == 22242 && auth.verify())
                         check(auth.tags.any { it.contentEquals(arrayOf("challenge", "test-challenge")) })
                         check(auth.tags.any { it.contentEquals(arrayOf("relay", url.url)) })
-                        authenticatedRelays += url
-                        out.onMessage("[\"OK\",\"${auth.id}\",true,\"\"]")
+                        if (acceptAuthentication) authenticatedRelays += url
+                        out.onMessage("[\"OK\",\"${auth.id}\",$acceptAuthentication,\"\"]")
                     }
                 }
             }
@@ -185,6 +197,7 @@ internal fun QuartzTestRelays.service(
                         .jsonPrimitive.content,
                 ),
         ),
+    relayInfoClient: HttpClient = nostrTestRelayInfoClient(),
     cache: NostrCache =
         object : NostrCache {
             override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> = emptyMap()
@@ -202,4 +215,10 @@ internal fun QuartzTestRelays.service(
         UnsupportedAmberSignerBridge("Unavailable"),
         relays.map { it.url },
         client,
+        relayInfoClient,
     )
+
+internal fun nostrTestRelayInfoClient(): HttpClient =
+    HttpClient(MockEngine) {
+        engine { addHandler { respondOk("{}") } }
+    }

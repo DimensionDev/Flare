@@ -137,8 +137,8 @@ public struct StatusView: View {
         let accountType = data.accountType
         let statusKey = data.statusKey
         let effectiveLineLimit = max(maxLine ?? Int(appearanceLineLimit), 1)
-        let contentLineLimit: Int? = isDetail || textExpanded ? nil : effectiveLineLimit
-        let collapseThreshold = maxLine == nil ? max(10, effectiveLineLimit) : effectiveLineLimit
+        let contentLineLimit: Int? = isDetail || textExpanded || effectiveLineLimit == Int(Int32.max) ? nil : effectiveLineLimit
+        let collapseThreshold = maxLine == nil ? max(15, effectiveLineLimit) : effectiveLineLimit
         let canExpandLineLimitedContent = contentLineLimit != nil && !isDetail && !textExpanded && showExpandTextButton
         let hasPreMediaBody =
             replyToHandle != nil ||
@@ -180,11 +180,11 @@ public struct StatusView: View {
                 spacing: 8,
             ) {
                 if showAsFullWidth, let user {
-                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                    AvatarView(data: user.avatar)
                         .frame(width: 44, height: 44)
                         .accessibilityLabel(
                             Text(
-                                verbatim: openProfileAccessibilityLabel(handle: user.handle.canonical)
+                                verbatim: openProfileAccessibilityLabel(handle: user.handle.display)
                             )
                         )
                         .onTapGesture {
@@ -202,7 +202,7 @@ public struct StatusView: View {
                         ) {
                             if let user {
                                 if showAsFullWidth {
-                                    UserOnelineView(data: user, showAvatar: false) {
+                                    UserOnelineView(data: user, showAvatar: false, subtitle: data.authorSubtitle) {
                                         topEndContent(
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
@@ -216,7 +216,7 @@ public struct StatusView: View {
                                         user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                                     }
                                 } else if isQuote {
-                                    UserOnelineView(data: user, showAvatar: true) {
+                                    UserOnelineView(data: user, showAvatar: true, subtitle: data.authorSubtitle) {
                                         topEndContent(
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
@@ -230,7 +230,7 @@ public struct StatusView: View {
                                         user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                                     }
                                 } else {
-                                    UserCompatView(data: user) {
+                                    UserCompatView(data: user, subtitle: data.authorSubtitle) {
                                         topEndContent(
                                             visibility: visibility,
                                             translationDisplayState: translationDisplayState,
@@ -370,6 +370,8 @@ public struct StatusView: View {
                                         image.previewUrl
                                     case .video(let video):
                                         video.thumbnailUrl
+                                    case .ugoira(let animation):
+                                        animation.previewUrl
                                     case .gif(let gif):
                                         gif.previewUrl
                                     case .audio:
@@ -456,7 +458,7 @@ public struct StatusView: View {
                         }
 
                         if (postActionStyle != .hidden || isDetail) && !forceHideActions {
-                            StatusActionsView(data: actions, useText: false, topPadding: 8)
+                            StatusActionsView(data: actions, useText: false, topPadding: 8, isDetail: isDetail, postKey: String(describing: data.statusKey))
                             #if os(macOS)
                                 .font(isDetail ? .body : .callout)
                             #else
@@ -503,7 +505,7 @@ public struct StatusView: View {
     private func topEndContent(
         visibility: UiTimelineV2.PostVisibility?,
         translationDisplayState: TranslationDisplayState,
-        platformIcon: UiIcon,
+        platformIcon: IconType,
         platformId: String,
         createdAt: UiDateTime,
         accountType: AccountType,
@@ -521,7 +523,7 @@ public struct StatusView: View {
                     .foregroundStyle(.secondary)
             }
             if showPlatformLogo {
-                Image(fontAwesome: platformIcon.fontAwesomeIcon)
+                TabIcon(icon: platformIcon, size: 14)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(
@@ -559,92 +561,6 @@ public struct StatusView: View {
                 .accessibilityLabel(Text("status_insight_title", bundle: FlareAppleUILocalization.bundle))
             }
         }
-    }
-}
-
-private struct CollapsibleRichText: View {
-    let text: UiRichText
-    let lineLimit: Int?
-    let collapseThreshold: Int
-    let isExpanded: Bool
-    let isTextSelectionEnabled: Bool
-    let onOverflowChanged: (Bool) -> Void
-
-    @ScaledMetric(relativeTo: .body) private var fallbackLineHeight: CGFloat = 20
-    @State private var fullHeight: CGFloat = 0
-    @State private var lineHeight: CGFloat = 0
-
-    private var effectiveLineHeight: CGFloat {
-        max(lineHeight, fallbackLineHeight)
-    }
-
-    private var overflows: Bool {
-        fullHeight > ceil(effectiveLineHeight * CGFloat(max(collapseThreshold, 1))) + 1
-    }
-
-    private var collapsedHeight: CGFloat? {
-        guard let lineLimit, !isExpanded else { return nil }
-        if fullHeight == 0 {
-            return ceil(effectiveLineHeight * CGFloat(max(collapseThreshold, 1)))
-        }
-        return overflows ? ceil(effectiveLineHeight * CGFloat(max(lineLimit, 1))) : nil
-    }
-
-    var body: some View {
-        richText
-            .fixedSize(horizontal: false, vertical: true)
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.height
-            } action: { value in
-                fullHeight = value
-                publishOverflow(fullHeight: value, lineHeight: lineHeight)
-            }
-            .overlay(alignment: .topLeading) {
-                Text(verbatim: "A")
-                    .fixedSize()
-                    .hidden()
-                    .onGeometryChange(for: CGFloat.self) { proxy in
-                        proxy.size.height
-                    } action: { value in
-                        lineHeight = value
-                        publishOverflow(fullHeight: fullHeight, lineHeight: value)
-                    }
-                    .allowsHitTesting(false)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(maxHeight: collapsedHeight, alignment: .top)
-            .clipped()
-            .onChange(of: lineLimit) { _, _ in
-                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
-            }
-            .onChange(of: collapseThreshold) { _, _ in
-                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
-            }
-            .onChange(of: isExpanded) { _, _ in
-                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
-            }
-            .onChange(of: text.raw) { _, _ in
-                publishOverflow(fullHeight: fullHeight, lineHeight: lineHeight)
-            }
-    }
-
-    @ViewBuilder
-    private var richText: some View {
-        if isTextSelectionEnabled {
-            RichText(text: text)
-                .textSelection(.enabled)
-        } else {
-            RichText(text: text)
-        }
-    }
-
-    private func publishOverflow(fullHeight: CGFloat, lineHeight: CGFloat) {
-        guard lineLimit != nil, !isExpanded else {
-            onOverflowChanged(false)
-            return
-        }
-        let thresholdHeight = ceil(max(lineHeight, fallbackLineHeight) * CGFloat(max(collapseThreshold, 1)))
-        onOverflowChanged(fullHeight > thresholdHeight + 1)
     }
 }
 

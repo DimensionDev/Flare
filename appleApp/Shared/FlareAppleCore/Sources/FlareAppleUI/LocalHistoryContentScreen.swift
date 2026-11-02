@@ -4,7 +4,6 @@ import SwiftUI
 
 public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
     @Environment(\.timelineListRenderer) private var listRenderer
-    @State private var listScope = UUID().uuidString
     @State private var searchPresenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     @State private var presenter = KotlinPresenter(presenter: LocalCacheSearchPresenter())
@@ -97,10 +96,8 @@ public struct LocalHistoryContentScreen<AskAiOverlay: View>: View {
             content = .users(committedQuery.isEmpty ? presenter.state.userHistory : searchPresenter.state.searchUser)
         }
         return TimelineListRequest(
-            key: "\(listScope):\(committedQuery.isEmpty ? "history" : searchPresenter.key):\(selection)",
-            positionScope: listScope,
-            content: content,
-            positionOwner: committedQuery.isEmpty ? presenter : searchPresenter
+            key: "\(committedQuery.isEmpty ? presenter.key : searchPresenter.key):\(selection)",
+            content: content
         )
     }
 

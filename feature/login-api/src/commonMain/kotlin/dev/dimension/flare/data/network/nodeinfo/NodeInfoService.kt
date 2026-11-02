@@ -42,10 +42,10 @@ public data object NodeInfoService {
             .removePrefix("http://")
             .removeSuffix("/")
 
-    public suspend fun fetchNodeInfo(host: String): String? {
+    public suspend fun fetchNodeInfo(host: String, proxy: dev.dimension.flare.data.model.ProxyRef = dev.dimension.flare.data.model.ProxyRef.Global): String? {
         val normalizedHost = normalizeHost(host)
         val response =
-            ktorClient()
+            ktorClient(proxy)
                 .get(
                     URLBuilder(
                         protocol = URLProtocol.HTTPS,
@@ -58,7 +58,7 @@ public data object NodeInfoService {
             .map {
                 when (it.rel) {
                     "http://nodeinfo.diaspora.software/ns/schema/1.0" -> {
-                        ktorClient()
+                        ktorClient(proxy)
                             .get(
                                 it.href,
                             ).body<Schema10>()
@@ -68,7 +68,7 @@ public data object NodeInfoService {
                     }
 
                     "http://nodeinfo.diaspora.software/ns/schema/1.1" -> {
-                        ktorClient()
+                        ktorClient(proxy)
                             .get(
                                 it.href,
                             ).body<Schema11>()
@@ -78,7 +78,7 @@ public data object NodeInfoService {
                     }
 
                     "http://nodeinfo.diaspora.software/ns/schema/2.0" -> {
-                        ktorClient()
+                        ktorClient(proxy)
                             .get(it.href)
                             .body<Schema20>()
                             .software
@@ -86,7 +86,7 @@ public data object NodeInfoService {
                     }
 
                     "http://nodeinfo.diaspora.software/ns/schema/2.1" -> {
-                        ktorClient()
+                        ktorClient(proxy)
                             .get(it.href)
                             .body<Schema21>()
                             .software

@@ -34,6 +34,26 @@ struct GalleryDetailScreen: View {
         }
         .background(Color.flareSystemGroupedBackground)
         .navigationTitle("")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if case .success(let success) = onEnum(of: presenter.state.detail) {
+                    let detail = success.data
+                    MacStatusShareMenu(
+                        data: MacStatusShareData(
+                            statusKey: detail.statusKey,
+                            accountType: detail.accountType,
+                            shareUrl: detail.url
+                        ),
+                        onShareScreenshot: {
+                            onNavigate(.statusShareSheet(detail.accountType, detail.statusKey, detail.url, nil, nil))
+                        }
+                    ) {
+                        Image(fontAwesome: .shareNodes)
+                    }
+                    .accessibilityLabel(Text("fx_share"))
+                }
+            }
+        }
     }
 
     private func compatBody(detail: GalleryDetail) -> some View {
@@ -89,9 +109,9 @@ struct GalleryDetailScreen: View {
 
 private struct GalleryImagesView: View {
     let detail: GalleryDetail
-    let openMedia: (UiMediaImage) -> Void
+    let openMedia: (any UiMedia) -> Void
 
-    private var images: [UiMediaImage] {
+    private var images: [any UiMedia] {
         detail.images.map { $0 }
     }
 
@@ -118,8 +138,8 @@ private struct GalleryImagesView: View {
             LazyVStack(spacing: 0) {
                 ForEach(0..<images.count, id: \.self) { index in
                     let image = images[index]
-                    NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
-                        .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
+                    GalleryMedia(media: image, contentMode: .fit)
+                        .aspectRatio((image.aspectRatio ?? 1), contentMode: .fit)
                         .frame(maxWidth: .infinity)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -131,9 +151,9 @@ private struct GalleryImagesView: View {
         }
     }
 
-    private func imageView(_ image: UiMediaImage) -> some View {
-        NetworkImage(data: image.url, customHeader: image.customHeaders)
-            .scaledToFit()
+    private func imageView(_ image: any UiMedia) -> some View {
+        GalleryMedia(media: image)
+            .aspectRatio(image.aspectRatio ?? 1, contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
             .onTapGesture {
@@ -186,7 +206,7 @@ private struct GalleryAuthorCard: View {
     var body: some View {
         HStack(spacing: 12) {
             if let user = detail.author {
-                AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                AvatarView(data: user.avatar)
                     .frame(width: 44, height: 44)
                     .onTapGesture {
                         onProfile(user)
@@ -496,13 +516,8 @@ struct GalleryCommentsScreen: View {
 }
 
 private extension UiTimelineV2.Post {
-    var galleryImagesForRawMedia: [UiMediaImage] {
-        images.compactMap { media in
-            if case .image(let image) = onEnum(of: media) {
-                return image
-            }
-            return nil
-        }
+    var galleryImagesForRawMedia: [any UiMedia] {
+        images.filter { $0 is UiMediaImage || $0 is UiMediaUgoira }
     }
 }
 

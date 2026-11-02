@@ -13,7 +13,7 @@ struct DMListScreen: View {
                 NavigationLink(value: Route.dmConversation(accountType, item.key, item.users.count == 1 ? item.users.first?.name.innerText ?? String(localized: "direct_messages_title") : String(localized: "direct_messages_title"))) {
                     HStack {
                         if item.hasUser, let image = item.users.first?.avatar {
-                            AvatarView(data: image.url, customHeader: image.customHeaders)
+                            AvatarView(data: image)
                                 .frame(width: 48, height: 48)
                         } else {
                             Image(fontAwesome: .list)
@@ -28,7 +28,7 @@ struct DMListScreen: View {
                                         RichText(text: user.name)
                                             .lineLimit(1)
                                         if (item.users.count == 1) {
-                                            Text(user.handle.canonical)
+                                            Text(user.handle.display)
                                                 .lineLimit(1)
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)

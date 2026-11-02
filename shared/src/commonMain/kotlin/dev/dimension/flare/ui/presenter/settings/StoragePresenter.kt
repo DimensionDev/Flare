@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.repository.UgoiraRepository
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.web.shared.WebPresenter
@@ -14,10 +15,33 @@ import kotlinx.coroutines.launch
 
 @WebPresenter("storage")
 public class StoragePresenter : PresenterBase<StorageState>() {
+    private val appDataStore by koinInject<dev.dimension.flare.data.datastore.AppDataStore>()
     private val cacheDatabase by koinInject<CacheDatabase>()
+    private val ugoiraRepository by koinInject<UgoiraRepository>()
+    private val imageTranslationRepository by koinInject<dev.dimension.flare.data.translation.image.ImageTranslationRepository>()
+
+    @Throws(Exception::class)
+    public suspend fun clearMediaCache() {
+        imageTranslationRepository.clear()
+        ugoiraRepository.clear()
+    }
+
+    @Throws(Exception::class)
+    public suspend fun mediaCacheSize(): Long = imageTranslationRepository.size() + ugoiraRepository.size()
+
+    @Throws(Exception::class)
+    public suspend fun clearUgoiraCache(): Unit = ugoiraRepository.clear()
+
+    @Throws(Exception::class)
+    public suspend fun ugoiraCacheSize(): Long = ugoiraRepository.size()
 
     public suspend fun clearCacheSuspend() {
         cacheDatabase.clearAllTables()
+        cacheDatabase.timelineResets.value += 1
+        appDataStore.homeTimelinePreferences.updateData {
+            dev.dimension.flare.data.datastore.model
+                .HomeTimelinePreferences()
+        }
     }
 
     @Composable

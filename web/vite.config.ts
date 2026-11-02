@@ -1,4 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import adapter from '@sveltejs/adapter-static';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'node:fs';
@@ -6,6 +7,7 @@ import { defineConfig } from 'vite';
 import type { Plugin, PreviewServer, ViteDevServer } from 'vite';
 
 const workspaceRoot = decodeURI(new URL('..', import.meta.url).pathname);
+const webSharedLibrary = process.env.FLARE_WEB_SHARED_LIBRARY ?? 'developmentLibrary';
 const sqliteWebWorker = decodeURI(
 	new URL('../shared/sqlite-web-worker/worker.js', import.meta.url).pathname
 );
@@ -70,7 +72,22 @@ export default defineConfig({
 			outdir: './src/lib/paraglide',
 			strategy: ['localStorage', 'preferredLanguage', 'baseLocale']
 		}),
-		sveltekit()
+		sveltekit({
+			compilerOptions: {
+				runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true)
+			},
+			adapter: adapter({
+				pages: 'build',
+				assets: 'build',
+				fallback: 'index.html'
+			}),
+			// shortcut: keep existing aliases; migrate to subpath imports before SvelteKit removes config.alias.
+			alias: {
+				$lib: './src/lib',
+				'@flare/web-shared': `../web-shared/build/dist/wasmJs/${webSharedLibrary}`,
+				'@flare/web-presenters': '../web-shared/build/generated/web-presenters/ts'
+			}
+		})
 	],
 	resolve: {
 		alias: {

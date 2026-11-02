@@ -26,6 +26,7 @@ struct StatusMediaScreen: View {
             medias: medias,
             initialIndex: initialIndex,
             preview: preview,
+            previewProxy: ProxyRef.companion.forAccountType(accountType: accountType),
             previewAspectRatio: initialMediaAspectRatio,
             previewIsImage: initialMediaIsImage,
             shareContext: MediaViewerShareContext(
@@ -139,94 +140,29 @@ private extension UIWindowScene {
 }
 
 struct AdaptiveKFImage: View {
-    let data: String
-    let placeholder: String?
-    let customHeader: [String: String]?
+    let data: any UiMedia
+    let placeholder: UiMedia?
     let mediaAspectRatio: CGFloat?
-
+    var onImageFailure: (() -> Void)? = nil
     @State private var measuredImageSize: CGSize?
-
-    init(
-        data: String,
-        placeholder: String?,
-        customHeader: [String: String]? = nil,
-        mediaAspectRatio: CGFloat? = nil
-    ) {
-        self.data = data
-        self.placeholder = placeholder
-        self.customHeader = customHeader
-        self.mediaAspectRatio = mediaAspectRatio
-    }
+    @State private var isLoading = false
 
     private var shouldFill: Bool {
-        MediaViewerImageLayoutPolicy.shouldFillWidth(
-            mediaAspectRatio: mediaAspectRatio,
-            measuredImageSize: measuredImageSize
-        )
+        MediaViewerImageLayoutPolicy.shouldFillWidth(mediaAspectRatio: mediaAspectRatio, measuredImageSize: measuredImageSize)
     }
-
     var body: some View {
-        if shouldFill {
-            ScrollView(.vertical, showsIndicators: false) {
-                kfImageView
-            }
-        } else {
-            kfImageView
+        Group {
+            if shouldFill { ScrollView(.vertical, showsIndicators: false) { image } }
+            else { image }
         }
     }
-    
-    var kfImageView: some View {
-        ZStack {
-            if data.hasSuffix(".gif") {
-                KFAnimatedImage(.init(string: data))
-                    .requestModifier({ request in
-                        if let customHeader {
-                            for (key, value) in customHeader {
-                                request.setValue(value, forHTTPHeaderField: key)
-                            }
-                        }
-                    })
-                    .onSuccess { result in
-                        measuredImageSize = result.image.size
-                    }
-                    .placeholder {
-                        if let placeholder {
-                            NetworkImage(
-                                data: placeholder,
-                                customHeader: customHeader,
-                                contentMode: shouldFill ? .fill : .fit
-                            )
-                        } else {
-                            ProgressView()
-                        }
-                    }
-                    .aspectRatio(contentMode: shouldFill ? .fill : .fit)
-            } else {
-                KFImage(.init(string: data))
-                    .requestModifier({ request in
-                        if let customHeader {
-                            for (key, value) in customHeader {
-                                request.setValue(value, forHTTPHeaderField: key)
-                            }
-                        }
-                    })
-                    .onSuccess { result in
-                        measuredImageSize = result.image.size
-                    }
-                    .placeholder {
-                        if let placeholder {
-                            NetworkImage(
-                                data: placeholder,
-                                customHeader: customHeader,
-                                contentMode: shouldFill ? .fill : .fit
-                            )
-                        } else {
-                            ProgressView()
-                        }
-                    }
-                    .resizable()
-                    .aspectRatio(contentMode: shouldFill ? .fill : .fit)
-            }
-        }
+    private var image: some View {
+        NetworkImage(data: data, placeholder: placeholder, contentMode: shouldFill ? .fill : .fit,
+                     onProgress: { isLoading = $0.map { $0 < 1 } ?? false },
+                     onImageFailure: onImageFailure,
+                     onImageSize: { measuredImageSize = $0 },
+                     keepsCurrentImage: true)
+            .originalImage()
+            .overlay { if isLoading, !data.isRemote { ProgressView() } }
     }
 }

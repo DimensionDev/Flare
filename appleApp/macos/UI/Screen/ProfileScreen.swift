@@ -98,7 +98,8 @@ struct ProfileScreen: View {
                         data: presenter.state.actions,
                         useText: false,
                         allowSpacer: false,
-                        applyPostActionLayout: false
+                        applyPostActionLayout: false,
+                        isDetail: true
                     )
                     .buttonStyle(.plain)
                 }
@@ -159,13 +160,13 @@ struct ProfileScreen: View {
         switch onEnum(of: tab) {
         case .timeline(let timeline):
             ProfileTimelineTabContent(presenter: timeline.presenter)
-                .id(profileTimelineID(for: tab))
+                .id(ObjectIdentifier(timeline.presenter))
         case .media(let media):
             ProfileGalleryTabContent(
                 presenter: media.presenter,
                 accountType: accountType
             )
-            .id(profileTimelineID(for: tab))
+            .id(ObjectIdentifier(media.presenter))
         }
     }
 
@@ -389,10 +390,9 @@ private struct ProfileGalleryTile: View {
 
     @ViewBuilder
     private var imageContent: some View {
-        if let previewURL = item.media.profileGalleryPreviewURL {
+        if let media = item.media.preview {
             NetworkImage(
-                data: previewURL,
-                customHeader: item.media.profileGalleryCustomHeaders
+                data: media
             )
         } else {
             ProfileGalleryPlaceholder()
@@ -479,6 +479,8 @@ private extension UiMedia {
             .video
         case .gif:
             .gif
+        case .ugoira:
+            .video
         case .audio:
             .audio
         }
@@ -492,6 +494,8 @@ private extension UiMedia {
             video.thumbnailUrl.isEmpty ? video.url : video.thumbnailUrl
         case .gif(let gif):
             gif.previewUrl.isEmpty ? gif.url : gif.previewUrl
+        case .ugoira(let animation):
+            animation.previewUrl
         case .audio(let audio):
             audio.previewUrl
         }
@@ -505,6 +509,8 @@ private extension UiMedia {
             video.thumbnailUrl
         case .gif(let gif):
             gif.previewUrl
+        case .ugoira(let animation):
+            animation.previewUrl
         case .audio:
             nil
         }
@@ -518,6 +524,8 @@ private extension UiMedia {
             video.customHeaders
         case .gif(let gif):
             gif.customHeaders
+        case .ugoira(let animation):
+            animation.customHeaders
         case .audio(let audio):
             audio.customHeaders
         }

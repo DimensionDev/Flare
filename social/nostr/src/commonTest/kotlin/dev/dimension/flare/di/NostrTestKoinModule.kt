@@ -64,17 +64,23 @@ private object TestInAppNotification : InAppNotification {
 }
 
 private object TestAccountService : AccountService {
+    override suspend fun deleteAccounts(
+        platformId: String,
+        ownsCredential: (String) -> Boolean,
+        beforeDelete: suspend () -> Unit,
+    ): Unit = unsupported()
+
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = unsupported()
 
     override fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>> {
         unsupported()
     }
 
-    override fun <T : Any> addAccount(
+    override suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ): Job = unsupported()
+    ): Unit = unsupported()
 
     override fun <T : Any> credentialFlow(
         accountKey: MicroBlogKey,

@@ -3,17 +3,25 @@ package dev.dimension.flare.data.database.cache.dao
 import androidx.room3.Room
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationReference
 import dev.dimension.flare.data.database.cache.model.DbTimelineItemPresentationType
 import dev.dimension.flare.data.database.createDatabaseDriver
 import dev.dimension.flare.memoryDatabaseBuilder
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 class PagingTimelineDaoTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
@@ -47,7 +55,7 @@ class PagingTimelineDaoTest : RobolectricTest() {
             val parentReference =
                 DbTimelineItemPresentationReference(
                     pagingKey = "mixed",
-                    statusId = "leaf",
+                    timelineId = DbPagingTimeline.createId("mixed", "leaf"),
                     referenceStatusId = "parent",
                     presentationType = DbTimelineItemPresentationType.InlineParent,
                 )
@@ -63,8 +71,12 @@ class PagingTimelineDaoTest : RobolectricTest() {
                         referenceStatusId = "repost",
                         presentationType = DbTimelineItemPresentationType.Repost,
                     ),
-                    parentReference.copy(pagingKey = "other", referenceStatusId = "other-parent"),
-                    parentReference.copy(statusId = "deleted-root", referenceStatusId = "orphaned-parent"),
+                    parentReference.copy(
+                        pagingKey = "other",
+                        timelineId = DbPagingTimeline.createId("other", "leaf"),
+                        referenceStatusId = "other-parent",
+                    ),
+                    parentReference.copy(timelineId = "deleted-root", referenceStatusId = "orphaned-parent"),
                 ),
             )
 

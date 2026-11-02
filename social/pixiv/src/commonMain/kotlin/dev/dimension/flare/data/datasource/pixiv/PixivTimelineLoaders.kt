@@ -57,6 +57,7 @@ internal class PixivHomeTimelineLoader(
     accountKey: MicroBlogKey,
 ) : PixivTimelineLoader(service, accountKey) {
     override val pagingKey: String = "pixiv_home_$accountKey"
+    override val canJoinTimeline: Boolean = true
 
     override suspend fun loadFirstPage(pageSize: Int): PixivIllustListResponse = service.followedIllusts()
 }
@@ -91,6 +92,7 @@ internal class PixivFollowingTimelineLoader(
     accountKey: MicroBlogKey,
     private val restrict: PixivRestrict = PixivRestrict.Public,
 ) : PixivTimelineLoader(service, accountKey) {
+    override val canJoinTimeline: Boolean = true
     override val pagingKey: String =
         if (restrict == PixivRestrict.Public) {
             "pixiv_following_$accountKey"

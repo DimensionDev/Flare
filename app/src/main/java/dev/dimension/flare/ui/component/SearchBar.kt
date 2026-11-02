@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -39,17 +40,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineDisplayMode
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiProfile
@@ -164,6 +168,15 @@ private fun SearchContent(
                     ),
             ) {
                 historyState.onSuccess { history ->
+                    if (history.size == 0) {
+                        item {
+                            ListEmptyView(
+                                modifier = Modifier.fillParentMaxSize(),
+                                text = stringResource(R.string.empty_search_history),
+                                icon = FontAwesomeIcons.Solid.ClockRotateLeft,
+                            )
+                        }
+                    }
                     items(history.size) { index ->
                         val item = history[index]
                         ListItem(
@@ -210,6 +223,15 @@ internal fun LazyStaggeredGridScope.searchContent(
     searchStatus: PagingState<UiTimelineV2>,
     toUser: (MicroBlogKey) -> Unit,
 ) {
+    if (searchUsers.isEmpty && searchStatus.isEmpty) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            ListEmptyView(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                text = stringResource(R.string.empty_search_results),
+                icon = FontAwesomeIcons.Solid.MagnifyingGlass,
+            )
+        }
+    }
     searchUsers
         .onSuccess {
             item(

@@ -128,6 +128,22 @@ struct SettingsScreen: View {
                         Image(fontAwesome: .language)
                     }
                 }
+                NavigationLink { ProxySettingsView() } label: {
+                    Label {
+                        Text("proxy_title")
+                        Text("proxy_settings_subtitle")
+                    } icon: {
+                        Image(fontAwesome: .globe)
+                    }
+                }
+                NavigationLink(value: Route.pluginManagement) {
+                    Label {
+                        Text("settings_plugins_title")
+                        Text("settings_plugins_subtitle")
+                    } icon: {
+                        Image(fontAwesome: .puzzlePiece)
+                    }
+                }
             }
 
             Section {
@@ -165,9 +181,7 @@ struct BehaviorSettingsScreen: View {
 
 struct LinkOpenDefaultsSettingsScreen: View {
     var body: some View {
-        List {
-            LinkOpenDefaultsSettingsSection()
-        }
-        .navigationTitle("settings_link_open_defaults_title")
+        LinkOpenDefaultsSettingsView()
+            .navigationTitle("settings_link_open_defaults_title")
     }
 }

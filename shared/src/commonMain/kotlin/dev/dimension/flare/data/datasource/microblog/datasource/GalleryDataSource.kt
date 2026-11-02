@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.media.UgoiraMetadata
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
@@ -26,6 +27,8 @@ public interface GalleryDataSource {
     public fun galleryComments(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2>
 
     public fun galleryRecommendations(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2>
+
+    public suspend fun ugoiraMetadata(statusKey: MicroBlogKey): UgoiraMetadata
 }
 
 @Serializable
@@ -35,7 +38,7 @@ public data class GalleryDetail(
     val statusKey: MicroBlogKey,
     val accountType: AccountType,
     val url: String,
-    val images: SerializableImmutableList<UiMedia.Image>,
+    val images: SerializableImmutableList<UiMedia>,
     val title: String,
     val author: UiProfile?,
     val createdAt: UiDateTime,

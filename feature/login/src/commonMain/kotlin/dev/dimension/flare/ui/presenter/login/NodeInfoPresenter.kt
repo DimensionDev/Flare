@@ -43,6 +43,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
     @Composable
     override fun body(): NodeInfoState {
         val scope = rememberCoroutineScope()
+        val platforms by loginPlatformRegistry.platforms.collectAsState()
         var filter by remember { mutableStateOf("") }
         val filterFlow =
             remember {
@@ -50,7 +51,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                     .debounce(666L)
             }
         val instances =
-            remember {
+            remember(platforms) {
                 combine(
                     Pager(
                         config = pagingConfig,
@@ -66,7 +67,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }.collectAsLazyPagingItems()
 
-        val detectedPlatformId by remember(filterFlow) {
+        val detectedPlatformId by remember(filterFlow, platforms) {
             filterFlow.flatMapLatest {
                 flow {
                     runCatching {

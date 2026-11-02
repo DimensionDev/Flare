@@ -18,19 +18,43 @@ own scheme; the existing lightweight unit and interaction schemes still run on
 older runtimes. The controller cases can also run in a diagnostic app after the
 normal `AppleSharedHelper` initialization, without XCTest class enumeration.
 
-The tests cover source changes, page bookmark lifetime, prepend/append, complete
+The tests cover list switching, reloads through placeholders, prepend/append, complete
 replacement, likes, coalesced inputs, refresh begin/end, footer updates, VVO's
 shared numeric offset, and image geometry through repeated column/width changes.
+Pull-refresh results stay queued until the elastic gesture settles, and only the
+latest input commits. Native interaction tests also cover prepends during refresh
+reveal and measured height changes to a partly hidden card while dragging or
+decelerating; the next visible card must keep its screen position.
 They also verify that fractional column widths use measured cell heights instead
 of retaining the 240pt estimate when layout and cache widths round differently.
+
+`StatusActionAnimationTests` covers action identity, UIKit animation cleanup, menu
+buttons, and count visibility. `StatusActionSwiftUIAnimationTests` captures real
+hosted frames to check first binding, state changes, rollback, and reuse, including
+retained lazy rows and post replacement during icon or digit transitions. Equal
+target counts must still cancel the previous post's transition. Animation layers
+are event driven; scrolling and first binding must not rebuild icons using `.id`.
+Direction and rebound cases inspect incoming digits before and after crossing
+their resting position. Icon checks cover Android's zero-scale entry, outgoing
+scale/fade, and visible overshoot. Opacity settles independently of the spring.
+Its Reduce Motion case runs only when the simulator's system setting is enabled; enable it on
+an isolated test simulator, restart that simulator, and run the case explicitly:
+
+```sh
+xcrun simctl spawn "$TEST_SIMULATOR" defaults write com.apple.Accessibility ReduceMotionEnabled -bool YES
+xcrun simctl shutdown "$TEST_SIMULATOR"
+xcrun simctl boot "$TEST_SIMULATOR"
+xcrun simctl bootstatus "$TEST_SIMULATOR" -b
+xcodebuild test -project appleApp/Flare.xcodeproj -scheme TimelineControllerTests \
+  -destination "platform=iOS Simulator,id=$TEST_SIMULATOR" \
+  -only-testing:TimelineControllerTests/StatusActionSwiftUIAnimationTests/testReduceMotionUpdatesImmediately
+```
+
 The fixtures yield the main actor while settling: a nested synchronous run loop
 cannot drain the controller's serialized main-queue submissions reliably.
 
-The implementation has four state owners:
+The implementation has three state owners:
 
-- Page containers keep `TimelineReadingState` only for their live tabs/queries.
-  Closing a detail navigation entry discards its bookmark. Restoration never
-  issues paging requests for data no longer retained by the source.
 - The controller installs one content/snapshot generation at a time, retaining
   only the latest pending input. It builds full snapshots for structural changes;
   payload changes only reconfigure affected IDs. Accessories use the same commit.
@@ -40,3 +64,10 @@ The implementation has four state owners:
 - Cells measure their current width and report once per fresh measurement.
   Controller-local height storage retains at most two geometries per live item.
   `TimelineAutoplay` handles playback without controlling list offsets.
+
+With Home reading position enabled, the shared presenter restores the selected tab
+and an index/offset from device-local UI preferences after ordinary cache paging.
+The controller cases cover applying that bookmark, waiting for native layout before
+launch refresh, Gap insertion (including a Gap at the start of the list), and user
+scrolling taking precedence over pending restoration. UI preference restoration is
+tested in `TimelineViewportTest`; cursor transactions stay in `TimelineGapTest`.

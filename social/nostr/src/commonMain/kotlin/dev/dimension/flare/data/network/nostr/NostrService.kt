@@ -15,6 +15,8 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.platform.NOSTR_PLATFORM_ID
 import dev.dimension.flare.data.platform.NostrCredential
 import dev.dimension.flare.data.platform.NostrSignerCredential
@@ -33,9 +35,12 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.mapper.nostrLike
 import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -43,10 +48,25 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -70,6 +90,7 @@ internal class NostrService(
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
     private val suppliedClient: INostrClient? = null,
+    private val relayInfoClient: HttpClient = ktorClient(ProxyRef.System) { expectSuccess = true },
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -225,6 +246,12 @@ internal class NostrService(
                 .distinct()
     }
 
+    private val relayLimitsMutex = Mutex()
+    private val relayLookupMutexes = mutableMapOf<String, Mutex>()
+
+    // shortcut: Cache NIP-11 for this session, add expiry if live changes matter.
+    private val relayTextLimits = mutableMapOf<String, NostrTextLimits>()
+
     private val credential = credential.normalized(accountKey)
     private val pubKeyHex = this.credential.effectivePubkeyHex(accountKey)
     private val signerHandle = nostrEventSigner(this.credential.effectiveSigner, pubKeyHex, amberSignerBridge)
@@ -241,6 +268,7 @@ internal class NostrService(
     }
 
     override fun close() {
+        relayInfoClient.close()
         if (suppliedClient == null) relayClient.close()
         signerHandle.close()
     }
@@ -523,7 +551,7 @@ internal class NostrService(
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(roots = events)
+        val eventGraph = loadEventGraph(roots = events, includeReplyParents = false)
         val interactionStats =
             loadInteractionStats(
                 accountPubkey = pubKeyHex,
@@ -901,10 +929,61 @@ internal class NostrService(
     private suspend fun queryAllRelays(filters: List<Filter>): List<Event> =
         client.fetchNostrEvents(currentRelays.value, filters).map { it.toCompatEvent() }
 
+    internal suspend fun fetchTextLimits(relay: String): NostrTextLimits {
+        val lookupMutex = relayLimitsMutex.withLock { relayLookupMutexes.getOrPut(relay) { Mutex() } }
+        return lookupMutex.withLock { fetchAndCacheTextLimits(relay) }
+    }
+
+    private suspend fun fetchAndCacheTextLimits(relay: String): NostrTextLimits {
+        relayLimitsMutex.withLock { relayTextLimits[relay] }?.let { return it }
+        val limits =
+            try {
+                withTimeoutOrNull(5.seconds) {
+                    val url =
+                        URLBuilder(relay)
+                            .apply {
+                                protocol = if (protocol == URLProtocol.WSS) URLProtocol.HTTPS else URLProtocol.HTTP
+                            }.buildString()
+                    val document =
+                        JSON
+                            .parseToJsonElement(
+                                relayInfoClient.get(url) { header("Accept", "application/nostr+json") }.bodyAsText(),
+                            ).jsonObjectOrNull
+                    val limitation = document?.get("limitation")?.jsonObjectOrNull
+
+                    fun limit(name: String): Int? =
+                        limitation
+                            ?.get(name)
+                            ?.jsonPrimitive
+                            ?.intOrNull
+                            ?.takeIf { it >= 0 }
+                    NostrTextLimits(limit("max_content_length"), limit("max_message_length"))
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                null
+            } ?: NostrTextLimits()
+        relayLimitsMutex.withLock { relayTextLimits[relay] = limits }
+        return limits
+    }
+
     private suspend fun sendEventBuilder(builder: EventTemplate<out QuartzEvent>): String {
         requireWritable()
+        val relays = currentRelays.value
+        val required = minOf(3, relays.size)
+        require(required > 0) { "No valid relay URLs available for publishing" }
         val event = signerHandle.sign(builder)
-        return client.publishNostrEvent(event, currentRelays.value)
+        val eventJson = event.toJson()
+        val checks =
+            coroutineScope {
+                relays.map { relay -> async { relay to fetchTextLimits(relay.url).error(event.content, eventJson) } }.awaitAll()
+            }
+        val eligible = checks.filter { it.second == null }.map { it.first }.toSet()
+        require(eligible.size >= required) {
+            checks.mapNotNull { (relay, error) -> error?.let { "${relay.url}: $it" } }.joinToString("; ")
+        }
+        return client.publishNostrEvent(event, eligible)
     }
 
     private fun requireWritable() {
@@ -1280,7 +1359,7 @@ internal class NostrService(
         }
     }
 
-    private fun List<Event>.toUiNotifications(
+    internal fun List<Event>.toUiNotifications(
         accountPubkey: String,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
@@ -1354,182 +1433,183 @@ internal class NostrService(
         val stats = interactionStats[id] ?: InteractionStats()
         val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
         val contentWarning = contentWarningReason()?.toUiPlainText()?.let { UiTranslatableText(original = it) }
-        return UiTimelineV2.Post(
-            platformId = NOSTR_PLATFORM_ID,
-            images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
-            sensitive = false,
-            contentWarning = contentWarning,
-            user = profile,
-            content =
-                UiTranslatableText(
-                    original = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
-                ),
-            actions =
-                buildList {
-                    if (canSign) {
-                        add(
-                            ActionMenu.Item(
-                                icon = UiIcon.Reply,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
-                                clickEvent =
-                                    ClickEvent.Deeplink(
-                                        DeeplinkRoute.Compose.Reply(
-                                            accountKey = accountKey,
-                                            statusKey = statusKey,
+        return UiTimelineV2
+            .Post(
+                platformId = NOSTR_PLATFORM_ID,
+                images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
+                sensitive = false,
+                contentWarning = contentWarning,
+                user = profile,
+                content =
+                    UiTranslatableText(
+                        original = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
+                    ),
+                actions =
+                    buildList {
+                        if (canSign) {
+                            add(
+                                ActionMenu.Item(
+                                    icon = UiIcon.Reply,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                                    clickEvent =
+                                        ClickEvent.Deeplink(
+                                            DeeplinkRoute.Compose.Reply(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
                                         ),
-                                    ),
-                                count = UiNumber(0L),
-                                actionFamily = PostActionFamily.Reply,
-                            ),
-                        )
-                        add(
-                            ActionMenu.Group(
-                                displayItem =
-                                    ActionMenu.nostrRepost(
-                                        statusKey = statusKey,
-                                        repostEventId = stats.myRepostEventId,
-                                        count = stats.repostCount,
-                                        accountKey = accountKey,
-                                    ),
-                                actions =
-                                    listOf(
+                                    count = UiNumber(0L),
+                                    actionFamily = PostActionFamily.Reply,
+                                ),
+                            )
+                            add(
+                                ActionMenu.Group(
+                                    displayItem =
                                         ActionMenu.nostrRepost(
                                             statusKey = statusKey,
                                             repostEventId = stats.myRepostEventId,
                                             count = stats.repostCount,
                                             accountKey = accountKey,
                                         ),
-                                        ActionMenu.Item(
-                                            icon = UiIcon.Quote,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
-                                            clickEvent =
-                                                ClickEvent.Deeplink(
-                                                    DeeplinkRoute.Compose.Quote(
-                                                        accountKey = accountKey,
-                                                        statusKey = statusKey,
-                                                    ),
-                                                ),
-                                            actionFamily = PostActionFamily.Quote,
-                                        ),
-                                    ).toImmutableList(),
-                            ),
-                        )
-                        add(
-                            ActionMenu.nostrLike(
-                                statusKey = statusKey,
-                                reactionEventId = stats.myReactionEventId,
-                                count = stats.reactionCount,
-                                accountKey = accountKey,
-                            ),
-                        )
-                    }
-                    add(
-                        ActionMenu.Group(
-                            displayItem =
-                                ActionMenu.Item(
-                                    icon = UiIcon.More,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
-                                ),
-                            actions =
-                                buildList {
-                                    add(
-                                        ActionMenu.Item(
-                                            icon = UiIcon.Share,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                            clickEvent =
-                                                ClickEvent.Deeplink(
-                                                    DeeplinkRoute.Status.ShareSheet(
-                                                        statusKey = statusKey,
-                                                        accountType = AccountType.Specific(accountKey),
-                                                        shareUrl = statusShareUrl(statusKey.id),
-                                                    ),
-                                                ),
-                                            actionFamily = PostActionFamily.Share,
-                                        ),
-                                    )
-                                    if (canSign && pubKey == accountKey.id) {
-                                        add(
+                                    actions =
+                                        listOf(
+                                            ActionMenu.nostrRepost(
+                                                statusKey = statusKey,
+                                                repostEventId = stats.myRepostEventId,
+                                                count = stats.repostCount,
+                                                accountKey = accountKey,
+                                            ),
                                             ActionMenu.Item(
-                                                icon = UiIcon.Delete,
-                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                                color = ActionMenu.Item.Color.Red,
+                                                icon = UiIcon.Quote,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                                 clickEvent =
                                                     ClickEvent.Deeplink(
-                                                        DeeplinkRoute.Status.DeleteConfirm(
-                                                            accountType =
-                                                                AccountType.Specific(
-                                                                    accountKey,
-                                                                ),
+                                                        DeeplinkRoute.Compose.Quote(
+                                                            accountKey = accountKey,
                                                             statusKey = statusKey,
                                                         ),
                                                     ),
-                                                actionFamily = PostActionFamily.Delete,
+                                                actionFamily = PostActionFamily.Quote,
                                             ),
-                                        )
-                                    } else {
-                                        add(ActionMenu.Divider)
-                                        addAll(
-                                            userActionsMenu(
-                                                accountKey = accountKey,
-                                                userKey = profile.key,
-                                                handle = profile.handle.canonical,
-                                            ),
-                                        )
-                                        add(ActionMenu.Divider)
+                                        ).toImmutableList(),
+                                ),
+                            )
+                            add(
+                                ActionMenu.nostrLike(
+                                    statusKey = statusKey,
+                                    reactionEventId = stats.myReactionEventId,
+                                    count = stats.reactionCount,
+                                    accountKey = accountKey,
+                                ),
+                            )
+                        }
+                        add(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        icon = UiIcon.More,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                    ),
+                                actions =
+                                    buildList {
                                         add(
                                             ActionMenu.Item(
-                                                icon = UiIcon.Report,
-                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                                color = ActionMenu.Item.Color.Red,
+                                                icon = UiIcon.Share,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                                 clickEvent =
-                                                    ClickEvent.event(accountKey) {
-                                                        dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
-                                                            postKey = statusKey,
-                                                            accountKey = accountKey,
-                                                        )
-                                                    },
-                                                actionFamily = PostActionFamily.Report,
+                                                    ClickEvent.Deeplink(
+                                                        DeeplinkRoute.Status.ShareSheet(
+                                                            statusKey = statusKey,
+                                                            accountType = AccountType.Specific(accountKey),
+                                                            shareUrl = statusShareUrl(statusKey.id),
+                                                        ),
+                                                    ),
+                                                actionFamily = PostActionFamily.Share,
                                             ),
                                         )
-                                    }
-                                }.toImmutableList(),
-                        ),
-                    )
-                }.toImmutableList(),
-            poll = null,
-            statusKey = statusKey,
-            card = null,
-            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
-            emojiReactions = persistentListOf(),
-            sourceChannel = null,
-            visibility = null,
-            replyToHandle = null,
-            references =
-                (
-                    parentEventIds().map {
-                        UiTimelineV2.Post.Reference(
-                            statusKey = MicroBlogKey(it, NOSTR_HOST),
-                            type = ReferenceType.Reply,
+                                        if (canSign && pubKey == accountKey.id) {
+                                            add(
+                                                ActionMenu.Item(
+                                                    icon = UiIcon.Delete,
+                                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                                    color = ActionMenu.Item.Color.Red,
+                                                    clickEvent =
+                                                        ClickEvent.Deeplink(
+                                                            DeeplinkRoute.Status.DeleteConfirm(
+                                                                accountType =
+                                                                    AccountType.Specific(
+                                                                        accountKey,
+                                                                    ),
+                                                                statusKey = statusKey,
+                                                            ),
+                                                        ),
+                                                    actionFamily = PostActionFamily.Delete,
+                                                ),
+                                            )
+                                        } else {
+                                            add(ActionMenu.Divider)
+                                            addAll(
+                                                userActionsMenu(
+                                                    accountKey = accountKey,
+                                                    userKey = profile.key,
+                                                    handle = profile.handle.canonical,
+                                                ),
+                                            )
+                                            add(ActionMenu.Divider)
+                                            add(
+                                                ActionMenu.Item(
+                                                    icon = UiIcon.Report,
+                                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                                    color = ActionMenu.Item.Color.Red,
+                                                    clickEvent =
+                                                        ClickEvent.event(accountKey) {
+                                                            dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
+                                                                postKey = statusKey,
+                                                                accountKey = accountKey,
+                                                            )
+                                                        },
+                                                    actionFamily = PostActionFamily.Report,
+                                                ),
+                                            )
+                                        }
+                                    }.toImmutableList(),
+                            ),
                         )
-                    } +
-                        quoteEventIds()
-                            .map {
-                                UiTimelineV2.Post.Reference(
-                                    statusKey = MicroBlogKey(it, NOSTR_HOST),
-                                    type = ReferenceType.Quote,
-                                )
-                            }
-                ).distinctBy { it.type to it.statusKey }
-                    .toImmutableList(),
-            clickEvent =
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Status.Detail(
-                        statusKey = statusKey,
-                        accountType = AccountType.Specific(accountKey),
+                    }.toImmutableList(),
+                poll = null,
+                statusKey = statusKey,
+                card = null,
+                createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
+                emojiReactions = persistentListOf(),
+                sourceChannel = null,
+                visibility = null,
+                replyToHandle = null,
+                references =
+                    (
+                        parentEventIds().map {
+                            UiTimelineV2.Post.Reference(
+                                statusKey = MicroBlogKey(it, NOSTR_HOST),
+                                type = ReferenceType.Reply,
+                            )
+                        } +
+                            quoteEventIds()
+                                .map {
+                                    UiTimelineV2.Post.Reference(
+                                        statusKey = MicroBlogKey(it, NOSTR_HOST),
+                                        type = ReferenceType.Quote,
+                                    )
+                                }
+                    ).distinctBy { it.type to it.statusKey }
+                        .toImmutableList(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Status.Detail(
+                            statusKey = statusKey,
+                            accountType = AccountType.Specific(accountKey),
+                        ),
                     ),
-                ),
-            accountType = AccountType.Specific(accountKey),
-        )
+                accountType = AccountType.Specific(accountKey),
+            ).bindMediaProxy()
     }
 
     private fun TextNoteEvent.toUiTimelineItem(
@@ -1540,6 +1620,7 @@ internal class NostrService(
         renderContext: NostrTextRenderContext?,
         visited: Set<String>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
+        includeReplyParents: Boolean = true,
     ): UiTimelineV2 {
         val post =
             toUi(
@@ -1553,34 +1634,38 @@ internal class NostrService(
             )
         val inlineParents =
             parentEventIds()
+                .takeIf { includeReplyParents }
+                .orEmpty()
                 .mapNotNull { parentId ->
                     val event = parentId.takeUnless { it in visited }?.let(eventsById::get) ?: return@mapNotNull null
                     val parent = resolveEvent(event, visited) ?: return@mapNotNull null
-                    UiTimelineV2.TimelinePostItem(
-                        post = parent,
-                        presentation =
-                            UiTimelineV2.PostPresentation(
-                                quotes =
-                                    (event as? TextNoteEvent)
-                                        ?.resolveQuotes(
-                                            eventsById,
-                                            visited + parentId,
-                                            resolveEvent,
-                                        ).orEmpty()
-                                        .toImmutableList(),
-                            ),
-                    )
+                    UiTimelineV2
+                        .TimelinePostItem(
+                            post = parent,
+                            presentation =
+                                UiTimelineV2.PostPresentation(
+                                    quotes =
+                                        (event as? TextNoteEvent)
+                                            ?.resolveQuotes(
+                                                eventsById,
+                                                visited + parentId,
+                                                resolveEvent,
+                                            ).orEmpty()
+                                            .toImmutableList(),
+                                ),
+                        ).bindMediaProxy()
                 }.toImmutableList()
         val quotes = resolveQuotes(eventsById, visited, resolveEvent)
         return if (inlineParents.isNotEmpty() || quotes.isNotEmpty()) {
-            UiTimelineV2.TimelinePostItem(
-                post = post,
-                presentation =
-                    UiTimelineV2.PostPresentation(
-                        inlineParents = inlineParents,
-                        quotes = quotes,
-                    ),
-            )
+            UiTimelineV2
+                .TimelinePostItem(
+                    post = post,
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            inlineParents = inlineParents,
+                            quotes = quotes,
+                        ),
+                ).bindMediaProxy()
         } else {
             post
         }
@@ -1796,19 +1881,20 @@ internal class NostrService(
         val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
         val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey, createdAt)
-        return UiTimelineV2.TimelinePostItem(
-            post = wrapperPost,
-            presentation =
-                UiTimelineV2.PostPresentation(
-                    message =
-                        repostMessage(
-                            actor = actor,
-                            statusKey = wrapperStatusKey,
-                            createdAt = createdAt,
-                        ),
-                    repost = boostedPost,
-                ),
-        )
+        return UiTimelineV2
+            .TimelinePostItem(
+                post = wrapperPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        message =
+                            repostMessage(
+                                actor = actor,
+                                statusKey = wrapperStatusKey,
+                                createdAt = createdAt,
+                            ),
+                        repost = boostedPost,
+                    ),
+            ).bindMediaProxy()
     }
 
     private fun GenericRepostEvent.toUiGenericRepost(
@@ -1822,19 +1908,20 @@ internal class NostrService(
         val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
         val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey, createdAt)
-        return UiTimelineV2.TimelinePostItem(
-            post = wrapperPost,
-            presentation =
-                UiTimelineV2.PostPresentation(
-                    message =
-                        repostMessage(
-                            actor = actor,
-                            statusKey = wrapperStatusKey,
-                            createdAt = createdAt,
-                        ),
-                    repost = boostedPost,
-                ),
-        )
+        return UiTimelineV2
+            .TimelinePostItem(
+                post = wrapperPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        message =
+                            repostMessage(
+                                actor = actor,
+                                statusKey = wrapperStatusKey,
+                                createdAt = createdAt,
+                            ),
+                        repost = boostedPost,
+                    ),
+            ).bindMediaProxy()
     }
 
     private fun UiTimelineV2.Post.toRepostWrapperPost(
@@ -1883,21 +1970,22 @@ internal class NostrService(
         statusKey: MicroBlogKey,
         createdAt: Long,
     ): UiTimelineV2.Message =
-        UiTimelineV2.Message(
-            user = actor,
-            statusKey = statusKey,
-            icon = UiIcon.Retweet,
-            type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost),
-            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
-            clickEvent =
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Profile.User(
-                        accountType = AccountType.Specific(accountKey),
-                        userKey = actor.key,
+        UiTimelineV2
+            .Message(
+                user = actor,
+                statusKey = statusKey,
+                icon = UiIcon.Retweet,
+                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost),
+                createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Profile.User(
+                            accountType = AccountType.Specific(accountKey),
+                            userKey = actor.key,
+                        ),
                     ),
-                ),
-            accountType = AccountType.Specific(accountKey),
-        )
+                accountType = AccountType.Specific(accountKey),
+            ).bindMediaProxy()
 
     private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message): UiTimelineV2 {
         val post = asTimelinePostItem() ?: return this
@@ -1905,6 +1993,7 @@ internal class NostrService(
             presentation =
                 post.presentation.copy(
                     message = message,
+                    notificationKey = message.statusKey,
                 ),
         )
     }
@@ -1938,6 +2027,7 @@ internal class NostrService(
                         renderContext = null,
                         visited = setOf(id),
                         resolveEvent = { event, visited -> resolveEvent(event, visited) },
+                        includeReplyParents = false,
                     )
                 val hasParent = parentEventIds().isNotEmpty()
                 post.withPresentationMessage(
@@ -1993,24 +2083,26 @@ internal class NostrService(
                         ?: return null
                 val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
-                UiTimelineV2.TimelinePostItem(
-                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
-                    presentation =
-                        UiTimelineV2.PostPresentation(
-                            message =
-                                notificationMessage(
-                                    actor = actor,
-                                    statusKey = wrapperStatusKey,
-                                    createdAt = createdAt,
-                                    icon = UiIcon.Retweet,
-                                    type =
-                                        UiTimelineV2.Message.Type.Localized(
-                                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
-                                        ),
-                                ),
-                            repost = boosted,
-                        ),
-                )
+                UiTimelineV2
+                    .TimelinePostItem(
+                        post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
+                        presentation =
+                            UiTimelineV2.PostPresentation(
+                                message =
+                                    notificationMessage(
+                                        actor = actor,
+                                        statusKey = wrapperStatusKey,
+                                        createdAt = createdAt,
+                                        icon = UiIcon.Retweet,
+                                        type =
+                                            UiTimelineV2.Message.Type.Localized(
+                                                UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                            ),
+                                    ),
+                                repost = boosted,
+                                notificationKey = wrapperStatusKey,
+                            ),
+                    ).bindMediaProxy()
             }
 
             is GenericRepostEvent -> {
@@ -2022,24 +2114,26 @@ internal class NostrService(
                         ?: return null
                 val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
-                UiTimelineV2.TimelinePostItem(
-                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
-                    presentation =
-                        UiTimelineV2.PostPresentation(
-                            message =
-                                notificationMessage(
-                                    actor = actor,
-                                    statusKey = wrapperStatusKey,
-                                    createdAt = createdAt,
-                                    icon = UiIcon.Retweet,
-                                    type =
-                                        UiTimelineV2.Message.Type.Localized(
-                                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
-                                        ),
-                                ),
-                            repost = boosted,
-                        ),
-                )
+                UiTimelineV2
+                    .TimelinePostItem(
+                        post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
+                        presentation =
+                            UiTimelineV2.PostPresentation(
+                                message =
+                                    notificationMessage(
+                                        actor = actor,
+                                        statusKey = wrapperStatusKey,
+                                        createdAt = createdAt,
+                                        icon = UiIcon.Retweet,
+                                        type =
+                                            UiTimelineV2.Message.Type.Localized(
+                                                UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                            ),
+                                    ),
+                                repost = boosted,
+                                notificationKey = wrapperStatusKey,
+                            ),
+                    ).bindMediaProxy()
             }
 
             else -> {
@@ -2047,7 +2141,10 @@ internal class NostrService(
             }
         }
 
-    private suspend fun loadEventGraph(roots: List<Event>): Map<String, Event> {
+    private suspend fun loadEventGraph(
+        roots: List<Event>,
+        includeReplyParents: Boolean = true,
+    ): Map<String, Event> {
         val eventsById = LinkedHashMap<String, Event>()
         val pendingEventIds = LinkedHashSet<String>()
         val pendingAddresses = LinkedHashMap<String, Address>()
@@ -2058,7 +2155,7 @@ internal class NostrService(
             }
             eventsById[event.id] = event
             embeddedEvents(event).forEach(::register)
-            referencedEventIds(event)
+            referencedEventIds(event, includeReplyParents)
                 .filterNot(eventsById::containsKey)
                 .forEach(pendingEventIds::add)
             referencedAddresses(event).forEach { address ->
@@ -2133,9 +2230,12 @@ internal class NostrService(
             .mapNotNull { (_, values) -> values.maxByOrNull { it.createdAt } }
     }
 
-    private fun referencedEventIds(event: Event): List<String> =
+    internal fun referencedEventIds(
+        event: Event,
+        includeReplyParents: Boolean,
+    ): List<String> =
         when (event) {
-            is TextNoteEvent -> event.parentEventIds() + event.quoteEventIds()
+            is TextNoteEvent -> event.parentEventIds().takeIf { includeReplyParents }.orEmpty() + event.quoteEventIds()
             is ReactionEvent -> event.originalPost()
             is RepostEvent -> listOfNotNull(event.boostedEventId())
             is GenericRepostEvent -> listOfNotNull(event.boostedEventId())
@@ -2197,7 +2297,7 @@ internal class NostrService(
             avatar = metadata?.picture.toUiImage(),
             nameInternal = name.toUiPlainText(),
             platformId = NOSTR_PLATFORM_ID,
-            platformIcon = dev.dimension.flare.ui.model.UiIcon.Nostr,
+            platformIcon = UiIcon.Nostr.asType(),
             clickEvent =
                 ClickEvent.Deeplink(
                     DeeplinkRoute.Profile.User(
@@ -2227,7 +2327,7 @@ internal class NostrService(
                     },
                 ).toImmutableList(),
             bottomContent = metadata.toBottomContent(),
-        )
+        ).withProxy(ProxyRef.System)
     }
 
     private fun UserMetadata?.toBottomContent(): UiProfile.BottomContent? {
@@ -2374,19 +2474,20 @@ internal class NostrService(
         icon: UiIcon,
         type: UiTimelineV2.Message.Type,
     ): UiTimelineV2.Message =
-        UiTimelineV2.Message(
-            user = actor,
-            statusKey = statusKey,
-            icon = icon,
-            type = type,
-            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
-            clickEvent =
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Profile.User(
-                        accountType = AccountType.Specific(accountKey),
-                        userKey = actor.key,
+        UiTimelineV2
+            .Message(
+                user = actor,
+                statusKey = statusKey,
+                icon = icon,
+                type = type,
+                createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Profile.User(
+                            accountType = AccountType.Specific(accountKey),
+                            userKey = actor.key,
+                        ),
                     ),
-                ),
-            accountType = AccountType.Specific(accountKey),
-        )
+                accountType = AccountType.Specific(accountKey),
+            ).bindMediaProxy()
 }

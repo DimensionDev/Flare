@@ -11,7 +11,6 @@ import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
-import app.bsky.embed.Video
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -26,6 +25,7 @@ import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.common.graphemeCount
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -60,6 +60,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostKind
@@ -94,7 +95,6 @@ import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -143,7 +143,7 @@ internal class BlueskyDataSource(
     PostEventHandler.Handler {
     private val coroutineScope: CoroutineScope by koinInject()
     private val imageCompressor: ImageCompressor by koinInject()
-    private val linkCardResolver = BlueskyLinkCardResolver()
+    private val linkCardResolver = BlueskyLinkCardResolver(ProxyRef.forAccount(accountKey))
     private var cachedPdsService: BlueskyService? = null
 
     private val mutex = Mutex(locked = false)
@@ -194,6 +194,7 @@ internal class BlueskyDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = accountKey.host,
             loader = loader,
         )
@@ -287,7 +288,7 @@ internal class BlueskyDataSource(
             statusOnly = false,
         )
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -296,11 +297,10 @@ internal class BlueskyDataSource(
         }
         val uploads = data.medias.map { it.file.uploadMedia() }
         uploads.forEach { upload ->
-            require(!upload.isGif) { "Bluesky does not accept GIF files without conversion" }
             upload.validate("Bluesky")
         }
-        val hasVideo = uploads.any { it.isVideo }
-        require(!hasVideo || uploads.size == 1) { "Bluesky supports one video per post, without other media" }
+        val hasVideo = uploads.any { it.isVideo || it.isGif }
+        require(!hasVideo || uploads.size == 1) { "Bluesky supports one video or GIF per post, without other media" }
         data.medias.forEach { media ->
             require(media.altText.orEmpty().length <= BLUESKY_ALT_TEXT_LIMIT) {
                 "Bluesky image alt text must be at most $BLUESKY_ALT_TEXT_LIMIT characters"
@@ -383,9 +383,11 @@ internal class BlueskyDataSource(
                 }
         val mediaEmbed =
             if (hasVideo) {
-                BlueskyMediaEmbed
-                    .VideoMedia(
-                        Video(video = service.uploadVideo(uploads.single()), alt = data.medias.single().altText),
+                val upload = uploads.single()
+                upload
+                    .toBlueskyMediaEmbed(
+                        blob = service.uploadVideo(upload),
+                        altText = data.medias.single().altText,
                     ).also { progress() }
             } else {
                 uploadedImages.toBlueskyMediaEmbed()
@@ -702,7 +704,14 @@ internal class BlueskyDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(300),
+            text =
+                ComposeConfig.Text.withValidation(300) { content, _ ->
+                    val remaining = 300 - content.graphemeCount()
+                    ComposeConfig.Text.Check(
+                        remainingLength = remaining,
+                        isValid = remaining >= 0 && content.encodeToByteArray().size <= 3000,
+                    )
+                },
             media =
                 ComposeConfig.Media(
                     maxCount = BLUESKY_GALLERY_AUTHOR_LIMIT,

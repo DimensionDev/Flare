@@ -2,12 +2,17 @@ package dev.dimension.flare.ui.presenter.home.rss
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.network.rss.Readability
+import dev.dimension.flare.data.network.rss.recommendRssDisplayMode
+import dev.dimension.flare.data.network.rss.toRssWebUrl
 import dev.dimension.flare.data.repository.SubscriptionRepository
 import dev.dimension.flare.data.repository.SubscriptionSourceInput
 import dev.dimension.flare.data.repository.toUiRssSource
@@ -27,13 +32,30 @@ import io.ktor.http.Url
 import io.ktor.http.buildUrl
 import io.ktor.http.set
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 @WebPresenter("editRssSource")
 public class EditRssSourcePresenter(
     private val id: Int?,
+    private val initialDisplayMode: RssDisplayMode? = null,
 ) : PresenterBase<EditRssSourcePresenter.State>() {
+    private var checkSource: (String) -> CheckRssSourcePresenter = { CheckRssSourcePresenter(it) }
+    private var extract: suspend (String) -> dev.dimension.flare.data.network.rss.DocumentData = Readability()::extract
+
+    internal constructor(
+        id: Int?,
+        initialDisplayMode: RssDisplayMode?,
+        checkSource: (String) -> CheckRssSourcePresenter,
+        extract: suspend (String) -> dev.dimension.flare.data.network.rss.DocumentData,
+    ) : this(id, initialDisplayMode) {
+        this.checkSource = checkSource
+        this.extract = extract
+    }
+
     private val subscriptionRepository: SubscriptionRepository by koinInject()
     private val scope by koinInject<CoroutineScope>()
 
@@ -51,10 +73,7 @@ public class EditRssSourcePresenter(
 
             @Immutable
             public interface RssSources : RssInputState {
-                public fun save(
-                    sources: List<UiRssSource>,
-                    displayMode: RssDisplayMode,
-                )
+                public fun save(sources: List<UiRssSource>)
             }
 
             @Immutable
@@ -95,6 +114,22 @@ public class EditRssSourcePresenter(
         public val actualRssHubUrl: String
 
         public val canSave: Boolean
+        public val displayMode: RssDisplayMode
+        public val readingModes: ImmutableList<RssReadingMode>
+
+        public fun setDisplayMode(value: RssDisplayMode)
+
+        public fun setSourceDisplayMode(
+            url: String,
+            value: RssDisplayMode,
+        )
+
+        public fun selectSource(
+            url: String,
+            selected: Boolean,
+        )
+
+        public fun clearSelectedSources()
 
         public fun checkRssHubServer(value: String)
 
@@ -108,10 +143,7 @@ public class EditRssSourcePresenter(
             displayMode: RssDisplayMode,
         )
 
-        public fun saveSourcesByUrl(
-            selectedUrls: String,
-            displayMode: RssDisplayMode,
-        )
+        public fun saveSelectedSources()
 
         public fun saveSubscriptionTypes(selectedTypes: String)
     }
@@ -120,14 +152,13 @@ public class EditRssSourcePresenter(
     override fun body(): State {
         var url by remember { mutableStateOf("") }
         var rssHubServer by remember { mutableStateOf("") }
-        val checkRssSourcePresenterState =
+        val checkPresenter =
             remember(
                 url,
             ) {
-                CheckRssSourcePresenter(
-                    url,
-                )
-            }.body()
+                checkSource(url)
+            }
+        val checkRssSourcePresenterState = key(checkPresenter) { checkPresenter.body() }
         val data by remember(id) {
             subscriptionRepository.observe(id ?: -1)
         }.collectAsUiState()
@@ -138,17 +169,45 @@ public class EditRssSourcePresenter(
                     path = url,
                 )
             }
-        val rssHubCheckState =
+        val rssHubPresenter =
             if (
                 rssHubServer.isNotBlank() &&
                 (checkRssSourcePresenterState.state as? UiState.Success)?.data == RssState.RssHub
             ) {
                 remember(actualRssHubUrl) {
-                    CheckRssSourcePresenter(actualRssHubUrl)
-                }.body().state
+                    checkSource(actualRssHubUrl)
+                }
             } else {
                 null
             }
+        val rssHubCheckState = rssHubPresenter?.let { key(it) { it.body().state } }
+        var selectedUrls by remember(url) { mutableStateOf(emptySet<String>()) }
+        val modeSelection = remember(url, actualRssHubUrl) { RssReadingModeSelection() }
+        val probes = remember(modeSelection) { Semaphore(3) }
+        val rssState = (checkRssSourcePresenterState.state as? UiState.Success)?.data
+        val hubFeed = (rssHubCheckState as? UiState.Success)?.data as? RssState.RssFeed
+        val readingUrls =
+            when (rssState) {
+                is RssState.RssFeed -> listOf(rssState.url)
+                is RssState.RssSources -> rssState.sources.map { it.url }
+                RssState.RssHub -> listOfNotNull(hubFeed?.url)
+                else -> emptyList()
+            }
+        val preset = (data as? UiState.Success)?.data?.displayMode ?: initialDisplayMode
+        val activeUrl = hubFeed?.url ?: (rssState as? RssState.RssFeed)?.url ?: url.toRssWebUrl()
+        val readingModes =
+            readingUrls
+                .map { readingUrl ->
+                    val selected = rssState !is RssState.RssSources || readingUrl in selectedUrls
+                    val feed = (rssHubPresenter ?: checkPresenter).feeds[readingUrl]
+                    LaunchedEffect(modeSelection, readingUrl, selected, feed) {
+                        if (id == null && initialDisplayMode == null && selected && feed != null) {
+                            probes.withPermit { modeSelection.recommend(readingUrl, recommendRssDisplayMode(feed, extract)) }
+                        }
+                    }
+                    modeSelection.state(readingUrl, preset, checking = selected && id == null)
+                }.toImmutableList()
+        val displayMode = modeSelection.state(activeUrl, preset, checking = id == null).displayMode
         val inputState =
             checkRssSourcePresenterState.state.map {
                 when (it) {
@@ -208,24 +267,19 @@ public class EditRssSourcePresenter(
 
                     is RssState.RssSources -> {
                         object : State.RssInputState.RssSources {
-                            override fun save(
-                                sources: List<UiRssSource>,
-                                displayMode: RssDisplayMode,
-                            ) {
-                                scope.launch {
-                                    subscriptionRepository.upsertAll(
-                                        sources.map {
-                                            SubscriptionSourceInput(
-                                                id = it.id,
-                                                url = it.url,
-                                                title = it.title ?: "",
-                                                lastUpdateMillis = 0,
-                                                displayMode = displayMode,
-                                                icon = it.favIcon,
-                                            )
-                                        },
-                                    )
-                                }
+                            override fun save(sources: List<UiRssSource>) {
+                                val inputs =
+                                    sources.map { source ->
+                                        SubscriptionSourceInput(
+                                            id = source.id,
+                                            url = source.url,
+                                            title = source.title.orEmpty(),
+                                            lastUpdateMillis = 0,
+                                            displayMode = modeSelection.state(source.url, preset).displayMode,
+                                            icon = source.favIcon,
+                                        )
+                                    }
+                                scope.launch { subscriptionRepository.upsertAll(inputs) }
                             }
                         }
                     }
@@ -298,10 +352,36 @@ public class EditRssSourcePresenter(
             override val canSave = canSave
             override val rssHubCheckState = rssHubCheckState
             override val actualRssHubUrl = actualRssHubUrl
+            override val displayMode = displayMode
+            override val readingModes = readingModes
+
+            override fun setDisplayMode(value: RssDisplayMode) {
+                modeSelection.select(activeUrl, value)
+            }
+
+            override fun setSourceDisplayMode(
+                url: String,
+                value: RssDisplayMode,
+            ) {
+                modeSelection.select(url, value)
+            }
+
+            override fun selectSource(
+                url: String,
+                selected: Boolean,
+            ) {
+                selectedUrls = if (selected) selectedUrls + url else selectedUrls - url
+            }
+
+            override fun clearSelectedSources() {
+                selectedUrls = emptySet()
+            }
 
             override fun checkUrl(value: String) {
-                url = value
-                rssHubServer = ""
+                if (url != value.trim()) {
+                    url = value.trim()
+                    rssHubServer = ""
+                }
             }
 
             override fun checkRssHubServer(value: String) {
@@ -346,28 +426,20 @@ public class EditRssSourcePresenter(
                 }
             }
 
-            override fun saveSourcesByUrl(
-                selectedUrls: String,
-                displayMode: RssDisplayMode,
-            ) {
+            override fun saveSelectedSources() {
                 val rssState = (checkState as? UiState.Success)?.data as? RssState.RssSources ?: return
-                val selected = selectedUrls.splitCsv().toSet()
-                scope.launch {
-                    subscriptionRepository.upsertAll(
-                        rssState.sources
-                            .filter { it.url in selected }
-                            .map {
-                                SubscriptionSourceInput(
-                                    id = it.id,
-                                    url = it.url,
-                                    title = it.title,
-                                    lastUpdateMillis = 0,
-                                    displayMode = displayMode,
-                                    icon = it.favIcon,
-                                )
-                            },
-                    )
-                }
+                val inputs =
+                    rssState.sources.filter { it.url in selectedUrls }.map { source ->
+                        SubscriptionSourceInput(
+                            id = source.id,
+                            url = source.url,
+                            title = source.title,
+                            lastUpdateMillis = 0,
+                            displayMode = modeSelection.state(source.url, preset).displayMode,
+                            icon = source.favIcon,
+                        )
+                    }
+                scope.launch { subscriptionRepository.upsertAll(inputs) }
             }
 
             override fun saveSubscriptionTypes(selectedTypes: String) {

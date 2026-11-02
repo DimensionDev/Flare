@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
@@ -10,6 +12,7 @@ import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.web.shared.WebExport
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,12 +26,15 @@ public sealed class UiTimelineV2 {
         itemKey
     }
 
+    public val isPaginationGap: Boolean get() = this is Gap
+
     public abstract val searchText: String?
     public abstract val statusKey: MicroBlogKey
     public abstract val createdAt: UiDateTime
     public abstract val accountType: AccountType
 
     public abstract val itemKey: String?
+    public abstract val stableItemKey: String
     public abstract val renderHash: Int
 
     @Transient
@@ -40,7 +46,49 @@ public sealed class UiTimelineV2 {
             is User -> "user"
             is UserList -> "user_list"
             is Message -> "message"
+            is Gap -> "gap"
         }
+
+    protected fun calculateStableItemKey(): String {
+        itemKey?.let { return it }
+        val notificationKey = (this as? TimelinePostItem)?.presentation?.notificationKey
+        val kind =
+            when {
+                notificationKey != null -> "notification"
+                this is Post || this is TimelinePostItem -> "post"
+                else -> itemType
+            }
+        val account =
+            when (val account = accountType) {
+                AccountType.Guest -> listOf("guest")
+                is AccountType.GuestHost -> listOf("guest_host", account.host)
+                is AccountType.Specific -> listOf("specific", account.accountKey.id, account.accountKey.host)
+            }
+        val identity = notificationKey ?: statusKey
+        return (account + listOf(kind, identity.id, identity.host))
+            .joinToString(separator = "") { "${it.length}:$it" }
+    }
+
+    /** A persisted continuation between two parts of the same cached timeline. */
+    @Serializable
+    @Immutable
+    public data class Gap(
+        override val statusKey: MicroBlogKey,
+        override val createdAt: UiDateTime,
+        val nextKey: String,
+        val lowerBound: Map<String, List<String>> = emptyMap(),
+        val revision: Long = 0,
+        @Transient override val itemKey: String? = null,
+        @Transient val loading: Boolean = false,
+        @Transient val failed: Boolean = false,
+        @Transient val onActivate: (((List<String>) -> Unit) -> Unit)? = null,
+    ) : UiTimelineV2() {
+        override val accountType: AccountType = AccountType.Guest
+        override val searchText: String? = null
+
+        @Transient override val stableItemKey: String = calculateStableItemKey()
+        override val renderHash: Int get() = listOf(statusKey, revision, loading, failed).hashCode()
+    }
 
     @Serializable
     @Immutable
@@ -56,6 +104,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
@@ -144,6 +194,7 @@ public sealed class UiTimelineV2 {
         override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
+        val pluginId: String? = null,
     ) : UiTimelineV2() {
         val actualCreatedAt: UiDateTime? by lazy {
             if (createdAt.value == Instant.fromEpochMilliseconds(0L)) {
@@ -153,6 +204,9 @@ public sealed class UiTimelineV2 {
             }
         }
         override val statusKey: MicroBlogKey = MicroBlogKey.fromRss(url)
+
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
             buildString {
                 title?.let {
@@ -171,6 +225,8 @@ public sealed class UiTimelineV2 {
                 .add(itemKey)
                 .add(title)
                 .add(description)
+                .add(descriptionHtml)
+                .add(clickEvent)
                 .add(url)
                 .add(sourceLanguages)
                 .add(translationDisplayState)
@@ -187,7 +243,10 @@ public sealed class UiTimelineV2 {
         public data class Source public constructor(
             val name: String,
             val icon: String?,
-        )
+            @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+        ) {
+            val media: UiMedia.Image? get() = icon.toUiImage(proxy = proxy)
+        }
     }
 
     @Serializable
@@ -199,8 +258,12 @@ public sealed class UiTimelineV2 {
         override val itemKey: String? = post.itemKey,
     ) : UiTimelineV2() {
         override val statusKey: MicroBlogKey = post.statusKey
-        override val createdAt: UiDateTime = post.createdAt
+        override val createdAt: UiDateTime =
+            if (presentation.notificationKey != null) presentation.message?.createdAt ?: post.createdAt else post.createdAt
         override val accountType: AccountType = post.accountType
+
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
             buildString {
                 append(post.searchText)
@@ -237,6 +300,7 @@ public sealed class UiTimelineV2 {
         val inlineParents: SerializableImmutableList<TimelinePostItem> = persistentListOf(),
         val quotes: SerializableImmutableList<Post> = persistentListOf(),
         val repost: Post? = null,
+        val notificationKey: MicroBlogKey? = null,
     )
 
     @Serializable
@@ -248,7 +312,7 @@ public sealed class UiTimelineV2 {
         val sensitive: Boolean,
         val contentWarning: UiTranslatableText?,
         val user: UiProfile?,
-        val platformIcon: UiIcon = user?.platformIcon ?: UiIcon.World,
+        val platformIcon: IconType = user?.platformIcon ?: UiIcon.World.asType(),
         public val sourceLanguages: SerializableImmutableList<String> = persistentListOf(),
         @Transient
         public val translationDisplayState: TranslationDisplayState = TranslationDisplayState.Hidden,
@@ -268,7 +332,15 @@ public sealed class UiTimelineV2 {
         public override val accountType: AccountType,
         @Transient
         override val itemKey: String? = null,
+        val pluginId: String? = null,
+        internal val authorSubtitleInternal: String? = null,
     ) : UiTimelineV2() {
+        @WebExport
+        val authorSubtitle: String
+            get() = authorSubtitleInternal ?: user?.handle?.display.orEmpty()
+
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String =
             buildString {
                 user?.name?.raw?.let {
@@ -293,6 +365,8 @@ public sealed class UiTimelineV2 {
             renderHashBuilder()
                 .add(itemKey)
                 .add(platformId)
+                .add(platformIcon)
+                .add(authorSubtitle)
                 .add(images.renderSummaryHash { it.renderSummaryHash() })
                 .add(sensitive)
                 .add(contentWarning?.original?.renderSummaryHash())
@@ -312,6 +386,7 @@ public sealed class UiTimelineV2 {
                 .add(visibility)
                 .add(replyToHandle)
                 .add(references.renderSummaryHash { it.renderSummaryHash() })
+                .add(clickEvent)
                 .add(mediaClickPolicy)
                 .add(accountType)
                 .build()
@@ -340,7 +415,9 @@ public sealed class UiTimelineV2 {
             public val clickEvent: ClickEvent,
             val isUnicode: Boolean,
             val me: Boolean,
+            @Transient val proxy: ProxyRef = ProxyRef.Unbound,
         ) {
+            val media: UiMedia.Image get() = UiMedia.Image(url, proxy = proxy)
             val onClicked: ClickContext.() -> Unit by lazy {
                 clickEvent.onClicked
             }
@@ -363,6 +440,8 @@ public sealed class UiTimelineV2 {
             Followers,
             Specified,
             Channel,
+            Friends,
+            SelfOnly,
         }
     }
 
@@ -378,6 +457,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         override val renderHash: Int by lazy {
             renderHashBuilder()
@@ -404,6 +485,8 @@ public sealed class UiTimelineV2 {
         @Transient
         override val itemKey: String? = null,
     ) : UiTimelineV2() {
+        @Transient
+        override val stableItemKey: String = calculateStableItemKey()
         override val searchText: String? = null
         override val renderHash: Int by lazy {
             renderHashBuilder()
@@ -426,6 +509,7 @@ internal fun UiTimelineV2.withItemKey(itemKey: String?): UiTimelineV2 {
     return when (this) {
         is UiTimelineV2.Feed -> copy(itemKey = itemKey)
         is UiTimelineV2.Message -> copy(itemKey = itemKey)
+        is UiTimelineV2.Gap -> copy(itemKey = itemKey)
         is UiTimelineV2.Post -> copy(itemKey = itemKey)
         is UiTimelineV2.TimelinePostItem -> copy(itemKey = itemKey)
         is UiTimelineV2.User -> copy(itemKey = itemKey)
@@ -486,7 +570,9 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(itemKey)
         .add(platformId)
+        .add(platformIcon)
         .add(user?.renderSummaryHash())
+        .add(authorSubtitle)
         .add(contentWarning?.original?.renderSummaryHash())
         .add(contentWarning?.translation?.renderSummaryHash())
         .add(content.original.renderSummaryHash())
@@ -502,12 +588,15 @@ private fun UiTimelineV2.Post.renderSummaryHash(): Int =
         .add(visibility)
         .add(translationDisplayState)
         .add(actions.renderSummaryHash { it.renderSummaryHash() })
+        .add(clickEvent)
+        .add(mediaClickPolicy)
         .add(createdAt.value.toEpochMilliseconds())
         .build()
 
 private fun UiTimelineV2.PostPresentation.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(message?.renderHash)
+        .add(notificationKey)
         .add(inlineParents.renderSummaryHash { it.renderHash })
         .add(quotes.renderSummaryHash { it.renderSummaryHash() })
         .add(repost?.renderSummaryHash())
@@ -518,9 +607,11 @@ private fun UiProfile.renderSummaryHash(): Int =
         .add(key)
         .add(handle.raw)
         .add(handle.host)
+        .add(handle.display)
         .add(avatar?.renderSummaryHash())
         .add(name.raw)
         .add(platformId)
+        .add(platformIcon)
         .add(banner?.renderSummaryHash())
         .add(description?.renderSummaryHash())
         .add(translationDisplayState)
@@ -557,6 +648,7 @@ private fun UiProfile.BottomContent.renderSummaryHash(): Int =
 
 private fun UiPoll.renderSummaryHash(): Int =
     renderHashBuilder()
+        .add(this) // Include the private vote event so replacement action tokens reach the UI.
         .add(id)
         .add(options.renderSummaryHash { it.renderSummaryHash() })
         .add(multiple)
@@ -583,6 +675,10 @@ private fun UiCard.renderSummaryHash(): Int =
 
 private fun UiMedia.renderSummaryHash(): Int =
     when (this) {
+        is UiMedia.Ugoira -> {
+            hashCode()
+        }
+
         is UiMedia.Audio -> {
             renderHashBuilder()
                 .add(url)
@@ -615,6 +711,7 @@ private fun UiMedia.renderSummaryHash(): Int =
         is UiMedia.Video -> {
             renderHashBuilder()
                 .add(url)
+                .add(downloadUrl)
                 .add(thumbnailUrl)
                 .add(description)
                 .add(height.toBits())
@@ -637,6 +734,7 @@ private fun UiTimelineV2.Post.EmojiReaction.renderSummaryHash(): Int =
         .add(count)
         .add(isUnicode)
         .add(me)
+        .add(clickEvent)
         .build()
 
 private fun UiTimelineV2.Post.Reference.renderSummaryHash(): Int =
@@ -668,6 +766,7 @@ private fun ActionMenu.renderSummaryHash(): Int =
 private fun ActionMenu.Item.renderSummaryHash(): Int =
     renderHashBuilder()
         .add(updateKey)
+        .add(clickEvent)
         .add(icon)
         .add(text.renderSummaryHash())
         .add(count)

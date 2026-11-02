@@ -9,15 +9,16 @@ import androidx.room3.PrimaryKey
 import androidx.room3.Relation
 import dev.dimension.flare.common.decodeProtobuf
 import dev.dimension.flare.common.encodeProtobuf
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 
 @Entity(
     indices = [
         Index(
             value = ["statusId", "pagingKey"],
-            unique = true,
         ),
         Index(
             value = ["pagingKey", "sortId"],
@@ -28,12 +29,14 @@ internal data class DbPagingTimeline(
     val pagingKey: String,
     val statusId: String,
     val sortId: Long,
+    val isGap: Boolean = false,
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val message: UiTimelineV2.Message? = null,
     val messageRenderHash: Int? = message?.renderHash,
     val semanticReferenceSignature: String = "",
     val presentationReferenceSignature: String = "",
     val contentRevision: Long = 0,
+    val notificationKey: MicroBlogKey? = null,
     @PrimaryKey
     val _id: String = createId(pagingKey, statusId),
 ) {
@@ -47,16 +50,16 @@ internal data class DbPagingTimeline(
 
 @Entity(
     tableName = "timeline_item_presentation_reference",
-    primaryKeys = ["pagingKey", "statusId", "presentationType", "referenceStatusId"],
+    primaryKeys = ["pagingKey", "timelineId", "presentationType", "referenceStatusId"],
     indices = [
         Index(
-            value = ["referenceStatusId", "pagingKey", "statusId"],
+            value = ["referenceStatusId", "pagingKey", "timelineId"],
         ),
     ],
 )
 internal data class DbTimelineItemPresentationReference(
     val pagingKey: String,
-    val statusId: String,
+    val timelineId: String,
     val referenceStatusId: String,
     val presentationType: DbTimelineItemPresentationType,
     val referenceOrder: Int = 0,
@@ -74,6 +77,10 @@ internal data class DbPagingKey(
     val pagingKey: String,
     val nextKey: String? = null,
     val prevKey: String? = null,
+    val generation: String = Uuid.random().toString(),
+    val revision: Long = 0,
+    val sourceHeads: String = "{}",
+    val accountKeys: String = "[]",
 )
 
 internal data class DbPagingTimelineWithStatus(
@@ -94,8 +101,8 @@ internal data class DbPagingTimelineWithStatus(
     @Embedded(prefix = "status_")
     val statusData: DbStatus,
     @Relation(
-        parentColumns = ["pagingKey", "statusId"],
-        entityColumns = ["pagingKey", "statusId"],
+        parentColumns = ["pagingKey", "_id"],
+        entityColumns = ["pagingKey", "timelineId"],
         entity = DbTimelineItemPresentationReference::class,
     )
     val presentationReferences: List<DbTimelineItemPresentationReferenceWithStatus> = emptyList(),

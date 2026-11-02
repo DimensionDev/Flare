@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.ShareRepliesLoader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
@@ -18,6 +19,10 @@ public interface MicroblogDataSource {
     ): RemoteLoader<UiTimelineV2>
 
     public fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2>
+
+    public fun shareReplies(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> = ShareRepliesLoader(context(statusKey), statusKey)
+
+    public fun shareReplyChildren(reply: UiTimelineV2): RemoteLoader<UiTimelineV2>? = null
 
     public fun searchStatus(query: String): RemoteLoader<UiTimelineV2>
 

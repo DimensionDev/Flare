@@ -4,27 +4,30 @@ import FlareAppleCore
 
 public struct UserCompatView<TrailingContent: View>: View {
     private let data: UiProfile
+    private let subtitle: String
     private let trailing: () -> TrailingContent
     private let onClicked: (() -> Void)?
 
     public init(
         data: UiProfile,
+        subtitle: String? = nil,
         @ViewBuilder trailing: @escaping () -> TrailingContent,
         onClicked: (() -> Void)? = nil
     ) {
         self.data = data
+        self.subtitle = subtitle ?? data.handle.display
         self.trailing = trailing
         self.onClicked = onClicked
     }
 
     public var body: some View {
         HStack(spacing: 8) {
-            AvatarView(data: data.avatar?.url, customHeader: data.avatar?.customHeaders)
+            AvatarView(data: data.avatar)
                 .frame(width: 44, height: 44)
                 .if(onClicked != nil) { view in
                     view
                         .accessibilityLabel(
-                            Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                            Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.display))
                         )
                         .onTapGesture {
                             onClicked?()
@@ -35,14 +38,14 @@ public struct UserCompatView<TrailingContent: View>: View {
                 spacing: 0
             ) {
                 RichText(text: data.name)
-                Text(data.handle.canonical)
+                Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             .if(onClicked != nil) { view in
                 view
                     .accessibilityLabel(
-                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.canonical))
+                        Text(verbatim: openProfileAccessibilityLabel(handle: data.handle.display))
                     )
                     .onTapGesture {
                         onClicked?()
@@ -106,6 +109,19 @@ public struct UserErrorView: View {
                 ) {
                     Text("notification_login_expired", bundle: FlareAppleUILocalization.bundle)
                     Text("error_login_expired \(expiredError.accountKey)", bundle: FlareAppleUILocalization.bundle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        } else if let reloginError = error as? RequireReLoginException {
+            HStack {
+                Image(systemName: "person.badge.shield.exclamationmark")
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                VStack(alignment: .leading) {
+                    Text("notification_login_expired", bundle: FlareAppleUILocalization.bundle)
+                    Text("error_login_expired \(reloginError.accountKey)", bundle: FlareAppleUILocalization.bundle)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

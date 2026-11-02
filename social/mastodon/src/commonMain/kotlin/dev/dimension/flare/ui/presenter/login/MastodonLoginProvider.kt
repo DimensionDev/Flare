@@ -158,7 +158,7 @@ private class MastodonOAuthLoginHandler(
             val host = baseUrl.host
             val service =
                 MastodonOAuthService(
-                    baseUrl = baseUrl.toString(),
+                proxy = context.proxy,                    baseUrl = baseUrl.toString(),
                     client_name = "Flare",
                     website = "https://github.com/DimensionDev/Flare",
                     redirect_uri = context.redirectUri ?: DeeplinkRoute.Companion.Callback.MASTODON,
@@ -222,7 +222,7 @@ private class MastodonOAuthLoginHandler(
         val host = application.host
         val service =
             MastodonOAuthService(
-                baseUrl = "https://$host/",
+                proxy = context.proxy,                baseUrl = "https://$host/",
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
                 redirect_uri = application.application.redirectURI,
@@ -232,7 +232,7 @@ private class MastodonOAuthLoginHandler(
         val user = service.verify(accessToken = accessTokenResponse.accessToken)
         val id = user.id
         requireNotNull(id) { "Invalid user id" }
-        val nodeInfo = NodeInfoService.fetchNodeInfo(host)
+        val nodeInfo = NodeInfoService.fetchNodeInfo(host, context.proxy)
         val accountKey =
             MicroBlogKey(
                 id = id,

@@ -105,7 +105,7 @@ private class FanboxWebCookieLoginHandler(
         runCatching {
             val sessionId = value.extractFanboxSession()
             require(!sessionId.isNullOrBlank()) { "FANBOX session cookie is missing" }
-            val service = FanboxService(flowOf(FanboxCredential(sessionId = sessionId, userId = "")))
+            val service = FanboxService(flowOf(FanboxCredential(sessionId = sessionId, userId = "")), proxy = context.proxy)
             val metadata = service.metadata(sessionId)
             val user = metadata.context?.user
             val userId = user?.userId
@@ -149,7 +149,7 @@ private class FanboxWebCookieLoginHandler(
             scope.launch {
                 val isLoggedIn =
                     runCatching {
-                        val service = FanboxService(flowOf(FanboxCredential(sessionId = sessionId, userId = "")))
+                        val service = FanboxService(flowOf(FanboxCredential(sessionId = sessionId, userId = "")), proxy = context.proxy)
                         val user = service.metadata(sessionId).context?.user
                         !user?.userId.isNullOrBlank()
                     }.getOrDefault(false)

@@ -13,6 +13,8 @@ import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -28,6 +30,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -106,7 +109,10 @@ class EmojiHandlerTest : RobolectricTest() {
             assertTrue(state is LoadState.NotLoading)
 
             val saved = db.emojiDao().get(host).first()
-            assertNull(saved)
+            assertNotNull(saved)
+            assertTrue(saved.content.data.isEmpty())
+            val published = handler.emoji.toUi().first { it !is UiState.Loading }
+            assertTrue(assertIs<UiState.Success<ImmutableMap<String, ImmutableList<UiEmoji>>>>(published).data.isEmpty())
         }
 
     @Test

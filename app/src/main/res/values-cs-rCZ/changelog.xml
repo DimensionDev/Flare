@@ -5,10 +5,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Verze %1$s:</span>
             <ul>
-                <li>Vylepšeno přehrávání videí na časové ose: plynulejší přechody, lepší automatický výběr a zachování pozice při otevření či zavření prohlížeče médií.</li>
-                <li>Zvýšena spolehlivost časové osy: odpovědi a kontext konverzace zůstávají při obnovení viditelné, upozornění na nové příspěvky se správně aktualizuje a byly opraveny pády stránkování.</li>
-                <li>Vylepšeno zpřístupnění příspěvků, médií a obrazovky pro psaní díky jasnějším popiskům, stavům a ovládacím prvkům.</li>
-                <li>Zvýšena spolehlivost relací Bluesky, kompatibilita s novými odpověďmi časové osy X a podpora dalších formátů odkazů na díla a profily Pixiv.</li>
+                <li>Přidán překlad obrázků. Po nastavení překladové služby můžete přepínat mezi originálem a překladem a výsledek uložit nebo sdílet.</li>
+                <li>Při sdílení příspěvku jako obrázku můžete vybrat odpovědi i vnořené odpovědi. Podporovány jsou i dlouhé obrázky.</li>
+                <li>Přidány časové osy skupin, okruhu přátel a soukromého sledování na Weibo, nastavení viditelnosti příspěvků a přehrávání Live Photo. Obnoveno zobrazení polohy podle IP.</li>
+                <li>Přidáno globální nastavení proxy i samostatné nastavení pro jednotlivé účty s podporou HTTPS a SOCKS5.</li>
+                <li>Opraveny některé chyby načítání obrázků, přidávání záložek v galerii a otevírání odkazů FANBOX. Vylepšeny smíšené časové osy, zobrazení překladů a zapamatování vybraného účtu.</li>
             </ul>
         ]]></string>
 </resources>

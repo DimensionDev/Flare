@@ -1,18 +1,18 @@
 package dev.dimension.flare.ui
 
-import android.content.Context
-import androidx.browser.customtabs.CustomTabsIntent
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
-import androidx.core.net.toUri
+import dev.dimension.flare.R
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
+import dev.dimension.flare.feature.plugin.management.ProvidePluginTextResolverV1
+import dev.dimension.flare.ui.common.AppUriHandler
 import dev.dimension.flare.ui.common.BindAmberSignerLauncher
 import dev.dimension.flare.ui.component.LocalAppSettings
 import dev.dimension.flare.ui.component.LocalGlobalAppearance
@@ -26,11 +26,13 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 fun AppContainer(afterInit: () -> Unit) {
-    FlareApp {
-        FlareTheme {
-            HomeScreen(
-                afterInit = afterInit,
-            )
+    ProvidePluginTextResolverV1 {
+        FlareApp {
+            FlareTheme {
+                HomeScreen(
+                    afterInit = afterInit,
+                )
+            }
         }
     }
 }
@@ -46,22 +48,13 @@ fun FlareApp(content: @Composable () -> Unit) {
     val originalUriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val uriHandler =
-        remember(globalAppearance.inAppBrowser) {
-            object : UriHandler {
-                override fun openUri(uri: String) {
-                    if (uri.startsWith("http://") || uri.startsWith("https://")) {
-                        openInBrowser(context, uri, globalAppearance.inAppBrowser) {
-                            originalUriHandler.openUri(uri)
-                        }
-                    } else {
-                        originalUriHandler.openUri(uri)
-                    }
-                }
+        remember(context, originalUriHandler, globalAppearance.inAppBrowser) {
+            AppUriHandler(context, originalUriHandler, globalAppearance.inAppBrowser) {
+                Toast.makeText(context, R.string.unable_to_open_link, Toast.LENGTH_SHORT).show()
             }
         }
 
     val appSettings = state.appSettings.takeSuccessOr(AppSettings(""))
-    val openAIConfig = appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
     CompositionLocalProvider(
         LocalAppSettings provides appSettings,
         LocalUriHandler provides uriHandler,
@@ -73,7 +66,7 @@ fun FlareApp(content: @Composable () -> Unit) {
                         TimelineAppearance.AiConfig(
                             translation = true,
                             tldr = appSettings.aiConfig.tldr,
-                            agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
+                            agent = appSettings.aiConfig.isAgentEnabled,
                             showOriginalWithTranslation =
                                 appSettings.translateConfig.showOriginalWithTranslation,
                         ),
@@ -81,23 +74,4 @@ fun FlareApp(content: @Composable () -> Unit) {
             },
         content = content,
     )
-}
-
-private fun openInBrowser(
-    context: Context,
-    url: String,
-    inAppBrowser: Boolean,
-    fallbackOpenUrl: (String) -> Unit,
-) {
-    if (inAppBrowser) {
-        runCatching {
-            val builder = CustomTabsIntent.Builder()
-            val customTabsIntent = builder.build()
-            customTabsIntent.launchUrl(context, url.toUri())
-        }.onFailure {
-            fallbackOpenUrl.invoke(url)
-        }
-    } else {
-        fallbackOpenUrl.invoke(url)
-    }
 }

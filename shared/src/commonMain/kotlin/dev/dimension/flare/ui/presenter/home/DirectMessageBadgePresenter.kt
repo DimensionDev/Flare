@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.di.koinInject
@@ -27,16 +27,14 @@ public class DirectMessageBadgePresenter(
     @Composable
     override fun body(): NotificationBadgeState {
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val directMessageState = remember(serviceState) { serviceState.map { requireNotNull(it.capabilities.directMessage) } }
         val countState =
-            serviceState.map { service ->
-                remember(service) {
-                    require(service is DirectMessageDataSource)
-                    service.directMessageBadgeCount
-                }.collectAsState()
+            directMessageState.map { directMessage ->
+                remember(directMessage) { directMessage.directMessageBadgeCount }.collectAsState()
             }
         if (autoRefresh) {
             countState.onSuccess {
-                LaunchedEffect(Unit) {
+                LaunchedEffect(it) {
                     delay(1.minutes)
                     it.refresh()
                 }

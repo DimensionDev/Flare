@@ -246,7 +246,7 @@ private struct DraftAccountsStrip: View {
         HStack(spacing: 6) {
             ForEach(Array(accounts.prefix(6).enumerated()), id: \.offset) { _, account in
                 if let avatar = account.avatar {
-                    NetworkImage(data: avatar.url, customHeader: avatar.customHeaders)
+                    NetworkImage(data: avatar)
                         .frame(width: 22, height: 22)
                         .clipShape(Circle())
                         .accessibilityLabel(Text(verbatim: postingAccountDescription(account)))

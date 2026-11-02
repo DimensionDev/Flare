@@ -47,7 +47,19 @@ internal interface ListDao {
     suspend fun deleteByPagingKey(pagingKey: String)
 
     @Query("DELETE FROM DbList WHERE accountType = :accountType")
-    suspend fun deleteByAccountType(accountType: String)
+    suspend fun deleteByAccountType(accountType: DbAccountType)
+
+    @Query("DELETE FROM DbListPaging WHERE accountType = :accountType")
+    suspend fun deletePagingByAccountType(accountType: DbAccountType)
+
+    @Query(
+        "DELETE FROM DbListMember WHERE listKey IN (" +
+            "SELECT listKey FROM DbList WHERE accountType = :accountType UNION " +
+            "SELECT listKey FROM DbListPaging WHERE accountType = :accountType) " +
+            "AND listKey NOT IN (SELECT listKey FROM DbList WHERE accountType != :accountType UNION " +
+            "SELECT listKey FROM DbListPaging WHERE accountType != :accountType)",
+    )
+    suspend fun deleteExclusiveMembersByAccountType(accountType: DbAccountType)
 
     @Query("DELETE FROM DbList WHERE listKey = :listKey AND accountType = :accountType")
     suspend fun deleteByListKey(
@@ -75,12 +87,23 @@ internal interface ListDao {
     )
 
     @Transaction
-    @Query("SELECT * FROM DbListMember WHERE listKey = :listKey")
+    @Query(
+        "SELECT DbListMember.* FROM DbListMember " +
+            "INNER JOIN DbUser ON DbUser.userKey = DbListMember.memberKey " +
+            "WHERE DbListMember.listKey = :listKey",
+    )
     fun getListMembers(listKey: MicroBlogKey): PagingSource<Int, DbListMemberWithContent>
 
     @Transaction
-    @Query("SELECT * FROM DbListMember WHERE listKey = :listKey")
+    @Query(
+        "SELECT DbListMember.* FROM DbListMember " +
+            "INNER JOIN DbUser ON DbUser.userKey = DbListMember.memberKey " +
+            "WHERE DbListMember.listKey = :listKey",
+    )
     fun getListMembersFlow(listKey: MicroBlogKey): Flow<List<DbListMemberWithContent>>
+
+    @Query("SELECT memberKey FROM DbListMember WHERE listKey = :listKey")
+    fun getListMemberKeysFlow(listKey: MicroBlogKey): Flow<List<MicroBlogKey>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllMember(members: List<DbListMember>)

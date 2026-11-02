@@ -77,6 +77,12 @@ internal interface MessageDao {
     @Query("DELETE FROM DbDirectMessageTimeline WHERE accountType = :accountType")
     suspend fun clearMessageTimeline(accountType: DbAccountType)
 
+    @Query(
+        "SELECT roomKey FROM DbDirectMessageTimeline WHERE accountType = :accountType " +
+            "AND roomKey NOT IN (SELECT roomKey FROM DbDirectMessageTimeline WHERE accountType != :accountType)",
+    )
+    suspend fun exclusiveRoomKeys(accountType: DbAccountType): List<MicroBlogKey>
+
     @Query("UPDATE DbDirectMessageTimeline SET unreadCount = 0 WHERE roomKey = :roomKey AND accountType = :accountType")
     suspend fun clearUnreadCount(
         roomKey: MicroBlogKey,

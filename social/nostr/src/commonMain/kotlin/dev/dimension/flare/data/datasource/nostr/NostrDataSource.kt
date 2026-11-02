@@ -22,11 +22,13 @@ import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.network.nostr.AmberSignerBridge
@@ -150,6 +152,7 @@ internal class NostrDataSource(
 
     override val userHandler by lazy {
         UserHandler(
+            proxy = ProxyRef.forAccount(accountKey),
             host = NostrService.NOSTR_HOST,
             loader = loader,
         )
@@ -186,6 +189,7 @@ internal class NostrDataSource(
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> =
         object : CacheableRemoteLoader<UiTimelineV2> {
             override val pagingKey: String = "home_$accountKey"
+            override val canJoinTimeline: Boolean = true
 
             override suspend fun load(
                 pageSize: Int,
@@ -362,7 +366,7 @@ internal class NostrDataSource(
         )
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
-        object : CacheableRemoteLoader<UiTimelineV2> {
+        object : NotificationTimelineLoader {
             override val pagingKey: String = "notification_${type.name.lowercase()}_$accountKey"
 
             override suspend fun load(
@@ -470,7 +474,7 @@ internal class NostrDataSource(
         }
     }
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -527,7 +531,6 @@ internal class NostrDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(65535),
             contentWarning = ComposeConfig.ContentWarning,
             media =
                 ComposeConfig.Media(

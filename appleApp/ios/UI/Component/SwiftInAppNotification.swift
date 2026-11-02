@@ -49,6 +49,16 @@ final class SwiftInAppNotification: InAppNotification {
                 } else {
                     Drops.show(.init(stringLiteral: .init(localized: "notification_login_expired")))
                 }
+            case .plugin:
+                Drops.show(
+                    .init(
+                        title: String(
+                            localized: "plugin_operation_failed",
+                            defaultValue: "The plugin operation failed. Try again or restart Flare."
+                        ),
+                        icon: UIImage(fontAwesome: .circleExclamation)
+                    )
+                )
             }
         }
     }
@@ -69,6 +79,9 @@ final class SwiftInAppNotification: InAppNotification {
                 )
             case .loginExpired:
                 // do nothing
+                break
+            case .plugin:
+                // Only plugin failures are surfaced globally.
                 break
             }
         }

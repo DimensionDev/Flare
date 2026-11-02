@@ -66,6 +66,7 @@ import compose.icons.fontawesomeicons.solid.CircleMinus
 import compose.icons.fontawesomeicons.solid.CirclePlus
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.TableList
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
@@ -76,6 +77,7 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.asText
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -169,7 +171,7 @@ internal fun TabAddBottomSheet(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        text = tab.profile.handle.canonical,
+                                        text = tab.profile.handle.display,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline,
                                         maxLines = 1,
@@ -249,11 +251,18 @@ internal fun TabAddBottomSheet(
                                             selected = selectedIndex == index,
                                             onClick = { selectedIndex = index },
                                             label = {
-                                                UiText(section.title.asText())
+                                                UiText(section.title)
                                             },
                                         )
                                     }
                                 }
+                            }
+                            if (accountTabs.tabsLoaded && accountTabs.tabs.isEmpty()) {
+                                ListEmptyView(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                                    text = stringResource(R.string.empty_tab_candidates),
+                                    icon = FontAwesomeIcons.Solid.TableList,
+                                )
                             }
                             when (selectedIndex) {
                                 in accountTabs.tabs.indices -> {
@@ -262,7 +271,13 @@ internal fun TabAddBottomSheet(
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                         verticalArrangement = Arrangement.spacedBy(2.dp),
                                     ) {
-                                        itemsIndexed(section.data) { index, totalCount, item ->
+                                        itemsIndexed(section.data, emptyContent = {
+                                            ListEmptyView(
+                                                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                                                text = stringResource(R.string.empty_tab_candidates),
+                                                icon = FontAwesomeIcons.Solid.TableList,
+                                            )
+                                        }) { index, totalCount, item ->
                                             TabItem(
                                                 item,
                                                 modifier =

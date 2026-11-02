@@ -11,9 +11,12 @@ struct AccountManagementScreen: View {
 
     var body: some View {
         List {
+            if presenter.state.removalFailed {
+                Text("settings_accounts_remove_failed").foregroundStyle(.red)
+            }
             ForEach(tabItems, id: \.account.accountKey) { account in
                 StateView(state: account.profile) { user in
-                    accountActions(for: account.account, accountName: user.handle.canonical) {
+                    accountActions(for: account.account, accountName: user.handle.display) {
                         UserCompatView(data: user) {
                             HStack {
                                 Image(systemName: activeAccountKey == user.key ? "checkmark.circle.fill" : "circle")
@@ -32,9 +35,19 @@ struct AccountManagementScreen: View {
                     accountActions(for: account.account, accountName: account.account.accountKey.id) {
                         Group {
                             if account.account.platformAvailable {
-                                UserErrorView(error: error)
+                                if let target = loginTarget(for: error) {
+                                    NavigationLink(value: Route.relogin(target.accountKey, target.platformId)) {
+                                        UserErrorView(error: error)
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    UserErrorView(error: error)
+                                }
                             } else {
-                                unavailableAccountRow(account.account)
+                                NavigationLink(value: Route.pluginManagement) {
+                                    unavailableAccountRow(account.account)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -44,8 +57,19 @@ struct AccountManagementScreen: View {
             }
             .onMove(perform: move)
         }
-        .onSuccessOf(of: presenter.state.accounts) { data in
-            tabItems = data.cast(AccountsStateAccountItem.self)
+        .overlay {
+            if tabItems.isEmpty && !presenter.state.removalFailed {
+                StateView(state: presenter.state.accounts) { accounts in
+                    if accounts.count == 0 {
+                        ListEmptyView("account_management_empty", icon: .users)
+                    }
+                }
+            }
+        }
+        .onChange(of: presenter.state.accounts, initial: true) { _, accounts in
+            if case .success(let data) = onEnum(of: accounts) {
+                tabItems = data.data.cast(AccountsStateAccountItem.self)
+            }
         }
         .onChange(of: tabItems, { oldValue, newValue in
             presenter.state.setOrder(value: newValue.map { item in item.account.accountKey })
@@ -125,10 +149,9 @@ struct AccountManagementScreen: View {
 
     private func unavailableAccountRow(_ account: UiAccount) -> some View {
         HStack(spacing: 12) {
-            Image(fontAwesome: account.platformIcon.fontAwesomeIcon)
-                .frame(width: 32, height: 32)
+            TabIcon(icon: account.platformIcon, size: 32)
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: account.platformDisplayName)
+                Text(account.platformDisplayNameText.text)
                 Text(verbatim: account.accountKey.description())
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -163,5 +186,15 @@ struct AccountManagementScreen: View {
     private func clearPendingLogout() {
         pendingLogoutAccountKey = nil
         pendingLogoutAccountName = nil
+    }
+
+    private func loginTarget(for error: KotlinThrowable) -> ReloginTarget? {
+        if let expired = error as? LoginExpiredException {
+            return ReloginTarget(accountKey: expired.accountKey, platformId: expired.platformId)
+        }
+        if let required = error as? RequireReLoginException {
+            return ReloginTarget(accountKey: required.accountKey, platformId: required.platformId)
+        }
+        return nil
     }
 }

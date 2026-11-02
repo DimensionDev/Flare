@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.misskey
 
 import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.appendMedia
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AccountApi
@@ -50,6 +51,7 @@ private fun config(
     accessTokenFlow: Flow<String>?,
 ) = ktorfit(
     baseUrl = baseUrl,
+    proxy = ProxyRef.forAccount(accountKey),
     config = {
         if (accessTokenFlow != null) {
             install(MisskeyAuthorizationPlugin) {

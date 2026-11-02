@@ -10,15 +10,31 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSpec
+import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.Media3VideoCacheManager
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.presenter.media.UgoiraPresenter
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
@@ -46,6 +62,91 @@ internal class AndroidDownloadManager(
     }
 
     private val nextDownloadId = AtomicLong()
+    private val exportScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val exportMutex = Mutex()
+    private var exportJob: Job? = null
+    private var smallerChoice: CompletableDeferred<Boolean>? = null
+    var ugoiraProgress by mutableStateOf<Float?>(null)
+        private set
+    var needsSmallerUgoira by mutableStateOf(false)
+        private set
+
+    fun cancelUgoira() {
+        exportJob?.cancel()
+        smallerChoice?.complete(false)
+    }
+
+    fun exportSmallerUgoira() {
+        smallerChoice?.complete(true)
+    }
+
+    suspend fun saveUgoira(
+        media: UiMedia.Ugoira,
+        fileName: String,
+        askDirectoryUri: Uri? = null,
+    ): Boolean =
+        exportScope
+            .async {
+                exportMutex.withLock {
+                    exportJob = currentCoroutineContext()[Job]
+                    ugoiraProgress = 0f
+                    try {
+                        val presenter = UgoiraPresenter(media)
+                        val animation = presenter.load { ugoiraProgress = it * .5f }
+                        try {
+                            val file = File.createTempFile("ugoira-", ".mp4", context.cacheDir)
+                            try {
+                                suspend fun encode(smaller: Boolean) =
+                                    encodeUgoira(animation, file, smaller) {
+                                        withContext(Dispatchers.Main) { ugoiraProgress = .5f + it * .5f }
+                                    }
+                                try {
+                                    encode(false)
+                                } catch (_: UgoiraResolutionUnsupported) {
+                                    val choice = CompletableDeferred<Boolean>()
+                                    smallerChoice = choice
+                                    needsSmallerUgoira = true
+                                    if (!choice.await()) return@withLock false
+                                    needsSmallerUgoira = false
+                                    encode(true)
+                                }
+                                currentCoroutineContext().ensureActive()
+                                val saved =
+                                    saveFile(fileName, "video/mp4", askDirectoryUri) { output ->
+                                        file.inputStream().use { it.copyTo(output) }
+                                        true
+                                    }
+                                Toast
+                                    .makeText(
+                                        context,
+                                        if (saved) R.string.media_save_success else R.string.media_save_fail,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                saved
+                            } finally {
+                                file.delete()
+                            }
+                        } finally {
+                            presenter.release(animation)
+                        }
+                    } catch (error: Exception) {
+                        if (error !is CancellationException) {
+                            Toast
+                                .makeText(
+                                    context,
+                                    R.string.media_save_fail,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
+                        false
+                    } finally {
+                        ugoiraProgress = null
+                        needsSmallerUgoira = false
+                        smallerChoice = null
+                        exportJob = null
+                    }
+                }
+            }.await()
 
     /**
      * Minimal download callback interface
@@ -90,17 +191,15 @@ internal class AndroidDownloadManager(
      * fetched through the same Media3 cache and written to the configured destination.
      */
     suspend fun downloadMedia(
-        uri: String,
+        media: UiMedia,
         fileName: String,
-        customHeaders: Map<String, String>? = null,
         callback: DownloadCallback? = null,
     ): Long {
         val downloadId = nextDownloadId.incrementAndGet()
         val success =
             saveMedia(
-                uri = uri,
+                media = media,
                 fileName = fileName,
-                customHeaders = customHeaders,
                 onDownloadStarted = {
                     withContext(Dispatchers.Main) {
                         callback?.onDownloadStarted(downloadId)
@@ -136,13 +235,16 @@ internal class AndroidDownloadManager(
         mediaByFileName.forEach { (fileName, media) ->
             val success =
                 runCatching {
-                    saveMedia(
-                        uri = media.url,
-                        fileName = fileName,
-                        customHeaders = media.customHeaders,
-                        onDownloadStarted = {},
-                        askDirectoryUri = askDirectoryUri,
-                    )
+                    if (media is UiMedia.Ugoira) {
+                        saveUgoira(media, fileName, askDirectoryUri)
+                    } else {
+                        saveMedia(
+                            media = media,
+                            fileName = fileName,
+                            onDownloadStarted = {},
+                            askDirectoryUri = askDirectoryUri,
+                        )
+                    }
                 }.getOrDefault(false)
             if (success) {
                 succeededFileNames += fileName
@@ -170,28 +272,37 @@ internal class AndroidDownloadManager(
     fun release() = Unit
 
     private suspend fun saveMedia(
-        uri: String,
+        media: UiMedia,
         fileName: String,
-        customHeaders: Map<String, String>?,
         onDownloadStarted: suspend () -> Unit,
         askDirectoryUri: Uri? = null,
     ): Boolean =
         withContext(Dispatchers.IO) {
+            val uri = media.urlForDownload
             if (isAdaptiveStream(uri)) {
                 Log.w(TAG, "Adaptive streams cannot be exported as a single media file: $uri")
                 return@withContext false
             }
 
-            val headers = customHeaders?.takeIf { it.isNotEmpty() }?.toMap()
             val mimeType = getMimeType(uri = uri, fileName = fileName)
+            if (uri.startsWith("file://")) {
+                if (!isImageTranslationFile(media, context.cacheDir)) return@withContext false
+                onDownloadStarted()
+                return@withContext saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { output ->
+                    java.io
+                        .File(java.net.URI(uri))
+                        .inputStream()
+                        .use { it.copyTo(output) }
+                    true
+                }
+            }
 
-            if (media3VideoCacheManager.isFullyCached(uri = uri, customHeaders = headers)) {
+            if (media3VideoCacheManager.isFullyCached(media)) {
                 val saveMode = mediaSaveLocationRepository.state.value.mode
                 val savedFromCache =
                     saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { outputStream ->
                         exportToStream(
-                            uri = uri,
-                            customHeaders = headers,
+                            media = media,
                             outputStream = outputStream,
                             cacheOnly = true,
                         )
@@ -209,8 +320,7 @@ internal class AndroidDownloadManager(
 
             saveFile(fileName = fileName, mimeType = mimeType, askDirectoryUri = askDirectoryUri) { outputStream ->
                 exportToStream(
-                    uri = uri,
-                    customHeaders = headers,
+                    media = media,
                     outputStream = outputStream,
                     cacheOnly = false,
                 )
@@ -218,19 +328,19 @@ internal class AndroidDownloadManager(
         }
 
     private fun exportToStream(
-        uri: String,
-        customHeaders: Map<String, String>?,
+        media: UiMedia,
         outputStream: OutputStream,
         cacheOnly: Boolean,
     ): Boolean {
+        val uri = media.urlForDownload
         val dataSource =
             if (cacheOnly) {
                 media3VideoCacheManager
-                    .cacheOnlyDataSourceFactory(customHeaders)
+                    .cacheOnlyDataSourceFactory(media)
                     .createDataSource()
             } else {
                 media3VideoCacheManager
-                    .downloadingDataSourceFactory(customHeaders)
+                    .downloadingDataSourceFactory(media)
                     .createDataSourceForDownloading()
             }
         return try {
@@ -350,25 +460,35 @@ internal class AndroidDownloadManager(
                 put(MediaStore.MediaColumns.IS_PENDING, 1)
             }
         val contentResolver = context.contentResolver
-        val outputUri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
-        val success =
-            try {
-                contentResolver.openOutputStream(outputUri)?.use(writer) == true
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to write MediaStore output: $outputUri", e)
-                false
+        var outputUri: Uri? = null
+        var success = false
+        return try {
+            outputUri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+            if (contentResolver.openOutputStream(outputUri)?.use(writer) != true) {
+                return false
             }
-
-        if (success) {
             val publishValues =
                 ContentValues().apply {
                     put(MediaStore.MediaColumns.IS_PENDING, 0)
                 }
-            contentResolver.update(outputUri, publishValues, null, null)
-        } else {
-            contentResolver.delete(outputUri, null, null)
+            success = contentResolver.update(outputUri, publishValues, null, null) > 0
+            success
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save MediaStore output: $outputUri", e)
+            false
+        } finally {
+            if (!success) {
+                outputUri?.let { uri ->
+                    runCatching {
+                        contentResolver.delete(uri, null, null)
+                    }.onFailure { error ->
+                        Log.w(TAG, "Failed to delete incomplete MediaStore output: $uri", error)
+                    }
+                }
+            }
         }
-        return success
     }
 
     private fun saveToDirectoryUri(

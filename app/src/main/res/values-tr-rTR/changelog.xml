@@ -3,10 +3,11 @@
     <string name="changelog_current"><![CDATA[
             <span>Sürüm %1$s:</span>
             <ul>
-                <li>Zaman akışındaki video oynatma; daha akıcı geçişler, daha iyi otomatik video seçimi ve medya görüntüleyici açılıp kapatıldığında oynatma konumunun korunmasıyla iyileştirildi.</li>
-                <li>Zaman akışı güvenilirliği artırıldı: yenileme sırasında yanıtlar ve konuşma bağlamı görünür kalıyor, yeni gönderi bildirimi doğru güncelleniyor ve sayfalama çökmeleri düzeltildi.</li>
-                <li>Gönderilerde, medyada ve oluşturma ekranında daha anlaşılır etiketler, durumlar ve kontrollerle erişilebilirlik iyileştirildi.</li>
-                <li>Bluesky oturum güvenilirliği, yeni X zaman akışı yanıtlarıyla uyumluluk ve daha fazla Pixiv eser ve profil bağlantısı biçimi desteği iyileştirildi.</li>
+                <li>Görsel çevirisi eklendi. Bir çeviri hizmeti yapılandırdıktan sonra özgün görsel ile çevirisi arasında geçiş yapabilir, sonucu kaydedebilir veya paylaşabilirsiniz.</li>
+                <li>Bir gönderiyi görsel olarak paylaşırken yanıtları ve alt yanıtları seçebilirsiniz. Uzun görseller oluşturma da desteklenir.</li>
+                <li>Weibo grup, arkadaş çevresi ve gizli takip zaman akışları, gönderi görünürlüğü ayarları ve Live Photo oynatma eklendi. IP konumu gösterimi geri getirildi.</li>
+                <li>HTTPS ve SOCKS5 desteğiyle genel ve hesaba özel vekil sunucu ayarları eklendi.</li>
+                <li>Bazı görsel yükleme hataları, galerideki yer imi işlemleri ve FANBOX bağlantılarının açılması düzeltildi. Karma zaman akışları, çeviri gösterimi ve hesap seçiminin hatırlanması iyileştirildi.</li>
             </ul>
         ]]></string>
     <string name="changelog_title">Tekrar hoş geldiniz!</string>

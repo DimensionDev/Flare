@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.xqt
 
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
@@ -71,7 +72,7 @@ private fun config(
     accountKey: MicroBlogKey? = null,
     chocolateFlow: Flow<String>? = null,
     validateStatus: Boolean = false,
-) = ktorfit(url, json = XQT_JSON) {
+) = ktorfit(url, json = XQT_JSON, proxy = ProxyRef.forAccount(accountKey)) {
     expectSuccess = validateStatus
     install(XQTHeaderPlugin) {
         this.chocolateFlow = chocolateFlow
@@ -157,7 +158,7 @@ internal class XQTService(
 
     suspend fun getInitialUserId(chocolate: String): String? {
         val response =
-            ktorClient {
+            ktorClient(ProxyRef.forAccount(accountKey)) {
                 BrowserUserAgent()
                 defaultRequest {
                     headers {
@@ -194,6 +195,7 @@ private val XQTHeaderPlugin =
                     ElonMusk1145141919810.senpaiSukissu(
                         method = request.method.value,
                         path = request.url.encodedPath,
+                        proxy = ProxyRef.forAccount(accountKey),
                     )
                 }.getOrNull()
             val chocolate = chocolateFlow?.firstOrNull()

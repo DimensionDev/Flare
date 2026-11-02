@@ -14,6 +14,7 @@ public fun UiMedia.accessibleDescription(): String =
         ?: when (this) {
             is UiMedia.Image,
             is UiMedia.Gif,
+            is UiMedia.Ugoira,
             -> stringResource(Res.string.media_image_no_alt)
 
             is UiMedia.Video -> stringResource(Res.string.media_video_no_alt)

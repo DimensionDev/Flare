@@ -1,5 +1,5 @@
 import SwiftUI
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 import LazyPager
 import Combine
 import FlareAppleCore
@@ -8,12 +8,11 @@ import FlareAppleUI
 struct Router<Root: View>: View {
     @Environment(\.openURL) private var openURL
     @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
-    @State private var backStack: [Route] = []
-    @State private var sheet: Route? = nil
-    @State private var cover: Route? = nil
+    @State private var navigation = RouterNavigationState<Route>()
     @State private var alertRoute: Route? = nil
     @State private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @State private var deepLinkHandler: DeepLinkHandler
+    private let pluginOAuthCallbacks = PluginOAuthCallbackFacadeV1()
     
     init(@ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root) {
         self.root = root
@@ -29,31 +28,31 @@ struct Router<Root: View>: View {
     }
     
     var body: some View {
-        NavigationStack(path: $backStack) {
+        NavigationStack(path: $navigation.backStack) {
             root({ route in
                 navigate(route: route)
             })
             .navigationDestination(for: Route.self) { route in
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    goBack: { backStack.removeLast() }
+                    goBack: navigation.goBack
                 )
             }
         }
         .environment(\.timelineMediaActionHandler, IOSTimelineMediaActions.handler)
-        .sheet(item: $sheet) { route in
+        .sheet(item: $navigation.sheet) { route in
             if #available(iOS 18.0, *) {
                 NavigationStack {
                     route.view(
                         onNavigate: { route in navigate(route: route) },
-                        goBack: { backStack.removeLast() }
+                        goBack: navigation.dismissSheet
                     )
                 }
             } else {
                 NavigationStack {
                     route.view(
                         onNavigate: { route in navigate(route: route) },
-                        goBack: { backStack.removeLast() }
+                        goBack: navigation.dismissSheet
                     )
                     .navigationDestination(for: Route.self) { destination in
                         destination.view(
@@ -64,11 +63,11 @@ struct Router<Root: View>: View {
                 }
             }
         }
-        .fullScreenCover(item: $cover) { route in
+        .fullScreenCover(item: $navigation.cover) { route in
             NavigationStack {
                 route.view(
                     onNavigate: { route in navigate(route: route) },
-                    goBack: { backStack.removeLast() }
+                    goBack: navigation.dismissCover
                 )
             }
             .background(ClearFullScreenBackground())
@@ -85,7 +84,11 @@ struct Router<Root: View>: View {
         })
         .onOpenURL { url in
             let targetURL = url.openInFlareTargetURL ?? url
-            deepLinkPresenter.state.handle(url: targetURL.absoluteString)
+            if pluginOAuthCallbacks.canHandle(url: targetURL.absoluteString) {
+                Task { try? await pluginOAuthCallbacks.handle(url: targetURL.absoluteString) }
+            } else {
+                deepLinkPresenter.state.handle(url: targetURL.absoluteString)
+            }
         }
         .onAppear {
             deepLinkHandler.onRoute = { route in
@@ -103,13 +106,13 @@ struct Router<Root: View>: View {
         if route.alertTitle != nil {
             alertRoute = route
         } else if isSheetRoute(route: route) {
-            sheet = route
+            navigation.sheet = route
         } else if isFullScreenCover(route: route) {
-            cover = route
-        } else if backStack.last != route {
-            backStack.append(route)
-            sheet = nil
-            cover = nil
+            navigation.cover = route
+        } else if navigation.backStack.last != route {
+            navigation.backStack.append(route)
+            navigation.sheet = nil
+            navigation.cover = nil
         }
     }
     

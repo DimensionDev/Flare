@@ -129,7 +129,7 @@ private class PixivOAuthLoginHandler(
                         expectedState = request.state,
                     )
                 val response =
-                    PixivService().login(
+                    PixivService(context.proxy).login(
                         clientId = PIXIV_ANDROID_CLIENT_ID,
                         clientSecret = PIXIV_ANDROID_CLIENT_SECRET,
                         code = code,

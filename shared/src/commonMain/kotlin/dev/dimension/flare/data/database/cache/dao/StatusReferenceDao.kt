@@ -7,6 +7,7 @@ import androidx.room3.Query
 import androidx.room3.Update
 import androidx.room3.Upsert
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.ReferenceType
 
 @Dao
@@ -25,6 +26,12 @@ internal interface StatusReferenceDao {
 
     @Query("DELETE FROM status_reference WHERE statusId = :statusId")
     suspend fun delete(statusId: String)
+
+    @Query(
+        "DELETE FROM status_reference WHERE statusId IN (SELECT id FROM DbStatus WHERE accountType = :accountType) " +
+            "OR referenceStatusId IN (SELECT id FROM DbStatus WHERE accountType = :accountType)",
+    )
+    suspend fun deleteByAccountType(accountType: DbAccountType)
 
     @Query("DELETE FROM status_reference WHERE statusId in (:statusIds)")
     suspend fun delete(statusIds: List<String>)

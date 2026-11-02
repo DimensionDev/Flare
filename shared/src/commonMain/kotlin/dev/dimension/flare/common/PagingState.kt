@@ -3,7 +3,11 @@ package dev.dimension.flare.common
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.paging.ItemSnapshotList
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
@@ -328,10 +332,12 @@ internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
 
 @Composable
 @HiddenFromObjC
-public fun <T : Any> Flow<List<T>>.collectPagingState(): State<PagingState<T>> =
-    produceState<PagingState<T>>(initialValue = PagingState.Loading<T>()) {
+public fun <T : Any> Flow<List<T>>.collectPagingState(): State<PagingState<T>> {
+    var attempt by remember(this) { mutableIntStateOf(0) }
+    return produceState<PagingState<T>>(initialValue = PagingState.Loading<T>(), this, attempt) {
+        value = PagingState.Loading()
         catch {
-            value = PagingState.Error(it, onRetry = {})
+            value = PagingState.Error(it, onRetry = { attempt++ })
         }.collect {
             value =
                 if (it.isEmpty()) {
@@ -341,3 +347,4 @@ public fun <T : Any> Flow<List<T>>.collectPagingState(): State<PagingState<T>> =
                 }
         }
     }
+}

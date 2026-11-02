@@ -94,6 +94,7 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
         RssDetailScreen(
             url = args.url,
             descriptionHtml = args.descriptionHtml,
+            fallbackHtml = args.fallbackHtml,
             descriptionTitle = args.title,
             onBack = onBack,
         )

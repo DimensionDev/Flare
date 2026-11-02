@@ -16,6 +16,14 @@ struct GalleryDetailScreen: View {
     private let onNavigate: (Route) -> Void
     private var isBigScreen: Bool { horizontalSizeClass == .regular }
 
+    private var backButtonTitle: String {
+        if case .success(let detail) = onEnum(of: presenter.state.detail),
+           !detail.data.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return detail.data.title
+        }
+        return String(localized: "status_detail_title")
+    }
+
     init(accountType: AccountType, statusKey: MicroBlogKey, onNavigate: @escaping (Route) -> Void) {
         self.accountType = accountType
         self.statusKey = statusKey
@@ -44,6 +52,7 @@ struct GalleryDetailScreen: View {
         .environment(\.timelineAppearance, timelineAppearance.galleryCardTimeline())
         .background(Color(.systemGroupedBackground))
         .navigationTitle("")
+        .navigationBackButtonTitle(backButtonTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !isBigScreen {
@@ -52,28 +61,30 @@ struct GalleryDetailScreen: View {
                         navigateToProfile($0)
                     }
                 }
+            }
 
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button {
-                        switch onEnum(of: presenter.state.detail) {
-                        case .success(let success):
-                            navigateToShare(success.data)
-                        case .loading, .error:
-                            break
-                        }
-                    } label: {
-                        Image(fontAwesome: .shareNodes)
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    switch onEnum(of: presenter.state.detail) {
+                    case .success(let success):
+                        navigateToShare(success.data)
+                    case .loading, .error:
+                        break
                     }
-                    .accessibilityLabel(Text("fx_share"))
-                    .disabled({
-                        switch onEnum(of: presenter.state.detail) {
-                        case .success:
-                            return false
-                        case .loading, .error:
-                            return true
-                        }
-                    }())
+                } label: {
+                    Image(fontAwesome: .shareNodes)
+                }
+                .accessibilityLabel(Text("fx_share"))
+                .disabled({
+                    switch onEnum(of: presenter.state.detail) {
+                    case .success:
+                        return false
+                    case .loading, .error:
+                        return true
+                    }
+                }())
 
+                if !isBigScreen {
                     Button {
                         switch onEnum(of: presenter.state.detail) {
                         case .success:
@@ -220,9 +231,9 @@ private enum GallerySideTab: String, CaseIterable, Identifiable {
 
 private struct GalleryImagesView: View {
     let detail: GalleryDetail
-    let openMedia: (UiMediaImage) -> Void
+    let openMedia: (any UiMedia) -> Void
 
-    private var images: [UiMediaImage] {
+    private var images: [any UiMedia] {
         detail.images.map { $0 }
     }
 
@@ -236,7 +247,7 @@ private struct GalleryImagesView: View {
             TabView {
                 ForEach(0..<images.count, id: \.self) { index in
                     let image = images[index]
-                    NetworkImage(data: image.url, customHeader: image.customHeaders)
+                    GalleryMedia(media: image)
                         .scaledToFit()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .contentShape(Rectangle())
@@ -252,8 +263,8 @@ private struct GalleryImagesView: View {
             LazyVStack(spacing: 0) {
                 ForEach(0..<images.count, id: \.self) { index in
                     let image = images[index]
-                    NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
-                        .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
+                    GalleryMedia(media: image, contentMode: .fit)
+                        .aspectRatio((image.aspectRatio ?? 1), contentMode: .fit)
                         .frame(maxWidth: .infinity)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -268,9 +279,9 @@ private struct GalleryImagesView: View {
 
 private struct GalleryBigScreenImagePane: View {
     let detail: GalleryDetail
-    let onOpenMedia: (UiMediaImage) -> Void
+    let onOpenMedia: (any UiMedia) -> Void
 
-    private var images: [UiMediaImage] {
+    private var images: [any UiMedia] {
         detail.images.map { $0 }
     }
 
@@ -286,7 +297,7 @@ private struct GalleryBigScreenImagePane: View {
                 TabView {
                     ForEach(0..<images.count, id: \.self) { index in
                         let image = images[index]
-                        NetworkImage(data: image.url, customHeader: image.customHeaders)
+                        GalleryMedia(media: image)
                             .scaledToFit()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .contentShape(Rectangle())
@@ -304,8 +315,8 @@ private struct GalleryBigScreenImagePane: View {
                         LazyVStack(spacing: 0) {
                             ForEach(0..<images.count, id: \.self) { index in
                                 let image = images[index]
-                                NetworkImage(data: image.url, customHeader: image.customHeaders, contentMode: .fit)
-                                    .aspectRatio(CGFloat(image.aspectRatio), contentMode: .fit)
+                                GalleryMedia(media: image, contentMode: .fit)
+                                    .aspectRatio((image.aspectRatio ?? 1), contentMode: .fit)
                                     .frame(maxWidth: .infinity)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
@@ -363,7 +374,7 @@ private struct GalleryAuthorCard: View {
         ListCardView(index: 0, totalCount: 2) {
             HStack(spacing: 12) {
                 if let user = detail.author {
-                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                    AvatarView(data: user.avatar)
                         .frame(width: 44, height: 44)
                         .onTapGesture {
                             onProfile(user)
@@ -660,7 +671,7 @@ private struct GalleryCompactToolbarTitle: View {
             let user = detail.author
             HStack(spacing: 10) {
                 if let user {
-                    AvatarView(data: user.avatar?.url, customHeader: user.avatar?.customHeaders)
+                    AvatarView(data: user.avatar)
                         .frame(width: 32, height: 32)
                         .onTapGesture {
                             onProfile(user)
@@ -770,13 +781,8 @@ struct GalleryCommentsScreen: View {
 }
 
 private extension UiTimelineV2.Post {
-    var galleryImagesForRawMedia: [UiMediaImage] {
-        images.compactMap { media in
-            if case .image(let image) = onEnum(of: media) {
-                return image
-            }
-            return nil
-        }
+    var galleryImagesForRawMedia: [any UiMedia] {
+        images.filter { $0 is UiMediaImage || $0 is UiMediaUgoira }
     }
 }
 

@@ -11,6 +11,7 @@ import app.bsky.embed.GalleryViewItemUnion
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.embed.RecordWithMediaViewMediaUnion
+import app.bsky.embed.VideoView
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.GeneratorView
@@ -35,6 +36,7 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.bluesky.normalizeHttpUrl
 import dev.dimension.flare.data.platform.BLUESKY_PLATFORM_ID
 import dev.dimension.flare.model.AccountType
@@ -55,7 +57,10 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.model.asTimelinePostItem
+import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.model.bindMediaProxy
 import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.RenderContent
 import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.render.RenderTextStyle
@@ -118,11 +123,14 @@ internal val bskyJson by lazy {
 
 private fun List<Byte>.stringify(): String = this.toByteArray().decodeToString()
 
-internal fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
+internal fun BookmarkView.render(
+    accountKey: MicroBlogKey,
+    downloadUrls: Map<String, String> = emptyMap(),
+): UiTimelineV2? =
     when (val content = item) {
         is BookmarkViewItemUnion.BlockedPost -> null
         is BookmarkViewItemUnion.NotFoundPost -> null
-        is BookmarkViewItemUnion.PostView -> content.value.render(accountKey)
+        is BookmarkViewItemUnion.PostView -> content.value.render(accountKey, downloadUrls)
         is BookmarkViewItemUnion.Unknown -> null
     }
 
@@ -531,11 +539,15 @@ private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
             }
         }
 
-internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = this.map { it.render(accountKey) }
+internal fun List<FeedViewPost>.render(
+    accountKey: MicroBlogKey,
+    downloadUrls: Map<String, String> = emptyMap(),
+): List<UiTimelineV2> = this.map { it.render(accountKey, downloadUrls) }
 
 internal fun List<ListNotificationsNotification>.render(
     accountKey: MicroBlogKey,
     references: ImmutableMap<AtUri, PostView>,
+    downloadUrls: Map<String, String> = emptyMap(),
 ): List<UiTimelineV2> {
     val grouped =
         this
@@ -555,8 +567,12 @@ internal fun List<ListNotificationsNotification>.render(
                                 .subject.uri
                     }
 
-                    else -> {
+                    ListNotificationsNotificationReason.Follow -> {
                         it.reason to null
+                    }
+
+                    else -> {
+                        it.reason to it.uri
                     }
                 }
             }.filter { it.value.any() }
@@ -597,21 +613,21 @@ internal fun List<ListNotificationsNotification>.render(
                                 clickEvent = ClickEvent.Noop,
                                 createdAt = items.first().indexedAt.toUi(),
                                 accountType = accountKey.toAccountType(),
-                            ),
+                            ).bindMediaProxy(),
                         users =
                             items
                                 .map {
                                     it.author.render(accountKey)
                                 }.toImmutableList(),
                         createdAt = items.first().indexedAt.toUi(),
-                        post = post?.render(accountKey),
+                        post = post?.render(accountKey, downloadUrls),
                         statusKey =
                             MicroBlogKey(
                                 id = items.joinToString("_") { it.uri.atUri } + idSuffix,
                                 host = accountKey.host,
                             ),
                         accountType = accountKey.toAccountType(),
-                    ),
+                    ).bindMediaProxy(),
                 )
             }
 
@@ -631,7 +647,7 @@ internal fun List<ListNotificationsNotification>.render(
                                 clickEvent = ClickEvent.Noop,
                                 createdAt = items.first().indexedAt.toUi(),
                                 accountType = accountKey.toAccountType(),
-                            ),
+                            ).bindMediaProxy(),
                         users =
                             items
                                 .map {
@@ -645,7 +661,7 @@ internal fun List<ListNotificationsNotification>.render(
                                 host = accountKey.host,
                             ),
                         accountType = accountKey.toAccountType(),
-                    ),
+                    ).bindMediaProxy(),
                 )
             }
 
@@ -661,6 +677,7 @@ internal fun List<ListNotificationsNotification>.render(
                     references[it.uri]
                         ?.renderTimelineItem(
                             accountKey = accountKey,
+                            downloadUrls = downloadUrls,
                             message =
                                 UiTimelineV2.Message(
                                     user = it.author.render(accountKey),
@@ -674,7 +691,7 @@ internal fun List<ListNotificationsNotification>.render(
                                     clickEvent = ClickEvent.Noop,
                                     createdAt = it.indexedAt.toUi(),
                                     accountType = accountKey.toAccountType(),
-                                ),
+                                ).bindMediaProxy(),
                         )
                 }
             }
@@ -695,7 +712,7 @@ internal fun List<ListNotificationsNotification>.render(
                                 clickEvent = ClickEvent.Noop,
                                 createdAt = it.indexedAt.toUi(),
                                 accountType = accountKey.toAccountType(),
-                            ),
+                            ).bindMediaProxy(),
                         value = it.author.render(accountKey),
                         statusKey =
                             MicroBlogKey(
@@ -704,15 +721,18 @@ internal fun List<ListNotificationsNotification>.render(
                             ),
                         createdAt = it.indexedAt.toUi(),
                         accountType = accountKey.toAccountType(),
-                    )
+                    ).bindMediaProxy()
                 }
             }
         }
     }
 }
 
-private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
-    val renderedPost = post.render(accountKey)
+private fun FeedViewPost.render(
+    accountKey: MicroBlogKey,
+    downloadUrls: Map<String, String>,
+): UiTimelineV2 {
+    val renderedPost = post.render(accountKey, downloadUrls)
     val feedReason = reason
     val message =
         when (val reason = feedReason) {
@@ -735,7 +755,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                                 accountType = accountKey.toAccountType(),
                             ),
                         ),
-                )
+                ).bindMediaProxy()
             }
 
             is FeedViewPostReasonUnion.ReasonRepost -> {
@@ -758,7 +778,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
                                 userKey = user.key,
                             ),
                         ),
-                )
+                ).bindMediaProxy()
             }
 
             else -> {
@@ -778,8 +798,8 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
             else -> {
                 null
             }
-        }?.renderTimelineItem(accountKey)?.asTimelinePostItem()
-    val quote = findQuote(accountKey, post)
+        }?.renderTimelineItem(accountKey, downloadUrls = downloadUrls)?.asTimelinePostItem()
+    val quote = findQuote(accountKey, post, downloadUrls)
     val inlineParents = listOfNotNull(reply).toImmutableList()
     val quotes = listOfNotNull(quote).toImmutableList()
     val presentation =
@@ -826,7 +846,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
         UiTimelineV2.TimelinePostItem(
             post = rootPost,
             presentation = presentation,
-        )
+        ).bindMediaProxy()
     } else {
         rootPost
     }
@@ -835,24 +855,29 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
 private fun PostView.renderTimelineItem(
     accountKey: MicroBlogKey,
     message: UiTimelineV2.Message? = null,
+    downloadUrls: Map<String, String>,
 ): UiTimelineV2 {
-    val post = render(accountKey)
-    val quotes = listOfNotNull(findQuote(accountKey, this)).toImmutableList()
+    val post = render(accountKey, downloadUrls)
+    val quotes = listOfNotNull(findQuote(accountKey, this, downloadUrls)).toImmutableList()
     return if (message != null || quotes.isNotEmpty()) {
         UiTimelineV2.TimelinePostItem(
             post = post,
             presentation =
                 UiTimelineV2.PostPresentation(
                     message = message,
+                    notificationKey = message?.statusKey,
                     quotes = quotes,
                 ),
-        )
+        ).bindMediaProxy()
     } else {
         post
     }
 }
 
-internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
+internal fun PostView.render(
+    accountKey: MicroBlogKey,
+    downloadUrls: Map<String, String> = emptyMap(),
+): UiTimelineV2.Post {
     val user = author.render(accountKey)
     val isFromMe = user.key == accountKey
     val statusKey =
@@ -881,11 +906,11 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
         }
 
     val sourceLanguages = record.sourceLanguages()
-    val quote = findQuote(accountKey, this)
+    val quote = findQuote(accountKey, this, downloadUrls)
     return UiTimelineV2.Post(
         platformId = BLUESKY_PLATFORM_ID,
         user = user,
-        images = findMedias(this),
+        images = findMedias(this, downloadUrls),
         card = findCard(this),
         statusKey = statusKey,
         sourceLanguages = sourceLanguages,
@@ -1030,7 +1055,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     userActionsMenu(
                                         accountKey = accountKey,
                                         userKey = user.key,
-                                        handle = user.handle.canonical,
+                                        handle = user.handle.display,
                                     ),
                                 )
                                 add(ActionMenu.Divider)
@@ -1068,7 +1093,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                         accountType = AccountType.Specific(accountKey),
                     ),
             ),
-    )
+    ).bindMediaProxy()
 }
 
 private fun blueskyProfileName(
@@ -1093,6 +1118,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = null,
@@ -1106,7 +1132,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1115,7 +1141,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
@@ -1131,6 +1157,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = null,
@@ -1144,7 +1171,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1153,7 +1180,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
@@ -1169,6 +1196,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = null,
@@ -1182,7 +1210,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1191,7 +1219,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
@@ -1207,6 +1235,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
             UiHandle(
                 raw = handle.handle,
                 host = accountKey.host,
+                displayOverride = "@${handle.handle}",
             ),
         key = userKey,
         banner = banner?.uri.toUiImage(),
@@ -1220,7 +1249,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformId = BLUESKY_PLATFORM_ID,
-        platformIcon = dev.dimension.flare.ui.model.UiIcon.Bluesky,
+        platformIcon = UiIcon.Bluesky.asType(),
         clickEvent =
             ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
@@ -1229,7 +1258,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
                         userKey = userKey,
                     ),
             ),
-    )
+    ).withProxy(ProxyRef.forAccount(accountKey))
 }
 
 private fun findCard(postView: PostView): UiCard? =
@@ -1267,7 +1296,10 @@ private fun findCard(postView: PostView): UiCard? =
         null
     }
 
-private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
+private fun findMedias(
+    postView: PostView,
+    downloadUrls: Map<String, String>,
+): SerializableImmutableList<UiMedia> =
     when (val embed = postView.embed) {
         is PostViewEmbedUnion.ImagesView -> {
             embed.value.images
@@ -1285,19 +1317,7 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
 
         is PostViewEmbedUnion.VideoView -> {
             persistentListOf(
-                UiMedia.Video(
-                    url = embed.value.playlist.uri,
-                    thumbnailUrl = embed.value.thumbnail?.uri ?: "",
-                    description = embed.value.alt,
-                    width =
-                        embed.value.aspectRatio
-                            ?.width
-                            ?.toFloat() ?: 0f,
-                    height =
-                        embed.value.aspectRatio
-                            ?.height
-                            ?.toFloat() ?: 0f,
-                ),
+                embed.value.toUiVideo(downloadUrls),
             )
         }
 
@@ -1327,19 +1347,7 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
 
                 is RecordWithMediaViewMediaUnion.VideoView -> {
                     persistentListOf(
-                        Video(
-                            url = media.value.playlist.uri,
-                            thumbnailUrl = media.value.thumbnail?.uri ?: "",
-                            description = media.value.alt,
-                            width =
-                                media.value.aspectRatio
-                                    ?.width
-                                    ?.toFloat() ?: 0f,
-                            height =
-                                media.value.aspectRatio
-                                    ?.height
-                                    ?.toFloat() ?: 0f,
-                        ),
+                        media.value.toUiVideo(downloadUrls),
                     )
                 }
 
@@ -1361,6 +1369,16 @@ private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
             persistentListOf()
         }
     }
+
+private fun VideoView.toUiVideo(downloadUrls: Map<String, String>): UiMedia.Video =
+    UiMedia.Video(
+        url = playlist.uri,
+        downloadUrl = downloadUrls[playlist.uri],
+        thumbnailUrl = thumbnail?.uri.orEmpty(),
+        description = alt,
+        width = aspectRatio?.width?.toFloat() ?: 0f,
+        height = aspectRatio?.height?.toFloat() ?: 0f,
+    )
 
 private fun GalleryView.toUiMedias(): SerializableImmutableList<UiMedia> =
     items
@@ -1429,16 +1447,18 @@ private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> 
 private fun findQuote(
     accountKey: MicroBlogKey,
     postView: PostView,
+    downloadUrls: Map<String, String>,
 ): UiTimelineV2.Post? =
     when (val embed = postView.embed) {
         is PostViewEmbedUnion.RecordView -> {
-            render(accountKey, embed.value.record)
+            render(accountKey, embed.value.record, downloadUrls)
         }
 
         is PostViewEmbedUnion.RecordWithMediaView -> {
             render(
                 accountKey,
                 embed.value.record.record,
+                downloadUrls,
             )
         }
 
@@ -1450,6 +1470,7 @@ private fun findQuote(
 private fun render(
     accountKey: MicroBlogKey,
     record: RecordViewRecordUnion,
+    downloadUrls: Map<String, String>,
 ): UiTimelineV2.Post? =
     when (record) {
         is RecordViewRecordUnion.ViewRecord -> {
@@ -1501,6 +1522,10 @@ private fun render(
                                     }
                                 }
 
+                                is RecordViewRecordEmbedUnion.VideoView -> {
+                                    listOf(it.value.toUiVideo(downloadUrls))
+                                }
+
                                 is RecordViewRecordEmbedUnion.GalleryView -> {
                                     it.value.toUiMedias()
                                 }
@@ -1524,19 +1549,7 @@ private fun render(
 
                                         is RecordWithMediaViewMediaUnion.VideoView -> {
                                             persistentListOf(
-                                                UiMedia.Video(
-                                                    url = media.value.playlist.uri,
-                                                    thumbnailUrl = media.value.thumbnail?.uri ?: "",
-                                                    description = media.value.alt,
-                                                    width =
-                                                        media.value.aspectRatio
-                                                            ?.width
-                                                            ?.toFloat() ?: 0f,
-                                                    height =
-                                                        media.value.aspectRatio
-                                                            ?.height
-                                                            ?.toFloat() ?: 0f,
-                                                ),
+                                                media.value.toUiVideo(downloadUrls),
                                             )
                                         }
 
@@ -1731,7 +1744,7 @@ private fun render(
                                 accountType = AccountType.Specific(accountKey),
                             ),
                     ),
-            )
+            ).bindMediaProxy()
         }
 
         else -> {
@@ -1741,6 +1754,7 @@ private fun render(
 
 internal fun GeneratorView.render(accountKey: MicroBlogKey) =
     UiList.Feed(
+        proxy = ProxyRef.forAccount(accountKey),
         id = uri.atUri,
         title = displayName,
         description = description,
@@ -1752,6 +1766,7 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
 
 internal fun ListView.render(accountKey: MicroBlogKey) =
     UiList.List(
+        proxy = ProxyRef.forAccount(accountKey),
         id = uri.atUri,
         title = name,
         description = description,

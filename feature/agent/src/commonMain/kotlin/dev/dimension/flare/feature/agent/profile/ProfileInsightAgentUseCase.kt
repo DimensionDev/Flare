@@ -8,17 +8,17 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountMicroblogDataSource
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryProvider
 import dev.dimension.flare.feature.agent.common.AgentConversationEvent
+import dev.dimension.flare.feature.agent.common.AgentRetryMode
+import dev.dimension.flare.feature.agent.common.AgentRetryableException
 import dev.dimension.flare.feature.agent.common.AgentRunResult
 import dev.dimension.flare.feature.agent.common.AgentToolContext
 import dev.dimension.flare.feature.agent.common.AgentTrace
 import dev.dimension.flare.feature.agent.common.FlareAgentRequest
 import dev.dimension.flare.feature.agent.common.FlareAgentRunner
-import dev.dimension.flare.feature.agent.common.FlareAgentUnavailableException
 import dev.dimension.flare.feature.agent.common.agentAttachmentMarker
 import dev.dimension.flare.feature.agent.common.resolveAgentVisibleResult
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
 import dev.dimension.flare.feature.agent.presenter.distinctAgentMessageParts
-import dev.dimension.flare.feature.agent.runtime.AgentAvailability
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.CancellationException
@@ -43,9 +43,10 @@ internal class ProfileInsightAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String? = null,
         conversationId: String = userKey.profileInsightConversationId(),
+        retryMode: AgentRetryMode? = null,
     ): Flow<AgentConversationEvent<UiProfile, AgentTrace>> =
         channelFlow {
-            run(userDataSource, userKey, searchDataSources, userInput, conversationId)
+            run(userDataSource, userKey, searchDataSources, userInput, conversationId, retryMode)
         }
 
     private suspend fun SendChannel<AgentConversationEvent<UiProfile, AgentTrace>>.run(
@@ -54,44 +55,48 @@ internal class ProfileInsightAgentUseCase(
         searchDataSources: List<AccountMicroblogDataSource>,
         userInput: String?,
         conversationId: String,
+        retryMode: AgentRetryMode?,
     ) {
         val userInputValue = userInput?.trim().orEmpty()
-        if (userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)) {
-            return
-        }
-        if (userInputValue.isBlank()) {
+        val reuseResponse = retryMode == null && userInputValue.isBlank() && chatHistoryProvider.hasAssistantMessage(conversationId)
+        if (retryMode == null && userInputValue.isBlank() && !reuseResponse) {
             agentRunner.clearConversation(conversationId)
         }
-        val profile = userDataSource.loadProfile(userKey)
-        if (userInputValue.isBlank()) {
+        val profile =
+            try {
+                userDataSource.loadProfile(userKey)
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Throwable) {
+                throw AgentRetryableException(exception, retryMode ?: AgentRetryMode.Restart)
+            }
+        if (retryMode == null && userInputValue.isBlank()) {
             chatHistoryProvider.ensureConversationTitle(conversationId, profile.insightConversationTitle())
         }
+        chatHistoryProvider.ensureInitialUserUiMessage(
+            conversationId,
+            profile.insightConversationTitle(),
+            AgentMessagePart.UserCard(profile),
+        )
         send(AgentConversationEvent.ContentLoaded(profile))
+        if (reuseResponse) return
 
         val result =
-            try {
-                agentRunner.runProfileInsightAgent(
-                    prompt =
-                        profile.toInsightPrompt(
-                            targetLanguage = Locale.language,
-                            userInput = userInputValue,
-                        ),
-                    toolContext =
-                        AgentToolContext(
-                            searchDataSources = searchDataSources,
-                        ),
-                    conversationId = conversationId,
-                ) { event ->
-                    send(event.toConversationEvent())
-                }
-            } catch (throwable: Throwable) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-                if (throwable is FlareAgentUnavailableException) {
-                    throw ProfileInsightAgentUnavailableException(throwable.availability)
-                }
-                throw throwable
+            agentRunner.runProfileInsightAgent(
+                prompt =
+                    profile.toInsightPrompt(
+                        targetLanguage = Locale.language,
+                        userInput = userInputValue,
+                    ),
+                toolContext =
+                    AgentToolContext(
+                        searchDataSources = searchDataSources,
+                    ),
+                conversationId = conversationId,
+                retryMode = retryMode,
+                supportingParts = listOf(AgentMessagePart.UserCard(profile)),
+            ) { event ->
+                send(event.toConversationEvent())
             }
 
         val supportingParts =
@@ -120,11 +125,14 @@ internal class ProfileInsightAgentUseCase(
         prompt: Prompt,
         toolContext: AgentToolContext,
         conversationId: String,
+        supportingParts: List<AgentMessagePart>,
+        retryMode: AgentRetryMode?,
         onEvent: suspend (AgentTrace) -> Unit,
     ): AgentRunResult =
         run(
             request =
                 FlareAgentRequest(
+                    retryMode = retryMode,
                     prompt = prompt,
                     systemPrompt = PROFILE_INSIGHT_SYSTEM_PROMPT,
                     agentId = "flare-profile-insight",
@@ -134,9 +142,8 @@ internal class ProfileInsightAgentUseCase(
                     sendToolResultsNodeName = "send_profile_insight_tool_results",
                     toolContext = toolContext,
                     temperature = 0.2,
-                    maxIterations = MAX_AGENT_ITERATIONS,
                     finishAfterToolResults = false,
-                    chatMemoryWindowSize = CHAT_MEMORY_WINDOW_SIZE,
+                    supportingParts = supportingParts,
                 ),
             conversationId = conversationId,
             onTrace = onEvent,
@@ -257,9 +264,6 @@ internal class ProfileInsightAgentUseCase(
     private fun AgentTrace.toConversationEvent(): AgentConversationEvent.Trace<AgentTrace> = AgentConversationEvent.Trace(this)
 
     private companion object {
-        const val MAX_AGENT_ITERATIONS = 32
-        const val CHAT_MEMORY_WINDOW_SIZE = 20
-
         const val PROFILE_INSIGHT_SYSTEM_PROMPT =
             """
             You explain social profiles for Flare users.
@@ -298,7 +302,3 @@ internal class ProfileInsightAgentUseCase(
 }
 
 private fun MicroBlogKey.profileInsightConversationId(): String = "profile-insight:$host:$id"
-
-public class ProfileInsightAgentUnavailableException public constructor(
-    public val availability: AgentAvailability,
-) : IllegalStateException("Profile insight agent is unavailable: $availability")

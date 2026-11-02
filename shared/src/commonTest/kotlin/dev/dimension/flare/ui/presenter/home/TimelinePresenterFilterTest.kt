@@ -5,9 +5,11 @@ import dev.dimension.flare.data.model.tab.TimelineFilterConfig
 import dev.dimension.flare.data.model.tab.TimelinePostContent
 import dev.dimension.flare.data.model.tab.TimelinePostKind
 import dev.dimension.flare.data.repository.KeywordFilterPattern
+import dev.dimension.flare.data.repository.MxgaSnapshot
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.di.testSingle
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.testPlatformRegistry
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -40,6 +42,41 @@ class TimelinePresenterFilterTest {
     @AfterTest
     fun tearDown() {
         stopKoin()
+    }
+
+    @Test
+    fun visibilityAppliesKeywordTabAndMxgaRulesTogether() {
+        val post =
+            createSampleStatus(createSampleUser().copy(key = MicroBlogKey("42", "x.com"))).copy(
+                platformId = "xQt",
+                images = persistentListOf(),
+                content = UiTranslatableText("Visible text".toUiPlainText()),
+            )
+        val visibility =
+            TimelineVisibility(
+                filters = listOf(KeywordFilterPattern("blocked", isRegex = false)),
+                config = TimelineFilterConfig(excludedContents = listOf(TimelinePostContent.Image)),
+                mxgaEnabled = true,
+                mxgaSnapshot = MxgaSnapshot(version = "test", blockedIds = longArrayOf(42)),
+                platformRegistry = testPlatformRegistry(),
+            )
+        assertFalse(visibility.isVisible(post))
+        val allowedUser = checkNotNull(post.user).copy(key = MicroBlogKey("43", "x.com"))
+        val allowedPost = post.copy(user = allowedUser)
+        assertTrue(visibility.isVisible(allowedPost))
+        assertFalse(visibility.isVisible(allowedPost.copy(content = UiTranslatableText("Blocked text".toUiPlainText()))))
+        assertFalse(
+            visibility.isVisible(
+                allowedPost.copy(
+                    images =
+                        persistentListOf(
+                            UiMedia.Image("https://example.com/image.jpg"),
+                        ),
+                ),
+            ),
+        )
+        assertTrue(visibility.copy(mxgaEnabled = false).isVisible(post))
+        assertTrue(visibility.copy(mxgaSnapshot = MxgaSnapshot()).isVisible(post))
     }
 
     @Test

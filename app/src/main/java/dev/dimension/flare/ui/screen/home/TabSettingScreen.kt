@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.tab.TimelineMergePolicy
 import dev.dimension.flare.data.model.tab.UiGroupTimelineTabItem
@@ -46,6 +47,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.HomeTabSettingsPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -155,6 +157,15 @@ internal fun TabSettingScreen(
                     .padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
+            if (state.loadedTabs && state.currentTabs.isEmpty()) {
+                item {
+                    ListEmptyView(
+                        modifier = Modifier.fillParentMaxSize(),
+                        text = stringResource(R.string.empty_home_tabs),
+                        icon = FontAwesomeIcons.Solid.TableList,
+                    )
+                }
+            }
             if (state.canShowMixedTimelineSetting) {
                 item("header") {
                     Column(
@@ -261,6 +272,7 @@ private fun presenter() =
         var showAddTab by remember { mutableStateOf(false) }
         object {
             val currentTabs = cacheTabs
+            val loadedTabs = loadedTabs
             val allTabsState = allTabsState
             val canSwipeToDelete = true
             val showAddTab = showAddTab

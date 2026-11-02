@@ -1,4 +1,5 @@
 import SwiftUI
+import KotlinSharedUI
 
 #if os(iOS)
 import UIKit
@@ -70,4 +71,31 @@ public extension Color {
         Color(nsColor: .secondaryLabelColor)
         #endif
     }
+}
+
+public extension ActionMenu.ItemColor {
+    var swiftColor: Color? {
+        switch self {
+        case .red: return .red
+        case .contentColor: return nil
+        case .primaryColor: return StatusActionColors.primary
+        }
+    }
+
+    #if os(iOS)
+    var uiColor: UIColor? {
+        switch self {
+        case .red: return .systemRed
+        case .contentColor: return nil
+        case .primaryColor: return StatusActionColors.primaryUIColor
+        }
+    }
+    #endif
+}
+
+private enum StatusActionColors {
+    static let primary = Color(red: 0, green: 186.0 / 255, blue: 124.0 / 255)
+    #if os(iOS)
+    static let primaryUIColor = UIColor(primary)
+    #endif
 }

@@ -145,6 +145,7 @@ dependencies {
     implementation(projects.feature.subscription)
     implementation(projects.feature.tab)
     implementation(projects.feature.agent)
+    implementation(projects.feature.plugin)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
@@ -155,7 +156,6 @@ dependencies {
     implementation(libs.webkit)
     implementation(libs.bundles.navigation3)
     implementation(libs.richtext.ui.material3)
-    implementation(libs.richtext.commonmark)
     implementation(libs.androidx.browser)
     implementation("net.java.dev.jna:jna:${libs.versions.jna.get()}@aar")
 
@@ -165,12 +165,15 @@ dependencies {
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
         implementation(libs.kotlinx.coroutines.play.services)
-        implementation("com.google.mlkit:genai-prompt:1.0.0-beta4")
+        implementation("com.google.mlkit:genai-prompt:1.0.0-beta5")
         implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
     }
     // END Non-FOSS component
 
     testImplementation(libs.junit)
+    testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))

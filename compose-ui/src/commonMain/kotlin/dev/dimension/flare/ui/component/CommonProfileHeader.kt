@@ -51,7 +51,7 @@ internal fun CommonProfileHeader(
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     val isBigScreen = isBigScreen()
-    val profileName = displayName.raw.ifBlank { handle.canonical }
+    val profileName = displayName.raw.ifBlank { handle.display }
     val statusBarHeight =
         with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()
@@ -81,9 +81,8 @@ internal fun CommonProfileHeader(
     ) {
         banner?.let {
             NetworkImage(
-                model = it.url,
+                model = it,
                 contentDescription = stringResource(Res.string.profile_banner, profileName),
-                customHeaders = it.customHeaders,
                 modifier =
                     Modifier
 //                        .sharedElement(
@@ -201,7 +200,7 @@ internal fun CommonProfileHeader(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             PlatformText(
-                                text = handle.canonical,
+                                text = handle.display,
                                 style = PlatformTheme.typography.caption,
 //                            modifier =
 //                                Modifier

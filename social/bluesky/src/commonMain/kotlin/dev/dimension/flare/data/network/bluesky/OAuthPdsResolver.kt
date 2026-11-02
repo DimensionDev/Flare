@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.bluesky
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -19,15 +20,19 @@ import sh.christian.ozone.oauth.OAuthToken
 private const val AT_PROTO_PDS_SERVICE_ID = "#atproto_pds"
 private const val AT_PROTO_PDS_SERVICE_TYPE = "AtprotoPersonalDataServer"
 
-internal suspend fun OAuthToken.withResolvedPds(issuer: String): OAuthToken {
+internal suspend fun OAuthToken.withResolvedPds(
+    issuer: String,
+    proxy: ProxyRef,
+): OAuthToken {
     val httpClient =
-        ktorClient {
+        ktorClient(proxy) {
             followRedirects = false
         }
     return try {
         withResolvedPds(issuer, httpClient)
     } finally {
         httpClient.close()
+        httpClient.engine.close()
     }
 }
 
@@ -109,7 +114,7 @@ private suspend inline fun <reified T> HttpClient.getJson(
     }
 }
 
-private fun didDocumentUrl(did: String): Url =
+internal fun didDocumentUrl(did: String): Url =
     when {
         did.startsWith("did:plc:") -> Url("https://plc.directory/$did")
         did.startsWith("did:web:") -> didWebDocumentUrl(did)
@@ -150,7 +155,7 @@ private fun Url.authorizationServerMetadataUrl(): Url =
         appendPathSegments(".well-known", "oauth-authorization-server")
     }
 
-private fun Url.requireHttpsOrigin(description: String): Url {
+internal fun Url.requireHttpsOrigin(description: String): Url {
     require(protocol == URLProtocol.HTTPS) { "$description must use HTTPS: $this" }
     require(user.isNullOrEmpty() && password.isNullOrEmpty()) { "$description must not contain credentials: $this" }
     require(encodedPath.isEmpty() || encodedPath == "/") { "$description must not contain a path: $this" }

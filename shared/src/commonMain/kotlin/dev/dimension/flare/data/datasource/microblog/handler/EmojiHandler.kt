@@ -25,19 +25,12 @@ public class EmojiHandler(
         Cacheable(
             fetchSource = {
                 val emojis = loader.emojis()
-                if (emojis.isEmpty()) {
-                    database.emojiDao().delete(host)
-                } else {
-                    database.emojiDao().insert(
-                        DbEmoji(
-                            host = host,
-                            content =
-                                EmojiContent(
-                                    emojis,
-                                ),
-                        ),
-                    )
-                }
+                database.emojiDao().insert(
+                    DbEmoji(
+                        host = host,
+                        content = EmojiContent(emojis),
+                    ),
+                )
             },
             cacheSource = {
                 database

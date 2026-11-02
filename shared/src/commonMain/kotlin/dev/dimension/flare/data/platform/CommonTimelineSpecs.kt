@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineLoaderFactory
@@ -30,7 +30,7 @@ public object CommonTimelineSpecs {
             targetId = { it.accountKey.toString() },
             loaderFactory =
                 accountLoader<MicroblogDataSource, TimelineSpec.AccountBasedData> {
-                    homeTimeline()
+                    requireNotNull(capabilities.timeline).homeTimeline()
                 },
         )
 
@@ -45,7 +45,7 @@ public object CommonTimelineSpecs {
                 TimelineLoaderFactory { data, context ->
                     context
                         .accountServiceFlow(AccountType.GuestHost(data.host))
-                        .map { service -> service.homeTimeline() }
+                        .map { service -> requireNotNull(service.capabilities.timeline).homeTimeline() }
                 },
         )
 
@@ -58,7 +58,7 @@ public object CommonTimelineSpecs {
             targetId = { it.accountKey.toString() },
             loaderFactory =
                 accountLoader<MicroblogDataSource, TimelineSpec.AccountBasedData> {
-                    discoverStatuses()
+                    requireNotNull(capabilities.search).discoverStatuses()
                 },
         )
 
@@ -70,8 +70,8 @@ public object CommonTimelineSpecs {
             serializer = TimelineSpec.AccountResourceData.serializer(),
             targetId = { "${it.accountKey}:${it.resourceId}" },
             loaderFactory =
-                accountLoader<ListDataSource, TimelineSpec.AccountResourceData> {
-                    listTimeline(listId = it.resourceId)
+                accountLoader<MicroblogDataSource, TimelineSpec.AccountResourceData> {
+                    requireNotNull(capabilities.list).listTimeline(listId = it.resourceId)
                 },
         )
 

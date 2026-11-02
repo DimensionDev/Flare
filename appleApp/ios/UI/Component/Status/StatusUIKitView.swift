@@ -620,16 +620,19 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             innerY += h
             // Compose inserts this spacer only after CommonStatusHeaderComponent;
             // compact side-avatar and quote headers do not get it.
-            if !showAsFullWidth && !isQuote {
+            // The reply row supplies its own spacing below the header.
+            if !showAsFullWidth && !isQuote && data?.replyToHandle == nil {
                 innerY += 4
             }
         }
 
         // Compose uses semantic 4/8pt spacers instead of a uniform stack gap.
         updateExpandMoreButtonVisibility(contentWidth: contentWidth)
+        var followsReply = false
         for item in contentColumnLayoutItems where !item.view.isHidden {
             let child = item.view
-            innerY += item.spacingBefore
+            // Keep the reply row's bottom spacing from stacking with the next block's.
+            innerY += followsReply ? 0 : item.spacingBefore
             let isCarousel = child === mediaViewStorage && mediaViewStorage?.isShowingCarousel == true
             if isCarousel, wantsAvatar {
                 innerY = max(innerY, y + Self.avatarSize + 8)
@@ -639,6 +642,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             let h = childHeight(of: child, for: childWidth)
             if assignFrames { child.frame = CGRect(x: childX, y: innerY, width: childWidth, height: h) }
             innerY += h + item.spacingAfter
+            followsReply = child === replyToContainerStorage
         }
 
         return max(innerY, y)
@@ -685,8 +689,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if newWantsAvatar, let user = data.user {
             let avatarView = resolvedAvatarView()
             avatarView.avatarShape = appearance.avatarShape
-            avatarView.set(url: user.avatar?.url, customHeaders: user.avatar?.customHeaders)
-            avatarView.accessibilityLabel = openProfileAccessibilityLabel(handle: user.handle.canonical)
+            avatarView.set(media: user.avatar)
+            avatarView.accessibilityLabel = openProfileAccessibilityLabel(handle: user.handle.display)
             if avatarView.superview !== self { addSubview(avatarView) }
         } else if avatarViewStorage?.superview === self {
             avatarViewStorage?.removeFromSuperview()
@@ -755,17 +759,17 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if showAsFullWidth {
             let userHeaderFull = resolvedUserHeaderFull()
             userHeaderFull.avatar.avatarShape = appearance.avatarShape
-            userHeaderFull.configure(data: user, trailing: topEndView, onClicked: onClicked)
+            userHeaderFull.configure(data: user, subtitle: data.authorSubtitle, trailing: topEndView, onClicked: onClicked)
             return userHeaderFull
         } else if isQuote {
             let userHeaderQuote = resolvedUserHeaderQuote()
             userHeaderQuote.avatar.avatarShape = appearance.avatarShape
-            userHeaderQuote.configure(data: user, trailing: topEndView, onClicked: onClicked)
+            userHeaderQuote.configure(data: user, subtitle: data.authorSubtitle, trailing: topEndView, onClicked: onClicked)
             return userHeaderQuote
         } else {
             let userHeaderCompat = resolvedUserHeaderCompat()
             userHeaderCompat.avatar.avatarShape = appearance.avatarShape
-            userHeaderCompat.configure(data: user, trailing: topEndView, onClicked: onClicked)
+            userHeaderCompat.configure(data: user, subtitle: data.authorSubtitle, trailing: topEndView, onClicked: onClicked)
             return userHeaderCompat
         }
     }
@@ -798,7 +802,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
         if let replyToHandle = data.replyToHandle {
             let replyToContainer = resolvedReplyToContainer()
             replyToContainer.configure(text: String(localized: "Reply to \(replyToHandle)"))
-            append(replyToContainer, before: 4)
+            append(replyToContainer, before: 2, after: 2)
         }
 
         // content warning
@@ -812,8 +816,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     lineLimit: nil,
                     isTextSelectionEnabled: isDetail,
                     onOpenURL: openURL,
-                    preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + contentWarning.cacheKeyOffset
+                    preferredContentSizeCategory: appearance.preferredContentSizeCategory
                 )
                 append(contentWarningText, before: 4)
             }
@@ -850,7 +853,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             } else {
                 bodySelectionEnabled = false
                 bodyLineLimit = max(maxLine, 1)
-                collapseAboveLineCount = maxLine >= 5 ? max(10, maxLine) : max(maxLine, 1)
+                collapseAboveLineCount = maxLine >= 5 ? max(15, maxLine) : max(maxLine, 1)
             }
             for content in contents where !content.text.isEmpty {
                 let bodyText = content.cacheKeyOffset == 0 ? resolvedBodyText() : resolvedBodyTranslationText()
@@ -860,7 +863,6 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     isTextSelectionEnabled: bodySelectionEnabled,
                     onOpenURL: openURL,
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
-                    contentKey: Int(data.renderHash) * 4 + 2 + content.cacheKeyOffset,
                     collapseAboveLineCount: collapseAboveLineCount
                 )
                 append(bodyText, before: visibleBodyCount == 0 ? 0 : 4)
@@ -924,6 +926,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 let preview: String? = switch onEnum(of: media) {
                 case .image(let image): image.previewUrl
                 case .video(let video): video.thumbnailUrl
+                case .ugoira(let animation): animation.previewUrl
                 case .gif(let gif): gif.previewUrl
                 case .audio: nil
                 }
@@ -1013,7 +1016,8 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                 postActionLayout: appearance.postActionLayout,
                 postActionFixedWidth: appearance.postActionFixedWidth,
                 showNumbers: appearance.showNumbers,
-                isDetail: isDetail
+                isDetail: isDetail,
+                postKey: String(describing: data.statusKey)
             )
             if actionsView.hasVisibleActions {
                 let actionsContainer = resolvedActionsContainer()
@@ -1501,6 +1505,7 @@ private final class QuotesContainerView: UIView, ManualLayoutMeasurable, Timelin
         layer.cornerRadius = 16
         layer.borderWidth = 1
         layer.borderColor = UIColor.separator.cgColor
+        clipsToBounds = true
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 

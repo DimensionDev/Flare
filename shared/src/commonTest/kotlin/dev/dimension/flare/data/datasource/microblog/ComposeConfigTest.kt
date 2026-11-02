@@ -15,57 +15,40 @@ class ComposeConfigTest {
     }
 
     @Test
-    fun visibilityMergeKeepsOnlyCommonOptions() {
-        val first =
-            visibility(
-                UiTimelineV2.Post.Visibility.Home,
-                UiTimelineV2.Post.Visibility.Public,
-                UiTimelineV2.Post.Visibility.Followers,
-                default = UiTimelineV2.Post.Visibility.Home,
-            )
-        val second =
-            visibility(
-                UiTimelineV2.Post.Visibility.Public,
-                UiTimelineV2.Post.Visibility.Followers,
-                default = UiTimelineV2.Post.Visibility.Followers,
-            )
-
-        val merged = first.merge(second)
-
-        assertEquals(
-            persistentListOf(
-                UiTimelineV2.Post.Visibility.Public,
-                UiTimelineV2.Post.Visibility.Followers,
-            ),
-            merged?.allVisibilities,
-        )
-        assertEquals(UiTimelineV2.Post.Visibility.Public, merged?.defaultVisibility)
+    fun visibilityMergeHidesSelectionEvenWhenDifferentRangesSharePublic() {
+        val first = visibility(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.SelfOnly)
+        val second = visibility(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.Followers)
+        assertNull(first.merge(second))
     }
 
     @Test
     fun visibilityMergeReturnsNullWhenThereIsNoCommonOption() {
-        val first = visibility(UiTimelineV2.Post.Visibility.Home)
-        val second = visibility(UiTimelineV2.Post.Visibility.Followers)
-
-        assertNull(first.merge(second))
+        assertNull(visibility(UiTimelineV2.Post.Visibility.Home).merge(visibility(UiTimelineV2.Post.Visibility.Followers)))
     }
 
     @Test
     fun visibilityMergeKeepsASharedNonPublicDefault() {
         val config = visibility(UiTimelineV2.Post.Visibility.Followers, UiTimelineV2.Post.Visibility.Public)
-
-        assertEquals(UiTimelineV2.Post.Visibility.Followers, config.merge(config)?.defaultVisibility)
+        assertEquals(config, config.merge(config))
     }
 
     @Test
-    fun visibilityMergeFallsBackToAnAvailableNonPublicOption() {
-        val first = visibility(UiTimelineV2.Post.Visibility.Home, UiTimelineV2.Post.Visibility.Followers)
-        val second = visibility(UiTimelineV2.Post.Visibility.Followers, UiTimelineV2.Post.Visibility.Specified)
+    fun visibilityMergeHidesSelectionWhenPlatformDefaultsDiffer() {
+        val first = visibility(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.Followers)
+        val second = first.copy(defaultVisibility = UiTimelineV2.Post.Visibility.Followers)
+        assertNull(first.merge(second))
+    }
 
-        val merged = ComposeConfig(visibility = first).merge(ComposeConfig(visibility = second)).visibility
-
-        assertEquals(persistentListOf(UiTimelineV2.Post.Visibility.Followers), merged?.allVisibilities)
-        assertEquals(UiTimelineV2.Post.Visibility.Followers, merged?.defaultVisibility)
+    @Test
+    fun visibilityMergeAcceptsTheSameOptionsInAnotherOrder() {
+        val first = visibility(UiTimelineV2.Post.Visibility.Public, UiTimelineV2.Post.Visibility.Followers)
+        val second =
+            visibility(
+                UiTimelineV2.Post.Visibility.Followers,
+                UiTimelineV2.Post.Visibility.Public,
+                default = UiTimelineV2.Post.Visibility.Public,
+            )
+        assertEquals(first, first.merge(second))
     }
 
     @Test

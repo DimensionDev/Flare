@@ -35,6 +35,7 @@ internal fun ProvideDesktopTimelineMediaActions(content: @Composable () -> Unit)
                     TimelineMediaActionHandler { post, media, action ->
                         when (action) {
                             TimelineMediaMenuAction.Download -> {
+                                if (media is UiMedia.Ugoira) return@TimelineMediaActionHandler
                                 val targetFile =
                                     DesktopSaveDialog.chooseFile(
                                         window = window,
@@ -42,9 +43,8 @@ internal fun ProvideDesktopTimelineMediaActions(content: @Composable () -> Unit)
                                     ) ?: return@TimelineMediaActionHandler
                                 scope.launch {
                                     downloadManager.download(
-                                        url = media.url,
+                                        media = media,
                                         targetFile = targetFile,
-                                        customHeaders = media.customHeaders,
                                     )
                                 }
                             }

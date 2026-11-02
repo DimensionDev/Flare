@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.pixiv
 
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.nullableFallbackJson
 import dev.dimension.flare.data.network.pixiv.api.PixivAppResources
@@ -46,8 +47,8 @@ private fun pixivKtorfit(
     converterFactories(ResponseConverterFactory())
 }
 
-private fun pixivHttpClient(configure: HttpClientConfigBuilder = {}) =
-    ktorClient {
+private fun pixivHttpClient(proxy: ProxyRef = ProxyRef.Global, configure: HttpClientConfigBuilder = {}) =
+    ktorClient(proxy) {
         expectSuccess = false
         install(ContentNegotiation) {
             nullableFallbackJson(JSON)
@@ -64,9 +65,9 @@ private data class PixivServiceClients(
     val appClient: HttpClient,
 )
 
-private fun createPixivServiceClients(configureAppClient: HttpClientConfigBuilder = {}): PixivServiceClients {
-    val authClient = pixivHttpClient()
-    val appClient = pixivHttpClient(configureAppClient)
+private fun createPixivServiceClients(proxy: ProxyRef = ProxyRef.Global, configureAppClient: HttpClientConfigBuilder = {}): PixivServiceClients {
+    val authClient = pixivHttpClient(proxy)
+    val appClient = pixivHttpClient(proxy, configureAppClient)
     return PixivServiceClients(
         authResources = pixivKtorfit(AUTH_BASE_URL, authClient).createPixivAuthResources(),
         appResources = pixivKtorfit(APP_API_BASE_URL, appClient).createPixivAppResources(),
@@ -79,20 +80,20 @@ internal class PixivService private constructor(
     private val appResources: PixivAppResources,
     private val appClient: HttpClient,
 ) {
-    constructor() : this(createPixivServiceClients())
+    constructor(proxy: ProxyRef = ProxyRef.Global) : this(createPixivServiceClients(proxy))
 
     constructor(
         accountKey: MicroBlogKey,
         credentialFlow: Flow<PixivCredential>,
         onCredentialRefreshed: suspend (PixivCredential) -> Unit,
     ) : this(
-        createPixivServiceClients {
+        createPixivServiceClients(ProxyRef.forAccount(accountKey)) {
             install(PixivAuthPlugin) {
                 this.accountKey = accountKey
                 this.credentialFlow = credentialFlow
                 this.onCredentialRefreshed = onCredentialRefreshed
                 this.refreshToken = { clientId, clientSecret, refreshToken ->
-                    pixivKtorfit(AUTH_BASE_URL, pixivHttpClient())
+                    pixivKtorfit(AUTH_BASE_URL, pixivHttpClient(ProxyRef.forAccount(accountKey)))
                         .createPixivAuthResources()
                         .refreshToken(
                             clientId = clientId,

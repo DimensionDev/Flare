@@ -39,6 +39,7 @@ import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.cancel
 import dev.dimension.flare.data.database.app.model.RssDisplayMode
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.edit_rss_source
 import dev.dimension.flare.mastodon_available_timelines
 import dev.dimension.flare.mastodon_federated_timeline
@@ -46,6 +47,9 @@ import dev.dimension.flare.mastodon_local_timeline
 import dev.dimension.flare.mastodon_trending_statuses
 import dev.dimension.flare.ok
 import dev.dimension.flare.opml_import
+import dev.dimension.flare.rss_open_mode_checking
+import dev.dimension.flare.rss_open_mode_recommended
+import dev.dimension.flare.rss_open_mode_unknown
 import dev.dimension.flare.rss_source_checking
 import dev.dimension.flare.rss_source_invalid
 import dev.dimension.flare.rss_source_options_available
@@ -71,8 +75,10 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
+import dev.dimension.flare.ui.presenter.home.rss.RssReadingMode
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import io.github.composefluent.FluentTheme
@@ -87,7 +93,6 @@ import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -161,7 +166,6 @@ fun EditRssSourceScreen(
                                 if (state.selectedSource.isNotEmpty()) {
                                     inputState.save(
                                         sources = state.selectedSource,
-                                        displayMode = state.displayMode,
                                     )
                                     state.save(
                                         sources = state.selectedSource,
@@ -252,7 +256,7 @@ fun EditRssSourceScreen(
                                     rssState.icon?.let {
                                         {
                                             NetworkImage(
-                                                it,
+                                                it.toUiImage(proxy = ProxyRef.Global),
                                                 contentDescription = null,
                                                 modifier =
                                                     Modifier
@@ -312,7 +316,7 @@ fun EditRssSourceScreen(
                                 CardExpanderItem(
                                     icon = {
                                         NetworkImage(
-                                            source.favIcon,
+                                            source.favIcon.toUiImage(proxy = ProxyRef.Global),
                                             contentDescription = null,
                                             modifier =
                                                 Modifier
@@ -343,6 +347,11 @@ fun EditRssSourceScreen(
                                                 state.selectSource(source)
                                             },
                                 )
+                                if (state.selectedSource.contains(source)) {
+                                    state.readingModes.firstOrNull { it.url == source.url }?.let { mode ->
+                                        RssReadingModePicker(mode) { state.setSourceDisplayMode(source.url, it) }
+                                    }
+                                }
                             }
                         }
 
@@ -361,7 +370,7 @@ fun EditRssSourceScreen(
                                         rssState.icon?.let {
                                             {
                                                 NetworkImage(
-                                                    it,
+                                                    it.toUiImage(proxy = ProxyRef.Global),
                                                     contentDescription = null,
                                                     modifier =
                                                         Modifier
@@ -395,52 +404,12 @@ fun EditRssSourceScreen(
                     }
                 }
                 state.inputState.onSuccess { inputState ->
-                    if (inputState !is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance) {
-                        CardExpanderItem(
-                            heading = {
-                                Text(text = stringResource(Res.string.rss_sources_display_mode))
-                            },
-                            trailing = {
-                                MenuFlyoutContainer(
-                                    flyout = {
-                                        MenuFlyoutItem(
-                                            text = { Text(stringResource(Res.string.rss_sources_full_content)) },
-                                            onClick = {
-                                                state.setDisplayMode(RssDisplayMode.FULL_CONTENT)
-                                                isFlyoutVisible = false
-                                            },
-                                        )
-                                        MenuFlyoutItem(
-                                            text = { Text(stringResource(Res.string.rss_sources_open_in_browser)) },
-                                            onClick = {
-                                                state.setDisplayMode(RssDisplayMode.OPEN_IN_BROWSER)
-                                                isFlyoutVisible = false
-                                            },
-                                        )
-                                        MenuFlyoutItem(
-                                            text = { Text(stringResource(Res.string.rss_sources_description_only)) },
-                                            onClick = {
-                                                state.setDisplayMode(RssDisplayMode.DESCRIPTION_ONLY)
-                                                isFlyoutVisible = false
-                                            },
-                                        )
-                                    },
-                                    adaptivePlacement = true,
-                                ) {
-                                    Button(
-                                        onClick = { isFlyoutVisible = !isFlyoutVisible },
-                                    ) {
-                                        Text(
-                                            when (state.displayMode) {
-                                                RssDisplayMode.FULL_CONTENT -> stringResource(Res.string.rss_sources_full_content)
-                                                RssDisplayMode.OPEN_IN_BROWSER -> stringResource(Res.string.rss_sources_open_in_browser)
-                                                RssDisplayMode.DESCRIPTION_ONLY -> stringResource(Res.string.rss_sources_description_only)
-                                            },
-                                        )
-                                    }
-                                }
-                            },
-                        )
+                    if (inputState !is EditRssSourcePresenter.State.RssInputState.RssSources &&
+                        inputState !is EditRssSourcePresenter.State.RssInputState.SubscriptionInstance
+                    ) {
+                        state.readingModes.firstOrNull()?.let { readingMode ->
+                            RssReadingModePicker(readingMode, state::setDisplayMode)
+                        }
                     }
                     Row(
                         horizontalArrangement =
@@ -557,7 +526,6 @@ private fun presenter(
     val selectedSource = remember { mutableStateListOf<UiRssSource>() }
     val selectedMastodonTypes = remember { mutableStateListOf<SubscriptionType>() }
     var pinnedInTabs by remember { mutableStateOf(false) }
-    var displayMode by remember { mutableStateOf(RssDisplayMode.FULL_CONTENT) }
     state.data.onSuccess {
         LaunchedEffect(Unit) {
             titleText.edit {
@@ -566,7 +534,6 @@ private fun presenter(
             urlText.edit {
                 append(it.url)
             }
-            displayMode = it.displayMode
         }
     }
 
@@ -601,16 +568,18 @@ private fun presenter(
             }
         }
     }
+    LaunchedEffect(state.checkState) {
+        selectedSource.clear()
+        state.clearSelectedSources()
+    }
     LaunchedEffect(Unit) {
         snapshotFlow { urlText.text }
-            .debounce(666)
             .collect {
                 state.checkUrl(it.toString())
             }
     }
     object : EditRssSourcePresenter.State by state {
         val pinnedInTabs = pinnedInTabs
-        val displayMode = displayMode
         val selectedSource = selectedSource
         val selectedMastodonTypes: List<SubscriptionType> = selectedMastodonTypes
         val rssHubHostText = rssHubHostText
@@ -619,16 +588,13 @@ private fun presenter(
             pinnedInTabs = value
         }
 
-        fun setDisplayMode(value: RssDisplayMode) {
-            displayMode = value
-        }
-
         fun selectSource(source: UiRssSource) {
             if (selectedSource.contains(source)) {
                 selectedSource.remove(source)
             } else {
                 selectedSource.add(source)
             }
+            state.selectSource(source.url, selectedSource.contains(source))
         }
 
         fun toggleMastodonType(type: SubscriptionType) {
@@ -659,4 +625,53 @@ private val publicRssHubServer =
         "https://rsshub.rssforever.com",
         "https://hub.slarker.me",
         "https://rsshub.pseudoyu.com",
+    )
+
+@Composable
+private fun RssReadingModePicker(
+    mode: RssReadingMode,
+    onSelect: (RssDisplayMode) -> Unit,
+) {
+    CardExpanderItem(
+        heading = { Text(stringResource(Res.string.rss_sources_display_mode)) },
+        trailing = {
+            MenuFlyoutContainer(
+                flyout = {
+                    RssDisplayMode.entries.forEach { value ->
+                        MenuFlyoutItem(
+                            text = { Text(rssReadingModeLabel(value)) },
+                            onClick = {
+                                onSelect(value)
+                                isFlyoutVisible = false
+                            },
+                        )
+                    }
+                },
+                adaptivePlacement = true,
+            ) {
+                Button(onClick = { isFlyoutVisible = !isFlyoutVisible }) { Text(rssReadingModeLabel(mode.displayMode)) }
+            }
+        },
+    )
+    if (mode.automatic) {
+        Text(
+            stringResource(
+                when {
+                    mode.checking -> Res.string.rss_open_mode_checking
+                    mode.recommended != null -> Res.string.rss_open_mode_recommended
+                    else -> Res.string.rss_open_mode_unknown
+                },
+            ),
+        )
+    }
+}
+
+@Composable
+private fun rssReadingModeLabel(mode: RssDisplayMode): String =
+    stringResource(
+        when (mode) {
+            RssDisplayMode.FULL_CONTENT -> Res.string.rss_sources_full_content
+            RssDisplayMode.DESCRIPTION_ONLY -> Res.string.rss_sources_description_only
+            RssDisplayMode.OPEN_IN_BROWSER -> Res.string.rss_sources_open_in_browser
+        },
     )

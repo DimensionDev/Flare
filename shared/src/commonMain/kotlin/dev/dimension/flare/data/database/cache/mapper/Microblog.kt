@@ -38,7 +38,7 @@ private suspend fun saveToDatabaseInTransaction(
     val timelines =
         items
             .map { it.timeline }
-            .associateBy { it.pagingKey to it.statusId }
+            .associateBy { it.pagingKey to it._id }
             .values
             .toList()
     val existingTimelineByPair = loadTimelineVersions(database, timelines)
@@ -100,7 +100,7 @@ private data class DbChanges<T>(
 )
 
 private val DbPagingTimeline.key: Pair<String, String>
-    get() = pagingKey to statusId
+    get() = pagingKey to _id
 
 private data class SemanticReferenceKey(
     val statusId: String,
@@ -113,7 +113,7 @@ private val DbStatusReference.key: SemanticReferenceKey
 
 private data class PresentationReferenceKey(
     val pagingKey: String,
-    val statusId: String,
+    val timelineId: String,
     val presentationType: DbTimelineItemPresentationType,
     val referenceStatusId: String,
 )
@@ -122,7 +122,7 @@ private val DbTimelineItemPresentationReference.key: PresentationReferenceKey
     get() =
         PresentationReferenceKey(
             pagingKey = pagingKey,
-            statusId = statusId,
+            timelineId = timelineId,
             presentationType = presentationType,
             referenceStatusId = referenceStatusId,
         )
@@ -218,9 +218,9 @@ private suspend fun syncPresentationReferences(
             .map { it.reference }
             .groupBy { it.pagingKey }
     items.groupBy { it.timeline.pagingKey }.forEach { (pagingKey, rows) ->
-        val rootStatusIds = rows.map { it.timeline.statusId }.distinct()
+        val timelineIds = rows.map { it.timeline._id }.distinct()
         val existing =
-            rootStatusIds
+            timelineIds
                 .chunked(SQL_IN_BATCH_SIZE)
                 .flatMap { database.pagingTimelineDao().getPresentationReferences(pagingKey, it) }
         syncByKey(
@@ -281,7 +281,7 @@ private suspend fun loadTimelineVersions(
                         statusIds = chunk,
                     )
                 }
-        }.associateBy { it.pagingKey to it.statusId }
+        }.associateBy { it.pagingKey to it._id }
 
 private fun DbPagingTimelineVersion.matches(timeline: DbPagingTimeline): Boolean =
     sortId == timeline.sortId &&

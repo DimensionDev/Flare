@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="media_video_error">视频加载失败</string>
     <string name="delete">删除</string>
     <string name="done">完成</string>
     <string name="cancel">取消</string>
@@ -434,4 +435,19 @@
     <string name="pixiv_private_favourites_title">私密收藏</string>
     <string name="fanbox_supported_title">支持中</string>
     <string name="fanbox_recommended_creators_title">推荐创作者</string>
+<string name="ugoira_play">播放动图</string>
+<string name="ugoira_loading">正在加载动图</string>
+    <string name="timeline_load_missing_posts">加载缺失的内容</string>
+    <string name="timeline_loading_missing_posts">正在加载缺失的内容…</string>
+    <string name="timeline_retry_missing_posts">加载失败，点击重试。</string>
+    <string name="share_replies_empty">暂无可选回复</string>
+    <string name="share_replies_failed">回复加载失败，已保留当前选择。</string>
+    <string name="share_replies_more">加载更多回复</string>
+    <string name="share_replies_retry">重试</string>
+    <string name="share_replies_children">加载这条评论的回复</string>
+
+    <string name="weibo_friends_circle_title">好友圈</string>
+    <string name="weibo_private_following_title">悄悄关注</string>
+    <string name="visibility_friends">好友圈可见</string>
+    <string name="visibility_self">仅自己可见</string>
 </resources>

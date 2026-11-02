@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -52,7 +53,7 @@ internal class ComposePostTool(
             "Platform names or aliases to narrow account selection. Leave empty when the user did not choose a platform; the tool will request a structured platform/account selection if needed.",
         )
         val platforms: List<String> = emptyList(),
-        @property:LLMDescription("Visibility for the post: Public, Home, Followers, Specified, or Channel.")
+        @property:LLMDescription("Visibility for the post: Public, Home, Followers, Specified, Channel, Friends, or SelfOnly.")
         val visibility: String = "Public",
         @property:LLMDescription("ISO 639-1 language codes for the post text. Leave empty to use en.")
         val languages: List<String> = emptyList(),
@@ -91,12 +92,6 @@ internal class ComposePostTool(
         val target = resolveComposeTarget(args) ?: return accountSelectionMessage(args, content, action, reference)
         val visibility = args.visibility.toPostVisibilityOrNull() ?: return "Unsupported visibility: ${args.visibility}."
         val config = target.dataSource.composeConfig(action.composeType)
-        val maxLength = config.text?.maxLength?.firstOrNull()
-        val remainingLength = config.text?.remainingLength(content)?.firstOrNull()
-        if (maxLength != null && remainingLength != null && remainingLength < 0) {
-            return "Post content is ${maxLength - remainingLength} characters, but ${target.platformId} allows " +
-                "at most $maxLength for ${action.label}."
-        }
         val visibilityConfig = config.visibility
         if (visibility != UiTimelineV2.Post.Visibility.Public && visibilityConfig == null) {
             return "${target.platformId} does not expose visibility selection for ${action.label} posts."
@@ -117,6 +112,13 @@ internal class ComposePostTool(
                 spoilerText = args.spoilerText.trim().takeIf { it.isNotBlank() },
                 referenceStatus = reference?.toComposeReference(action),
             )
+        if (config.text
+                ?.remainingLength(data.content, data.spoilerText)
+                ?.first()
+                ?.isValid == false
+        ) {
+            return "Post text exceeds the platform limits."
+        }
         if (!args.confirmed) {
             val userPreview = target.loadUserPreview()
             val inputRequest =
@@ -147,7 +149,7 @@ internal class ComposePostTool(
             reference?.let {
                 appendLine("Target status: ${it.statusKey}")
             }
-            appendLine("Visibility: ${data.visibility.name}")
+            appendLine("Visibility: ${data.visibility?.name ?: "Platform default"}")
         }.trim()
     }
 
@@ -413,7 +415,7 @@ internal class ComposePostTool(
                                     appendLine("targetStatusId=${it.statusKey.id}")
                                     appendLine("targetStatusHost=${it.statusKey.host}")
                                 }
-                                appendLine("visibility=${data.visibility.name}")
+                                appendLine("visibility=${data.visibility?.name ?: "Platform default"}")
                                 if (data.language.isNotEmpty()) {
                                     appendLine("languages=${data.language.joinToString()}")
                                 }
@@ -450,7 +452,7 @@ internal class ComposePostTool(
             appendLine("accountId=${accountKey.id}")
             appendLine("accountHost=${accountKey.host}")
             appendLine("platform=$platformId")
-            appendLine("visibility=${data.visibility.name}")
+            appendLine("visibility=${data.visibility?.name ?: "Platform default"}")
             reference?.let {
                 appendLine("targetStatus=${it.statusKey}")
                 appendLine("targetStatusId=${it.statusKey.id}")

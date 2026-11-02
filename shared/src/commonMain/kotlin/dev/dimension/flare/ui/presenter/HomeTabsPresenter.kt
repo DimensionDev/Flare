@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.di.koinInject
@@ -31,7 +31,7 @@ public class HomeTabsPresenter : PresenterBase<HomeTabsPresenter.State>() {
     private val tabsFlow by lazy {
         allAccountServicesFlow(accountRepository)
             .map { accountServices ->
-                if (accountServices.any { it is NotificationTimelineDataSource }) {
+                if (accountServices.any { it.capabilities.notification?.timeline != null }) {
                     persistentListOf(
                         State.HomeTabs.Home,
                         State.HomeTabs.Notifications,

@@ -7,8 +7,13 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.fleeksoft.ksoup.Ksoup
+import dev.dimension.flare.data.model.ProxyRef
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.toUiImage
+import dev.dimension.flare.ui.model.withProxy
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -87,13 +92,32 @@ class RichTextStateTest {
     }
 
     @Test
+    fun image_link_is_annotated_with_its_signed_account_route() {
+        val proxy = ProxyRef.Account(MicroBlogKey("viewer", "weibo.cn"))
+        val image = requireNotNull("https://cdn.example/image.jpg".toUiImage(proxy = proxy))
+        val ui = Ksoup.parse("""<a href="${image.url}">查看图片</a>""").body().toUi(imageLinks = mapOf(image.url to image))
+        val text = assertIs<RichTextContent.Text>(RichTextState(ui, defaultStyleData()).contents.single()).content
+        val link =
+            if (allowLinkAnnotation) {
+                assertIs<LinkAnnotation.Url>(text.getLinkAnnotations(0, text.length).single().item).url
+            } else {
+                text.getStringAnnotations(TAG_URL, 0, text.length).single().item
+            }
+        val route = assertIs<DeeplinkRoute.Media.Image>(DeeplinkRoute.parse(link))
+        assertEquals(image.url, route.uri)
+        assertEquals(proxy, route.proxy)
+    }
+
+    @Test
     fun emoji_creates_inline_content_entry() {
         val emojiUrl = "https://example.com/emoji.png"
-        val ui = htmlToUiRichText("<p>Hi <emoji target=\"$emojiUrl\"/></p>")
+        val ui = htmlToUiRichText("<p>Hi <emoji target=\"$emojiUrl\"/></p>").withProxy(ProxyRef.Global)
         val state = RichTextState(ui, defaultStyleData())
 
         assertTrue(state.inlineContent.isNotEmpty())
-        val anyEmoji = state.inlineContent.values.any { it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.url == emojiUrl }
+        val anyEmoji = state.inlineContent.values.any {
+            it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.media.url == emojiUrl && it.media.proxy == ProxyRef.Global
+        }
         assertTrue(anyEmoji, "Expected an Emoji inline content with the provided URL")
     }
 
@@ -105,7 +129,7 @@ class RichTextStateTest {
 
         val blockContent = state.contents.filterIsInstance<RichTextContent.BlockImage>().firstOrNull()
         assertNotNull(blockContent)
-        assertEquals(imgUrl, blockContent.url)
+        assertEquals(imgUrl, blockContent.media.url)
     }
 
     @Test
@@ -116,7 +140,7 @@ class RichTextStateTest {
 
         val anyInlineImage =
             state.inlineContent.values.any {
-                it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.url == imgUrl
+                it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.media.url == imgUrl
             }
         assertTrue(anyInlineImage, "Expected an inline image entry with the provided URL")
     }

@@ -7,10 +7,11 @@ import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.notification.UpdateSeenRequest
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.resolveBlueskyVideoDownloadUrls
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -23,7 +24,7 @@ internal class NotificationRemoteMediator(
     private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: () -> Unit,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : NotificationTimelineLoader {
     override val pagingKey: String =
         buildString {
             append("notification_")
@@ -150,7 +151,7 @@ internal class NotificationRemoteMediator(
                 .toImmutableMap()
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.notifications.render(accountKey, references),
+            data = response.notifications.render(accountKey, references, resolveBlueskyVideoDownloadUrls(references.values, accountKey)),
             nextKey = response.cursor,
         )
     }

@@ -7,7 +7,10 @@ import Combine
 import Observation
 
 struct ProfileScreen: View {
+    @Environment(\.timelineAccountID) private var accountID
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.layoutDirection) private var layoutDirection
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     let accountType: AccountType
@@ -38,6 +41,7 @@ struct ProfileScreen: View {
             for: .navigationBar
         )
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBackButtonTitle(backButtonTitle)
         .onChange(of: isBlockedProfile) { _, isBlocked in
             if !isBlocked {
                 showBlockedProfileContent = false
@@ -45,8 +49,12 @@ struct ProfileScreen: View {
         }
         .toolbar {
             if horizontalSizeClass == .compact && !isProfileHeaderVisible && !shouldGateBlockedProfile, case .success(let userState) = onEnum(of: presenter.state.userState) {
-                ToolbarItem(placement: .principal) {
-                    RichText(text: userState.data.name)
+                if #available(iOS 27.1, *) {
+                    ProfileNavigationTitle(text: userState.data.name)
+                } else {
+                    ToolbarItem(placement: .principal) {
+                        RichText(text: userState.data.name)
+                    }
                 }
             }
             
@@ -96,7 +104,8 @@ struct ProfileScreen: View {
                             data: presenter.state.actions,
                             useText: false,
                             allowSpacer: false,
-                            applyPostActionLayout: false
+                            applyPostActionLayout: false,
+                            isDetail: true
                         )
                     }
                 }
@@ -105,14 +114,21 @@ struct ProfileScreen: View {
     }
     
     var regularBody: some View {
-        HStack(spacing: nil) {
-            ScrollView {
-                ListCardView {
+        GeometryReader { proxy in
+            let division = profileDivision(in: proxy)
+            let layout = ProfileLayoutPolicy(
+                width: proxy.size.width,
+                division: division,
+                layoutDirection: layoutDirection
+            )
+            HStack(spacing: 0) {
+                ScrollView {
                     ProfileHeader(
                         user: presenter.state.userState,
                         relation: presenter.state.relationState,
                         followButtonState: presenter.state.followButtonState,
                         isMe: presenter.state.isMe,
+                        bannerTopInset: layout.usesCard ? 0 : proxy.safeAreaInsets.top,
                         onFollowClick: { user, followButtonState in
                             handleFollowAction(user: user, followButtonState: followButtonState)
                         },
@@ -120,44 +136,71 @@ struct ProfileScreen: View {
                         onFansClick: onFansClick
                     )
                     .padding(.bottom)
+                    .background(layout.usesCard ? Color.flareSecondarySystemGroupedBackground : Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: layout.usesCard ? 32 : 0, style: .continuous))
                 }
-            }
-            .padding(.leading)
-            .frame(width: 400)
+                .contentMargins(.top, 0, for: .scrollContent)
+                .padding(.leading, layout.usesCard ? 16 : 0)
+                .frame(width: layout.profileWidth)
+                .background {
+                    if !layout.usesCard {
+                        Color(.systemBackground).ignoresSafeArea(edges: .vertical)
+                    }
+                }
+                .ignoresSafeArea(.container, edges: layout.usesCard ? [] : .top)
 
-            if shouldGateBlockedProfile {
-                BlockedProfileGate {
-                    showBlockedProfileContent = true
-                }
-                .padding(.horizontal)
-                .padding(.top, 24)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            } else {
-                StateView(state: presenter.state.tabs) { tabsArray in
-                    let tabs = tabsArray.cast(ProfileState.Tab.self)
-                    profileTimelineCollection(
-                        tabs: tabs,
-                        showsProfileAccessories: false
-                    )
-                } errorContent: { error in
-                    ListErrorView(error: error) {
-                        presenter.state.retryTabs()
+                Divider()
+                    .frame(width: layout.columnSpacing)
+                    .opacity(layout.usesCard ? 0 : 1)
+                    .background(layout.usesCard ? Color.clear : Color(.systemBackground))
+                    .ignoresSafeArea(.container, edges: .vertical)
+
+                if shouldGateBlockedProfile {
+                    BlockedProfileGate {
+                        showBlockedProfileContent = true
                     }
-                } loadingContent: {
-                    GeometryReader { proxy in
-                        ScrollView {
-                            LazyVStack(spacing: 0) {
-                                ProfileTabsLoadingPlaceholder()
-                                ProfileTimelineUIKitLoadingPlaceholder(
-                                    columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width)
-                                )
-                            }
+                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                } else {
+                    StateView(state: presenter.state.tabs) { tabsArray in
+                        let tabs = tabsArray.cast(ProfileState.Tab.self)
+                        profileTimelineCollection(
+                            tabs: tabs,
+                            showsProfileAccessories: false
+                        )
+                    } errorContent: { error in
+                        ListErrorView(error: error) {
+                            presenter.state.retryTabs()
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    } loadingContent: {
+                        GeometryReader { proxy in
+                            ScrollView {
+                                LazyVStack(spacing: 0) {
+                                    ProfileTabsLoadingPlaceholder()
+                                    ProfileTimelineUIKitLoadingPlaceholder(
+                                        columnCount: TimelineColumnPolicy.adaptive.columnCount(for: proxy.size.width)
+                                    )
+                                }
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        }
                     }
                 }
             }
+            .modifier(TimelineListBackground(
+                columnPolicy: layout.usesCard ? .adaptive : .single
+            ))
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.25), value: division)
         }
+    }
+
+    private func profileDivision(in proxy: GeometryProxy) -> CGRect? {
+        if #available(iOS 27.1, *) {
+            return proxy.reservedRegions(kind: .division)
+                .first { $0.isActive && $0.frame.height > $0.frame.width }?.frame
+        }
+        return nil
     }
     
     @ViewBuilder
@@ -232,7 +275,6 @@ struct ProfileScreen: View {
         GeometryReader { proxy in
             ProfileTimelineCollectionView(
                 profileState: presenter.state,
-                readingScope: "profile:\(accountType):\(userKey.map(String.init(describing:)) ?? "self")",
                 tabs: tabs,
                 selectedTab: $selectedTab,
                 showsProfileAccessories: showsProfileAccessories,
@@ -259,6 +301,7 @@ struct ProfileScreen: View {
                     }
                 }
             )
+            .id(accountID)
         }
         .ignoresSafeArea(edges: .vertical)
     }
@@ -266,6 +309,14 @@ struct ProfileScreen: View {
     @ViewBuilder
     private func profileTabPicker(tabs: [ProfileState.Tab]) -> some View {
         ProfileTabPicker(tabs: tabs, selectedTab: $selectedTab)
+    }
+
+    private var backButtonTitle: String {
+        if case .success(let user) = onEnum(of: presenter.state.userState),
+           !user.data.name.innerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return user.data.name.innerText
+        }
+        return String(localized: "profile_title")
     }
 
     private func updateToolbarTabPickerVisibility() {
@@ -302,6 +353,21 @@ struct ProfileScreen: View {
 
     private var shouldGateBlockedProfile: Bool {
         isBlockedProfile && !showBlockedProfileContent
+    }
+}
+
+@available(iOS 27.1, *)
+private struct ProfileNavigationTitle: ToolbarContent {
+    @Environment(\.toolbarVerticalEdge) private var toolbarVerticalEdge
+    let text: UiRichText
+
+    var body: some ToolbarContent {
+        // A custom title would add a horizontal bar alongside Duo's vertical controls.
+        if toolbarVerticalEdge == nil {
+            ToolbarItem(placement: .principal) {
+                RichText(text: text)
+            }
+        }
     }
 }
 
@@ -438,7 +504,6 @@ private struct ProfileProgressTabBar: View {
 
 private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     let profileState: ProfileState
-    let readingScope: String
     let tabs: [ProfileState.Tab]
     @Binding var selectedTab: Int
     let showsProfileAccessories: Bool
@@ -455,8 +520,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
     @Environment(\.networkKind) private var networkKind
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    @Environment(\.timelineAccountScope) private var accountScope
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -534,7 +597,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
                 makeController: {
                     coordinator.pageController(
                         for: tab,
-                        readingScope: accountScope + ":" + readingScope,
                         timelineColumnCount: timelineColumnCount,
                         appearance: appearance,
                         networkKind: networkKind,
@@ -556,7 +618,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             let controller = UITimelineCollectionViewController(detailStatusKey: nil)
-            let positions = TimelinePagePositions()
             var cancellable: AnyCancellable?
             var columnCount: Int?
             var kind: Kind?
@@ -581,7 +642,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
             }
 
             func close() {
-                controller.saveReadingPosition()
                 cancellable = nil
                 controller.onContentOffsetChanged = nil
                 controller.onScrollInteractionBegan = nil
@@ -673,7 +733,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
         func pageController(
             for tab: ProfileState.Tab,
-            readingScope: String,
             timelineColumnCount: Int,
             appearance: TimelineUIKitAppearance,
             networkKind: NetworkKind,
@@ -698,7 +757,6 @@ private struct ProfileTimelineCollectionView: UIViewControllerRepresentable {
 
             switch onEnum(of: tab) {
             case .timeline(let tab):
-                controller.setReadingState(record.positions.state(for: tabID, scope: readingScope))
                 controller.restoresScrollAnchorOnSnapshotChanges = true
                 let needsBinding = record.prepare(
                     kind: .timeline,
@@ -917,6 +975,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         observePageScrollView()
 
         accessoryScrollView.backgroundColor = .clear
+        accessoryScrollView.clipsToBounds = true
         accessoryScrollView.contentInsetAdjustmentBehavior = .never
         accessoryScrollView.showsHorizontalScrollIndicator = false
         accessoryScrollView.showsVerticalScrollIndicator = false
@@ -1070,11 +1129,8 @@ private final class ProfileTimelinePagerViewController: UIViewController,
                     isProgrammatic: false
                 )
             }
-            let isFirstActivation = target.timelineController == nil
             let timeline = activate(target)
-            if isFirstActivation {
-                synchronizeInitialOffset(from: source, to: timeline)
-            }
+            synchronizeInitialOffset(from: source, to: timeline)
         }
     }
 
@@ -1086,7 +1142,6 @@ private final class ProfileTimelinePagerViewController: UIViewController,
     private func selectPage(at index: Int, animated: Bool) {
         guard pages.indices.contains(index) else { return }
         let target = pages[index]
-        let isFirstActivation = target.timelineController == nil
         let targetTimeline = activate(target)
         let visiblePage = pageViewController.viewControllers?.first as? ProfileTimelinePageViewController
         let sourceIndex = visiblePage.flatMap(index(of:)) ?? currentIndex
@@ -1098,7 +1153,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
             }
             return
         }
-        if isFirstActivation, let visiblePage {
+        if let visiblePage {
             synchronizeInitialOffset(from: visiblePage, to: targetTimeline)
         }
         let direction: UIPageViewController.NavigationDirection = index >= sourceIndex ? .forward : .reverse
@@ -1236,7 +1291,7 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         from source: ProfileTimelinePageViewController,
         to target: UITimelineCollectionViewController
     ) {
-        guard !target.hasSavedReadingPosition, let source = source.timelineController else { return }
+        guard let source = source.timelineController else { return }
         let offsetY = min(max(source.effectiveContentOffsetY, 0), collapseDistance)
         target.loadViewIfNeeded()
         target.restoreEffectiveContentOffset(offsetY, animated: false)
@@ -1298,12 +1353,13 @@ private final class ProfileTimelinePagerViewController: UIViewController,
         headerView?.transform = .identity
         headerView?.frame = CGRect(x: 0, y: 0, width: width, height: headerHeight)
         collapsedGlassView.transform = .identity
+        // shortcut: 40 pt hides glass corner seams outside the clipped viewport; recheck if system refraction changes.
         collapsedGlassView.frame = CGRect(
             x: 0,
             y: collapseDistance,
             width: width,
             height: max(headerHeight - collapseDistance, 0) + pickerHeight
-        )
+        ).insetBy(dx: -40, dy: 0)
         pickerView?.transform = .identity
         pickerView?.frame = CGRect(x: 0, y: headerHeight, width: width, height: pickerHeight)
 
@@ -1535,7 +1591,7 @@ private struct ProfileHeaderAccessorySignature: Equatable {
                 "success",
                 String(describing: success.data.key),
                 success.data.name.raw,
-                success.data.handle.canonical,
+                success.data.handle.display,
                 success.data.avatar?.url ?? "",
                 success.data.banner?.url ?? "",
                 success.data.description_?.raw ?? "",

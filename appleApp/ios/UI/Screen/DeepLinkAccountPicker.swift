@@ -1,7 +1,6 @@
 import SwiftUI
 import FlareAppleUI
 import KotlinSharedUI
-import SwiftUIBackports
 
 struct DeepLinkAccountPicker: View {
     let originalUrl: String
@@ -14,7 +13,5 @@ struct DeepLinkAccountPicker: View {
             data: data,
             onNavigate: onNavigate
         )
-        .backport
-        .navigationSubtitle("deep_link_account_picker_subtitle")
     }
 }

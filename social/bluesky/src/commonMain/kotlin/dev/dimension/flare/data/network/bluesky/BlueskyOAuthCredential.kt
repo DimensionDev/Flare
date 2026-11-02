@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.bluesky
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.platform.BlueskyCredential
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthClient
@@ -10,6 +11,7 @@ internal suspend fun OAuthApi.requestBlueskyOAuthCredential(
     code: String,
     nonce: String,
     codeVerifier: String,
+    proxy: ProxyRef,
 ): BlueskyCredential.OAuthCredential {
     val token =
         requestToken(
@@ -17,7 +19,7 @@ internal suspend fun OAuthApi.requestBlueskyOAuthCredential(
             code = code,
             nonce = nonce,
             codeVerifier = codeVerifier,
-        ).withResolvedPds(issuer)
+        ).withResolvedPds(issuer, proxy)
     return BlueskyCredential.OAuthCredential(
         baseUrl = issuer,
         oAuthToken = token,

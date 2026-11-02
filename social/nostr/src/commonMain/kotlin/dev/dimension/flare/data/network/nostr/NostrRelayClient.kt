@@ -5,14 +5,18 @@ import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
 import com.vitorpamplona.quartz.nip01Core.relay.client.NostrClient
 import com.vitorpamplona.quartz.nip01Core.relay.client.accessories.fetchAllWithHooks
 import com.vitorpamplona.quartz.nip01Core.relay.client.accessories.publishAndCollectResults
+import com.vitorpamplona.quartz.nip01Core.relay.client.auth.AuthOutcome
 import com.vitorpamplona.quartz.nip01Core.relay.client.auth.RelayAuthenticator
+import com.vitorpamplona.quartz.nip01Core.relay.client.auth.authSuccessMarks
+import com.vitorpamplona.quartz.nip01Core.relay.client.auth.awaitAuthOutcome
+import com.vitorpamplona.quartz.nip01Core.relay.commands.toClient.MachineReadablePrefix
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebSocket
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebSocketListener
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebsocketBuilder
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip42RelayAuth.RelayAuthEvent
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
@@ -24,6 +28,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
@@ -39,7 +45,7 @@ internal class NostrRelayClient(
     relays: () -> Set<NormalizedRelayUrl> = { emptySet() },
 ) : AutoCloseable {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private val httpClient = ktorClient { install(WebSockets) }
+    private val httpClient = ktorClient(ProxyRef.System) { install(WebSockets) }
     val client: INostrClient =
         NostrClient(
             websocketBuilder =
@@ -78,7 +84,7 @@ internal fun INostrClient.authenticateNostrRelays(
     }
 
 internal fun normalizedNostrRelays(relays: List<String>): Set<NormalizedRelayUrl> =
-    relays.map { requireNotNull(RelayUrlNormalizer.normalizeOrNull(it)) { "Invalid Nostr relay URL: $it" } }.toSet()
+    relays.map { NormalizedRelayUrl(requireNotNull(RelayUrlNormalizer.normalizeOrNull(it)) { "Invalid Nostr relay URL: $it" }) }.toSet()
 
 internal suspend fun INostrClient.fetchNostrEvents(
     relays: Set<NormalizedRelayUrl>,
@@ -111,7 +117,23 @@ internal suspend fun INostrClient.publishNostrEvent(
 ): String {
     require(relays.isNotEmpty()) { "No valid relay URLs available for publishing" }
     require(event.verify()) { "Cannot publish an invalid Nostr event" }
-    val results = publishAndCollectResults(event, relays)
+    val authMarks = authSuccessMarks(relays)
+    val results = publishAndCollectResults(event, relays).toMutableMap()
+    val retryRelays =
+        coroutineScope {
+            results
+                .filterValues { !it.accepted && MachineReadablePrefix.parse(it.message) == MachineReadablePrefix.AUTH_REQUIRED }
+                .keys
+                .map { relay ->
+                    async {
+                        relay.takeIf { awaitAuthOutcome(relay, authMarks[relay] ?: 0, settleMs = 15_000) == AuthOutcome.AUTHENTICATED }
+                    }
+                }.awaitAll()
+                .filterNotNull()
+                .toSet()
+        }
+    // Reuse the signed event ID so Quartz's automatic outbox retry stays idempotent.
+    if (retryRelays.isNotEmpty()) results.putAll(publishAndCollectResults(event, retryRelays))
     val required = minOf(3, relays.size)
     val accepted = results.values.count { it.accepted }
     check(accepted >= required) {
@@ -134,7 +156,7 @@ internal class NostrWebSocket(
     private val connected = MutableStateFlow(false)
     private val messages = Channel<String>(Channel.UNLIMITED)
 
-    override fun needsReconnect(): Boolean = !connected.value
+    override fun needsReconnect(): Boolean = !started.value || ended.value
 
     override fun connect() {
         if (ended.value || !started.compareAndSet(false, true)) return
@@ -169,16 +191,18 @@ internal class NostrWebSocket(
             } finally {
                 connected.value = false
                 messages.close()
+                if (ended.compareAndSet(false, true)) out.onClosed(1000, "Connection closed")
                 scope.cancel()
             }
         }
     }
 
     override fun disconnect() {
-        ended.value = true
+        val notifyClosed = ended.compareAndSet(false, true) && started.value
         connected.value = false
         messages.close()
         scope.cancel()
+        if (notifyClosed) out.onClosed(1000, "Client disconnect")
     }
 
     override fun send(msg: String): Boolean = connected.value && !ended.value && messages.trySend(msg).isSuccess

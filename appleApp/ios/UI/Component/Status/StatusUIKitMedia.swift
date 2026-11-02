@@ -1,5 +1,4 @@
 import UIKit
-import Kingfisher
 import KotlinSharedUI
 import SwiftUI
 import FlareAppleUI
@@ -9,6 +8,7 @@ struct TimelineVideoAutoplayCandidate {
     let id: String
     let url: URL
     let hostView: UIView
+    var ugoira: UiMediaUgoira? = nil
     var groupID: String? = nil
     var isSelected = true
     var horizontalFraction: CGFloat = 1
@@ -28,11 +28,15 @@ enum VideoAutoplayOverlayState {
 private struct MediaItemSignature: Equatable {
     let kind: String
     let primaryURL: String
+    let downloadURL: String?
     let altText: String
     let aspectRatio: CGFloat?
     let customHeaders: [String: String]?
+    let proxy: ProxyRef
 
     init(media: UiMedia) {
+        proxy = media.proxy
+        downloadURL = media.downloadUrl
         altText = media.description_ ?? ""
         aspectRatio = media.carouselLayoutAspectRatio
         switch onEnum(of: media) {
@@ -48,6 +52,10 @@ private struct MediaItemSignature: Equatable {
             kind = "gif"
             primaryURL = gif.url
             customHeaders = gif.customHeaders
+        case .ugoira(let animation):
+            kind = "ugoira"
+            primaryURL = animation.url + "|" + animation.previewUrl
+            customHeaders = animation.customHeaders
         case .audio:
             kind = "audio"
             primaryURL = ""
@@ -67,8 +75,9 @@ private struct MediaItemSignature: Equatable {
 //   authoritative play path, matching the SwiftUI tap-to-expand behaviour.
 final class MediaUIView: UIView {
     private(set) var videoURL: URL?
-    private let imageView: UIImageView = {
-        let iv = UIImageView()
+    private(set) var videoMedia: UiMedia?
+    private let imageView: NetworkImageView = {
+        let iv = NetworkImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         iv.translatesAutoresizingMaskIntoConstraints = false
@@ -80,7 +89,7 @@ final class MediaUIView: UIView {
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
-    private let playBadge: UIImageView = {
+    private lazy var playBadge: UIImageView = {
         let iv = UIImageView(image: UIImage(fontAwesome: .circlePlay))
         iv.contentMode = .scaleAspectFit
         iv.tintColor = .white
@@ -88,22 +97,23 @@ final class MediaUIView: UIView {
         iv.isHidden = true
         return iv
     }()
-    private let playBadgeBg: UIView = {
-        let v = UIView()
+    private lazy var playBadgeBg: UIButton = {
+        let v = UIButton(type: .custom)
         v.backgroundColor = .black
         v.layer.cornerRadius = 16
         v.translatesAutoresizingMaskIntoConstraints = false
         v.isHidden = true
+        v.isUserInteractionEnabled = false
         return v
     }()
-    private let loadingIndicator: UIActivityIndicatorView = {
+    private lazy var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = .white
         indicator.translatesAutoresizingMaskIntoConstraints = false
         indicator.isHidden = true
         return indicator
     }()
-    private let countdownLabel: UILabel = {
+    private lazy var countdownLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .caption1)
         label.textColor = .white
@@ -113,10 +123,12 @@ final class MediaUIView: UIView {
         label.isHidden = true
         return label
     }()
+    private var isOverlayInstalled = false
     private var lastMediaSignature: MediaItemSignature?
     private var lastCornerRadius: CGFloat?
     private weak var autoplayPlayerView: UIView?
     private var autoplayPlayerConstraints: [NSLayoutConstraint] = []
+    private var onAutoplayRetry: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -124,10 +136,6 @@ final class MediaUIView: UIView {
         isAccessibilityElement = true
         addSubview(background)
         addSubview(imageView)
-        addSubview(playBadgeBg)
-        playBadgeBg.addSubview(playBadge)
-        playBadgeBg.addSubview(loadingIndicator)
-        playBadgeBg.addSubview(countdownLabel)
         NSLayoutConstraint.activate([
             background.topAnchor.constraint(equalTo: topAnchor),
             background.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -137,25 +145,43 @@ final class MediaUIView: UIView {
             imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
-            playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
-            playBadge.centerXAnchor.constraint(equalTo: playBadgeBg.centerXAnchor),
-            playBadge.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
-            playBadge.widthAnchor.constraint(equalToConstant: 16),
-            playBadge.heightAnchor.constraint(equalToConstant: 16),
-            loadingIndicator.centerXAnchor.constraint(equalTo: playBadgeBg.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
-            countdownLabel.topAnchor.constraint(equalTo: playBadgeBg.topAnchor),
-            countdownLabel.leadingAnchor.constraint(equalTo: playBadgeBg.leadingAnchor, constant: 8),
-            countdownLabel.trailingAnchor.constraint(equalTo: playBadgeBg.trailingAnchor, constant: -8),
-            countdownLabel.bottomAnchor.constraint(equalTo: playBadgeBg.bottomAnchor),
         ])
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
+    private func installOverlayIfNeeded() {
+        guard !isOverlayInstalled else { return }
+        isOverlayInstalled = true
+        addSubview(playBadgeBg)
+        playBadgeBg.addTarget(self, action: #selector(retryAutoplay), for: .touchUpInside)
+        let badgeContent = UIStackView(arrangedSubviews: [playBadge, loadingIndicator, countdownLabel])
+        badgeContent.axis = .horizontal
+        badgeContent.alignment = .center
+        badgeContent.spacing = 8
+        badgeContent.isUserInteractionEnabled = false
+        badgeContent.translatesAutoresizingMaskIntoConstraints = false
+        playBadgeBg.addSubview(badgeContent)
+        for icon in [playBadge, loadingIndicator] {
+            let width = icon.widthAnchor.constraint(equalToConstant: 16)
+            width.priority = .init(999)
+            width.isActive = true
+        }
+        NSLayoutConstraint.activate([
+            playBadgeBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            playBadgeBg.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+            playBadgeBg.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            playBadgeBg.widthAnchor.constraint(greaterThanOrEqualToConstant: 32),
+            playBadgeBg.heightAnchor.constraint(equalToConstant: 32),
+            badgeContent.leadingAnchor.constraint(equalTo: playBadgeBg.leadingAnchor, constant: 8),
+            badgeContent.trailingAnchor.constraint(equalTo: playBadgeBg.trailingAnchor, constant: -8),
+            badgeContent.centerYAnchor.constraint(equalTo: playBadgeBg.centerYAnchor),
+            playBadge.heightAnchor.constraint(equalToConstant: 16),
+            loadingIndicator.heightAnchor.constraint(equalToConstant: 16),
+        ])
+    }
+
     func set(media: UiMedia, cornerRadius: CGFloat) {
+        videoMedia = media
         accessibilityLabel = media.accessibleDescription
         let signature = MediaItemSignature(media: media)
         if lastMediaSignature == signature {
@@ -169,19 +195,24 @@ final class MediaUIView: UIView {
         videoURL = nil
         lastCornerRadius = cornerRadius
         layer.cornerRadius = cornerRadius
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelImageLoad()
+        imageView.isHidden = false
         imageView.image = nil
         setAutoplayOverlay(.idle, showsBadge: false)
 
         switch onEnum(of: media) {
         case .image(let image):
-            loadImage(url: image.previewUrl, customHeaders: image.customHeaders)
+            loadImage(media: image.preview)
         case .video(let video):
             videoURL = URL(string: video.url)
-            loadImage(url: video.thumbnailUrl, customHeaders: video.customHeaders)
+            loadImage(media: video.preview)
             setAutoplayOverlay(.idle)
         case .gif(let gif):
-            loadGif(url: gif.url, customHeaders: gif.customHeaders)
+            loadImage(media: gif)
+        case .ugoira(let animation):
+            videoURL = URL(string: animation.url)
+            loadImage(media: animation.preview)
+            setAutoplayOverlay(.idle)
         case .audio:
             imageView.image = nil
         }
@@ -189,7 +220,7 @@ final class MediaUIView: UIView {
 
     func prepareForPoolRemoval() {
         accessibilityLabel = nil
-        imageView.kf.cancelDownloadTask()
+        imageView.cancelImageLoad()
         imageView.image = nil
         lastMediaSignature = nil
         videoURL = nil
@@ -203,7 +234,7 @@ final class MediaUIView: UIView {
         detachAutoplayPlayer()
         playerView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(playerView)
-        bringSubviewToFront(playBadgeBg)
+        if isOverlayInstalled { bringSubviewToFront(playBadgeBg) }
         autoplayPlayerView = playerView
         autoplayPlayerConstraints = [
             playerView.topAnchor.constraint(equalTo: topAnchor),
@@ -214,7 +245,12 @@ final class MediaUIView: UIView {
         NSLayoutConstraint.activate(autoplayPlayerConstraints)
     }
 
+    func setAutoplayFrameVisible(_ visible: Bool) {
+        imageView.isHidden = visible
+    }
+
     func detachAutoplayPlayer() {
+        imageView.isHidden = false
         guard let autoplayPlayerView else { return }
         NSLayoutConstraint.deactivate(autoplayPlayerConstraints)
         autoplayPlayerConstraints = []
@@ -225,8 +261,28 @@ final class MediaUIView: UIView {
         setAutoplayOverlay(.idle)
     }
 
-    func setAutoplayOverlay(_ state: VideoAutoplayOverlayState, showsBadge: Bool = true) {
-        playBadgeBg.isHidden = !showsBadge
+    func setAutoplayOverlay(
+        _ state: VideoAutoplayOverlayState,
+        showsBadge: Bool = true,
+        progress: Double? = nil,
+        errorMessage: String? = nil,
+        onRetry: (() -> Void)? = nil
+    ) {
+        onAutoplayRetry = nil
+        accessibilityCustomActions = nil
+        accessibilityValue = nil
+        // Image-only tiles never need the video controls or their layout constraints.
+        guard showsBadge else {
+            if isOverlayInstalled {
+                playBadgeBg.isHidden = true
+                playBadgeBg.isUserInteractionEnabled = false
+                loadingIndicator.stopAnimating()
+            }
+            return
+        }
+        installOverlayIfNeeded()
+        playBadgeBg.isHidden = false
+        playBadgeBg.isUserInteractionEnabled = false
         playBadge.isHidden = true
         countdownLabel.isHidden = true
         loadingIndicator.isHidden = true
@@ -239,13 +295,35 @@ final class MediaUIView: UIView {
         case .loading:
             loadingIndicator.isHidden = false
             loadingIndicator.startAnimating()
+            if let progress, progress > 0 {
+                countdownLabel.text = "\(Int((min(progress, 1) * 100).rounded()))%"
+                countdownLabel.isHidden = false
+                accessibilityValue = countdownLabel.text
+            }
         case .playing(let remaining):
             countdownLabel.text = Self.formatRemainingTime(remaining)
             countdownLabel.isHidden = false
         case .error:
-            playBadge.image = UIImage(systemName: "exclamationmark.triangle.fill")
+            countdownLabel.text = errorMessage
+            countdownLabel.isHidden = errorMessage == nil
+            accessibilityValue = errorMessage
+            playBadge.image = UIImage(systemName: onRetry == nil ? "exclamationmark.triangle.fill" : "arrow.clockwise")
             playBadge.isHidden = false
+            if showsBadge, let onRetry {
+                onAutoplayRetry = onRetry
+                playBadgeBg.isUserInteractionEnabled = true
+                let label = String(localized: "action_retry", bundle: .main)
+                playBadgeBg.accessibilityLabel = label
+                accessibilityCustomActions = [UIAccessibilityCustomAction(name: label) { _ in
+                    onRetry()
+                    return true
+                }]
+            }
         }
+    }
+
+    @objc private func retryAutoplay() {
+        onAutoplayRetry?()
     }
 
     private static func formatRemainingTime(_ remaining: TimeInterval) -> String {
@@ -260,32 +338,10 @@ final class MediaUIView: UIView {
         return String(format: "%d:%02d", minutes, remainder)
     }
 
-    private func loadImage(url: String?, customHeaders: [String: String]?) {
-        guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: true))
+    private func loadImage(media: UiMedia?) {
+        imageView.setImage(media: media)
     }
 
-    private func loadGif(url: String?, customHeaders: [String: String]?) {
-        guard let u = url.flatMap(URL.init(string:)) else { return }
-        imageView.kf.setImage(with: u, options: imageOptions(customHeaders: customHeaders, cacheOriginalImage: false))
-    }
-
-    private func imageOptions(customHeaders: [String: String]?, cacheOriginalImage: Bool) -> KingfisherOptionsInfo {
-        var options: KingfisherOptionsInfo = [.transition(.fade(0.25)), .backgroundDecode]
-        if cacheOriginalImage {
-            options.append(.cacheOriginalImage)
-        }
-        if let customHeaders, !customHeaders.isEmpty {
-            options.append(.requestModifier(AnyModifier { request in
-                var request = request
-                for (key, value) in customHeaders {
-                    request.setValue(value, forHTTPHeaderField: key)
-                }
-                return request
-            }))
-        }
-        return options
-    }
 }
 
 private final class HorizontalMediaCollectionView: UICollectionView {
@@ -308,7 +364,7 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     var onMediaMenuAction: ((UiMedia, TimelineMediaMenuAction) -> Void)?
 
     private let grid = UIView()
-    private let carouselLayout: UICollectionViewFlowLayout = {
+    private lazy var carouselLayout: UICollectionViewFlowLayout = {
         let layout = StatusMediaCarouselLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 4
@@ -319,8 +375,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         frame: .zero,
         collectionViewLayout: carouselLayout
     )
-    private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
-    private let toggleButton = UIButton(type: .system)
+    private var isCarouselInstalled = false
+    private lazy var blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+    private lazy var toggleButton = UIButton(type: .system)
+    private var areSensitiveControlsInstalled = false
     private let overflowView = MediaOverflowView()
 
     let autoplayGroupID = UUID().uuidString
@@ -329,7 +387,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private var selectionURLs: [String] = []
     private var pendingReturnedIndex: Int?
     private var hasInteractedWithCarousel = false
-    var isCarouselScrolling: Bool { carousel.isDragging || carousel.isDecelerating || carousel.isTracking }
+    var isCarouselScrolling: Bool {
+        isCarouselInstalled && (carousel.isDragging || carousel.isDecelerating || carousel.isTracking)
+    }
 
     private var items: [UiMedia] = []
     private var sensitive: Bool = false
@@ -387,11 +447,24 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         overflowView.isHidden = true
         grid.addSubview(overflowView)
 
+        NSLayoutConstraint.activate([
+            grid.topAnchor.constraint(equalTo: topAnchor),
+            grid.leadingAnchor.constraint(equalTo: leadingAnchor),
+            grid.trailingAnchor.constraint(equalTo: trailingAnchor),
+            grid.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
+
+    private func installCarouselIfNeeded() {
+        guard !isCarouselInstalled else { return }
+        isCarouselInstalled = true
         carousel.translatesAutoresizingMaskIntoConstraints = false
         carousel.backgroundColor = .clear
         carousel.dataSource = self
         carousel.delegate = self
         carousel.showsHorizontalScrollIndicator = false
+        carousel.scrollsToTop = false
         carousel.showsVerticalScrollIndicator = false
         carousel.isDirectionalLockEnabled = true
         carousel.alwaysBounceHorizontal = true
@@ -401,8 +474,18 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             forCellWithReuseIdentifier: Self.carouselCellReuseIdentifier
         )
         carousel.isHidden = true
-        addSubview(carousel)
+        insertSubview(carousel, aboveSubview: grid)
+        NSLayoutConstraint.activate([
+            carousel.topAnchor.constraint(equalTo: topAnchor),
+            carousel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            carousel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            carousel.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
 
+    private func installSensitiveControlsIfNeeded() {
+        guard !areSensitiveControlsInstalled else { return }
+        areSensitiveControlsInstalled = true
         blurView.translatesAutoresizingMaskIntoConstraints = false
         blurView.isHidden = true
         addSubview(blurView)
@@ -412,21 +495,12 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         addSubview(toggleButton)
 
         NSLayoutConstraint.activate([
-            grid.topAnchor.constraint(equalTo: topAnchor),
-            grid.leadingAnchor.constraint(equalTo: leadingAnchor),
-            grid.trailingAnchor.constraint(equalTo: trailingAnchor),
-            grid.bottomAnchor.constraint(equalTo: bottomAnchor),
-            carousel.topAnchor.constraint(equalTo: topAnchor),
-            carousel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            carousel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            carousel.bottomAnchor.constraint(equalTo: bottomAnchor),
             blurView.topAnchor.constraint(equalTo: topAnchor),
             blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
             blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
             blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
-    required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -525,7 +599,9 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             pendingReturnedIndex = nil
             selectedCarouselIndex = 0
             hasInteractedWithCarousel = false
-            carousel.setContentOffset(.zero, animated: false)
+            if isCarouselInstalled {
+                carousel.setContentOffset(.zero, animated: false)
+            }
         }
         layer.cornerRadius = usesCarousel ? 0 : cornerRadius
         updateAspectConstraint()
@@ -595,20 +671,24 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
 
     private func reloadMediaLayout() {
         grid.isHidden = usesCarousel
-        carousel.isHidden = !usesCarousel
-        carouselLayout.sectionInset = UIEdgeInsets(
-            top: 0,
-            left: carouselLeadingPadding,
-            bottom: 0,
-            right: carouselTrailingPadding
-        )
-        carouselLayout.invalidateLayout()
-        carousel.reloadData()
-
         if usesCarousel {
+            installCarouselIfNeeded()
+            carousel.isHidden = false
+            carouselLayout.sectionInset = UIEdgeInsets(
+                top: 0,
+                left: carouselLeadingPadding,
+                bottom: 0,
+                right: carouselTrailingPadding
+            )
+            carouselLayout.invalidateLayout()
+            carousel.reloadData()
             overflowView.isHidden = true
             trimCellPool(activeCount: 0)
         } else {
+            if isCarouselInstalled {
+                carousel.isHidden = true
+                carousel.reloadData()
+            }
             rebuildGrid()
         }
         setNeedsLayout()
@@ -972,6 +1052,10 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     }
 
     private func updateBlurUI() {
+        guard sensitive || areSensitiveControlsInstalled else { return }
+        if sensitive {
+            installSensitiveControlsIfNeeded()
+        }
         blurView.isHidden = !(sensitive && isBlurred)
         NSLayoutConstraint.deactivate(toggleButtonPositionConstraints)
         toggleButtonPositionConstraints = []
@@ -1057,7 +1141,7 @@ private extension Int {
     }
 }
 
-private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate {
+private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate, UIGestureRecognizerDelegate {
     var onTap: ((Int) -> Void)?
     var onMenuAction: ((Int, TimelineMediaMenuAction) -> Void)?
 
@@ -1080,6 +1164,7 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
         ])
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(onCellTapped))
+        tap.delegate = self
         isUserInteractionEnabled = true
         addGestureRecognizer(tap)
         addInteraction(UIContextMenuInteraction(delegate: self))
@@ -1129,14 +1214,15 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
               bounds.width > 0,
               bounds.height > 0,
               let media,
-              case .video(let video) = onEnum(of: media),
-              let url = URL(string: video.url) else {
+              media is UiMediaVideo || media is UiMediaUgoira,
+              let url = URL(string: media.url) else {
             return nil
         }
         return TimelineVideoAutoplayCandidate(
-            id: "\(prefix):video:\(index):\(video.url)",
+            id: "\(prefix):video:\(index):\(media.url)",
             url: url,
-            hostView: mediaView
+            hostView: mediaView,
+            ugoira: media as? UiMediaUgoira
         )
     }
 
@@ -1199,6 +1285,15 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate 
 
     @objc private func onCellTapped() {
         onTap?(tag)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var view = touch.view
+        while let current = view {
+            if current is UIControl { return false }
+            view = current.superview
+        }
+        return true
     }
 }
 

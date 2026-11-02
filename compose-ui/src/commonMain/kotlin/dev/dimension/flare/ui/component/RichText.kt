@@ -223,9 +223,8 @@ public fun RichText(
                                                 }
                                             }
                                         },
-                                model = content.url,
-                                contentDescription = content.url,
-                                customHeaders = imageHeaders,
+                                model = content.media,
+                                contentDescription = content.media.description,
                             )
                         }
                     }
@@ -260,7 +259,7 @@ private fun renderInlineContent(
                     Layout(
                         content = {
                             EmojiImage(
-                                uri = content.url,
+                                media = content.media,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         },

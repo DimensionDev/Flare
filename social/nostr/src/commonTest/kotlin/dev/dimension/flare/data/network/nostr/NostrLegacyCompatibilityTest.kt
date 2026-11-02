@@ -134,6 +134,7 @@ class NostrLegacyCompatibilityTest {
                         amberSignerBridge = noAmber,
                         initialRelays = network.relays.map { it.url },
                         suppliedClient = network.client,
+                        relayInfoClient = nostrTestRelayInfoClient(),
                     ).use { it.action() }
                     val actual = published.distinctBy { it.id }.single()
                     val expected = rustNostrEventFixtures.getValue(name)

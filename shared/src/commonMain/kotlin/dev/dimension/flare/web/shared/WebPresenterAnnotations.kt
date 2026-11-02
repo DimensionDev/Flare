@@ -11,3 +11,6 @@ public annotation class WebPresenter(
     AnnotationTarget.PROPERTY,
 )
 public annotation class WebIgnore
+
+@Target(AnnotationTarget.PROPERTY)
+public annotation class WebExport

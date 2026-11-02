@@ -50,6 +50,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
+import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
@@ -79,6 +80,25 @@ internal class AgentToolsTest {
                 extraTimelineSpecs = emptyList(),
             ),
         )
+
+    @Test
+    fun pluginToolsAreAvailableAlongsideOrdinaryToolsWithoutAChatContext() {
+        val authoring = TestAuthoring()
+        val tools =
+            AgentToolProvider(FakeLocalCacheRepository(), platformRegistry, authoring)
+                .resolve(AgentToolContext.Empty)
+        val names =
+            tools.toolRegistry.tools
+                .map { it.name }
+                .toSet()
+        assertTrue("create_plugin" in names)
+        assertTrue("search_posts" in names)
+        assertTrue("compose_post" in names)
+        assertTrue(authoring.plugins.value.isEmpty())
+        val withoutPlugins = AgentToolProvider(FakeLocalCacheRepository(), platformRegistry).resolve(AgentToolContext.Empty)
+        assertFalse(withoutPlugins.toolRegistry.tools.any { it.name == "create_plugin" })
+        assertTrue(withoutPlugins.toolRegistry.tools.any { it.name == "search_posts" })
+    }
 
     @Test
     fun emptyPlatformListSearchesEveryTarget() {
@@ -427,6 +447,29 @@ internal class AgentToolsTest {
             assertEquals(1, inputRequest.options.size)
             assertEquals("confirm", inputRequest.options.first().id)
             assertEquals("hello from agent", assertNotNull(inputRequest.postPreview).content.original.raw)
+        }
+
+    @Test
+    fun composeToolRejectsSecondaryTextLimitBeforeConfirmation() =
+        runTest {
+            val dataSource =
+                StubComposeDataSource(
+                    accountKey = MicroBlogKey("alice", "example.social"),
+                    text = ComposeConfig.Text.withValidation(300) { _, _ -> ComposeConfig.Text.Check(299, isValid = false) },
+                )
+            val inputRequestStore = AgentToolInputRequestStore()
+            val result =
+                composePostTool(dataSource, inputRequestStore).execute(
+                    ComposePostTool.Args(
+                        content = "hello from agent",
+                        accountId = "alice",
+                        accountHost = "example.social",
+                    ),
+                )
+
+            assertTrue(result.contains("exceeds the platform limits"))
+            assertFalse(dataSource.composed)
+            assertNull(inputRequestStore.snapshot())
         }
 
     @Test
@@ -1106,6 +1149,32 @@ internal class AgentToolsTest {
         }
 
     @Test
+    fun fullContentArticleKeepsFeedHtmlAsFallbackEvenWhenTitleIsPresent() =
+        runTest {
+            val url = "https://example.com/article"
+            val feed =
+                createFeed(url, "Article title", "<p>Feed body</p>").copy(
+                    clickEvent =
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Rss.Detail(url = url, title = "Article title", fallbackHtml = "<p>Feed body</p>"),
+                        ),
+                )
+            val dataSource =
+                StubSubscriptionDataSource(
+                    timelineItems = mapOf(SubscriptionType.RSS to "https://example.com/feed.xml" to listOf(feed)),
+                )
+            val session = subscriptionSession(dataSource)
+            val timeline =
+                LoadSubscriptionTimelineTool(session).execute(
+                    LoadSubscriptionTimelineTool.Args(type = "RSS", url = "https://example.com/feed.xml"),
+                )
+            assertTrue(timeline.contains("displayMode: FULL_CONTENT"))
+            LoadRssArticleTool(session).execute(LoadRssArticleTool.Args(articleRef = "[[rss:$url]]"))
+            assertEquals(null, dataSource.lastArticleDescriptionHtml)
+            assertEquals("<p>Feed body</p>", dataSource.lastArticleFallbackHtml)
+        }
+
+    @Test
     fun saveSubscriptionSourceRequestsConfirmationBeforeSavingDetectedRssFeed() =
         runTest {
             val dataSource =
@@ -1213,7 +1282,7 @@ private class AgentTestPlatformSpec(
     aliases: List<String> = emptyList(),
     override val isDefaultGuest: Boolean = false,
 ) : PlatformSpec {
-    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World, aliases)
+    override val metadata: PlatformMetadata = PlatformMetadata(platformId, UiIcon.World.asType(), aliases)
     override val timelineSpecs: ImmutableList<TimelineSpec<out TimelineSpec.Data>> = persistentListOf()
 
     override fun deepLinks(accountKey: MicroBlogKey): ImmutableList<PlatformDeepLink<*>> = persistentListOf()
@@ -1610,6 +1679,7 @@ private class StubSubscriptionDataSource(
     var lastArticleUrl: String? = null
     var lastArticleDescriptionHtml: String? = null
     var lastArticleDescriptionTitle: String? = null
+    var lastArticleFallbackHtml: String? = null
 
     override suspend fun listSources(): List<UiRssSource> = sources
 
@@ -1635,10 +1705,12 @@ private class StubSubscriptionDataSource(
         url: String,
         descriptionHtml: String?,
         descriptionTitle: String?,
+        fallbackHtml: String?,
     ): DocumentData {
         lastArticleUrl = url
         lastArticleDescriptionHtml = descriptionHtml
         lastArticleDescriptionTitle = descriptionTitle
+        lastArticleFallbackHtml = fallbackHtml
         return article
     }
 }
@@ -1661,11 +1733,12 @@ private class StubSubscriptionTimelineLoader(
 private class StubComposeDataSource(
     override val accountKey: MicroBlogKey,
     private val visibility: ComposeConfig.Visibility = ComposeConfig.Visibility(),
+    private val text: ComposeConfig.Text = ComposeConfig.Text(maxLength = 300),
 ) : ComposeDataSource {
     var composed: Boolean = false
     var lastData: ComposeData? = null
 
-    override suspend fun compose(
+    override suspend fun publish(
         data: ComposeData,
         progress: () -> Unit,
     ) {
@@ -1675,7 +1748,7 @@ private class StubComposeDataSource(
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
-            text = ComposeConfig.Text(maxLength = 300),
+            text = text,
             visibility = visibility,
             language = ComposeConfig.Language(maxCount = 1),
         )

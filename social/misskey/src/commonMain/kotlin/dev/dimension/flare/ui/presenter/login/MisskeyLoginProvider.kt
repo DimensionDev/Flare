@@ -106,7 +106,7 @@ private class MisskeyOAuthLoginHandler(
             val session = Uuid.random().toString()
             val service =
                 MisskeyOauthService(
-                    host = context.host,
+                proxy = context.proxy,                    host = context.host,
                     name = "Flare",
                     callback = context.redirectUri ?: DeeplinkRoute.Companion.Callback.MISSKEY,
                     session = session,
@@ -162,7 +162,7 @@ private class MisskeyOAuthLoginHandler(
     ) {
         val response =
             MisskeyOauthService(
-                host = host,
+                proxy = context.proxy,                host = host,
                 session = session,
             ).check()
         requireNotNull(response.ok) { "No response" }
@@ -170,7 +170,7 @@ private class MisskeyOAuthLoginHandler(
         requireNotNull(response.token) { "No token" }
         val id = response.user?.id
         requireNotNull(id) { "No user id" }
-        val nodeInfo = NodeInfoService.fetchNodeInfo(host)
+        val nodeInfo = NodeInfoService.fetchNodeInfo(host, context.proxy)
         val accountKey =
             MicroBlogKey(
                 id = id,

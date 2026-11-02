@@ -1,8 +1,10 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
@@ -21,7 +23,10 @@ public sealed class UiList {
         val avatar: String? = null,
         val creator: UiProfile? = null,
         override val readonly: Boolean = false,
-    ) : UiList()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : UiList() {
+        val media: UiMedia.Image? get() = avatar.toUiImage(proxy = proxy)
+    }
 
     @Serializable
     @Immutable
@@ -34,7 +39,10 @@ public sealed class UiList {
         val likedCount: UiNumber = UiNumber(0),
         val liked: Boolean = false,
         override val readonly: Boolean = false,
-    ) : UiList()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : UiList() {
+        val media: UiMedia.Image? get() = avatar.toUiImage(proxy = proxy)
+    }
 
     @Serializable
     @Immutable
@@ -42,6 +50,7 @@ public sealed class UiList {
         override val id: String,
         override val title: String,
         override val readonly: Boolean = false,
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
     ) : UiList()
 
     @Serializable
@@ -57,5 +66,8 @@ public sealed class UiList {
         val isFollowing: Boolean? = null,
         val isFavorited: Boolean? = null,
         override val readonly: Boolean = false,
-    ) : UiList()
+        @Transient val proxy: ProxyRef = ProxyRef.Unbound,
+    ) : UiList() {
+        val media: UiMedia.Image? get() = banner.toUiImage(proxy = proxy)
+    }
 }

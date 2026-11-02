@@ -28,7 +28,7 @@ import kotlin.time.Duration.Companion.minutes
 
 @Single
 internal class OpenAIService(
-    private val httpClientFactory: (HttpClientConfig<*>.() -> Unit) -> HttpClient = ::ktorClient,
+    private val httpClientFactory: (HttpClientConfig<*>.() -> Unit) -> HttpClient = { ktorClient(config = it) },
 ) {
     suspend fun models(
         serverUrl: String,

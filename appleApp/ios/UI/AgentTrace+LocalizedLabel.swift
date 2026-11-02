@@ -16,7 +16,7 @@ extension AgentTrace {
         case .preparingImages:
             localizedPresentationString("status_insight_trace_preparing_images", fallback: "Preparing images")
         case .imagesUnsupportedFallback:
-            localizedPresentationString("status_insight_trace_images_unsupported_fallback", fallback: "Images are not supported, using text fallback")
+            localizedPresentationString("status_insight_trace_images_unsupported_fallback", fallback: "Images could not be read; continuing with text only")
         case .agentStarted:
             localizedPresentationString("status_insight_trace_agent_started", fallback: "Agent started")
         case .strategyStarted:

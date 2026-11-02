@@ -4,7 +4,7 @@ internal class VideoPlaybackArbiter {
     private data class Client(
         val stop: () -> Unit,
         val reconsider: () -> Unit,
-        val mediaReturned: (List<String>, String) -> Unit,
+        val mediaReturned: (List<String>, Int) -> Unit,
         val resume: () -> Unit,
         val willHandoff: (String) -> Unit,
     )
@@ -19,7 +19,7 @@ internal class VideoPlaybackArbiter {
         owner: Any,
         stop: () -> Unit,
         reconsider: () -> Unit,
-        mediaReturned: (List<String>, String) -> Unit = { _, _ -> },
+        mediaReturned: (List<String>, Int) -> Unit = { _, _ -> },
         resume: () -> Unit = reconsider,
         willHandoff: (String) -> Unit = {},
     ) {
@@ -54,12 +54,13 @@ internal class VideoPlaybackArbiter {
     fun remove(
         owner: Any,
         mediaUrls: List<String> = emptyList(),
-        selectedUri: String? = null,
+        selectedIndex: Int? = null,
     ) {
+        val selectedUri = selectedIndex?.let(mediaUrls::getOrNull)
         val wasTop = presentations.lastOrNull() === owner
         val returnOwner = returnOwners.remove(owner)
         if (active === owner) stopActive(if (wasTop) selectedUri else null)
-        if (wasTop && selectedUri != null) clients[returnOwner]?.mediaReturned?.invoke(mediaUrls, selectedUri)
+        if (wasTop && selectedIndex != null && selectedUri != null) clients[returnOwner]?.mediaReturned?.invoke(mediaUrls, selectedIndex)
         if (preferred === owner) preferred = returnOwner?.takeIf { it in clients }
         returnOwners.keys.filter { returnOwners[it] === owner }.forEach { returnOwners[it] = returnOwner }
         presentations.remove(owner)

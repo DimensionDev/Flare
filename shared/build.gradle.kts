@@ -1,5 +1,6 @@
 
 import dev.dimension.flare.buildlogic.FlarePlatform
+import dev.dimension.flare.buildlogic.GenerateGraphemePropertiesTask
 import dev.dimension.flare.buildlogic.flare
 import java.time.Duration
 
@@ -13,6 +14,10 @@ plugins {
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
+}
+
+val generateGraphemeProperties by tasks.registering(GenerateGraphemePropertiesTask::class) {
+    outputDirectory.set(layout.buildDirectory.dir("generated/sources/graphemeProperties/commonMain/kotlin"))
 }
 
 kotlin {
@@ -30,6 +35,13 @@ kotlin {
             libs.room.compiler,
         )
     }
+    wasmJs {
+        browser {
+            testTask {
+                useKarma { useChromeHeadless() }
+            }
+        }
+    }
     android {
         withHostTest {}
         withDeviceTest {
@@ -45,6 +57,7 @@ kotlin {
             }
         }
         val commonMain by getting {
+            kotlin.srcDir(generateGraphemeProperties.flatMap { it.outputDirectory })
             dependencies {
                 implementation(dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.runtime)
@@ -66,7 +79,7 @@ kotlin {
                 implementation(libs.room.paging)
                 implementation(libs.sqlite)
                 implementation(libs.sqlite.async)
-                implementation(libs.datastore.core)
+                api(libs.datastore.core)
                 implementation(libs.datastore.core.okio)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.ktor.client.resources)
@@ -151,6 +164,11 @@ val runDatabaseBenchmark =
         .map(String::toBoolean)
         .orElse(false)
 
+tasks.named<org.gradle.api.tasks.testing.Test>("jvmTest") {
+    // Keep off-screen image tests from waiting for macOS AppKit startup.
+    systemProperty("java.awt.headless", "true")
+}
+
 tasks.withType<org.gradle.api.tasks.testing.AbstractTestTask>().configureEach {
     if (runDatabaseBenchmark.get()) {
         outputs.upToDateWhen { false }
@@ -168,15 +186,25 @@ dependencies.add(
 
 val sqliteNativeLibrary =
     when {
-        System.getProperty("os.name").startsWith("Mac") && System.getProperty("os.arch") in setOf("aarch64", "arm64") ->
+        System.getProperty("os.name").startsWith("Mac") && System.getProperty("os.arch") in setOf("aarch64", "arm64") -> {
             "natives/osx_arm64" to "libsqliteJni.dylib"
-        System.getProperty("os.name").startsWith("Linux") && System.getProperty("os.arch") in setOf("aarch64", "arm64") ->
+        }
+
+        System.getProperty("os.name").startsWith("Linux") && System.getProperty("os.arch") in setOf("aarch64", "arm64") -> {
             "natives/linux_arm64" to "libsqliteJni.so"
-        System.getProperty("os.name").startsWith("Linux") ->
+        }
+
+        System.getProperty("os.name").startsWith("Linux") -> {
             "natives/linux_x64" to "libsqliteJni.so"
-        System.getProperty("os.name").startsWith("Windows") ->
+        }
+
+        System.getProperty("os.name").startsWith("Windows") -> {
             "natives/windows_x64" to "sqliteJni.dll"
-        else -> null
+        }
+
+        else -> {
+            null
+        }
     }
 
 if (sqliteNativeLibrary != null) {

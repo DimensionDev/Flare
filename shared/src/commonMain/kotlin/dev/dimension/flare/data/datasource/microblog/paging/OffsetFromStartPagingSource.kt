@@ -18,6 +18,8 @@ internal sealed interface OffsetFromStartPagingKey {
 
     data class Refresh(
         val limit: Int,
+        val anchorId: String? = null,
+        val anchorPosition: Int = 0,
     ) : OffsetFromStartPagingKey
 }
 
@@ -26,6 +28,10 @@ internal interface OffsetFromStartPageLoader<Item : Any> {
         offset: Int,
         limit: Int,
     ): List<Item>
+
+    fun refreshAnchorId(item: Item): String? = null
+
+    suspend fun loadRefresh(key: OffsetFromStartPagingKey.Refresh): List<Item> = load(0, key.limit)
 
     fun observeInvalidations(invalidate: () -> Unit): PageInvalidationSubscription? = null
 }
@@ -47,7 +53,8 @@ internal class OffsetFromStartPagingSource<Item : Any>(
         invalidationSubscription?.ready?.await()
         val offset: Int
         val limit: Int
-        when (val key = params.key) {
+        val key = params.key
+        when (key) {
             null -> {
                 offset = 0
                 limit = params.loadSize
@@ -64,7 +71,12 @@ internal class OffsetFromStartPagingSource<Item : Any>(
             }
         }
 
-        val data = loader.load(offset = offset, limit = limit)
+        val data =
+            if (key is OffsetFromStartPagingKey.Refresh) {
+                loader.loadRefresh(key.copy(limit = limit))
+            } else {
+                loader.load(offset = offset, limit = limit)
+            }
         return LoadResult.Page(
             data = data,
             prevKey = null,
@@ -82,6 +94,7 @@ internal class OffsetFromStartPagingSource<Item : Any>(
                 state.config.initialLoadSize,
                 anchorPosition + 1 + state.config.pageSize + state.config.prefetchDistance,
             )
-        return OffsetFromStartPagingKey.Refresh(limit)
+        val anchorId = state.closestItemToPosition(anchorPosition)?.let(loader::refreshAnchorId)
+        return OffsetFromStartPagingKey.Refresh(limit, anchorId, if (anchorId != null) anchorPosition else 0)
     }
 }

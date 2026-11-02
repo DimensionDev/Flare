@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class XQTTimelineConfigurationTest {
     private val dataSource =
@@ -18,6 +20,13 @@ class XQTTimelineConfigurationTest {
             accountKey = MicroBlogKey(id = "account", host = "x.com"),
             sourceCredentialFlow = flowOf(XQTCredential(chocolate = "")),
         )
+
+    @Test
+    fun onlyFeaturedTimelineLimitsRefreshGapsPerSession() {
+        assertTrue(dataSource.featuredTimelineLoader().refreshGapOncePerSession)
+        assertFalse(dataSource.homeTimeline().refreshGapOncePerSession)
+        assertFalse(dataSource.popularTimelineLoader().refreshGapOncePerSession)
+    }
 
     @Test
     fun newTimelinesAreAvailableInSidebar() {

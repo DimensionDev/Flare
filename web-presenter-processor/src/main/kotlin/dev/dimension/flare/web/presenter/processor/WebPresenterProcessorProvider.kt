@@ -778,7 +778,7 @@ internal object WebPresenterRenderer {
                 appendLine("        ${variant.tag.kotlinString()} -> ${variant.type}")
             } else {
                 appendLine("        ${variant.tag.kotlinString()} -> ${variant.type}(")
-                variant.properties.forEach { property ->
+                variant.properties.filter { it.constructorParameter }.forEach { property ->
                     appendLine(
                         "            ${property.kotlinName} = ${
                             property.valueModel().readJsonExpression(
@@ -960,6 +960,7 @@ internal data class SealedPropertyModel(
     val uiState: UiStateModel? = null,
     val pagingState: PagingStateModel? = null,
     val nullable: Boolean = false,
+    val constructorParameter: Boolean = true,
 )
 
 internal data class RefModel(
@@ -2179,22 +2180,26 @@ private class WebTypeAnalyzer(
     ): SealedVariantModel? {
         val qualifiedName = declaration.qualifiedName?.asString() ?: return null
         if (declaration.classKind != ClassKind.OBJECT && declaration.primaryConstructor?.isBridgeVisible() == false) return null
-        val properties =
+        val constructorNames =
             declaration
                 .primaryConstructor
                 ?.parameters
                 .orEmpty()
                 .filter { it.isVal || it.isVar }
-                .mapNotNull { parameter ->
-                    val parameterName = parameter.name?.asString() ?: return null
-                    val propertyDeclaration =
-                        declaration.getAllProperties().firstOrNull { it.simpleName.asString() == parameterName }
-                    if (propertyDeclaration?.isBridgeVisible() == false) return@mapNotNull null
-                    val parameterType = parameter.type.resolve()
-                    val value = value(parameterType, visited = visited, allowRef = true) ?: return@mapNotNull null
+                .mapNotNull { it.name?.asString() }
+                .toSet()
+        val properties =
+            declaration
+                .getAllProperties()
+                .filter { it.simpleName.asString() in constructorNames || it.hasAnnotation(WEB_EXPORT_ANNOTATION) }
+                .filter { it.isBridgeVisible() }
+                .mapNotNull { property ->
+                    val propertyName = property.simpleName.asString()
+                    val propertyType = property.type.resolve()
+                    val value = value(propertyType, visited = visited, allowRef = true) ?: return@mapNotNull null
                     SealedPropertyModel(
-                        name = parameterName.toWebSealedPropertyName(),
-                        kotlinName = parameterName,
+                        name = propertyName.toWebSealedPropertyName(),
+                        kotlinName = propertyName,
                         webType = value.webType,
                         customValue = value.customValue,
                         enum = value.enum,
@@ -2203,9 +2208,11 @@ private class WebTypeAnalyzer(
                         array = value.array,
                         uiState = value.uiState,
                         pagingState = value.pagingState,
-                        nullable = parameterType.isMarkedNullable,
+                        nullable = propertyType.isMarkedNullable,
+                        constructorParameter = propertyName in constructorNames,
                     )
                 }.sortedBy { it.name }
+                .toList()
         return SealedVariantModel(
             type = qualifiedName,
             typeName = declaration.simpleName.asString(),
@@ -2580,6 +2587,7 @@ private fun String.jsonString(): String = kotlinString()
 private const val WEB_PRESENTER_SHORT_NAME = "WebPresenter"
 private const val WEB_PRESENTER_ANNOTATION = "dev.dimension.flare.web.shared.WebPresenter"
 private const val WEB_IGNORE_ANNOTATION = "WebIgnore"
+private const val WEB_EXPORT_ANNOTATION = "WebExport"
 private const val COMPOSABLE_ANNOTATION = "Composable"
 private const val DEPRECATED_ANNOTATION = "Deprecated"
 private const val PRESENTER_BASE = "dev.dimension.flare.ui.presenter.PresenterBase"

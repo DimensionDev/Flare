@@ -9,7 +9,9 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
@@ -63,12 +65,12 @@ public class FollowingPresenter(
     accountType: AccountType,
     private val userKey: MicroBlogKey,
 ) : UserListPresenter(accountType) {
-    override fun dataSource(service: MicroblogDataSource) = service.following(userKey)
+    override fun dataSource(service: MicroblogDataSource) = service.capabilities.profile?.following(userKey) ?: notSupported()
 }
 
 public class FansPresenter(
     accountType: AccountType,
     private val userKey: MicroBlogKey,
 ) : UserListPresenter(accountType) {
-    override fun dataSource(service: MicroblogDataSource) = service.fans(userKey)
+    override fun dataSource(service: MicroblogDataSource) = service.capabilities.profile?.fans(userKey) ?: notSupported()
 }

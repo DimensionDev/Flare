@@ -60,6 +60,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
@@ -119,6 +120,8 @@ import dev.dimension.flare.compose.ui.user_mute_with_parameter
 import dev.dimension.flare.compose.ui.user_send_message
 import dev.dimension.flare.compose.ui.user_unblock
 import dev.dimension.flare.compose.ui.user_unmute
+import dev.dimension.flare.compose.ui.visibility_friends
+import dev.dimension.flare.compose.ui.visibility_self
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.applyPostActionLayout
@@ -134,6 +137,7 @@ import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
@@ -152,7 +156,6 @@ import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.TranslationDisplayState
 import dev.dimension.flare.ui.model.UiCard
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
@@ -187,6 +190,7 @@ public fun CommonStatusComponent(
     handleModifier: Modifier = Modifier,
     avatarModifier: Modifier = Modifier,
     actionsModifier: Modifier = Modifier,
+    forceHideActions: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
     val openPostLabel = stringResource(Res.string.status_open_post)
@@ -233,7 +237,7 @@ public fun CommonStatusComponent(
                     contentDescription =
                         stringResource(
                             Res.string.profile_open_user,
-                            it.handle.canonical,
+                            it.handle.display,
                         ),
                     modifier =
                         Modifier.clickable {
@@ -281,17 +285,15 @@ public fun CommonStatusComponent(
                                 )
                             }
                             if (appearanceSettings.showPlatformLogo) {
-                                FAIcon(
-                                    imageVector = item.platformIcon.toImageVector(),
+                                TabIcon(
+                                    icon = item.platformIcon,
                                     contentDescription =
                                         stringResource(
                                             Res.string.status_platform,
                                             item.platformId,
                                         ),
-                                    modifier =
-                                        Modifier
-                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                    tint = PlatformTheme.colorScheme.caption,
+                                    size = PlatformTheme.typography.caption.fontSize.value.dp,
+                                    color = PlatformTheme.colorScheme.caption,
                                 )
                             }
                             if (!isDetail) {
@@ -332,6 +334,7 @@ public fun CommonStatusComponent(
                     if (showAsFullWidth) {
                         UserCompat(
                             user = user,
+                            subtitle = item.authorSubtitle,
                             onUserClick = {
                                 user.onClicked.invoke(
                                     ClickContext(
@@ -348,6 +351,7 @@ public fun CommonStatusComponent(
                     } else if (isQuote) {
                         UserCompat(
                             user,
+                            subtitle = item.authorSubtitle,
                             onUserClick = {
                                 user.onClicked.invoke(
                                     ClickContext(
@@ -363,6 +367,7 @@ public fun CommonStatusComponent(
                     } else {
                         CommonStatusHeaderComponent(
                             data = user,
+                            subtitle = item.authorSubtitle,
                             nameModifier = nameModifier,
                             handleModifier = handleModifier,
                             avatarModifier = avatarModifier,
@@ -412,7 +417,7 @@ public fun CommonStatusComponent(
                 if (isDetail && !item.content.original.isEmpty && appearanceSettings.showTranslateButton) {
                     TranslationComponent(
                         item = item,
-                        statusKey = item.itemKey ?: item.hashCode().toString(),
+                        statusKey = item.stableItemKey,
                         contentWarning = item.contentWarning?.original,
                         rawContent = item.content.original.innerText,
                         content = item.content.original,
@@ -428,9 +433,9 @@ public fun CommonStatusComponent(
                     allowMediaCarousel = allowMediaCarousel,
                     carouselLeadingPadding = carouselLeadingPadding,
                     carouselTrailingPadding = carouselEdgePadding,
-                    onMediaClick = { media ->
+                    onMediaClick = { index ->
                         item.openMedia(
-                            media = media,
+                            index = index,
                             launcher = uriHandler::openUri,
                         )
                     },
@@ -494,7 +499,7 @@ public fun CommonStatusComponent(
                     fullTime = true,
                 )
             }
-            if (appearanceSettings.postActionStyle != PostActionStyle.Hidden || isDetail) {
+            if ((appearanceSettings.postActionStyle != PostActionStyle.Hidden || isDetail) && !forceHideActions) {
                 if (isDetail) {
                     CompositionLocalProvider(
                         PlatformContentColor provides PlatformTheme.colorScheme.text,
@@ -536,7 +541,7 @@ internal fun StatusMediasComponent(
     allowMediaCarousel: Boolean,
     carouselLeadingPadding: Dp,
     carouselTrailingPadding: Dp,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: (Int) -> Unit,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
     var showMedia by remember { mutableStateOf(false) }
@@ -728,7 +733,7 @@ private fun StatusReactionComponent(
                             PlatformText(reaction.name)
                         } else {
                             EmojiImage(
-                                uri = reaction.url,
+                                media = reaction.media,
                                 modifier = Modifier.height(16.dp),
                             )
                         }
@@ -969,6 +974,24 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
         }
+
+        UiTimelineV2.Post.Visibility.Friends -> {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Heart,
+                contentDescription = stringResource(Res.string.visibility_friends),
+                modifier = modifier,
+                tint = tint,
+            )
+        }
+
+        UiTimelineV2.Post.Visibility.SelfOnly -> {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Lock,
+                contentDescription = stringResource(Res.string.visibility_self),
+                modifier = modifier,
+                tint = tint,
+            )
+        }
     }
 }
 
@@ -980,11 +1003,13 @@ internal fun StatusActions(
     val appearanceSettings = LocalTimelineAppearance.current
     val displayItems =
         remember(items, appearanceSettings.postActionLayout) {
-            items.applyPostActionLayout(appearanceSettings.postActionLayout)
+            items.applyPostActionLayout(appearanceSettings.postActionLayout).filterNot { it == ActionMenu.Divider }
         }
     if (displayItems.isEmpty()) return
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
+    val isStretched = appearanceSettings.postActionStyle == PostActionStyle.Stretch
+    val trailingNumberWidth = PlatformTextStyle.current.fontSize.value.dp * 2.5f + 2.dp
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom,
@@ -993,16 +1018,30 @@ internal fun StatusActions(
                 PostActionStyle.Hidden -> Arrangement.spacedBy(4.dp, Alignment.Start)
                 PostActionStyle.LeftAligned -> Arrangement.spacedBy(4.dp, Alignment.Start)
                 PostActionStyle.RightAligned -> Arrangement.spacedBy(4.dp, Alignment.End)
-                PostActionStyle.Stretch -> Arrangement.SpaceBetween
+                PostActionStyle.Stretch -> Arrangement.Start
             },
     ) {
         displayItems.fastForEachIndexed { index, action ->
+            val number =
+                when (action) {
+                    is ActionMenu.Item -> action.count
+                    is ActionMenu.Group -> action.displayItem.count
+                    ActionMenu.Divider -> null
+                }
+            // Equal leading slots keep icon centers independent of the count's width.
+            val actionModifier =
+                when {
+                    !isStretched || displayItems.size == 1 -> Modifier
+                    index != displayItems.lastIndex -> Modifier.weight(1f)
+                    else -> Modifier.width(28.dp + if (number != null) trailingNumberWidth else 0.dp)
+                }
             if (index == displayItems.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
                 Spacer(modifier = Modifier.weight(1f))
             }
             when (action) {
                 is ActionMenu.Group -> {
                     StatusActionGroup(
+                        modifier = actionModifier,
                         icon =
                             action.displayItem.icon?.toImageVector()
                                 ?: FontAwesomeIcons.Solid.Ellipsis,
@@ -1014,9 +1053,10 @@ internal fun StatusActions(
                             action.displayItem.text?.asString()
                                 ?: stringResource(Res.string.more),
                         withTextMinWidth =
-                            appearanceSettings.postActionFixedWidth &&
+                            !isStretched && appearanceSettings.postActionFixedWidth &&
                                 action.displayItem.count != null &&
                                 index != displayItems.lastIndex,
+                        isStretched = isStretched,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
@@ -1037,6 +1077,7 @@ internal fun StatusActions(
 
                 is ActionMenu.Item -> {
                     StatusActionButton(
+                        modifier = actionModifier,
                         icon =
                             action.icon?.toImageVector()
                                 ?: FontAwesomeIcons.Solid.Ellipsis,
@@ -1048,9 +1089,10 @@ internal fun StatusActions(
                                 ?: stringResource(Res.string.more),
                         enabled = action.enabled,
                         withTextMinWidth =
-                            appearanceSettings.postActionFixedWidth &&
+                            !isStretched && appearanceSettings.postActionFixedWidth &&
                                 action.count != null &&
                                 index != displayItems.lastIndex,
+                        isStretched = isStretched,
                         onClicked = {
                             action.onClicked.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -1319,7 +1361,7 @@ private fun StatusContentComponent(
                 }
             }.orEmpty()
     val effectiveMaxLines = (maxLines ?: appearanceSettings.lineLimit).coerceAtLeast(1)
-    val collapseThresholdLines = maxLines?.coerceAtLeast(1) ?: 10
+    val collapseThresholdLines = maxLines?.coerceAtLeast(1) ?: 15
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }

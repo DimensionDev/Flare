@@ -2,6 +2,8 @@ package dev.dimension.flare.feature.agent.presenter
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
+import dev.dimension.flare.feature.agent.common.AgentPostSnapshotSerializer
+import dev.dimension.flare.feature.agent.common.AgentProfileSnapshotSerializer
 import dev.dimension.flare.feature.agent.common.agentAttachmentRef
 import dev.dimension.flare.feature.agent.common.agentDisplayPost
 import dev.dimension.flare.model.MicroBlogKey
@@ -24,12 +26,14 @@ public sealed interface AgentMessagePart {
     @Serializable
     @Immutable
     public data class PostCard(
+        @Serializable(with = AgentPostSnapshotSerializer::class)
         val post: UiTimelineV2.Post,
     ) : AgentMessagePart
 
     @Serializable
     @Immutable
     public data class UserCard(
+        @Serializable(with = AgentProfileSnapshotSerializer::class)
         val user: UiProfile,
     ) : AgentMessagePart
 
@@ -109,7 +113,9 @@ internal fun List<AgentMessagePart>.markAgentInputRequestSelected(
     optionId: String,
 ): ImmutableList<AgentMessagePart> =
     map { part ->
-        if (part is AgentMessagePart.Actions && part.request.requestId == requestId) {
+        if (part is AgentMessagePart.Actions && !part.selected && part.request.requestId == requestId &&
+            part.request.options.any { it.id == optionId }
+        ) {
             part.copy(
                 selected = true,
                 selectedOptionId = optionId,

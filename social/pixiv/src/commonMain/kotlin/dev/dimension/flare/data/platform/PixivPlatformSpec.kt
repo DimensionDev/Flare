@@ -34,7 +34,7 @@ public data object PixivPlatformSpec :
     override val metadata: PlatformMetadata =
         PlatformMetadata(
             displayName = "pixiv",
-            icon = UiIcon.Pixiv,
+            icon = UiIcon.Pixiv.asType(),
             agentAliases = listOf("pxv", "p站"),
         )
     override val order: Int = 50

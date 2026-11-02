@@ -2,6 +2,10 @@ package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.withItemKey
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
@@ -20,6 +24,31 @@ internal class NotSupportRemoteLoader<T : Any> : RemoteLoader<T> {
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<T> = PagingResult(endOfPaginationReached = true)
+}
+
+@HiddenFromObjC
+public fun RemoteLoader<UiTimelineV2>.toTimelinePagingSource(): PagingSource<String, UiTimelineV2> {
+    // ponytail: pagingConfig retains all pages; use page-scoped identities if page dropping is enabled.
+    val seenKeys = mutableSetOf<String>()
+    val mutex = Mutex()
+    return object : RemoteLoader<UiTimelineV2> {
+        override suspend fun load(
+            pageSize: Int,
+            request: PagingRequest,
+        ): PagingResult<UiTimelineV2> {
+            val result = this@toTimelinePagingSource.load(pageSize, request)
+            return mutex.withLock {
+                if (request == PagingRequest.Refresh) seenKeys.clear()
+                result.copy(
+                    data =
+                        result.data.mapNotNull { item ->
+                            val key = item.stableItemKey
+                            if (seenKeys.add(key)) item.withItemKey(key) else null
+                        },
+                )
+            }
+        }
+    }.toPagingSource()
 }
 
 @HiddenFromObjC

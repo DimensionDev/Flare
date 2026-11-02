@@ -16,10 +16,13 @@ public class TimelineItemPresenter(
     private val timelineTabItem: UiTimelineTabItem,
     private val isHomeTimeline: Boolean = false,
 ) : PresenterBase<TimelineItemPresenter.State>() {
+    public constructor(timelineTabItem: UiTimelineTabItem) : this(timelineTabItem, isHomeTimeline = false)
+
     private val timelinePresenterFactory by koinInject<TimelinePresenterFactory>()
 
     public interface State {
         public val listState: PagingState<UiTimelineV2>
+        public val reading: TimelineReadingState? get() = null
 
         public fun refreshSync()
 
@@ -38,6 +41,7 @@ public class TimelineItemPresenter(
         val scope = rememberCoroutineScope()
         return object : State {
             override val listState = state.listState
+            override val reading = state.reading
             override val isRefreshing = listState.isRefreshing
 
             override fun refreshSync() {

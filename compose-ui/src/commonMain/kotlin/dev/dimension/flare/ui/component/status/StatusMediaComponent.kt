@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
+import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
@@ -99,7 +100,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal fun StatusMediaComponent(
     post: UiTimelineV2.Post,
     data: ImmutableList<UiMedia>,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: (Int) -> Unit,
     sensitive: Boolean,
     shape: Shape,
     allowCarousel: Boolean = false,
@@ -121,18 +122,15 @@ internal fun StatusMediaComponent(
     val playback = LocalTimelinePlayback.current
     var selectedIndex by remember(post.statusKey) { mutableStateOf(0) }
     val mediaUrls = remember(data) { data.map { it.url } }
-    val openMedia: (UiMedia) -> Unit = { media ->
-        playback?.selectMedia(carouselId, media.url, userInitiated = true)
-        onMediaClick(media)
+    val openMedia: (Int) -> Unit = { index ->
+        playback?.selectMedia(carouselId, index, userInitiated = true)
+        onMediaClick(index)
     }
     DisposableEffect(playback, carouselId, mediaUrls, carouselState) {
-        playback?.mediaSelections?.register(carouselId, mediaUrls) { uri ->
-            val index = mediaUrls.indexOf(uri)
-            if (index >= 0) {
-                selectedIndex = index
-                playback.selectMedia(carouselId, uri, userInitiated = false)
-                carouselState?.requestScrollToItem(index)
-            }
+        playback?.mediaSelections?.register(carouselId, mediaUrls) { index ->
+            selectedIndex = index
+            playback.selectMedia(carouselId, index, userInitiated = false)
+            carouselState?.requestScrollToItem(index)
         }
         onDispose { playback?.mediaSelections?.remove(carouselId) }
     }
@@ -232,13 +230,13 @@ internal fun StatusMediaComponent(
                                     aspectRatio = media.timelineAspectRatio,
                                 ).dp
                         CompositionLocalProvider(
-                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index == selectedIndex),
+                            LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index, index == selectedIndex),
                         ) {
                             StatusMediaItem(
                                 post = post,
                                 media = media,
                                 mediaCount = data.size,
-                                onMediaClick = openMedia,
+                                onMediaClick = { openMedia(index) },
                                 hideSensitive = hideSensitive,
                                 keepAspectRatio = false,
                                 fillContainer = true,
@@ -257,13 +255,13 @@ internal fun StatusMediaComponent(
                 itemCount = data.size,
                 itemContent = { index ->
                     CompositionLocalProvider(
-                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, selected = true, isCarousel = false),
+                        LocalTimelineCarouselItem provides TimelineCarouselItem(carouselId, index, selected = true, isCarousel = false),
                     ) {
                         StatusMediaItem(
                             post = post,
                             media = data[index],
                             mediaCount = data.size,
-                            onMediaClick = openMedia,
+                            onMediaClick = { openMedia(index) },
                             hideSensitive = hideSensitive,
                             keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
                         )
@@ -380,6 +378,7 @@ private val UiMedia.carouselAspectRatio: Float
                 is UiMedia.Image -> width / height
                 is UiMedia.Video -> width / height
                 is UiMedia.Gif -> width / height
+                is UiMedia.Ugoira -> width / height
                 is UiMedia.Audio -> 0f
             }
         return ratio.takeIf { it.isFinite() && it > 0f } ?: 0f
@@ -393,7 +392,7 @@ private fun StatusMediaItem(
     post: UiTimelineV2.Post,
     media: UiMedia,
     mediaCount: Int,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: () -> Unit,
     hideSensitive: Boolean,
     keepAspectRatio: Boolean,
     modifier: Modifier = Modifier,
@@ -430,7 +429,7 @@ private fun StatusMediaItem(
                         isMenuExpanded = it
                     },
                     onClick = {
-                        onMediaClick(media)
+                        onMediaClick()
                     },
                     modifier = mediaModifier,
                     menu = {
@@ -464,7 +463,7 @@ private fun StatusMediaItem(
                     media = media,
                     modifier =
                         mediaModifier.clickable {
-                            onMediaClick(media)
+                            onMediaClick()
                         },
                     keepAspectRatio = keepAspectRatio,
                 )
@@ -525,22 +524,9 @@ private fun TimelineMediaDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
     ) {
-        TimelineMediaMenuItem(
-            label = stringResource(Res.string.media_menu_download),
-            icon = {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.Download,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-            },
-            onClick = {
-                onAction(TimelineMediaMenuAction.Download)
-            },
-        )
-        if (showDownloadAll) {
+        if (media !is UiMedia.Ugoira || mediaActionConfig.canSaveUgoira) {
             TimelineMediaMenuItem(
-                label = stringResource(Res.string.media_menu_download_all),
+                label = stringResource(Res.string.media_menu_download),
                 icon = {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Download,
@@ -549,9 +535,24 @@ private fun TimelineMediaDropdownMenu(
                     )
                 },
                 onClick = {
-                    onAction(TimelineMediaMenuAction.DownloadAll)
+                    onAction(TimelineMediaMenuAction.Download)
                 },
             )
+            if (showDownloadAll) {
+                TimelineMediaMenuItem(
+                    label = stringResource(Res.string.media_menu_download_all),
+                    icon = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    },
+                    onClick = {
+                        onAction(TimelineMediaMenuAction.DownloadAll)
+                    },
+                )
+            }
         }
         if (media is UiMedia.Image && mediaActionConfig.showShareImage) {
             TimelineMediaMenuItem(
@@ -610,12 +611,23 @@ public fun MediaItem(
     val appearanceSettings = LocalTimelineAppearance.current
     val accessibleDescription = media.accessibleDescription()
     when (media) {
+        is UiMedia.Ugoira -> {
+            val wifi = LocalWifiState.current
+            UgoiraPlayer(
+                media,
+                modifier.fillMaxWidth().let { if (keepAspectRatio) it.aspectRatio(media.aspectRatio) else it },
+                autoplay =
+                    appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
+                        (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifi),
+                contentScale = contentScale,
+            )
+        }
+
         is UiMedia.Image -> {
             NetworkImage(
-                model = media.previewUrl,
+                model = media.preview,
                 contentDescription = accessibleDescription,
                 contentScale = contentScale,
-                customHeaders = media.customHeaders,
                 modifier =
                     modifier
                         .fillMaxWidth()
@@ -642,10 +654,8 @@ public fun MediaItem(
             if (shouldPlay) {
                 PlatformVideoPlayer(
                     contentScale = contentScale,
-                    uri = media.url,
-                    customHeaders = media.customHeaders,
+                    media = media,
                     muted = true,
-                    previewUri = media.thumbnailUrl,
                     contentDescription = accessibleDescription,
                     modifier =
                         modifier
@@ -669,8 +679,7 @@ public fun MediaItem(
                         ) {
                             NetworkImage(
                                 contentScale = contentScale,
-                                model = media.thumbnailUrl,
-                                customHeaders = media.customHeaders,
+                                model = media.preview,
                                 contentDescription = accessibleDescription,
                                 modifier =
                                     Modifier
@@ -706,8 +715,7 @@ public fun MediaItem(
                         ) {
                             NetworkImage(
                                 contentScale = contentScale,
-                                model = media.thumbnailUrl,
-                                customHeaders = media.customHeaders,
+                                model = media.preview,
                                 contentDescription = accessibleDescription,
                                 modifier =
                                     Modifier
@@ -769,8 +777,7 @@ public fun MediaItem(
                 ) {
                     NetworkImage(
                         contentScale = contentScale,
-                        model = media.thumbnailUrl,
-                        customHeaders = media.customHeaders,
+                        model = media.preview,
                         contentDescription = accessibleDescription,
                         modifier =
                             Modifier
@@ -812,8 +819,7 @@ public fun MediaItem(
 
         is UiMedia.Audio -> {
             AudioPlayer(
-                uri = media.url,
-                previewUri = media.previewUrl,
+                media = media,
                 contentDescription = accessibleDescription,
                 modifier = modifier,
             )
@@ -821,10 +827,9 @@ public fun MediaItem(
 
         is UiMedia.Gif -> {
             NetworkImage(
-                model = media.url,
+                model = media,
                 contentDescription = accessibleDescription,
                 contentScale = contentScale,
-                customHeaders = media.customHeaders,
                 modifier =
                     modifier
                         .fillMaxWidth()

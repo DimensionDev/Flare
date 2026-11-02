@@ -1,6 +1,2625 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "discover_empty_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to discover yet"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无推荐内容"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫無推薦內容"
+          }
+        }
+      }
+    },
+    "search_empty_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results found"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到结果"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到結果"
+          }
+        }
+      }
+    },
+    "account_management_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No accounts added"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无账号"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫無帳號"
+          }
+        }
+      }
+    },
+    "tab_settings_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tabs configured"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未配置标签页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未設定分頁"
+          }
+        }
+      }
+    },
+    "link_open_defaults_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No available platforms"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无可配置的平台"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫無可設定的平台"
+          }
+        }
+      }
+    },
+    "opml_import_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No subscriptions found to import"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到可导入的订阅"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到可匯入的訂閱"
+          }
+        }
+      }
+    },
+    "emoji_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No emoji available"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无可用表情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫無可用表情"
+          }
+        }
+      }
+    },
+    "emoji_search_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching emoji"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到匹配的表情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到符合的表情"
+          }
+        }
+      }
+    },
+    "translation_languages_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matching languages"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到匹配的语言"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到符合的語言"
+          }
+        }
+      }
+    },
+    "weibo_friends_circle_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friends Circle"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好友圈"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好友圈"
+          }
+        }
+      }
+    },
+    "weibo_private_following_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private Following"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悄悄关注"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悄悄關注"
+          }
+        }
+      }
+    },
+  "visibility_friends": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Friends circle"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "好友圈可见"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "好友圈可見"
+        }
+      }
+    }
+  },
+  "visibility_friends_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only people who follow you and whom you follow can see this post"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "仅互相关注的好友可以看到此微博"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "僅互相關注的好友可以看到此微博"
+        }
+      }
+    }
+  },
+  "visibility_self": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only me"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "仅自己可见"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "僅自己可見"
+        }
+      }
+    }
+  },
+  "visibility_self_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only you can see this post"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "仅你自己可以看到此微博"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "僅你自己可以看到此微博"
+        }
+      }
+    }
+  },
+  "agent_error_interrupted": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This run was interrupted. Check what was completed before sending another message."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "执行已中断，请确认已完成的操作后再发送新消息。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "執行已中斷，請確認已完成的操作後再傳送新訊息。"
+        }
+      }
+    }
+  },
+  "agent_error_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Unable to continue"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "暂时无法继续"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "暫時無法繼續"
+        }
+      }
+    }
+  },
+  "agent_error_history": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Could not load this conversation. Try loading it again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "无法加载会话，请重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法載入對話，請重試。"
+        }
+      }
+    }
+  },
+  "agent_error_network": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Could not connect to the AI service. Check your connection and try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "无法连接 AI 服务，请检查网络后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法連線至 AI 服務，請檢查網路後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_rate_limited": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service is receiving too many requests. Wait a moment and try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务请求过于频繁，请稍后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務請求過於頻繁，請稍後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_service": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service is temporarily unavailable. Try again later."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务暂时不可用，请稍后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務暫時無法使用，請稍後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_configuration": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Complete the AI Agent setup in Settings, then try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "请在设置中完成 AI Agent 配置后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "請在設定中完成 AI Agent 設定後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_authentication": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service rejected your API key. Check it in AI settings, then try again."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务拒绝了 API 密钥，请在 AI 设置中检查后重试。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務拒絕了 API 金鑰，請在 AI 設定中檢查後重試。"
+        }
+      }
+    }
+  },
+  "agent_error_access_denied": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Your account cannot access this AI service or model. Check the provider permissions and AI settings."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "账号无权使用此 AI 服务或模型，请检查服务商权限和 AI 设置。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "帳號無權使用此 AI 服務或模型，請檢查服務商權限和 AI 設定。"
+        }
+      }
+    }
+  },
+  "agent_error_quota": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service reports insufficient quota. Check your balance or usage limit with the provider."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务提示额度不足，请检查服务商的余额或用量限制。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務提示額度不足，請檢查服務商的餘額或用量限制。"
+        }
+      }
+    }
+  },
+  "agent_error_unknown": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The AI service did not return an error description."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服务未返回具体错误说明。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI 服務未傳回具體錯誤說明。"
+        }
+      }
+    }
+  },
+  "agent_error_details": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Error details"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "错误详情"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "錯誤詳細資訊"
+        }
+      }
+    }
+  },
+  "agent_error_retry": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Retry"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重试"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重試"
+        }
+      }
+    }
+  },
+  "settings_ai_config_context_window": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Context window (tokens)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "上下文窗口（token）"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "上下文視窗（token）"
+        }
+      }
+    }
+  },
+  "settings_ai_config_context_window_hint": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Leave blank to use the known model limit. Unknown models use an estimated budget of 8192 tokens. Enter at least 1024 tokens to override."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "留空使用已知模型的上限；未知模型使用 8192 token 的估算预算。手动设置至少为 1024 token。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "留空使用已知模型的上限；未知模型使用 8192 token 的估算預算。手動設定至少為 1024 token。"
+        }
+      }
+    }
+  },
+  "plugin_add": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Add plugin"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "添加插件"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "新增外掛"
+      }
+    }
+  }
+},
+    "image_translation_use_shared_description" : {"localizations": {"en": {"stringUnit": {"state": "translated", "value": "Share the service URL, API key and model. The service and model must support image output. Turn off to configure image translation separately."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "共用服务地址、API 密钥和模型。服务与模型需要支持输出图片；关闭后可单独配置。"}}}},
+    "Automatic" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Automatic" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "自动" } } } },
+    "Original file" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Original file" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "原文件上传" } } } },
+    "Image translation" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Image translation" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图片翻译" } } } },
+    "Off" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Off" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关闭" } } } },
+    "Tencent Cloud" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Tencent Cloud" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "腾讯云" } } } },
+    "OpenAI Images compatible" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "OpenAI Images compatible" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "OpenAI Images 兼容" } } } },
+    "API key" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "API key" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "API 密钥" } } } },
+    "Secret ID" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Secret ID" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Secret ID" } } } },
+    "Secret key" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Secret key" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Secret 密钥" } } } },
+    "Service URL" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Service URL" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "服务地址" } } } },
+    "Image model" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Image model" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图片模型" } } } },
+    "Region" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Region" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "地域" } } } },
+    "Mode" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Mode" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "模式" } } } },
+    "Translation prompt" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Translation prompt" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "翻译提示词" } } } },
+    "Image input format" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Image input format" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图片输入格式" } } } },
+    "Image translation provider" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Image translation provider" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图片翻译提供商" } } } },
+    "Original images, including private images, are sent to the selected service. Choose a model that returns images." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Original images, including private images, are sent to the selected service. Choose a model that returns images." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "原图（包括私有图片）会发送给所选服务。请选择可以返回图片的模型。" } } } },
+    "Qwen requires a publicly accessible original URL. Private images cannot be translated with this provider." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Qwen requires a publicly accessible original URL. Private images cannot be translated with this provider." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "千问需要可公开访问的原图 URL，此提供商无法处理带认证信息的私有图片。" } } } },
+    "Translate image" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Translate image" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "翻译图片" } } } },
+    "Show translation" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Show translation" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "显示译图" } } } },
+    "Translate again" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Translate again" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重新翻译" } } } },
+    "Translating image" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Translating image" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在翻译图片" } } } },
+    "Configure image translation in Translation settings first." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Configure image translation in Translation settings first." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请先在翻译设置中配置图片翻译。" } } } },
+    "The provider does not support this image or input format." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The provider does not support this image or input format." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "提供商不支持此图片或输入格式。" } } } },
+    "Check the provider credentials and service access." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Check the provider credentials and service access." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请检查提供商凭据及服务开通状态。" } } } },
+    "The provider rate or quota limit was reached." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The provider rate or quota limit was reached." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已达到提供商速率或额度限制。" } } } },
+    "The provider rejected this image translation request." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The provider rejected this image translation request." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "提供商拒绝了此次图片翻译请求。" } } } },
+    "The provider did not return a complete translated image." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The provider did not return a complete translated image." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "提供商未返回完整译图。" } } } },
+    "The translated image could not be decoded." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The translated image could not be decoded." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法解码返回的译图。" } } } },
+    "Image translation failed. Check the connection and provider settings." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Image translation failed. Check the connection and provider settings." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图片翻译失败，请检查网络及提供商设置。" } } } },
+    "Image translation timed out. The provider may still be processing it." : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Image translation timed out. The provider may still be processing it." } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "图片翻译等待超时，提供商可能仍在处理。" } } } },
+    "Error details" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Error details" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "错误详情" } } } },
+    "View error details" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "View error details" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "查看错误详情" } } } },
+    "Copy error details" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy error details" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "复制错误详情" } } } },
+    "Translation settings" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Translation settings" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "翻译设置" } } } },
+    "Provider" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Provider" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "提供商" } } } },
+    "Edit" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑" } } } },
+    "Save" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保存" } } } },
+    "Pro" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Pro" } } } },
+    "Lite" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } }, "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Lite" } } } },
+  "plugin_ai_delete_message": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete %@, its local source, accounts, credentials, and account data from this device? This takes effect immediately."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从本机删除 %@、本地源码及其账号、凭据和账号数据？删除后立即生效。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "從本機刪除 %@、本機原始碼及其帳號、憑證和帳號資料？刪除後立即生效。"
+        }
+      }
+    }
+  },
+
+  "plugin_ai_create": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "Create with Flare AI"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "使用 Flare AI 创建"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "使用 Flare AI 建立"
+      }
+    }
+  }
+},
+  "plugin_ai_untitled": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "New plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "新插件"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "新外掛程式"
+        }
+      }
+    }
+  },
+  "plugin_ai_source_revision": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Local AI-generated plugin · Revision %lld"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "本地 AI 生成 · 修订版 %lld"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "本機 AI 產生 · 修訂版 %lld"
+        }
+      }
+    }
+  },
+  "plugin_ai_stop": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Cancel update"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "取消更新"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "取消更新"
+        }
+      }
+    }
+  },
+
+  "plugin_ai_idle": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Ready to edit"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "可以继续制作"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "可以繼續製作"
+        }
+      }
+    }
+  },
+  "plugin_ai_validating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validating"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在校验"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在驗證"
+        }
+      }
+    }
+  },
+
+  "plugin_ai_waiting": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Waiting for login or writes to finish"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "等待登录或写操作完成"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "等待登入或寫入完成"
+        }
+      }
+    }
+  },
+  "plugin_ai_applied": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Up to date"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已应用最新版本"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "已套用最新版本"
+        }
+      }
+    }
+  },
+  "plugin_ai_failed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Changes could not be applied"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "修改未能生效"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "無法套用修改"
+        }
+      }
+    }
+  },
+  "plugin_development": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugin development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件开发"
+        }
+      }
+    }
+  },
+  "plugin_development_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Choose the build output folder containing manifest.json and plugin.js. Saves are validated automatically; reload applies them to all accounts and pages of this plugin."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "选择包含 manifest.json 和 plugin.js 的构建输出目录。保存后自动校验，点击重载后应用到该插件的所有账号和页面。"
+        }
+      }
+    }
+  },
+  "plugin_development_open": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Choose folder…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "选择目录…"
+        }
+      }
+    }
+  },
+  "plugin_development_start": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Start development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "开始开发"
+        }
+      }
+    }
+  },
+  "plugin_development_reload": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Reload plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重载插件"
+        }
+      }
+    }
+  },
+  "plugin_development_stop": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Stop development"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "停止开发"
+        }
+      }
+    }
+  },
+  "plugin_development_validating": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validating files…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在校验文件…"
+        }
+      }
+    }
+  },
+  "plugin_development_ready": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Validated · ready to load"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "校验通过 · 可以加载"
+        }
+      }
+    }
+  },
+  "plugin_development_current": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Running the validated version"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在运行已校验版本"
+        }
+      }
+    }
+  },
+  "plugin_development_review": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Only load code you trust. This code temporarily replaces the installed plugin and uses your existing accounts and data. Account changes are real and are not undone when development stops. Restarting the app restores the installed version."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "请只加载可信代码。开发代码会临时替换已安装插件，并使用现有账号和数据。账号操作真实生效，停止开发不会撤销这些操作。重启应用后恢复已安装版本。"
+        }
+      }
+    }
+  },
+  "plugin_development_schema": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The credential format changed. Existing accounts may need to sign in again, including after returning to the installed version."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "凭据格式已变化，现有账号可能需要重新登录，恢复已安装版本后也可能需要重新登录。"
+        }
+      }
+    }
+  },
+  "plugin_development_diagnostics": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Recent calls (no request or response data)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最近调用（不记录请求和响应数据）"
+        }
+      }
+    }
+  },
+  "plugin_capabilities": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Functions"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "功能"
+        }
+      }
+    }
+  },
+  "plugin_cleanup": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Clean up unused files"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "清理未使用文件"
+        }
+      }
+    }
+  },
+  "plugin_confirm_install": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "安装"
+        }
+      }
+    }
+  },
+  "plugin_empty": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "No plugins installed"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "尚未安装插件"
+        }
+      }
+    }
+  },
+  "plugin_inactive": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Inactive in this process"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "当前进程未启用"
+        }
+      }
+    }
+  },
+  "plugin_install_github": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install from GitHub"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从 GitHub 安装"
+        }
+      }
+    }
+  },
+  "plugin_github_repository": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub repository URL"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub 仓库链接"
+        }
+      }
+    }
+  },
+  "plugin_check_updates": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Check for updates"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "检查更新"
+        }
+      }
+    }
+  },
+  "plugin_update": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Update"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "更新"
+        }
+      }
+    }
+  },
+  "plugin_up_to_date": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub plugins are up to date"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "GitHub 插件均为最新版本"
+        }
+      }
+    }
+  },
+  "plugin_warning_source_changed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This installation changes the plugin source"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此次安装将更改插件来源"
+        }
+      }
+    }
+  },
+  "plugin_warning_tag_moved": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This tag now points to a different commit"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此 tag 现在指向不同的提交"
+        }
+      }
+    }
+  },
+  "plugin_unverified_github_warning": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This GitHub plugin has not been verified. Only install it if you trust the author."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此 GitHub 插件未经验证。请仅在信任作者时安装。"
+        }
+      }
+    }
+  },
+  "plugin_install": {
+  "localizations": {
+    "en": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "From file…"
+      }
+    },
+    "zh-Hans": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "从文件添加…"
+      }
+    },
+    "zh-Hant": {
+      "stringUnit": {
+        "state": "translated",
+        "value": "從檔案加入…"
+      }
+    }
+  }
+},
+  "plugin_issues": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Issues"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "问题"
+        }
+      }
+    }
+  },
+  "plugin_permission_media_network": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Load media from any website, which may receive this plugin’s account data"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从任意网站加载媒体，这些网站可能收到该插件的账户数据"
+        }
+      }
+    }
+  },
+  "plugin_permissions": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Permissions"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "权限"
+        }
+      }
+    }
+  },
+  "plugin_permission_account_origin": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Network access to the HTTPS instance you choose"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "访问你选择的 HTTPS 实例"
+        }
+      }
+    }
+  },
+  "plugin_permission_account_origin_label": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "the HTTPS instance you choose"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "你选择的 HTTPS 实例"
+        }
+      }
+    }
+  },
+  "plugin_permission_cookie": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Read cookie %2$@ from %1$@"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从 %1$@ 读取 Cookie %2$@"
+        }
+      }
+    }
+  },
+  "plugin_rebuild_index": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Rebuild plugin index"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重建插件索引"
+        }
+      }
+    }
+  },
+  "plugin_retry": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Retry"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "重试"
+        }
+      }
+    }
+  },
+  "plugin_running": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Active in this process"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "当前进程已启用"
+        }
+      }
+    }
+  },
+  "plugin_uninstall": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Uninstall"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "卸载"
+        }
+      }
+    }
+  },
+  "plugin_uninstall_confirm_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Uninstall plugin?"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "卸载插件？"
+        }
+      }
+    }
+  },
+  "plugin_uninstall_confirm_message": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete %@ and its accounts, credentials, and account data from this device? This takes effect immediately."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "从本机删除 %@ 及其账号、凭据和账号数据？删除后立即生效。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "從本機刪除 %@ 及其帳號、憑證和帳號資料？刪除後立即生效。"
+        }
+      }
+    }
+  },
+  "plugin_operation_failed": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin operation failed. Try again or restart Flare."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件操作失败。请重试或重新启动 Flare。"
+        }
+      }
+    }
+  },
+  "plugin_issue_index_corrupt": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin index is damaged. Rebuild it to recover valid packages."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件索引已损坏。请重建索引以恢复有效的插件包。"
+        }
+      }
+    }
+  },
+  "plugin_issue_files_missing": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugin files are missing or have changed."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件文件缺失或已被修改。"
+        }
+      }
+    }
+  },
+  "plugin_issue_platform_conflict": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This plugin uses a platform ID that is already registered."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此插件使用了已注册的平台 ID。"
+        }
+      }
+    }
+  },
+  "plugin_issue_platform_invalid": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This plugin platform could not be loaded."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "无法加载此插件平台。"
+        }
+      }
+    }
+  },
+  "plugin_runtime_fatal": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin runtime stopped after a fatal error."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件运行时因严重错误而停止。"
+        }
+      }
+    }
+  },
+  "plugin_runtime_paused": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "The plugin was paused after repeated fatal errors."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件因连续发生严重错误而暂停。"
+        }
+      }
+    }
+  },
+  "plugin_unverified_warning": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This local plugin is unverified. It can access the listed accounts and network origins. Install only if you trust its author."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此本地插件未经验证，可以访问列出的账号和网络域名。请仅在信任作者时安装。"
+        }
+      }
+    }
+  },
+  "plugin_warning_added_permission": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This update requests an additional permission"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此更新申请了新增权限"
+        }
+      }
+    }
+  },
+  "plugin_warning_changed_package": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This version has different package contents"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "同一版本的插件包内容已变化"
+        }
+      }
+    }
+  },
+  "plugin_warning_compatibility": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Compatibility warning"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "兼容性警告"
+        }
+      }
+    }
+  },
+  "plugin_warning_downgrade": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This package is older than the installed version"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此插件包版本低于当前安装版本"
+        }
+      }
+    }
+  },
+  "settings_plugins_subtitle": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Install and manage social platform plugins"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "安装和管理社交平台插件"
+        }
+      }
+    }
+  },
+  "settings_plugins_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugins (Beta)"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件（Beta）"
+        }
+      }
+    }
+  },
+  "plugin_beta_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Plugins are still in beta and may be incomplete. If you run into problems, report them on [GitHub Issues](https://github.com/DimensionDev/Flare/issues)."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "插件仍处于 Beta 阶段，功能尚不完善。遇到问题可前往 [GitHub Issues](https://github.com/DimensionDev/Flare/issues) 提交反馈。"
+        }
+      }
+    }
+  },
+    "share_replies_children" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Load replies to this comment" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "加载这条评论的回复" } }
+      }
+    },
+    "share_replies_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select replies"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择回复"
+          }
+        }
+      }
+    },
+    "share_replies_count" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld selected"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已选 %lld 条"
+          }
+        }
+      }
+    },
+    "share_replies_done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        }
+      }
+    },
+    "share_replies_cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "share_replies_clear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空"
+          }
+        }
+      }
+    },
+    "share_replies_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No replies available"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无可选回复"
+          }
+        }
+      }
+    },
+    "share_replies_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to load replies. Your selection is saved."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回复加载失败，已保留当前选择。"
+          }
+        }
+      }
+    },
+    "share_replies_more" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load more replies"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加载更多回复"
+          }
+        }
+      }
+    },
+    "share_replies_retry" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        }
+      }
+    },
+    "share_replies_too_large" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The image is too long. Select fewer replies."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片过长，请减少所选回复。"
+          }
+        }
+      }
+    },
+    "share_replies_render_failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to prepare the image. Retry or remove replies with unavailable media."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片生成失败，请重试或移除媒体不可用的回复。"
+          }
+        }
+      }
+    },
+    "share_replies_preparing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing image…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在生成图片…"
+          }
+        }
+      }
+    },
+  "proxy_webview_error": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "The webpage could not be loaded with the global proxy settings. Check the proxy and try again."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "无法使用全局代理设置加载网页。请检查代理后重试。"}}, "zh-Hant": {"stringUnit": {"state": "translated", "value": "無法使用全域代理設定載入網頁。請檢查代理後重試。"}}}},
+  "proxy_error_name": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "A proxy name is required"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请输入代理名称"}}}},
+  "proxy_error_host": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Enter a hostname or IP address without a scheme or credentials"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请输入主机名或 IP 地址，不要包含协议或身份验证信息"}}}},
+  "proxy_error_port": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Port must be between 1 and 65535"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "端口必须介于 1 和 65535 之间"}}}},
+  "proxy_error_in_use": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Reassign accounts and the global policy before deleting this proxy"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请先修改使用此代理的账号和全局设置，再删除代理"}}}},
+  "proxy_error_policy": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Select an available proxy policy"}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "请选择有效的代理设置"}}}},
+  "proxy_error_request": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Proxy operation failed. Please try again."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "代理操作失败，请重试。"}}}},
+  "settings_accounts_remove_failed": {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "Could not remove this account. Please try again."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "无法移除此账号，请重试。"}}}},
+  "media_video_error": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Video failed to load" } },
+      "zh-Hans": { "stringUnit": { "state": "translated", "value": "视频加载失败" } }
+    }
+  },
+  "proxy_settings_subtitle": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Global and per-account proxy settings" } },
+      "zh-Hans": { "stringUnit": { "state": "translated", "value": "管理全局和各账号的代理连接" } }
+    }
+  },
+  "proxy_title": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Proxy"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "代理"
+        }
+      }
+    }
+  },
+  "proxy_global": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Global"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "全局"
+        }
+      }
+    }
+  },
+  "proxy_system": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "System settings"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "系统设置"
+        }
+      }
+    }
+  },
+  "proxy_direct": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Direct connection"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "直连"
+        }
+      }
+    }
+  },
+  "proxy_inherit": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Follow global"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "跟随全局"
+        }
+      }
+    }
+  },
+  "proxy_profiles": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Proxy servers"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "代理服务器"
+        }
+      }
+    }
+  },
+  "proxy_add": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Add proxy"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "添加代理"
+        }
+      }
+    }
+  },
+  "proxy_name": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Name"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "名称"
+        }
+      }
+    }
+  },
+  "proxy_host": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Hostname or IP address"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "主机名或 IP 地址"
+        }
+      }
+    }
+  },
+  "proxy_port": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Port"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "端口"
+        }
+      }
+    }
+  },
+  "proxy_protocol": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Protocol"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "协议"
+        }
+      }
+    }
+  },
+  "proxy_no_auth": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Supports TLS-encrypted HTTPS proxies and SOCKS5 with remote destination DNS. Plain HTTP proxies and proxy authentication are not supported."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "支持 TLS 加密的 HTTPS 代理和由代理解析目标域名的 SOCKS5。不支持明文 HTTP 代理及代理身份验证。"
+        }
+      }
+    }
+  },
+  "proxy_test": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Test connection"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "测试连接"
+        }
+      }
+    }
+  },
+  "proxy_test_hint": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Tests HTTPS access to example.com through this proxy."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "通过此代理测试 example.com 的 HTTPS 连接。"
+        }
+      }
+    }
+  },
+  "proxy_test_success": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Connection succeeded"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "连接成功"
+        }
+      }
+    }
+  },
+  "proxy_in_use": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Reassign global and account settings before deleting this proxy."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "删除前请先调整使用此代理的全局和账号设置。"
+        }
+      }
+    }
+  },
+  "proxy_edit": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Edit proxy"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "编辑代理"
+        }
+      }
+    }
+  },
+  "proxy_accounts": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Accounts"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "账号"
+        }
+      }
+    }
+  },
+  "proxy_save": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Save"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "保存"
+        }
+      }
+    }
+  },
+  "proxy_cancel": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Cancel"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "取消"
+        }
+      }
+    }
+  },
+  "proxy_delete": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Delete"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "删除"
+        }
+      }
+    }
+  },
+    "settings_remember_home_timeline_position": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Remember Home reading position"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "记住首页阅读位置"
+        }
+      }
+    }
+  },
+  "settings_remember_home_timeline_position_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Keep your place when refreshing and restore your last tab and position when opening the app."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "刷新时保留当前位置，启动时恢复上次的标签页和阅读位置。"
+        }
+      }
+    }
+  },
+  "home_timeline_view_latest": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "View latest posts"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "查看最新内容"
+        }
+      }
+    }
+  },
+  "timeline_load_missing_posts": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Load missing posts"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "加载缺失的内容"
+        }
+      }
+    }
+  },
+  "timeline_loading_missing_posts": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Loading missing posts…"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在加载缺失的内容…"
+        }
+      }
+    }
+  },
+  "timeline_retry_missing_posts": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Could not load posts. Tap to retry."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "加载失败，点击重试。"
+        }
+      }
+    }
+  },
+
+  "ugoira_play": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Play animation"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "播放动图"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "播放動圖"
+        }
+      }
+    }
+  },
+  "ugoira_loading": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Loading animation"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在加载动图"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在載入動圖"
+        }
+      }
+    }
+  },
+  "ugoira_resolution_unsupported": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "This device cannot export the original size. Export at up to 1920 pixels?"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此设备无法导出原始尺寸。是否导出最长边不超过 1920 像素的视频？"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此裝置無法匯出原始尺寸。是否匯出最長邊不超過 1920 像素的影片？"
+        }
+      }
+    }
+  },
+  "ugoira_export_smaller": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Export smaller MP4"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "导出较小尺寸的 MP4"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "匯出較小尺寸的 MP4"
+        }
+      }
+    }
+  },
+  "ugoira_export_progress": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Saving MP4: %ld%%"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在保存 MP4：%ld%%"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "正在儲存 MP4：%ld%%"
+        }
+      }
+    }
+  },
+  "ugoira_export_failed": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Failed to save animation"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "动图保存失败"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "動圖儲存失敗"
+        }
+      }
+    }
+  },
     "media_post_collapse": {
       "extractionState": "manual",
       "localizations": {
@@ -32677,181 +35296,181 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weergawe %@:\n• Verbeterde videoterrugspeel op die tydlyn met gladder oorgange, beter outomatiese videokeuse en behoue terugspeelvordering wanneer die mediakyker oop- of toegemaak word.\n• Verbeterde tydlynnavigasie en plasingbesonderhede: antwoorde en rolposisies bly ná herlaai behoue, Weibo-besonderhede gebruik die inheemse tydlynervaring en navigasiebalke verklein tydens rol op iOS 27.\n• Verbeterde toeganklikheid vir plasings, media en die opstelskerm met duideliker etikette, toestande en kontroles.\n• Verbeterde Bluesky-sessiebetroubaarheid, versoenbaarheid met nuwe X-tydlynreaksies en ondersteuning vir meer Pixiv-kunswerk- en profielskakelformate."
+            "value" : "Weergawe %@:\n• Prentvertaling is bygevoeg. Stel ’n vertaaldiens op om tussen die oorspronklike en vertaalde prent te wissel en die resultaat te stoor of te deel.\n• Kies antwoorde en subantwoorde om in te sluit wanneer jy ’n plasing as ’n prent deel. Oortollige witruimte in uitgevoerde prente is reggestel.\n• Weibo het nou tydlyne vir groepe, vriendekringe en private volglyste, instellings vir plasingsigbaarheid en Live Photo-afspeel. IP-liggingetikette is herstel.\n• Globale instellings en instellings per rekening vir HTTPS- en SOCKS5-instaanbedieners is bygevoeg.\n• Tydlynblaai en die prentkyker se swiep-om-te-sluit-, zoem- en blaai-gebare is verbeter. Plasingaksie-animasies is bygevoeg, en omvalle tydens heraanmelding en Pixiv-prentvertoning is reggestel."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الإصدار %@:\n• تحسين تشغيل فيديوهات الخط الزمني بانتقالات أكثر سلاسة واختيار تلقائي أفضل للفيديو، مع الاحتفاظ بموضع التشغيل عند فتح عارض الوسائط أو إغلاقه.\n• تحسين التنقل في الخط الزمني وتفاصيل المنشورات: تبقى الردود ومواضع التمرير بعد التحديث، وتستخدم تفاصيل Weibo تجربة الخط الزمني الأصلية، وتصغر أشرطة التنقل أثناء التمرير في iOS 27.\n• تحسين إمكانية الوصول في المنشورات والوسائط وشاشة الإنشاء من خلال تسميات وحالات وعناصر تحكم أوضح.\n• تحسين موثوقية جلسات Bluesky والتوافق مع استجابات الخط الزمني الجديدة من X ودعم المزيد من صيغ روابط الأعمال الفنية والملفات الشخصية في Pixiv."
+            "value" : "الإصدار %@:\n• إضافة ترجمة الصور. بعد إعداد خدمة الترجمة، يمكنك التبديل بين الصورة الأصلية والمترجمة وحفظ النتيجة أو مشاركتها.\n• يمكنك اختيار الردود والردود المتفرعة لتضمينها عند مشاركة المنشور كصورة. إصلاح المساحات الفارغة الزائدة في الصور المصدّرة.\n• إضافة خطوط زمنية لمجموعات Weibo ودائرة الأصدقاء والمتابعات الخاصة، وإعدادات ظهور المنشورات وتشغيل Live Photo. استعادة عرض الموقع المرتبط بعنوان IP.\n• إضافة إعدادات وكيل عامة ولكل حساب، مع دعم HTTPS وSOCKS5.\n• تحسين تمرير الخط الزمني والسحب لإغلاق عارض الصور والتكبير والتنقل بين الصور. إضافة حركات لأزرار المنشورات وإصلاح التعطل عند إعادة تسجيل الدخول ومشكلات عرض صور Pixiv."
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Подобрено възпроизвеждането на видео в хронологията с по-плавни преходи, по-добър автоматичен избор и запазване на позицията при отваряне или затваряне на медийния преглед.\n• Подобрени са навигацията в хронологията и подробностите за публикациите: отговорите и позицията на превъртане се запазват след обновяване, Weibo използва нативната хронология, а навигационните ленти се свиват при превъртане в iOS 27.\n• Подобрена е достъпността на публикациите, медиите и екрана за създаване с по-ясни етикети, състояния и контроли.\n• Подобрена е надеждността на сесиите в Bluesky, съвместимостта с нови отговори от хронологията на X и поддръжката на повече формати за връзки към творби и профили в Pixiv."
+            "value" : "Версия %@:\n• Добавен е превод на изображения. След настройване на услуга за превод можете да превключвате между оригинала и превода и да запазвате или споделяте резултата.\n• Можете да избирате отговори и вложени отговори при споделяне на публикация като изображение. Поправени са излишните празни полета в експортираните изображения.\n• Добавени са хронологии за групи, приятелски кръг и частни следвания в Weibo, настройки за видимост на публикациите и възпроизвеждане на Live Photo. Възстановено е показването на местоположението по IP.\n• Добавени са глобални настройки за прокси и отделни настройки за всеки акаунт с поддръжка на HTTPS и SOCKS5.\n• Подобрени са превъртането на хронологията и затварянето с плъзгане, мащабирането и прелистването в прегледа на изображения. Добавени са анимации за действията с публикации и са поправени сривове при повторно влизане и проблеми с изображенията от Pixiv."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versió %@:\n• S’ha millorat la reproducció de vídeo a la cronologia amb transicions més fluides, una millor selecció automàtica i la conservació del progrés en obrir o tancar el visor multimèdia.\n• S’han millorat la navegació per la cronologia i els detalls de les publicacions: les respostes i la posició es conserven en actualitzar, els detalls de Weibo utilitzen la cronologia nativa i les barres de navegació es minimitzen en desplaçar-se a iOS 27.\n• S’ha millorat l’accessibilitat de les publicacions, els continguts multimèdia i la pantalla de redacció amb etiquetes, estats i controls més clars.\n• S’ha millorat la fiabilitat de les sessions de Bluesky, la compatibilitat amb noves respostes de la cronologia d’X i l’admissió de més formats d’enllaços d’obres i perfils de Pixiv."
+            "value" : "Versió %@:\n• S’ha afegit la traducció d’imatges. Després de configurar un servei de traducció, podeu alternar entre l’original i la traducció i desar o compartir el resultat.\n• Podeu triar respostes i respostes imbricades en compartir una publicació com a imatge. S’han corregit els espais en blanc sobrants de les imatges exportades.\n• S’han afegit fils de grups, cercle d’amics i seguiments privats de Weibo, opcions de visibilitat de publicacions i reproducció de Live Photo. S’ha recuperat la ubicació segons l’adreça IP.\n• S’han afegit opcions de servidor intermediari globals i per compte, amb compatibilitat amb HTTPS i SOCKS5.\n• S’han millorat el desplaçament del fil i els gestos per tancar, ampliar i passar imatges al visor. S’han afegit animacions a les accions de les publicacions i s’han corregit tancaments inesperats en tornar a iniciar sessió i problemes amb les imatges de Pixiv."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verze %@:\n• Vylepšeno přehrávání videí na časové ose: plynulejší přechody, lepší automatický výběr a zachování pozice při otevření či zavření prohlížeče médií.\n• Vylepšena navigace na časové ose a detaily příspěvků: odpovědi i pozice posunu se po obnovení zachovají, detaily Weibo používají nativní časovou osu a navigační lišty se při posouvání v iOS 27 minimalizují.\n• Vylepšeno zpřístupnění příspěvků, médií a obrazovky pro psaní díky jasnějším popiskům, stavům a ovládacím prvkům.\n• Zvýšena spolehlivost relací Bluesky, kompatibilita s novými odpověďmi časové osy X a podpora dalších formátů odkazů na díla a profily Pixiv."
+            "value" : "Verze %@:\n• Přidán překlad obrázků. Po nastavení překladové služby můžete přepínat mezi originálem a překladem a výsledek uložit nebo sdílet.\n• Při sdílení příspěvku jako obrázku můžete vybrat odpovědi i vnořené odpovědi. Opraveny nadbytečné prázdné okraje exportovaných obrázků.\n• Přidány časové osy skupin, okruhu přátel a soukromého sledování na Weibo, nastavení viditelnosti příspěvků a přehrávání Live Photo. Obnoveno zobrazení polohy podle IP.\n• Přidáno globální nastavení proxy i samostatné nastavení pro jednotlivé účty s podporou HTTPS a SOCKS5.\n• Vylepšeno posouvání časové osy a zavírání tahem, přibližování a procházení v prohlížeči obrázků. Přidány animace akcí příspěvků a opraveny pády při opětovném přihlášení a zobrazení obrázků Pixiv."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Forbedret videoafspilning på tidslinjen med mere jævne overgange, bedre automatisk videovalg og bevaret afspilningsposition, når mediefremviseren åbnes eller lukkes.\n• Forbedret navigation og indlægsdetaljer: svar og rullepositioner bevares efter opdatering, Weibo-detaljer bruger den indbyggede tidslinje, og navigationslinjer minimeres under rulning i iOS 27.\n• Forbedret tilgængeligheden i indlæg, medier og oprettelsesskærmen med tydeligere etiketter, tilstande og betjeningselementer.\n• Forbedret stabiliteten af Bluesky-sessioner, kompatibiliteten med nye X-tidslinjesvar og understøttelsen af flere linkformater til Pixiv-værker og -profiler."
+            "value" : "Version %@:\n• Tilføjet billedoversættelse. Når en oversættelsestjeneste er konfigureret, kan du skifte mellem originalen og oversættelsen samt gemme eller dele resultatet.\n• Vælg svar og undersvar, der skal medtages, når du deler et opslag som et billede. Rettet for meget tom plads i eksporterede billeder.\n• Tilføjet tidslinjer for Weibo-grupper, vennekreds og privat fulgte konti, indstillinger for opslags synlighed og afspilning af Live Photo. Visning af IP-placering er gendannet.\n• Tilføjet globale proxyindstillinger og separate indstillinger for hver konto med understøttelse af HTTPS og SOCKS5.\n• Forbedret rulning på tidslinjen samt billedfremviserens bevægelser til at lukke, zoome og skifte billede. Tilføjet animationer til opslagshandlinger og rettet nedbrud ved fornyet login og visning af Pixiv-billeder."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Die Videowiedergabe in Timelines wurde mit flüssigeren Übergängen, einer besseren automatischen Videoauswahl und gespeicherter Wiedergabeposition beim Öffnen oder Schließen der Medienansicht verbessert.\n• Timeline-Navigation und Beitragsdetails wurden verbessert: Antworten und Scrollpositionen bleiben nach Aktualisierungen erhalten, Weibo-Details nutzen die native Timeline und Navigationsleisten werden unter iOS 27 beim Scrollen minimiert.\n• Die Barrierefreiheit von Beiträgen, Medien und dem Verfassen-Bildschirm wurde durch deutlichere Beschriftungen, Zustände und Steuerelemente verbessert.\n• Die Zuverlässigkeit von Bluesky-Sitzungen, die Kompatibilität mit neuen X-Timeline-Antworten und die Unterstützung weiterer Pixiv-Linkformate für Werke und Profile wurden verbessert."
+            "value" : "Version %@:\n• Bildübersetzung hinzugefügt. Nach dem Einrichten eines Übersetzungsdienstes kannst du zwischen Original und Übersetzung wechseln und das Ergebnis speichern oder teilen.\n• Beim Teilen eines Beitrags als Bild kannst du Antworten und Unterantworten auswählen. Überflüssige Ränder in exportierten Bildern wurden entfernt.\n• Weibo bietet jetzt Timelines für Gruppen, den Freundeskreis und privat gefolgte Konten sowie Sichtbarkeitseinstellungen für Beiträge und Live-Photo-Wiedergabe. Die IP-Standortanzeige wurde wiederhergestellt.\n• Globale Proxy-Einstellungen und separate Einstellungen pro Konto mit Unterstützung für HTTPS und SOCKS5 hinzugefügt.\n• Das Scrollen in Timelines sowie Wischen zum Schließen, Zoomen und Blättern im Bildbetrachter verbessert. Animationen für Beitragsaktionen hinzugefügt und Abstürze bei erneuter Anmeldung sowie die Anzeige von Pixiv-Bildern korrigiert."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έκδοση %@:\n• Βελτιώθηκε η αναπαραγωγή βίντεο στη χρονογραμμή με ομαλότερες μεταβάσεις, καλύτερη αυτόματη επιλογή και διατήρηση της θέσης κατά το άνοιγμα ή κλείσιμο της προβολής πολυμέσων.\n• Βελτιώθηκε η πλοήγηση στη χρονογραμμή και οι λεπτομέρειες αναρτήσεων: απαντήσεις και θέση κύλισης διατηρούνται μετά την ανανέωση, οι λεπτομέρειες Weibo χρησιμοποιούν την εγγενή χρονογραμμή και οι γραμμές πλοήγησης ελαχιστοποιούνται κατά την κύλιση στο iOS 27.\n• Βελτιώθηκε η προσβασιμότητα σε αναρτήσεις, πολυμέσα και στην οθόνη σύνταξης με σαφέστερες ετικέτες, καταστάσεις και στοιχεία ελέγχου.\n• Βελτιώθηκε η αξιοπιστία των συνεδριών Bluesky, η συμβατότητα με νέες αποκρίσεις χρονογραμμής του X και η υποστήριξη περισσότερων μορφών συνδέσμων έργων και προφίλ Pixiv."
+            "value" : "Έκδοση %@:\n• Προστέθηκε μετάφραση εικόνων. Αφού ρυθμίσετε μια υπηρεσία μετάφρασης, μπορείτε να εναλλάσσεστε μεταξύ πρωτότυπου και μετάφρασης και να αποθηκεύετε ή να κοινοποιείτε το αποτέλεσμα.\n• Επιλέξτε απαντήσεις και υποαπαντήσεις για συμπερίληψη όταν κοινοποιείτε μια ανάρτηση ως εικόνα. Διορθώθηκαν τα περιττά κενά περιθώρια στις εξαγόμενες εικόνες.\n• Προστέθηκαν χρονολόγια ομάδων, κύκλου φίλων και ιδιωτικών ακολουθήσεων στο Weibo, ρυθμίσεις ορατότητας αναρτήσεων και αναπαραγωγή Live Photo. Επανήλθε η εμφάνιση τοποθεσίας βάσει IP.\n• Προστέθηκαν καθολικές ρυθμίσεις διακομιστή μεσολάβησης και ξεχωριστές ρυθμίσεις ανά λογαριασμό, με υποστήριξη HTTPS και SOCKS5.\n• Βελτιώθηκαν η κύλιση του χρονολογίου και το κλείσιμο με σάρωση, το ζουμ και η εναλλαγή εικόνων στην προβολή εικόνων. Προστέθηκαν κινούμενα εφέ για ενέργειες αναρτήσεων και διορθώθηκαν καταρρεύσεις κατά την επανασύνδεση και προβλήματα εμφάνισης εικόνων Pixiv."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Improved timeline video playback with smoother transitions, better automatic video selection, and playback progress preserved when opening or closing the media viewer.\n• Improved timeline navigation and post details: replies and scroll positions survive refreshes, Weibo details use the native timeline experience, and navigation bars minimize while scrolling on iOS 27.\n• Improved accessibility across posts, media, and the compose screen with clearer labels, states, and controls.\n• Improved Bluesky session reliability, compatibility with new X timeline responses, and support for more Pixiv artwork and profile link formats."
+            "value" : "Version %@:\n• Added image translation. After configuring a translation service, switch between the original and translated image, then save or share the result.\n• Choose replies and nested replies to include when sharing a post as an image. Fixed excess padding in exported images.\n• Added Weibo group, Friends Circle, and Private Following timelines, post visibility settings, and Live Photo playback. Restored IP location labels.\n• Added global and per-account proxy settings, with HTTPS and SOCKS5 support.\n• Improved timeline scrolling and media-viewer swipe-to-dismiss, zooming, and paging. Added post-action animations and fixed re-login crashes and Pixiv image display."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versio %@:\n• Aikajanan videotoistoa parannettiin sujuvammilla siirtymillä, paremmalla automaattisella videovalinnalla ja toistokohdan säilymisellä mediaselainta avattaessa tai suljettaessa.\n• Aikajanan selaamista ja julkaisujen tietoja parannettiin: vastaukset ja vierityskohta säilyvät päivityksissä, Weibo-tiedot käyttävät natiivia aikajanaa ja navigointipalkit pienenevät vieritettäessä iOS 27:ssä.\n• Julkaisujen, median ja kirjoitusnäkymän saavutettavuutta parannettiin selkeämmillä nimikkeillä, tiloilla ja säätimillä.\n• Bluesky-istuntojen luotettavuutta, yhteensopivuutta X:n uusien aikajanavastausten kanssa ja useampien Pixiv-teos- ja profiililinkkien tukea parannettiin."
+            "value" : "Versio %@:\n• Lisätty kuvien kääntäminen. Kun käännöspalvelu on määritetty, voit vaihtaa alkuperäisen ja käännetyn kuvan välillä sekä tallentaa tai jakaa tuloksen.\n• Voit valita vastaukset ja niiden alavastaukset jakaessasi julkaisun kuvana. Korjattu vietyjen kuvien ylimääräiset tyhjät reunukset.\n• Lisätty Weibon ryhmien, ystäväpiirin ja yksityisesti seurattujen tilien aikajanat, julkaisujen näkyvyysasetukset ja Live Photo -toisto. IP-sijainnin näyttö on palautettu.\n• Lisätty yleiset ja tilikohtaiset välityspalvelinasetukset sekä HTTPS- ja SOCKS5-tuki.\n• Parannettu aikajanan vieritystä sekä kuvankatselun sulkemista pyyhkäisemällä, zoomausta ja kuvien vaihtamista. Lisätty julkaisutoimintojen animaatiot ja korjattu uudelleenkirjautumisen kaatumisia sekä Pixiv-kuvien näyttöä."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ :\n• Amélioration de la lecture vidéo dans les fils avec des transitions plus fluides, une meilleure sélection automatique et la reprise à la même position après l’ouverture ou la fermeture de la visionneuse multimédia.\n• Amélioration de la navigation et des détails de publication : les réponses et positions de défilement sont conservées après actualisation, les détails Weibo utilisent le fil natif et les barres de navigation se réduisent lors du défilement sous iOS 27.\n• Amélioration de l’accessibilité des publications, des médias et de l’écran de rédaction grâce à des libellés, états et commandes plus clairs.\n• Amélioration de la fiabilité des sessions Bluesky, de la compatibilité avec les nouvelles réponses de fil X et de la prise en charge de davantage de formats de liens vers les œuvres et profils Pixiv."
+            "value" : "Version %@ :\n• Ajout de la traduction d’images. Après avoir configuré un service de traduction, alternez entre l’original et sa traduction, puis enregistrez ou partagez le résultat.\n• Choisissez les réponses et sous-réponses à inclure lorsque vous partagez une publication sous forme d’image. Correction des marges excessives dans les images exportées.\n• Ajout des fils Weibo de groupes, du cercle d’amis et des abonnements privés, des réglages de visibilité des publications et de la lecture des Live Photos. Rétablissement de la localisation par IP.\n• Ajout de réglages de proxy globaux et par compte, avec prise en charge de HTTPS et SOCKS5.\n• Amélioration du défilement des fils et des gestes de fermeture, de zoom et de navigation dans la visionneuse. Ajout d’animations pour les actions des publications et correction des plantages à la reconnexion et de l’affichage des images Pixiv."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "גרסה %@:\n• שופרה הפעלת הסרטונים בציר הזמן עם מעברים חלקים יותר, בחירה אוטומטית טובה יותר ושמירת מיקום ההפעלה בעת פתיחה או סגירה של מציג המדיה.\n• שופרו הניווט בציר הזמן ופרטי הפוסטים: תגובות ומיקומי גלילה נשמרים לאחר רענון, פרטי Weibo משתמשים בציר הזמן המקורי וסרגלי הניווט מצטמצמים בגלילה ב-iOS 27.\n• שופרה הנגישות בפוסטים, במדיה ובמסך הכתיבה באמצעות תוויות, מצבים ופקדים ברורים יותר.\n• שופרה אמינות ההפעלות של Bluesky, התאימות לתגובות החדשות של ציר הזמן ב-X והתמיכה בתבניות נוספות של קישורים ליצירות ולפרופילים ב-Pixiv."
+            "value" : "גרסה %@:\n• נוספה תמיכה בתרגום תמונות. לאחר הגדרת שירות תרגום, אפשר לעבור בין התמונה המקורית לתמונה המתורגמת ולשמור או לשתף את התוצאה.\n• אפשר לבחור תגובות ותגובות משנה שייכללו בשיתוף פוסט כתמונה. תוקנו שוליים ריקים מיותרים בתמונות שיוצאו.\n• נוספו צירי זמן של קבוצות, מעגל חברים ומעקב פרטי ב־Weibo, הגדרות חשיפה של פוסטים והפעלת Live Photo. הוחזרה הצגת המיקום לפי כתובת IP.\n• נוספו הגדרות שרת מתווך כלליות ולכל חשבון בנפרד, עם תמיכה ב־HTTPS וב־SOCKS5.\n• שופרו גלילת ציר הזמן, סגירה בהחלקה, שינוי גודל ומעבר בין תמונות במציג התמונות. נוספו הנפשות לפעולות בפוסטים ותוקנו קריסות בהתחברות מחדש ותקלות בהצגת תמונות Pixiv."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ verzió:\n• Javult az idővonali videók lejátszása: simább átmenetek, jobb automatikus videóválasztás és a lejátszási pozíció megőrzése a médianézegető megnyitásakor vagy bezárásakor.\n• Javult az idővonal navigációja és a bejegyzésrészletek: frissítés után megmaradnak a válaszok és a görgetési helyzet, a Weibo-részletek natív idővonalat használnak, iOS 27-en pedig görgetéskor összehúzódnak a navigációs sávok.\n• Egyértelműbb címkékkel, állapotokkal és vezérlőkkel javult a bejegyzések, a média és a szerkesztőképernyő akadálymentessége.\n• Javult a Bluesky-munkamenetek megbízhatósága, az új X-idővonalválaszokkal való kompatibilitás és több Pixiv-alkotás- és profillink-formátum támogatása."
+            "value" : "%@ verzió:\n• Képfordítás hozzáadva. A fordítási szolgáltatás beállítása után válthatsz az eredeti és a lefordított kép között, az eredményt pedig mentheted vagy megoszthatod.\n• Kiválaszthatod a válaszokat és az alválaszokat, amikor képként osztasz meg egy bejegyzést. Eltávolítottuk az exportált képek felesleges üres margóit.\n• Új Weibo-idővonalak csoportokhoz, baráti körhöz és privát követésekhez, valamint bejegyzésláthatósági beállítások és Live Photo-lejátszás. Visszaállt az IP-alapú helymegjelenítés.\n• Globális és fiókonkénti proxybeállítások hozzáadva HTTPS- és SOCKS5-támogatással.\n• Javult az idővonal görgetése, valamint a képnézegető bezárása húzással, nagyítása és lapozása. Animációkat adtunk a bejegyzésműveletekhez, és javítottuk az újbóli bejelentkezéskor fellépő összeomlásokat és a Pixiv-képek megjelenítését."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versione %@:\n• Migliorata la riproduzione dei video nella timeline con transizioni più fluide, una migliore selezione automatica e il mantenimento della posizione quando si apre o chiude il visualizzatore multimediale.\n• Migliorati la navigazione nella timeline e i dettagli dei post: risposte e posizione di scorrimento vengono conservate dopo l’aggiornamento, i dettagli Weibo usano la timeline nativa e le barre di navigazione si riducono durante lo scorrimento su iOS 27.\n• Migliorata l’accessibilità di post, contenuti multimediali e schermata di composizione con etichette, stati e controlli più chiari.\n• Migliorata l’affidabilità delle sessioni Bluesky, la compatibilità con le nuove risposte della timeline di X e il supporto per più formati di link a opere e profili Pixiv."
+            "value" : "Versione %@:\n• Aggiunta la traduzione delle immagini. Dopo aver configurato un servizio di traduzione, puoi passare dall’originale alla traduzione e salvare o condividere il risultato.\n• Puoi scegliere risposte e risposte secondarie da includere quando condividi un post come immagine. Corretti i margini vuoti eccessivi nelle immagini esportate.\n• Aggiunte le cronologie Weibo di gruppi, cerchia di amici e account seguiti privatamente, le impostazioni di visibilità dei post e la riproduzione delle Live Photo. Ripristinata la posizione basata sull’IP.\n• Aggiunte impostazioni proxy globali e per account, con supporto per HTTPS e SOCKS5.\n• Migliorati lo scorrimento della cronologia e i gesti di chiusura, zoom e navigazione nel visualizzatore di immagini. Aggiunte animazioni alle azioni dei post e corretti gli arresti anomali al nuovo accesso e la visualizzazione delle immagini Pixiv."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン %@:\n• タイムラインの動画再生を改善しました。切り替えがより滑らかになり、再生する動画を適切に自動選択し、メディアビューアーを開閉しても再生位置を維持します。\n• タイムライン操作と投稿詳細を改善しました。更新後も返信とスクロール位置を維持し、Weibo の詳細画面はネイティブのタイムラインを使用します。iOS 27 ではスクロール中にナビゲーションバーが最小化されます。\n• 投稿、メディア、投稿作成画面のラベル、状態、操作を分かりやすくし、アクセシビリティを改善しました。\n• Bluesky セッションの安定性、新しい X タイムライン応答への互換性、および Pixiv の作品・プロフィールリンク形式への対応を改善しました。"
+            "value" : "バージョン %@:\n• 画像翻訳を追加しました。翻訳サービスを設定すると、原画像と翻訳画像を切り替えて表示し、翻訳結果を保存・共有できます。\n• 投稿を画像として共有する際に、返信とその返信を選んで含められるようになりました。書き出した画像の余分な余白を修正しました。\n• Weibo にグループ、友達の輪、非公開フォローのタイムライン、投稿の公開範囲設定、Live Photo の再生を追加しました。IP 所在地の表示を復元しました。\n• 全体およびアカウントごとのプロキシ設定を追加し、HTTPS・SOCKS5 に対応しました。\n• タイムラインのスクロールと、画像ビューアーのスワイプ終了・ズーム・ページ切り替えを改善しました。投稿操作のアニメーションを追加し、再ログイン時のクラッシュと Pixiv 画像の表示不具合を修正しました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버전 %@:\n• 타임라인 동영상 재생을 개선하여 전환이 더 부드러워지고 자동 동영상 선택이 향상되었으며, 미디어 뷰어를 열거나 닫아도 재생 위치가 유지됩니다.\n• 타임라인 탐색과 게시물 상세를 개선했습니다. 새로 고쳐도 답글과 스크롤 위치가 유지되고, Weibo 상세 화면은 네이티브 타임라인을 사용하며, iOS 27에서는 스크롤할 때 탐색 막대가 축소됩니다.\n• 게시물, 미디어 및 작성 화면에 더 명확한 레이블, 상태 및 컨트롤을 제공하여 접근성을 개선했습니다.\n• Bluesky 세션 안정성, 새로운 X 타임라인 응답과의 호환성 및 더 다양한 Pixiv 작품·프로필 링크 형식 지원을 개선했습니다."
+            "value" : "버전 %@:\n• 이미지 번역을 추가했습니다. 번역 서비스를 설정하면 원본과 번역 이미지를 전환해서 보고 번역 결과를 저장하거나 공유할 수 있습니다.\n• 게시물을 이미지로 공유할 때 답글과 하위 답글을 선택해서 포함할 수 있습니다. 내보낸 이미지의 불필요한 여백을 수정했습니다.\n• Weibo 그룹, 친구 서클, 비공개 팔로우 타임라인과 게시물 공개 범위 설정, Live Photo 재생을 추가했습니다. IP 위치 표시를 복원했습니다.\n• HTTPS와 SOCKS5를 지원하는 전체 및 계정별 프록시 설정을 추가했습니다.\n• 타임라인 스크롤과 이미지 뷰어의 밀어서 닫기, 확대·축소 및 페이지 전환을 개선했습니다. 게시물 동작 애니메이션을 추가하고, 재로그인 시 충돌과 Pixiv 이미지 표시 문제를 수정했습니다."
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versjon %@:\n• Forbedret videoavspilling i tidslinjen med jevnere overganger, bedre automatisk videovalg og bevart avspillingsposisjon når medievisningen åpnes eller lukkes.\n• Forbedret navigasjon og innleggsdetaljer: svar og rulleposisjoner bevares etter oppdatering, Weibo-detaljer bruker den innebygde tidslinjen, og navigasjonslinjer minimeres ved rulling i iOS 27.\n• Forbedret tilgjengeligheten i innlegg, medier og publiseringsskjermen med tydeligere etiketter, tilstander og kontroller.\n• Forbedret stabiliteten til Bluesky-økter, kompatibiliteten med nye X-tidslinjesvar og støtten for flere lenkeformater til Pixiv-verk og -profiler."
+            "value" : "Versjon %@:\n• Lagt til bildeoversettelse. Når en oversettelsestjeneste er konfigurert, kan du bytte mellom originalen og oversettelsen og lagre eller dele resultatet.\n• Velg svar og undersvar som skal tas med når du deler et innlegg som bilde. Rettet for mye tomrom i eksporterte bilder.\n• Lagt til tidslinjer for Weibo-grupper, vennekrets og privat fulgte kontoer, innstillinger for innleggsynlighet og avspilling av Live Photo. Visning av IP-posisjon er gjenopprettet.\n• Lagt til globale proxyinnstillinger og egne innstillinger per konto, med støtte for HTTPS og SOCKS5.\n• Forbedret rulling i tidslinjen og bildeviserens bevegelser for å lukke, zoome og bytte bilde. Lagt til animasjoner for innleggshandlinger og rettet krasj ved ny innlogging og visning av Pixiv-bilder."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versie %@:\n• De videoweergave in tijdlijnen is verbeterd met soepelere overgangen, betere automatische videoselectie en behoud van de afspeelpositie bij het openen of sluiten van de mediaviewer.\n• Tijdlijnnavigatie en berichtdetails zijn verbeterd: antwoorden en scrollposities blijven na vernieuwen behouden, Weibo-details gebruiken de systeemeigen tijdlijn en navigatiebalken worden tijdens scrollen in iOS 27 geminimaliseerd.\n• De toegankelijkheid van berichten, media en het opstelscherm is verbeterd met duidelijkere labels, statussen en bedieningselementen.\n• De betrouwbaarheid van Bluesky-sessies, compatibiliteit met nieuwe X-tijdlijnreacties en ondersteuning voor meer Pixiv-linkformaten voor werken en profielen zijn verbeterd."
+            "value" : "Versie %@:\n• Afbeeldingsvertaling toegevoegd. Stel een vertaaldienst in om tussen het origineel en de vertaling te wisselen en het resultaat op te slaan of te delen.\n• Kies antwoorden en geneste antwoorden om op te nemen wanneer je een bericht als afbeelding deelt. Overtollige witruimte in geëxporteerde afbeeldingen verholpen.\n• Weibo-tijdlijnen toegevoegd voor groepen, de vriendenkring en privé gevolgde accounts, met zichtbaarheidsinstellingen voor berichten en Live Photo-weergave. IP-locatielabels zijn hersteld.\n• Algemene proxyinstellingen en afzonderlijke instellingen per account toegevoegd, met ondersteuning voor HTTPS en SOCKS5.\n• Scrollen in tijdlijnen en vegen om te sluiten, zoomen en bladeren in de afbeeldingsviewer verbeterd. Animaties voor berichtacties toegevoegd en crashes bij opnieuw inloggen en weergaveproblemen met Pixiv-afbeeldingen verholpen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wersja %@:\n• Ulepszono odtwarzanie filmów na osi czasu: płynniejsze przejścia, lepszy automatyczny wybór oraz zachowanie pozycji po otwarciu lub zamknięciu przeglądarki multimediów.\n• Ulepszono nawigację po osi czasu i szczegóły wpisów: odpowiedzi i pozycja przewijania są zachowywane po odświeżeniu, szczegóły Weibo korzystają z natywnej osi czasu, a paski nawigacji minimalizują się podczas przewijania w iOS 27.\n• Ulepszono dostępność wpisów, multimediów i ekranu tworzenia dzięki czytelniejszym etykietom, stanom i elementom sterującym.\n• Zwiększono niezawodność sesji Bluesky, zgodność z nowymi odpowiedziami osi czasu X oraz obsługę większej liczby formatów odnośników do prac i profili Pixiv."
+            "value" : "Wersja %@:\n• Dodano tłumaczenie obrazów. Po skonfigurowaniu usługi tłumaczenia można przełączać się między oryginałem a tłumaczeniem oraz zapisywać lub udostępniać wynik.\n• Podczas udostępniania wpisu jako obrazu można wybrać odpowiedzi i zagnieżdżone odpowiedzi. Usunięto nadmierne puste marginesy w eksportowanych obrazach.\n• Dodano osie czasu grup, kręgu znajomych i prywatnie obserwowanych kont Weibo, ustawienia widoczności wpisów oraz odtwarzanie Live Photo. Przywrócono wyświetlanie lokalizacji według IP.\n• Dodano globalne ustawienia proxy i osobne ustawienia dla każdego konta z obsługą HTTPS i SOCKS5.\n• Ulepszono przewijanie osi czasu oraz zamykanie gestem, powiększanie i przechodzenie między obrazami w przeglądarce. Dodano animacje działań wpisów i naprawiono awarie przy ponownym logowaniu oraz wyświetlanie obrazów Pixiv."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Melhorada a reprodução de vídeos na cronologia com transições mais fluidas, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador multimédia.\n• Melhoradas a navegação na cronologia e os detalhes das publicações: as respostas e posições de deslocamento mantêm-se após atualizar, os detalhes Weibo usam a cronologia nativa e as barras de navegação minimizam-se ao deslocar no iOS 27.\n• Melhorada a acessibilidade das publicações, dos conteúdos multimédia e do ecrã de composição com etiquetas, estados e controlos mais claros.\n• Melhorada a fiabilidade das sessões Bluesky, a compatibilidade com novas respostas da cronologia do X e o suporte para mais formatos de ligações de obras e perfis Pixiv."
+            "value" : "Versão %@:\n• Adicionada a tradução de imagens. Após configurar um serviço de tradução, pode alternar entre o original e a tradução e guardar ou partilhar o resultado.\n• Pode escolher respostas e respostas aninhadas ao partilhar uma publicação como imagem. Corrigidas as margens em branco excessivas nas imagens exportadas.\n• Adicionadas cronologias de grupos, círculo de amigos e contas seguidas em privado do Weibo, definições de visibilidade das publicações e reprodução de Live Photo. Restaurada a localização por IP.\n• Adicionadas definições de proxy globais e por conta, com suporte para HTTPS e SOCKS5.\n• Melhorados o deslocamento da cronologia e os gestos para fechar, ampliar e navegar no visualizador de imagens. Adicionadas animações às ações das publicações e corrigidas falhas ao voltar a iniciar sessão e na apresentação de imagens Pixiv."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versão %@:\n• Melhoramos a reprodução de vídeos na timeline com transições mais suaves, melhor seleção automática e preservação da posição ao abrir ou fechar o visualizador de mídia.\n• Melhoramos a navegação na timeline e os detalhes dos posts: respostas e posições de rolagem são preservadas após a atualização, os detalhes do Weibo usam a timeline nativa e as barras de navegação são minimizadas ao rolar no iOS 27.\n• Melhoramos a acessibilidade de posts, mídias e da tela de composição com rótulos, estados e controles mais claros.\n• Melhoramos a confiabilidade das sessões do Bluesky, a compatibilidade com novas respostas da timeline do X e o suporte a mais formatos de links de obras e perfis do Pixiv."
+            "value" : "Versão %@:\n• Adicionada a tradução de imagens. Após configurar um serviço de tradução, você pode alternar entre o original e a tradução e salvar ou compartilhar o resultado.\n• Você pode escolher respostas e respostas aninhadas ao compartilhar uma publicação como imagem. Corrigidas as margens em branco excessivas nas imagens exportadas.\n• Adicionadas linhas do tempo de grupos, círculo de amigos e contas seguidas em particular do Weibo, configurações de visibilidade das publicações e reprodução de Live Photo. Restaurada a localização por IP.\n• Adicionadas configurações de proxy globais e por conta, com suporte a HTTPS e SOCKS5.\n• Melhoradas a rolagem da linha do tempo e as ações de deslizar para fechar, ampliar e navegar no visualizador de imagens. Adicionadas animações às ações das publicações e corrigidas falhas ao entrar novamente e na exibição de imagens do Pixiv."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versiunea %@:\n• Redarea videoclipurilor în cronologie a fost îmbunătățită cu tranziții mai fluide, selecție automată mai bună și păstrarea poziției la deschiderea sau închiderea vizualizatorului media.\n• Navigarea în cronologie și detaliile postărilor au fost îmbunătățite: răspunsurile și poziția de derulare se păstrează după reîmprospătare, detaliile Weibo folosesc cronologia nativă, iar barele de navigare se minimizează la derulare în iOS 27.\n• Accesibilitatea postărilor, conținutului media și ecranului de compunere a fost îmbunătățită cu etichete, stări și comenzi mai clare.\n• A fost îmbunătățită fiabilitatea sesiunilor Bluesky, compatibilitatea cu noile răspunsuri ale cronologiei X și suportul pentru mai multe formate de linkuri către lucrări și profiluri Pixiv."
+            "value" : "Versiunea %@:\n• Am adăugat traducerea imaginilor. După configurarea unui serviciu de traducere, poți comuta între original și traducere și poți salva sau distribui rezultatul.\n• Poți selecta răspunsuri și răspunsuri secundare când distribui o postare ca imagine. Am eliminat spațiile goale excesive din imaginile exportate.\n• Am adăugat fluxuri Weibo pentru grupuri, cercul de prieteni și conturi urmărite în privat, setări de vizibilitate a postărilor și redare Live Photo. Am restabilit afișarea locației pe baza IP-ului.\n• Am adăugat setări proxy globale și pentru fiecare cont, cu suport pentru HTTPS și SOCKS5.\n• Am îmbunătățit derularea fluxului și închiderea prin glisare, mărirea și navigarea în vizualizatorul de imagini. Am adăugat animații pentru acțiunile postărilor și am remediat blocările la reautentificare și afișarea imaginilor Pixiv."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версия %@:\n• Улучшено воспроизведение видео в ленте: более плавные переходы, точнее автоматический выбор видео и сохранение позиции при открытии или закрытии медиапросмотра.\n• Улучшены навигация по ленте и сведения о публикациях: ответы и позиция прокрутки сохраняются после обновления, страницы Weibo используют нативную ленту, а панели навигации сворачиваются при прокрутке в iOS 27.\n• Улучшена доступность публикаций, медиа и экрана создания благодаря более понятным подписям, состояниям и элементам управления.\n• Повышена надёжность сеансов Bluesky, совместимость с новыми ответами ленты X и поддержка дополнительных форматов ссылок на работы и профили Pixiv."
+            "value" : "Версия %@:\n• Добавлен перевод изображений. После настройки сервиса перевода можно переключаться между оригиналом и переводом, сохранять результат и делиться им.\n• При отправке публикации в виде изображения можно выбирать ответы и вложенные ответы. Убраны лишние пустые поля в экспортируемых изображениях.\n• Добавлены ленты групп, круга друзей и приватных подписок Weibo, настройки видимости публикаций и воспроизведение Live Photo. Восстановлено отображение местоположения по IP.\n• Добавлены общие настройки прокси и отдельные настройки для каждого аккаунта с поддержкой HTTPS и SOCKS5.\n• Улучшены прокрутка ленты, закрытие смахиванием, масштабирование и перелистывание в просмотрщике изображений. Добавлены анимации действий с публикациями и исправлены сбои при повторном входе и отображении изображений Pixiv."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Верзија %@:\n• Побољшана је репродукција видеа на временској линији уз глаткије прелазе, бољи аутоматски избор и чување позиције при отварању или затварању приказивача медија.\n• Побољшана је навигација и приказ детаља објава: одговори и позиција померања остају сачувани након освежавања, Weibo детаљи користе изворну временску линију, а навигационе траке се смањују током померања у iOS-у 27.\n• Побољшана је приступачност објава, медија и екрана за састављање јаснијим ознакама, стањима и контролама.\n• Побољшана је поузданост Bluesky сесија, компатибилност са новим одговорима X временске линије и подршка за више формата веза ка Pixiv радовима и профилима."
+            "value" : "Верзија %@:\n• Додат је превод слика. Након подешавања услуге превођења можете да прелазите између оригинала и превода и сачувате или поделите резултат.\n• При дељењу објаве као слике можете да изаберете одговоре и пододговоре. Уклоњене су сувишне празне маргине на извезеним сликама.\n• Додате су Weibo временске линије за групе, круг пријатеља и приватна праћења, подешавања видљивости објава и репродукција Live Photo садржаја. Враћен је приказ локације према IP адреси.\n• Додата су општа подешавања проксија и засебна подешавања за сваки налог, уз подршку за HTTPS и SOCKS5.\n• Побољшани су померање временске линије и затварање превлачењем, зумирање и листање у прегледачу слика. Додате су анимације радњи над објавама и исправљени падови при поновном пријављивању и приказ Pixiv слика."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@:\n• Förbättrad videouppspelning i tidslinjen med mjukare övergångar, bättre automatiskt videoval och sparad uppspelningsposition när medievisaren öppnas eller stängs.\n• Förbättrad tidslinjenavigering och inläggsdetaljer: svar och rullningspositioner bevaras efter uppdatering, Weibo-detaljer använder den inbyggda tidslinjen och navigeringsfält minimeras vid rullning i iOS 27.\n• Förbättrad tillgänglighet i inlägg, medier och publiceringsskärmen med tydligare etiketter, tillstånd och kontroller.\n• Förbättrad tillförlitlighet för Bluesky-sessioner, kompatibilitet med nya X-tidslinjesvar och stöd för fler länkformat till Pixiv-verk och -profiler."
+            "value" : "Version %@:\n• Lagt till bildöversättning. När du har konfigurerat en översättningstjänst kan du växla mellan originalet och översättningen och spara eller dela resultatet.\n• Välj svar och undersvar att ta med när du delar ett inlägg som bild. Åtgärdat överflödiga tomma marginaler i exporterade bilder.\n• Lagt till tidslinjer för Weibo-grupper, vänkrets och privat följda konton, inställningar för inläggens synlighet och uppspelning av Live Photo. Visning av IP-plats har återställts.\n• Lagt till globala proxyinställningar och separata inställningar per konto, med stöd för HTTPS och SOCKS5.\n• Förbättrat rullning i tidslinjen samt svep för att stänga, zooma och bläddra i bildvisaren. Lagt till animationer för inläggsåtgärder och åtgärdat krascher vid ny inloggning och visning av Pixiv-bilder."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sürüm %@:\n• Zaman akışındaki video oynatma; daha akıcı geçişler, daha iyi otomatik video seçimi ve medya görüntüleyici açılıp kapatıldığında oynatma konumunun korunmasıyla iyileştirildi.\n• Zaman akışı gezinmesi ve gönderi ayrıntıları iyileştirildi: yenilemeden sonra yanıtlar ve kaydırma konumu korunuyor, Weibo ayrıntıları yerel zaman akışını kullanıyor ve iOS 27’de kaydırırken gezinme çubukları küçülüyor.\n• Gönderilerde, medyada ve oluşturma ekranında daha anlaşılır etiketler, durumlar ve kontrollerle erişilebilirlik iyileştirildi.\n• Bluesky oturum güvenilirliği, yeni X zaman akışı yanıtlarıyla uyumluluk ve daha fazla Pixiv eser ve profil bağlantısı biçimi desteği iyileştirildi."
+            "value" : "Sürüm %@:\n• Görsel çevirisi eklendi. Bir çeviri hizmeti yapılandırdıktan sonra özgün görsel ile çevirisi arasında geçiş yapabilir, sonucu kaydedebilir veya paylaşabilirsiniz.\n• Bir gönderiyi görsel olarak paylaşırken yanıtları ve alt yanıtları seçebilirsiniz. Dışa aktarılan görsellerdeki fazla boşluklar düzeltildi.\n• Weibo grup, arkadaş çevresi ve gizli takip zaman akışları, gönderi görünürlüğü ayarları ve Live Photo oynatma eklendi. IP konumu gösterimi geri getirildi.\n• HTTPS ve SOCKS5 desteğiyle genel ve hesaba özel vekil sunucu ayarları eklendi.\n• Zaman akışında kaydırma ve görsel görüntüleyicide kaydırarak kapatma, yakınlaştırma ve sayfa değiştirme iyileştirildi. Gönderi işlemi animasyonları eklendi; yeniden girişteki çökmeler ve Pixiv görsellerinin gösterimi düzeltildi."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Версія %@:\n• Покращено відтворення відео у стрічці: плавніші переходи, кращий автоматичний вибір і збереження позиції під час відкриття або закриття переглядача медіа.\n• Покращено навігацію стрічкою та подробиці дописів: відповіді й позиція прокручування зберігаються після оновлення, сторінки Weibo використовують нативну стрічку, а панелі навігації згортаються під час прокручування в iOS 27.\n• Покращено доступність дописів, медіа й екрана створення завдяки зрозумілішим міткам, станам і елементам керування.\n• Підвищено надійність сеансів Bluesky, сумісність із новими відповідями стрічки X і підтримку більшої кількості форматів посилань на роботи та профілі Pixiv."
+            "value" : "Версія %@:\n• Додано переклад зображень. Після налаштування сервісу перекладу можна перемикатися між оригіналом і перекладом, зберігати результат і ділитися ним.\n• Під час поширення допису як зображення можна вибирати відповіді та вкладені відповіді. Прибрано зайві порожні поля в експортованих зображеннях.\n• Додано стрічки груп, кола друзів і приватних підписок Weibo, налаштування видимості дописів та відтворення Live Photo. Відновлено показ місцеперебування за IP.\n• Додано загальні налаштування проксі та окремі налаштування для кожного облікового запису з підтримкою HTTPS і SOCKS5.\n• Поліпшено прокручування стрічки, закривання змахуванням, масштабування та гортання в переглядачі зображень. Додано анімації дій із дописами та виправлено збої під час повторного входу й показу зображень Pixiv."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phiên bản %@:\n• Cải thiện phát video trên dòng thời gian với chuyển cảnh mượt hơn, chọn video tự động tốt hơn và giữ nguyên vị trí phát khi mở hoặc đóng trình xem đa phương tiện.\n• Cải thiện điều hướng dòng thời gian và chi tiết bài đăng: phản hồi cùng vị trí cuộn được giữ lại sau khi làm mới, chi tiết Weibo dùng dòng thời gian gốc và thanh điều hướng thu gọn khi cuộn trên iOS 27.\n• Cải thiện khả năng hỗ trợ tiếp cận cho bài đăng, nội dung đa phương tiện và màn hình soạn thảo với nhãn, trạng thái và điều khiển rõ ràng hơn.\n• Cải thiện độ ổn định của phiên Bluesky, khả năng tương thích với phản hồi dòng thời gian mới của X và hỗ trợ thêm định dạng liên kết tác phẩm, hồ sơ Pixiv."
+            "value" : "Phiên bản %@:\n• Thêm tính năng dịch hình ảnh. Sau khi thiết lập dịch vụ dịch, bạn có thể chuyển giữa ảnh gốc và ảnh đã dịch, rồi lưu hoặc chia sẻ kết quả.\n• Bạn có thể chọn phản hồi và phản hồi con khi chia sẻ bài đăng dưới dạng hình ảnh. Sửa khoảng trắng thừa trong ảnh xuất ra.\n• Thêm dòng thời gian nhóm, vòng bạn bè và theo dõi riêng tư trên Weibo, cài đặt phạm vi hiển thị bài đăng và phát Live Photo. Khôi phục hiển thị vị trí theo IP.\n• Thêm cài đặt proxy chung và riêng cho từng tài khoản, hỗ trợ HTTPS và SOCKS5.\n• Cải thiện cuộn dòng thời gian và thao tác vuốt để đóng, thu phóng, chuyển ảnh trong trình xem ảnh. Thêm hiệu ứng cho thao tác bài đăng, sửa lỗi văng khi đăng nhập lại và lỗi hiển thị ảnh Pixiv."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 改进时间线视频播放：切换更流畅，可自动选择更合适的视频，并在打开或关闭媒体查看器时保留播放进度。\n• 改进时间线导航和帖子详情：刷新后会保留回复与滚动位置，微博详情使用原生时间线体验，iOS 27 上的导航栏会在滚动时自动收起。\n• 改进帖子、媒体和发帖界面的无障碍体验，提供更清晰的标签、状态说明和操作控件。\n• 提升 Bluesky 会话稳定性，兼容 X 时间线的新响应格式，并支持更多 Pixiv 作品及用户链接格式。"
+            "value" : "版本 %@：\n• 新增图片翻译，配置翻译服务后，可切换查看原图和译图，并保存或分享翻译结果。\n• 分享帖子图片时可选择附带回复和子回复，修正导出图片的多余留白。\n• 微博新增分组、好友圈和悄悄关注时间线，支持发帖可见范围设置与 Live Photo 播放，恢复 IP 属地显示。\n• 新增全局和分账号代理设置，支持 HTTPS、SOCKS5 代理。\n• 优化时间线滚动及图片查看器的滑动关闭、缩放和翻页体验，新增帖子操作动画，修复重新登录崩溃及 Pixiv 图片显示异常。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@：\n• 改善時間軸影片播放：切換更流暢，可自動選擇更合適的影片，並在開啟或關閉媒體檢視器時保留播放進度。\n• 改善時間軸導覽和貼文詳細資料：重新整理後會保留回覆與捲動位置，微博詳細資料採用原生時間軸體驗，iOS 27 上的導覽列會在捲動時自動收合。\n• 改善貼文、媒體和發文介面的輔助使用體驗，提供更清晰的標籤、狀態說明和操作控制項。\n• 提升 Bluesky 工作階段穩定性、相容 X 時間軸的新回應格式，並支援更多 Pixiv 作品及使用者連結格式。"
+            "value" : "版本 %@：\n• 新增圖片翻譯，設定翻譯服務後，可切換查看原圖與譯圖，並儲存或分享翻譯結果。\n• 分享貼文圖片時可選擇附帶回覆與子回覆，修正匯出圖片的多餘留白。\n• 微博新增分組、好友圈與悄悄關注時間軸，支援發文可見範圍設定及 Live Photo 播放，恢復 IP 所在地顯示。\n• 新增全域與個別帳號的代理伺服器設定，支援 HTTPS、SOCKS5 代理伺服器。\n• 改善時間軸捲動及圖片檢視器的滑動關閉、縮放與翻頁體驗，新增貼文操作動畫，修正重新登入時當機及 Pixiv 圖片顯示異常。"
           }
         }
       }
@@ -140432,6 +143051,70 @@
         }
       }
     },
+    "rss_open_mode_checking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking the best opening mode…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在推荐打开方式…"
+          }
+        }
+      }
+    },
+    "rss_open_mode_recommended": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommended from recent articles. You can change this."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已根据最近文章推荐，可随时修改。"
+          }
+        }
+      }
+    },
+    "rss_open_mode_unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not recommend an opening mode. You can choose one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法推荐打开方式，你可以手动选择。"
+          }
+        }
+      }
+    },
+    "rss_detail_unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This article could not be loaded. You can open the original page."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法加载这篇文章，你可以打开原文。"
+          }
+        }
+      }
+    },
     "rss_sources_description_only" : {
       "localizations" : {
         "af" : {
@@ -140485,7 +143168,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Description only"
+            "value" : "Feed content"
           }
         },
         "fi" : {
@@ -140605,7 +143288,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "仅描述"
+            "value" : "订阅内容"
           }
         },
         "zh-Hant" : {
@@ -140669,7 +143352,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Full content"
+            "value" : "Webpage full text"
           }
         },
         "fi" : {
@@ -140789,7 +143472,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "完整内容"
+            "value" : "网页全文"
           }
         },
         "zh-Hant" : {
@@ -158347,7 +161030,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Images are unsupported; retrying with text…"
+            "value" : "Images could not be read; continuing with text only…"
           }
         },
         "fi" : {
@@ -158467,13 +161150,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "图像不支持；重试文本..."
+            "value" : "图片无法读取，已改为文字分析…"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不支援圖片；正在改用文字重試..."
+            "value" : "圖片無法讀取，已改為文字分析…"
           }
         }
       }
@@ -178935,7 +181618,206 @@
           }
         }
       }
+    },
+  "None": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "None"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "关闭"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "關閉"
+        }
+      }
     }
+  },
+  "Minimal": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Minimal"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最低"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最低"
+        }
+      }
+    }
+  },
+  "Extra High": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Extra High"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "极高"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "極高"
+        }
+      }
+    }
+  },
+  "Maximum": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Maximum"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最高"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "最高"
+        }
+      }
+    }
+  },
+  "settings_ai_config_basic_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Translation and summaries"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "翻译与摘要"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "翻譯與摘要"
+        }
+      }
+    }
+  },
+  "settings_ai_config_agent_title": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI Agent"
+        }
+      }
+    }
+  },
+  "settings_ai_config_use_shared": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Use translation and summary AI settings"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "使用翻译与摘要的 AI 设置"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "使用翻譯與摘要的 AI 設定"
+        }
+      }
+    }
+  },
+  "settings_ai_config_use_shared_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Turn off to configure a separate server, model and reasoning settings for the Agent."
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "关闭后，可为 Agent 单独设置服务器、模型和推理参数。"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "關閉後，可為 Agent 單獨設定伺服器、模型和推理參數。"
+        }
+      }
+    }
+  },
+  "settings_ai_config_model_description": {
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "AI model used for this configuration"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此配置使用的 AI 模型"
+        }
+      },
+      "zh-Hant": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "此設定使用的 AI 模型"
+        }
+      }
+    }
+  }
+
   },
   "version" : "1.1"
 }

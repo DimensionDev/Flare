@@ -57,6 +57,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.paging.testing)
                 implementation(libs.ktor.client.mock)

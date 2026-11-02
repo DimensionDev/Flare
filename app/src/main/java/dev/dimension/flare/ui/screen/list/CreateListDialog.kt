@@ -45,6 +45,7 @@ import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.CreateListPresenter
 import dev.dimension.flare.ui.presenter.list.CreateListState
@@ -114,7 +115,7 @@ internal fun CreateListDialog(
                             ) {
                                 if (state.uri != null) {
                                     NetworkImage(
-                                        model = state.uri.toString(),
+                                        model = state.uri.toString().toUiImage(),
                                         contentDescription = stringResource(R.string.list_choose_image),
                                         modifier =
                                             Modifier

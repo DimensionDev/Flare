@@ -391,7 +391,6 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                 }
         }
     state.appSettings.onSuccess { appSettings ->
-        val openAIConfig = appSettings.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
         LaunchedEffect(appSettings.language) {
             if (appSettings.language.isNotEmpty()) {
                 val locale = Locale.forLanguageTag(appSettings.language)
@@ -409,7 +408,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                             TimelineAppearance.AiConfig(
                                 translation = true,
                                 tldr = appSettings.aiConfig.tldr,
-                                agent = appSettings.aiConfig.agent && !openAIConfig?.model.isNullOrBlank(),
+                                agent = appSettings.aiConfig.isAgentEnabled,
                                 showOriginalWithTranslation =
                                     appSettings.translateConfig.showOriginalWithTranslation,
                             ),

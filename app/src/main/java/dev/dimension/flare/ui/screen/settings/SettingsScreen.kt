@@ -5,6 +5,7 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -30,10 +31,12 @@ import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Newspaper
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.PhotoFilm
+import compose.icons.fontawesomeicons.solid.PuzzlePiece
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Sliders
 import compose.icons.fontawesomeicons.solid.TableList
@@ -81,6 +84,8 @@ internal fun SettingsDetailPlaceholder(modifier: Modifier = Modifier) {
 @Composable
 internal fun SettingsScreen(
     toAccounts: () -> Unit,
+    toProxy: () -> Unit,
+    toPlugins: () -> Unit,
     toAppearanceTheme: () -> Unit,
     toAppearanceLayout: () -> Unit,
     toAppearanceDisplay: () -> Unit,
@@ -352,7 +357,7 @@ internal fun SettingsScreen(
                     onClick = {
                         toTranslationConfig.invoke()
                     },
-                    shapes = ListItemDefaults.last(),
+                    shapes = ListItemDefaults.item(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_translation_title))
                     },
@@ -366,6 +371,32 @@ internal fun SettingsScreen(
                     supportingContent = {
                         Text(text = stringResource(id = R.string.settings_translation_description))
                     },
+                )
+                SegmentedListItem(
+                    onClick = toProxy,
+                    shapes = ListItemDefaults.item(),
+                    content = { Text(stringResource(R.string.proxy_title)) },
+                    supportingContent = { Text(stringResource(R.string.proxy_settings_subtitle)) },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.Globe,
+                            contentDescription = null,
+                            color = ThemeIconData.Color.SapphireBlue,
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = toPlugins,
+                    shapes = ListItemDefaults.last(),
+                    content = { Text(text = stringResource(id = R.string.settings_plugins_title)) },
+                    leadingContent = {
+                        ThemedIcon(
+                            imageVector = FontAwesomeIcons.Solid.PuzzlePiece,
+                            contentDescription = null,
+                            color = ThemeIconData.Color.ForestGreen,
+                        )
+                    },
+                    supportingContent = { Text(text = stringResource(id = R.string.settings_plugins_subtitle)) },
                 )
             }
             Column(

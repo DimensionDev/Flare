@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.misskey
 
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AuthResources
 import dev.dimension.flare.data.network.misskey.api.createAuthResources
@@ -42,12 +43,13 @@ private val defaultPermission =
 
 internal class MisskeyOauthService(
     private val host: String,
+    proxy: ProxyRef = ProxyRef.Global,
     private val name: String? = null,
     private val icon: String? = null,
     private val callback: String? = null,
     private val permission: List<String> = defaultPermission,
     private val session: String = Uuid.random().toString(),
-) : AuthResources by ktorfit("https://$host/").createAuthResources() {
+) : AuthResources by ktorfit("https://$host/", proxy = proxy).createAuthResources() {
     fun getAuthorizeUrl(): String {
         val url =
             URLBuilder().apply {

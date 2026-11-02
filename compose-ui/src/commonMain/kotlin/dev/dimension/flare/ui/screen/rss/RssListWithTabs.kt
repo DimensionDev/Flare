@@ -34,6 +34,7 @@ import dev.dimension.flare.compose.ui.more
 import dev.dimension.flare.compose.ui.tab_settings_add
 import dev.dimension.flare.compose.ui.tab_settings_remove
 import dev.dimension.flare.data.database.app.model.SubscriptionType
+import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
@@ -43,6 +44,7 @@ import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUiImage
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 
@@ -102,7 +104,7 @@ public fun LazyListScope.rssListWithTabs(
                 },
                 leadingContent = {
                     NetworkImage(
-                        model = it.favIcon,
+                        model = it.favIcon.toUiImage(proxy = ProxyRef.Global),
                         contentDescription = it.title,
                         modifier = Modifier.size(24.dp),
                     )

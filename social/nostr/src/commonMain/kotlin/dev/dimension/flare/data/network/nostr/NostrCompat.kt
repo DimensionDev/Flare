@@ -421,10 +421,15 @@ internal data class Address(
 internal typealias NormalizedRelayUrl = String
 
 internal object RelayUrlNormalizer {
-    fun normalizeOrNull(raw: String): NormalizedRelayUrl? =
-        com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
-            .normalizeOrNull(raw)
+    fun normalizeOrNull(raw: String): NormalizedRelayUrl? {
+        // Rust accepted case-insensitive schemes; preserve the path and query verbatim.
+        val value = raw.trim()
+        val schemeEnd = value.indexOf("://")
+        val canonical = if (schemeEnd >= 0) value.take(schemeEnd).lowercase() + value.substring(schemeEnd) else value
+        return com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
+            .normalizeOrNull(canonical)
             ?.url
+    }
 
     fun isRelayUrl(raw: String): Boolean = normalizeOrNull(raw) != null
 }

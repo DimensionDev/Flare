@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
+import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
+import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.model.tab.ShortcutSpec
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
@@ -21,7 +21,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStrings
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toWebPath
@@ -76,10 +75,10 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
             .map { services ->
                 services
                     .mapNotNull { service ->
-                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
-                            service.userHandler
-                                .userById(service.accountKey.id)
-                                .toUi()
+                        val profileFlow = service.accountProfileFlow()
+                        val accountKey = service.accountKeyOrNull
+                        if (profileFlow != null && accountKey != null) {
+                            profileFlow
                                 .distinctUntilChangedBy {
                                     it.takeSuccess()?.let {
                                         buildString {
@@ -95,7 +94,7 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
                                 }.map { userState ->
                                     userState.takeSuccess()?.let { user ->
                                         Item(
-                                            accountKey = service.accountKey,
+                                            accountKey = accountKey,
                                             user = userState,
                                             tabs =
                                                 (
@@ -106,13 +105,14 @@ public class SecondaryTabsPresenter : PresenterBase<SecondaryTabsPresenter.State
                                                             target =
                                                                 ShortcutSpec.Target.Route(
                                                                     DeeplinkRoute.Profile.User(
-                                                                        accountType = AccountType.Specific(service.accountKey),
+                                                                        accountType = AccountType.Specific(accountKey),
                                                                         userKey = user.key,
                                                                     ),
                                                                 ),
                                                         ),
-                                                    ) +
-                                                        (service as? TimelineTabConfigurationDataSource)
+                                                    ).takeIf { service.capabilities.profile != null }.orEmpty() +
+                                                        service.capabilities.tabCatalog
+                                                            ?.configuration
                                                             ?.shortcuts
                                                             .orEmpty()
                                                 ).mapNotNull(::toTab)

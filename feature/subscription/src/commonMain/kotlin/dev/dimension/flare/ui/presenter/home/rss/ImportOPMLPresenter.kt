@@ -26,6 +26,8 @@ public class ImportOPMLPresenter(
     private val opmlContent: String,
     private val fetchIcon: suspend (String) -> String? = { RssService.fetchIcon(it) },
 ) : PresenterBase<ImportOPMLPresenter.State>() {
+    public constructor(opmlContent: String) : this(opmlContent, fetchIcon = { RssService.fetchIcon(it) })
+
     private val subscriptionRepository: SubscriptionRepository by koinInject()
 
     @Immutable

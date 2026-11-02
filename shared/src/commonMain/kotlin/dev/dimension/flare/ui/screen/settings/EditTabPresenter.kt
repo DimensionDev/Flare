@@ -22,6 +22,8 @@ public class EditTabPresenter(
     private val tabItem: UiTimelineTabItem,
     private val localizedString: suspend (UiStrings) -> String = { it.name },
 ) : PresenterBase<EditTabPresenter.State>() {
+    public constructor(tabItem: UiTimelineTabItem) : this(tabItem, localizedString = { it.name })
+
     private val timelineResolver: TimelineResolver by koinInject()
 
     public interface State {
@@ -111,4 +113,5 @@ private suspend fun UiText.displayText(localizedString: suspend (UiStrings) -> S
     when (this) {
         is UiText.Localized -> localizedString(string)
         is UiText.Raw -> string
+        is UiText.ExternalRef -> fallbackText()
     }

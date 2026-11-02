@@ -8,8 +8,8 @@ import dev.dimension.flare.data.database.cache.model.DbTranslation
 import dev.dimension.flare.data.database.cache.model.TranslationDisplayOptions
 import dev.dimension.flare.data.database.cache.model.applyTranslation
 import dev.dimension.flare.model.DbAccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.bindMediaProxy
 import kotlin.concurrent.atomics.AtomicReference
 
 /** The single retained representation shared by the page cache and Paging/UI. */
@@ -38,8 +38,9 @@ internal class TimelinePageItem(
                     ),
                 ].orEmpty()
             }
-        cachedRender.store(CachedRender(options, rendered))
-        return rendered
+        val bound = rendered.bindMediaProxy()
+        cachedRender.store(CachedRender(options, bound))
+        return bound
     }
 
     private data class CachedRender(

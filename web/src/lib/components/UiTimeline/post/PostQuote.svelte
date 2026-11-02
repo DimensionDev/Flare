@@ -3,10 +3,10 @@
 	import type { TimelineAppearance } from '$lib/environment/environmentSettings.svelte';
 	import type { UiTimelineV2Post } from '@flare/web-presenters/timeline.svelte';
 	import PostCard from './PostCard.svelte';
+	import PostBody from './PostBody.svelte';
 	import PostHeader from './PostHeader.svelte';
 	import PostMediaGrid from './PostMediaGrid.svelte';
-	import RichText from '$lib/components/RichText.svelte';
-	import { shouldIgnorePostContainerClick } from './postUtils';
+	import { postKey, shouldIgnorePostContainerClick } from './postUtils';
 
 	let {
 		quote,
@@ -59,11 +59,9 @@
 	<PostHeader post={quote} {appearance} sideAvatarVisible={false} quoteHeader={true} />
 	{#if visibleContents.some((content) => !content.isEmpty)}
 		<div class="quote-text">
-			{#each visibleContents as content}
-				{#if !content.isEmpty}
-					<RichText text={content} className="rich-body" />
-				{/if}
-			{/each}
+			{#key postKey(quote)}
+				<PostBody contents={visibleContents} lineLimit={Math.max(appearance.lineLimit || 5, 1)} />
+			{/key}
 		</div>
 	{/if}
 	{#if quote.images.length > 0}
@@ -86,7 +84,7 @@
 
 	.quote-text {
 		display: grid;
-		gap: 0.25rem;
+		gap: var(--post-gap);
 		color: var(--post-text-readable);
 		font-size: 0.86rem;
 		line-height: 1.42;

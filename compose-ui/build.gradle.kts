@@ -50,6 +50,8 @@ kotlin {
                 implementation(libs.coil3.compose)
                 implementation(libs.coil3.ktor3)
                 implementation(libs.coil3.network)
+                api(libs.richtext.ui)
+                implementation(libs.richtext.commonmark)
                 implementation(libs.compose.placeholder)
                 implementation(libs.ksoup)
                 implementation(libs.kotlinx.immutable)
@@ -79,11 +81,14 @@ kotlin {
                 implementation(libs.material3.adaptive)
                 implementation(libs.material3)
                 implementation(libs.bundles.media3)
+                implementation(libs.media3.datasource.okhttp)
+                implementation(libs.ktor.client.okhttp)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)
             }
         }
         val androidDeviceTest by getting {
+            kotlin.srcDir("src/androidJvmTest/kotlin")
             dependencies {
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.ui.test.junit4)

@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotificationTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.model.mapper.render
 internal class MentionRemoteMediator(
     private val service: MastodonService,
     private val accountKey: MicroBlogKey,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : NotificationTimelineLoader {
     override val pagingKey: String = "mention_$accountKey"
 
     override suspend fun load(

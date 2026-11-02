@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
@@ -17,7 +16,7 @@ internal class FeedTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val uri: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
-    override val pagingKey = "feed_timeline_$uri"
+    override val pagingKey = "feed_timeline_${accountKey}_$uri"
 
     override suspend fun load(
         pageSize: Int,
@@ -58,7 +57,7 @@ internal class FeedTimelineRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data = response.feed.render(accountKey),
+            data = response.feed.renderWithDownloadUrls(accountKey),
             nextKey = response.cursor,
         )
     }

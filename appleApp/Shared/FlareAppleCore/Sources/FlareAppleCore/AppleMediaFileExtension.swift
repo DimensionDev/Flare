@@ -1,6 +1,10 @@
 import Foundation
 
 public enum AppleMediaFileExtension {
+    public nonisolated static func isGIF(url: URL?) -> Bool {
+        url?.pathExtension.lowercased() == "gif"
+    }
+
     public nonisolated static func image(url: URL, fallback: String = "jpg") -> String {
         extensionFromPath(url.path) ?? fallback
     }
@@ -29,7 +33,8 @@ public enum AppleMediaFileExtension {
 
     public nonisolated static func video(url: URL, response: URLResponse?, fallback: String = "mp4") -> String {
         let pathExtension = url.pathExtension.lowercased()
-        if !pathExtension.isEmpty, pathExtension != "m3u8" {
+        if !pathExtension.isEmpty, pathExtension != "m3u8",
+           !url.path.hasSuffix("/xrpc/com.atproto.sync.getBlob") {
             return pathExtension
         }
 

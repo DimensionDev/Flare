@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -53,6 +54,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -62,6 +64,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,7 +74,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -83,6 +89,7 @@ import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Sliders
+import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
@@ -108,12 +115,14 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.LoggedInPresenter
@@ -158,6 +167,9 @@ internal fun HomeTimelineScreen(
                     .asPaddingValues(),
         ) {
             state.tabState.onSuccess { tabs ->
+                if (tabs.isEmpty()) {
+                    item { HomeTabsEmpty(toTabSettings, Modifier.fillParentMaxSize().windowInsetsPadding(WindowInsets.systemBars)) }
+                }
                 items(tabs) { tab ->
                     val tabItemState by producePresenter("tabItemState_${tab.id}") {
                         val backStack =
@@ -424,7 +436,11 @@ internal fun HomeTimelineScreen(
             modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         ) { contentPadding ->
             state.pagerState.onSuccess { pagerState ->
-                state.tabState.onSuccess { tabState ->
+                state.tabState.onSuccess tabs@{ tabState ->
+                    if (tabState.isEmpty()) {
+                        HomeTabsEmpty(toTabSettings, Modifier.fillMaxSize().padding(contentPadding))
+                        return@tabs
+                    }
                     LaunchedEffect(pagerState.currentPage >= tabState.size) {
                         if (pagerState.currentPage >= tabState.size) {
                             scope.launch {
@@ -471,6 +487,21 @@ internal fun HomeTimelineScreen(
 }
 
 @Composable
+private fun HomeTabsEmpty(
+    onAddTab: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        ListEmptyView(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+            text = stringResource(R.string.empty_home_tabs),
+            icon = FontAwesomeIcons.Solid.TableList,
+        )
+        TextButton(onClick = onAddTab) { Text(stringResource(R.string.tab_settings_add)) }
+    }
+}
+
+@Composable
 private fun HomeTabDropdown(
     tabs: List<UiTimelineTabItem>,
     selectedTabIndex: Int,
@@ -485,6 +516,8 @@ private fun HomeTabDropdown(
                 modifier =
                     Modifier
                         .clickable { expanded = true }
+                        .testTag("home-timeline-title")
+                        .semantics { testTagsAsResourceId = true }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -564,9 +597,21 @@ internal fun TimelineItemContent(
             item = item,
             isHomeTimeline = isHomeTimeline,
             lazyStaggeredGridState = lazyStaggeredGridState,
+            leadingItemCount = if (changeLogState?.changeLog != null && changeLogState.shouldShowChangeLog.takeSuccessOr(false)) 1 else 0,
         )
     val latestState by rememberUpdatedState(state)
     val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) latestState.reading?.savePosition()
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(isCurrentlyVisible) {
+        if (!isCurrentlyVisible) latestState.reading?.savePosition()
+    }
     LaunchedEffect(isHomeTimeline, autoRefreshInterval, isCurrentlyVisible, lifecycleOwner) {
         if (!isHomeTimeline || !isCurrentlyVisible || autoRefreshInterval == TimelineAutoRefreshInterval.DISABLED) {
             return@LaunchedEffect
@@ -583,6 +628,8 @@ internal fun TimelineItemContent(
     if (isCurrentlyVisible) {
         RegisterTabCallback(
             lazyListState = state.lazyListState,
+            onScrollToTop = state.reading?.let { { it.showLatest() } },
+            canRefreshAtTop = state.reading?.isAtLatest != false,
             onRefresh = {
                 state.refreshSync()
                 changeLogState?.dismissChangeLog()
@@ -605,7 +652,9 @@ internal fun TimelineItemContent(
                 allowGalleryMode = true,
                 modifier =
                     Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .semantics { testTagsAsResourceId = true }
+                        .then(if (isCurrentlyVisible) Modifier.testTag("home-timeline-list") else Modifier),
             ) {
                 changeLogState?.shouldShowChangeLog?.onSuccess {
                     changeLogState.changeLog?.let { changelog ->
@@ -651,9 +700,9 @@ internal fun TimelineItemContent(
                     }
                 }
 
-                status(state.listState)
+                status(state.listState, onLoadGap = state::loadGap)
             }
-            state.listState.onSuccess {
+            if (state.reading != null || state.listState is dev.dimension.flare.common.PagingState.Success) {
                 AnimatedVisibility(
                     state.showNewToots,
                     enter = slideInVertically { -it },
@@ -666,8 +715,12 @@ internal fun TimelineItemContent(
                     Glassify(
                         onClick = {
                             state.onNewTootsShown()
-                            scope.launch {
-                                state.lazyListState.scrollToItem(0)
+                            if (state.reading != null) {
+                                state.reading?.showLatest()
+                            } else {
+                                scope.launch {
+                                    state.lazyListState.scrollToItem(0)
+                                }
                             }
                         },
                         shape = RoundedCornerShape(50),
@@ -687,11 +740,15 @@ internal fun TimelineItemContent(
                             )
                             val ctx = LocalContext.current
                             val newTootsText =
-                                ctx.resources.getQuantityString(
-                                    R.plurals.home_timeline_new_toots,
-                                    state.newPostsCount,
-                                    state.newPostsCount,
-                                )
+                                if (state.reading != null) {
+                                    stringResource(R.string.home_timeline_view_latest)
+                                } else {
+                                    ctx.resources.getQuantityString(
+                                        R.plurals.home_timeline_new_toots,
+                                        state.newPostsCount,
+                                        state.newPostsCount,
+                                    )
+                                }
                             Text(text = newTootsText)
                         }
                     }
@@ -708,8 +765,17 @@ private fun timelinePresenter() =
         val loginState = remember { LoggedInPresenter() }.invoke()
 
         val pagerState =
-            state.tabState.map {
-                rememberPagerState { it.size }
+            state.tabState.map { tabs ->
+                val pager =
+                    rememberPagerState(
+                        initialPage = tabs.indexOfFirst { it.id == state.initialSelectedTabId }.coerceAtLeast(0),
+                    ) { tabs.size }
+                LaunchedEffect(pager, tabs) {
+                    snapshotFlow { pager.settledPage }.collect { index ->
+                        tabs.getOrNull(index)?.let { state.selectTab(it.id) }
+                    }
+                }
+                pager
             }
 
         val changeLogState = changeLogPresenter()

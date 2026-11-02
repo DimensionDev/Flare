@@ -74,14 +74,14 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
                 "timeline_presentation_reference_delete_revision",
                 "DELETE",
                 "timeline_item_presentation_reference",
-                "pagingKey = OLD.pagingKey AND statusId = OLD.statusId",
+                "pagingKey = OLD.pagingKey AND _id = OLD.timelineId",
             ),
             referenceTrigger(
                 "timeline_presentation_reference_update_revision",
                 "UPDATE",
                 "timeline_item_presentation_reference",
-                "(pagingKey = OLD.pagingKey AND statusId = OLD.statusId) " +
-                    "OR (pagingKey = NEW.pagingKey AND statusId = NEW.statusId)",
+                "(pagingKey = OLD.pagingKey AND _id = OLD.timelineId) " +
+                    "OR (pagingKey = NEW.pagingKey AND _id = NEW.timelineId)",
             ),
         )
 
@@ -121,14 +121,14 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
             FROM DbPagingTimeline AS timeline
             INNER JOIN timeline_item_presentation_reference AS presentation
                 ON presentation.pagingKey = timeline.pagingKey
-                AND presentation.statusId = timeline.statusId
+                AND presentation.timelineId = timeline._id
             WHERE presentation.referenceStatusId = $contentId
             UNION
             SELECT timeline._id
             FROM DbPagingTimeline AS timeline
             INNER JOIN timeline_item_presentation_reference AS parent
                 ON parent.pagingKey = timeline.pagingKey
-                AND parent.statusId = timeline.statusId
+                AND parent.timelineId = timeline._id
                 AND parent.presentationType = 'InlineParent'
             INNER JOIN status_reference AS nested
                 ON nested.statusId = parent.referenceStatusId
@@ -160,7 +160,7 @@ internal object TimelineRevisionCallback : RoomDatabase.Callback() {
             FROM DbPagingTimeline AS timeline
             INNER JOIN timeline_item_presentation_reference AS parent
                 ON parent.pagingKey = timeline.pagingKey
-                AND parent.statusId = timeline.statusId
+                AND parent.timelineId = timeline._id
                 AND parent.presentationType = 'InlineParent'
             WHERE parent.referenceStatusId = $statusId
         )

@@ -12,8 +12,8 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.capabilities
+import dev.dimension.flare.data.datasource.microblog.paging.toTimelinePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.AccountService
@@ -46,8 +46,10 @@ public class VVOStatusDetailPresenter(
     }
     private val rawStatusFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            require(service is PostDataSource)
-            service.postHandler.post(statusKey).toUi()
+            requireNotNull(service.capabilities.post)
+                .postHandler
+                .post(statusKey)
+                .toUi()
         }
     }
     private val extendedTextFlow by lazy {
@@ -81,7 +83,7 @@ public class VVOStatusDetailPresenter(
         serviceFlow.flatMapLatest { service ->
             require(service is VVODataSource)
             Pager(config = pagingConfig) {
-                service.statusRepost(statusKey = statusKey).toPagingSource()
+                service.statusRepost(statusKey = statusKey).toTimelinePagingSource()
             }.flow.map { data ->
                 data.map { item ->
                     item.withoutVvoQuotes()
@@ -93,7 +95,7 @@ public class VVOStatusDetailPresenter(
         serviceFlow.flatMapLatest { service ->
             require(service is VVODataSource)
             Pager(config = pagingConfig) {
-                service.statusComment(statusKey = statusKey).toPagingSource()
+                service.statusComment(statusKey = statusKey).toTimelinePagingSource()
             }.flow
         }
     }

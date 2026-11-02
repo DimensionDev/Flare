@@ -48,7 +48,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.BasicRichText
 import com.halilibo.richtext.ui.RichTextThemeProvider
 import compose.icons.FontAwesomeIcons
@@ -62,6 +61,7 @@ import dev.dimension.flare.agent_chat_thinking
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.feature.agent.common.AgentChatHistoryMessage
+import dev.dimension.flare.feature.agent.common.AgentFailure
 import dev.dimension.flare.feature.agent.common.AgentInputRequest
 import dev.dimension.flare.feature.agent.common.AgentInputRequestOptionButtonType
 import dev.dimension.flare.feature.agent.presenter.AgentMessagePart
@@ -69,6 +69,7 @@ import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
+import dev.dimension.flare.ui.component.ProxyMarkdown
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.UiProfile
@@ -90,7 +91,8 @@ internal fun AgentChatScaffold(
     input: String,
     isRunning: Boolean,
     canSend: Boolean,
-    errorMessage: String?,
+    error: AgentFailure?,
+    onRetry: () -> Unit,
     runningTrace: String,
     inputPlaceholder: String,
     sendContentDescription: String,
@@ -139,10 +141,10 @@ internal fun AgentChatScaffold(
                         .padding(top = 8.dp),
             )
         }
-        errorMessage?.let { text ->
-            Text(
-                text = text,
-                color = FluentTheme.colors.system.critical,
+        error?.takeUnless { isRunning }?.let { failure ->
+            AgentErrorCard(
+                failure = failure,
+                onRetry = onRetry.takeIf { failure.canRetry },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -168,7 +170,7 @@ internal fun AgentChatScaffold(
 }
 
 @Composable
-private fun AgentChatMessageList(
+internal fun AgentChatMessageList(
     messages: PagingState<AgentChatHistoryMessage>,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
     onPostClick: (UiTimelineV2.Post) -> Unit,
@@ -176,6 +178,13 @@ private fun AgentChatMessageList(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
+    val newestMessageId = (messages as? PagingState.Success)?.peek(0)?.id
+    val wasAtBottom = !listState.canScrollBackward
+    LaunchedEffect(newestMessageId) {
+        if (newestMessageId != null && wasAtBottom) {
+            listState.scrollToItem(0)
+        }
+    }
 
     FlareScrollBar(
         state = listState,
@@ -204,9 +213,10 @@ private fun AgentChatMessageList(
                     AgentChatMessageSkeleton(isUser = index == 0)
                 },
                 errorContent = { throwable ->
-                    Text(
-                        text = throwable.message ?: throwable.toString(),
-                        color = FluentTheme.colors.system.critical,
+                    AgentErrorCard(
+                        failure = AgentFailure.fromThrowable(throwable),
+                        onRetry = { (messages as? PagingState.Error)?.onRetry?.invoke() },
+                        historyError = true,
                     )
                 },
                 itemContent = { _, _, message ->
@@ -238,16 +248,20 @@ private fun AgentChatMessageSkeleton(isUser: Boolean) {
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth(0.72f)
-                    .background(
-                        color = FluentTheme.colors.background.layer.default,
-                        shape = RoundedCornerShape(8.dp),
-                    ).border(
-                        width = 1.dp,
-                        color = FluentTheme.colors.stroke.card.default,
-                        shape = RoundedCornerShape(8.dp),
-                    ).padding(12.dp),
+                if (isUser) {
+                    Modifier
+                        .fillMaxWidth(0.72f)
+                        .background(
+                            color = FluentTheme.colors.background.layer.default,
+                            shape = RoundedCornerShape(8.dp),
+                        ).border(
+                            width = 1.dp,
+                            color = FluentTheme.colors.stroke.card.default,
+                            shape = RoundedCornerShape(8.dp),
+                        ).padding(12.dp)
+                } else {
+                    Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                },
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
@@ -288,7 +302,16 @@ private fun AgentChatMessageBubble(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
     ) {
-        if (previewOnlyUserMessage) {
+        if (!isUser) {
+            AgentChatMessageParts(
+                parts = parts,
+                isUser = false,
+                onPostClick = onPostClick,
+                onUserClick = onUserClick,
+                onInputRequestOptionSelected = onInputRequestOptionSelected,
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
+        } else if (previewOnlyUserMessage) {
             Column(
                 modifier = Modifier.fillMaxWidth(0.82f),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -307,12 +330,7 @@ private fun AgentChatMessageBubble(
                     Modifier
                         .fillMaxWidth(0.82f)
                         .background(
-                            color =
-                                if (isUser) {
-                                    FluentTheme.colors.fillAccent.default
-                                } else {
-                                    FluentTheme.colors.background.layer.default
-                                },
+                            color = FluentTheme.colors.fillAccent.default,
                             shape = RoundedCornerShape(8.dp),
                         ).padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -336,10 +354,11 @@ private fun AgentChatMessageParts(
     onPostClick: (UiTimelineV2.Post) -> Unit,
     onUserClick: (UiProfile) -> Unit,
     onInputRequestOptionSelected: (AgentInputRequest.Option) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         parts.forEach { part ->
             when (part) {
@@ -398,7 +417,7 @@ private fun AgentMarkdownText(
     ) {
         SelectionContainer {
             BasicRichText(modifier = modifier) {
-                Markdown(content = markdown)
+                ProxyMarkdown(content = markdown)
             }
         }
     }

@@ -40,11 +40,12 @@ public final class PlatformTextTextContent: PlatformTextContent {
 }
 
 public final class PlatformTextBlockImageContent: PlatformTextContent {
-    public let url: String
+    public let media: UiMediaImage
+    public var url: String { media.url }
     public let href: String?
 
-    public init(url: String, href: String?) {
-        self.url = url
+    public init(media: UiMediaImage, href: String?) {
+        self.media = media
         self.href = href
         super.init()
     }
@@ -78,7 +79,7 @@ public final class PlatformTextStyleDescriptor: NSObject {
     public let isFigCaption: Bool
 
     public init(style: RenderTextStyle, block: RenderBlockStyle) {
-        link = style.link
+        link = style.resolvedLink
         bold = style.bold
         italic = style.italic
         strikethrough = style.strikethrough
@@ -99,11 +100,12 @@ public extension NSAttributedString.Key {
 }
 
 public final class PlatformTextImageRun: PlatformTextRun {
-    public let url: String
+    public let media: UiMediaImage
+    public var url: String { media.url }
     public let alt: String
 
-    public init(url: String, alt: String) {
-        self.url = url
+    public init(media: UiMediaImage, alt: String) {
+        self.media = media
         self.alt = alt
         super.init()
     }
@@ -128,7 +130,7 @@ public final class PlatformTextRenderer: SwiftPlatformTextRenderer, @unchecked S
                 context.appendTextContent(textContent)
             case let blockImage as RenderContent.BlockImage:
                 context.appendBlockImage(
-                    url: blockImage.url,
+                    media: blockImage.media,
                     href: blockImage.href
                 )
             default:
@@ -186,7 +188,7 @@ private final class RenderContext {
                 commitAttributedBuffer()
                 renderedRuns.append(
                     PlatformTextImageRun(
-                        url: imageRun.url,
+                        media: imageRun.media,
                         alt: imageRun.alt
                     )
                 )
@@ -209,8 +211,8 @@ private final class RenderContext {
         )
     }
 
-    func appendBlockImage(url: String, href: String?) {
-        contents.append(PlatformTextBlockImageContent(url: url, href: href))
+    func appendBlockImage(media: UiMediaImage, href: String?) {
+        contents.append(PlatformTextBlockImageContent(media: media, href: href))
     }
 
     private func templateAttributes(
@@ -220,7 +222,7 @@ private final class RenderContext {
         var attributes: [NSAttributedString.Key: Any] = [
             .platformTextStyleDescriptor: PlatformTextStyleDescriptor(style: style, block: block),
         ]
-        if let link = style.link, let url = URL(string: link) {
+        if let link = style.resolvedLink, let url = URL(string: link) {
             attributes[.link] = url
         }
         return attributes
@@ -235,7 +237,7 @@ private final class RenderContext {
             container.font = font
         }
 
-        if let link = style.link, let url = URL(string: link) {
+        if let link = style.resolvedLink, let url = URL(string: link) {
             container.link = url
         }
         if style.strikethrough {

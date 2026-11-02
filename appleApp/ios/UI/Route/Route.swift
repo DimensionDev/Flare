@@ -107,6 +107,7 @@ enum Route: Hashable, Identifiable {
             SearchScreen(accountType: accountType, initialQuery: query) { query in
                 onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
             }
+            .environment(\.timelineListRenderer, nil)
         case .composeNew:
             ComposeScreen(accountType: nil)
         case .composeCrossPost(let prefill):

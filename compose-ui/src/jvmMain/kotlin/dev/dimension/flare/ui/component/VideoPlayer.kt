@@ -361,7 +361,8 @@ internal class SurfaceBindingManager() {
         if (foreground == value) return
         foreground = value
         if (value) {
-            val playbacks = suspendedPlaybacks.toList()
+            // Weak keys can disappear after toList() reads size == 1.
+            val playbacks = suspendedPlaybacks.toMutableList()
             suspendedPlaybacks.clear()
             playbacks.forEach { it.setSuspended(false) }
         } else {

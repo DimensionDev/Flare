@@ -80,7 +80,9 @@ expected_classes = %w[
   dev.dimension.flare.ui.screen.media.ImageTranslationErrorDialogTest
 ]
 check(classes.to_set == expected_classes.to_set, 'The combined Android invocation must retain all five regression classes')
-check(android.scan(':app:connectedDebugAndroidTest').size == 1, 'Android regressions must use one instrumentation invocation')
+check(android.scan(':app:connectedDebugAndroidTest').size == 1, 'App Android regressions must use one instrumentation invocation')
+playback = android.lines.find { |line| line.include?(':compose-ui:connectedAndroidDeviceTest') }
+check(playback&.include?('-Pandroid.testInstrumentationRunnerArguments.class=dev.dimension.flare.ui.component.SurfaceBindingManagerTest'), 'Android CI must run the playback foreground regression in its owning module')
 check(android.include?('-x wasmJsBrowserTest'), 'Linux unit tests must delegate Wasm execution to the Web job')
 web = commands(jobs.fetch('build-web'))
 %w[:web-shared:wasmJsTest :shared:wasmJsBrowserTest].each do |task|

@@ -30,6 +30,7 @@ import java.lang.reflect.Proxy
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
 import java.net.URI
+import java.util.Collections
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -38,6 +39,67 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SurfaceBindingManagerTest {
+    @Test
+    fun collectedSuspendedPlaybackDoesNotCrashForegroundResume() =
+        runTest {
+            val manager = SurfaceBindingManager(this) { error("Resuming collected playbacks must not create a player") }
+            val playback = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
+            val map = CollectingPlaybackMap()
+            val suspended = Collections.newSetFromMap(map)
+            try {
+                manager.setForeground(false)
+                playback.setSuspended(true)
+                playback.close()
+                suspended.add(playback)
+                SurfaceBindingManager::class.java.getDeclaredField("suspendedPlaybacks").apply {
+                    isAccessible = true
+                    set(manager, suspended)
+                }
+                map.collectOnNextSizeRead(playback)
+
+                manager.setForeground(true)
+
+                assertEquals(1, map.collections)
+                assertTrue(suspended.isEmpty())
+            } finally {
+                playback.close()
+                manager.close()
+            }
+        }
+
+    @Test
+    fun foregroundResumeClearsSuspendedPlaybacksBeforeRestartingSurvivors() =
+        runTest {
+            val manager = SurfaceBindingManager(this) { error("Coordinator callbacks must not create a player") }
+            val playback = TimelinePlaybackCoordinator(this, VideoPlaybackArbiter(), MediaPlaybackMemory())
+            val suspended = Collections.newSetFromMap(CollectingPlaybackMap())
+            val events = mutableListOf<Boolean>()
+            try {
+                manager.setForeground(false)
+                playback.setSuspended(true)
+                playback.present()
+                playback.register("video") {
+                    assertTrue(suspended.isEmpty(), "Clear the weak set before resuming playback")
+                    events.add(it)
+                }
+                playback.update(TimelineAutoplayPolicy.Candidate("video", visible = true, canStart = true, distance = 0f))
+                suspended.add(playback)
+                SurfaceBindingManager::class.java.getDeclaredField("suspendedPlaybacks").apply {
+                    isAccessible = true
+                    set(manager, suspended)
+                }
+
+                manager.setForeground(true)
+                manager.setForeground(true)
+
+                assertEquals(listOf(true), events)
+                assertTrue(suspended.isEmpty())
+            } finally {
+                playback.close()
+                manager.close()
+            }
+        }
+
     @Test
     fun playbackDiagnosticsKeepRelayCauseWithoutLeakingMediaUrls() {
         val error = VideoPlayerError.SourceError("Native failed at https://player.example/video?token=native-secret")

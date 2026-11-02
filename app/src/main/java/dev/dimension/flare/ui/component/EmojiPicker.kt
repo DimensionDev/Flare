@@ -30,10 +30,13 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.CaretUp
+import compose.icons.fontawesomeicons.solid.FaceSmile
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.EmojiHistoryPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.segmentedShapes2
@@ -130,6 +133,17 @@ internal fun EmojiPicker(
                 }
             }
 
+            if (actualData.values.all { it.isEmpty() } &&
+                (searchTextState.text.isNotEmpty() || state.history.takeSuccess().isNullOrEmpty())
+            ) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    ListEmptyView(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        text = stringResource(if (searchTextState.text.isEmpty()) R.string.empty_emojis else R.string.empty_emoji_search),
+                        icon = FontAwesomeIcons.Solid.FaceSmile,
+                    )
+                }
+            }
             actualData.onEachIndexed { index, (category, emojis) ->
                 if (emojis.any()) {
                     if (actualData.size > 1) {

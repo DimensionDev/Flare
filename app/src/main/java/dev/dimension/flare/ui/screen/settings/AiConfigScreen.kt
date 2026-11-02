@@ -46,12 +46,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Language
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -1332,6 +1336,15 @@ private fun ExcludedLanguagesDialog(
                     state = rememberLazyListState(),
                     verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                 ) {
+                    if (filteredOptions.isEmpty()) {
+                        item {
+                            ListEmptyView(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                                text = stringResource(R.string.empty_languages),
+                                icon = FontAwesomeIcons.Solid.Language,
+                            )
+                        }
+                    }
                     items(
                         items = filteredOptions,
                         key = { it.tag },

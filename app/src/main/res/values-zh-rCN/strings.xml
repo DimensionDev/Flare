@@ -933,4 +933,24 @@
     <string name="visibility_friends_description">仅互相关注的好友可以看到此微博</string>
     <string name="visibility_self">仅自己可见</string>
     <string name="visibility_self_description">仅你自己可以看到此微博</string>
+    <string name="empty_search_results">没有搜索结果</string>
+    <string name="empty_discover">暂无推荐内容</string>
+    <string name="empty_following">暂无关注用户</string>
+    <string name="empty_followers">暂无粉丝</string>
+    <string name="empty_profile_media">暂无媒体内容</string>
+    <string name="empty_user_history">没有匹配的用户浏览记录</string>
+    <string name="empty_home_tabs">尚未添加标签</string>
+    <string name="empty_accounts">尚未添加账号</string>
+    <string name="empty_link_defaults">暂无可配置的链接</string>
+    <string name="empty_gallery_recommendations">暂无推荐作品</string>
+    <string name="empty_conversation">暂无消息，发送一条消息开始对话吧。</string>
+    <string name="empty_agent_chat">输入问题，开始对话。</string>
+    <string name="empty_logs">暂无日志</string>
+    <string name="empty_tab_candidates">此分类暂无可添加的标签</string>
+    <string name="empty_opml_import">未找到可导入的订阅源</string>
+    <string name="empty_emojis">暂无可用表情</string>
+    <string name="empty_emoji_search">没有匹配的表情</string>
+    <string name="empty_languages">没有匹配的语言</string>
+    <string name="empty_search_history">搜索帖子或用户，开始探索。</string>
+    <string name="empty_media">暂无可显示的媒体</string>
 </resources>

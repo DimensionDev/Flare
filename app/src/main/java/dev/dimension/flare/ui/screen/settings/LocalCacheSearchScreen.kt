@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Robot
+import compose.icons.fontawesomeicons.solid.Users
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.feature.agent.localhistory.LocalHistoryAgentTarget
@@ -45,6 +46,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiState
@@ -224,6 +226,13 @@ internal fun LocalCacheSearchScreen(
                             state.userHistory
                         } else {
                             state.searchUser
+                        },
+                        emptyContent = {
+                            ListEmptyView(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                                text = stringResource(R.string.empty_user_history),
+                                icon = FontAwesomeIcons.Solid.Users,
+                            )
                         },
                     ) { index, itemsCount, user ->
                         AdaptiveCard(

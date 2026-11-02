@@ -804,4 +804,24 @@
     <string name="visibility_friends_description">僅互相關注的好友可以看到此微博</string>
     <string name="visibility_self">僅自己可見</string>
     <string name="visibility_self_description">僅你自己可以看到此微博</string>
+    <string name="empty_search_results">沒有搜尋結果</string>
+    <string name="empty_discover">暫無推薦內容</string>
+    <string name="empty_following">暫無追蹤使用者</string>
+    <string name="empty_followers">暫無粉絲</string>
+    <string name="empty_profile_media">暫無媒體內容</string>
+    <string name="empty_user_history">沒有符合的使用者瀏覽記錄</string>
+    <string name="empty_home_tabs">尚未新增分頁</string>
+    <string name="empty_accounts">尚未新增帳號</string>
+    <string name="empty_link_defaults">暫無可設定的連結</string>
+    <string name="empty_gallery_recommendations">暫無推薦作品</string>
+    <string name="empty_conversation">暫無訊息，傳送一則訊息開始對話吧。</string>
+    <string name="empty_agent_chat">輸入問題，開始對話。</string>
+    <string name="empty_logs">暫無日誌</string>
+    <string name="empty_tab_candidates">此分類暫無可新增的分頁</string>
+    <string name="empty_opml_import">未找到可匯入的訂閱來源</string>
+    <string name="empty_emojis">暫無可用表情</string>
+    <string name="empty_emoji_search">沒有符合的表情</string>
+    <string name="empty_languages">沒有符合的語言</string>
+    <string name="empty_search_history">搜尋貼文或使用者，開始探索。</string>
+    <string name="empty_media">暫無可顯示的媒體</string>
 </resources>

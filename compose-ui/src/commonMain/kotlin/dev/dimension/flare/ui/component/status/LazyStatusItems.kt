@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -206,19 +207,23 @@ public fun <T : Any> LazyStaggeredGridScope.appendStateUI(success: PagingState.S
 }
 
 @Composable
-public fun ListEmptyView(modifier: Modifier = Modifier) {
+public fun ListEmptyView(
+    modifier: Modifier = Modifier,
+    text: String = stringResource(Res.string.status_empty),
+    icon: ImageVector = FontAwesomeIcons.Solid.File,
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         FAIcon(
-            imageVector = FontAwesomeIcons.Solid.File,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(48.dp),
         )
         PlatformText(
-            text = stringResource(resource = Res.string.status_empty),
+            text = text,
             modifier = Modifier.padding(16.dp),
         )
     }

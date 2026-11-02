@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -32,15 +33,18 @@ class AiConfigScreenTest {
     // The application supplies this dependency before instrumentation starts.
     private val settings by lazy { requireNotNull(GlobalContext.get().getOrNull<SettingsRepository>()) }
     private lateinit var originalConfig: AppSettings.AiConfig
+    private lateinit var originalTranslation: AppSettings.TranslateConfig
 
     @Before
     fun saveConfig() {
         originalConfig = currentConfig()
+        originalTranslation = runBlocking { settings.appSettings.first().translateConfig }
     }
 
     @After
     fun restoreConfig() {
         setConfig(originalConfig)
+        runBlocking { settings.updateAppSettings { copy(translateConfig = originalTranslation) } }
     }
 
     @Test
@@ -98,6 +102,20 @@ class AiConfigScreenTest {
         composeRule.waitUntil(5_000) { currentConfig().agentType?.serverUrl == "https://changed.example/v1/" }
         assertEquals(basic, currentConfig().type)
         assertEquals(agent.copy(serverUrl = "https://changed.example/v1/"), currentConfig().agentType)
+    }
+
+    @Test
+    fun excludedLanguagesShowsNoMatchesAndRecoversWhenSearchIsCleared() {
+        runBlocking { settings.updateAppSettings { copy(translateConfig = translateConfig.copy(preTranslate = true)) } }
+        composeRule.setContent {
+            MaterialTheme { TranslationConfigScreen(onBack = {}) }
+        }
+        composeRule.onNodeWithText(label(R.string.settings_translation_auto_excluded_languages)).performScrollTo().performClick()
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("no-language-matches-this-query")
+        composeRule.onNodeWithText(label(R.string.empty_languages)).assertIsDisplayed()
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("")
+        composeRule.onNodeWithText(label(R.string.empty_languages)).assertDoesNotExist()
+        composeRule.onNodeWithText(label(android.R.string.cancel)).performClick()
     }
 
     private fun showScreen() {

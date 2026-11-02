@@ -46,6 +46,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ArrowRightFromBracket
 import compose.icons.fontawesomeicons.solid.CircleUser
+import compose.icons.fontawesomeicons.solid.Comments
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import dev.dimension.flare.R
@@ -63,6 +64,7 @@ import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.dm.DMItem
 import dev.dimension.flare.ui.component.dm.DMLoadingItem
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
@@ -266,9 +268,13 @@ internal fun DMConversationScreen(
                 key = {
                     it.id
                 },
-//                emptyContent = {
-//
-//                },
+                emptyContent = {
+                    ListEmptyView(
+                        modifier = Modifier.fillParentMaxSize(),
+                        text = stringResource(R.string.empty_conversation),
+                        icon = FontAwesomeIcons.Solid.Comments,
+                    )
+                },
 //                errorContent = {
 //
 //                },

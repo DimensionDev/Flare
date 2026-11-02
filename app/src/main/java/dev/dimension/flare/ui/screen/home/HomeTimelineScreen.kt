@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -88,6 +89,7 @@ import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.CaretDown
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Sliders
+import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datastore.model.TimelineAutoRefreshInterval
@@ -113,6 +115,7 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.isCompatScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -164,6 +167,9 @@ internal fun HomeTimelineScreen(
                     .asPaddingValues(),
         ) {
             state.tabState.onSuccess { tabs ->
+                if (tabs.isEmpty()) {
+                    item { HomeTabsEmpty(toTabSettings, Modifier.fillParentMaxSize().windowInsetsPadding(WindowInsets.systemBars)) }
+                }
                 items(tabs) { tab ->
                     val tabItemState by producePresenter("tabItemState_${tab.id}") {
                         val backStack =
@@ -430,7 +436,11 @@ internal fun HomeTimelineScreen(
             modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         ) { contentPadding ->
             state.pagerState.onSuccess { pagerState ->
-                state.tabState.onSuccess { tabState ->
+                state.tabState.onSuccess tabs@{ tabState ->
+                    if (tabState.isEmpty()) {
+                        HomeTabsEmpty(toTabSettings, Modifier.fillMaxSize().padding(contentPadding))
+                        return@tabs
+                    }
                     LaunchedEffect(pagerState.currentPage >= tabState.size) {
                         if (pagerState.currentPage >= tabState.size) {
                             scope.launch {
@@ -473,6 +483,21 @@ internal fun HomeTimelineScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun HomeTabsEmpty(
+    onAddTab: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        ListEmptyView(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+            text = stringResource(R.string.empty_home_tabs),
+            icon = FontAwesomeIcons.Solid.TableList,
+        )
+        TextButton(onClick = onAddTab) { Text(stringResource(R.string.tab_settings_add)) }
     }
 }
 

@@ -353,6 +353,11 @@ private struct TranslationExcludedLanguagesSheet: View {
     var body: some View {
         NavigationStack {
             languageList
+            .overlay {
+                if state.filteredLanguageOptions.isEmpty {
+                    ListEmptyView("translation_languages_empty", icon: .language)
+                }
+            }
             #if os(iOS)
             .environment(\.editMode, .constant(.active))
             #endif

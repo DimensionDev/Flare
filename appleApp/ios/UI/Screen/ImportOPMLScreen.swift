@@ -35,6 +35,11 @@ struct ImportOPMLScreen: View {
                         UiRssView(data: item)
                     }
                 }
+                .overlay {
+                    if !presenter.state.importing && presenter.state.importedSources.isEmpty {
+                        ListEmptyView("opml_import_empty", icon: .fileImport)
+                    }
+                }
             }
         }
         .navigationTitle("opml_import")

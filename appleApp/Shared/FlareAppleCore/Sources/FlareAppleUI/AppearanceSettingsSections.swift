@@ -301,6 +301,9 @@ public struct LinkOpenDefaultsSettingsSection: View {
         Section {
             StateView(state: presenter.state.targets) { data in
                 let targets = data.cast(LinkOpenDefaultsPresenter.Target.self)
+                if targets.isEmpty {
+                    ListEmptyView("link_open_defaults_empty", icon: .globe)
+                }
                 ForEach(targets, id: \.id) { target in
                     LinkOpenDefaultSettingsMenu(
                         target: target,

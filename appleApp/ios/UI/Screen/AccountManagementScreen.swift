@@ -57,8 +57,19 @@ struct AccountManagementScreen: View {
             }
             .onMove(perform: move)
         }
-        .onSuccessOf(of: presenter.state.accounts) { data in
-            tabItems = data.cast(AccountsStateAccountItem.self)
+        .overlay {
+            if tabItems.isEmpty && !presenter.state.removalFailed {
+                StateView(state: presenter.state.accounts) { accounts in
+                    if accounts.count == 0 {
+                        ListEmptyView("account_management_empty", icon: .users)
+                    }
+                }
+            }
+        }
+        .onChange(of: presenter.state.accounts, initial: true) { _, accounts in
+            if case .success(let data) = onEnum(of: accounts) {
+                tabItems = data.data.cast(AccountsStateAccountItem.self)
+            }
         }
         .onChange(of: tabItems, { oldValue, newValue in
             presenter.state.setOrder(value: newValue.map { item in item.account.accountKey })

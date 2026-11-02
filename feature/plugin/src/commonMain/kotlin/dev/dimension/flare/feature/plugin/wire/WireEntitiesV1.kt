@@ -10,6 +10,7 @@ public data class RelationV1(
     val followedBy: Boolean = false,
     val blocking: Boolean = false,
     val muting: Boolean = false,
+    @Serializable(with = KnownActionTokensV1Serializer::class)
     val actionTokens: Map<SemanticActionV1, String> = emptyMap(),
 )
 
@@ -70,9 +71,11 @@ public data class GalleryV1(
     val createdAt: String,
     val content: RichTextV1? = null,
     val url: String,
+    @Serializable(with = CompatibleMediaListV1Serializer::class)
     val images: List<MediaV1>,
     val orientation: GalleryOrientationV1 = GalleryOrientationV1.Vertical,
     val entityToken: String? = null,
+    @Serializable(with = KnownActionsV1Serializer::class)
     val actions: List<ActionDescriptorV1> = emptyList(),
 )
 

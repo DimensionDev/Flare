@@ -7,9 +7,11 @@ import dev.dimension.flare.feature.plugin.wire.PageDirectionV1
 
 internal class PluginSessionCapabilitiesV1(
     private val declarations: Map<String, CapabilityManifestV1>,
-    private val operations: Map<String, Set<String>>,
+    operations: Map<String, Set<String>>,
     private val authenticated: Boolean,
 ) {
+    private val operations = PluginAbiV1.knownCapabilities(operations)
+
     fun hasOperation(
         capability: String,
         operation: String,

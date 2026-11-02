@@ -70,20 +70,18 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     platform.capabilities.forEach { (capabilityId, declaration) ->
         val path = "platform.capabilities.$capabilityId"
         check(CAPABILITY_ID.matches(capabilityId), "capability.id", path, "Invalid capability ID")
-        check(declaration.operations.isNotEmpty(), "capability.empty", path, "Capability has no operations")
+        val knownOperations = PluginAbiV1.knownCapabilityOperations[capabilityId] ?: return@forEach
         check(declaration.operations.size <= 32, "capability.operations", path, "Too many operations")
-        val knownOperations = PluginAbiV1.knownCapabilityOperations[capabilityId]
-        if (knownOperations == null) {
-            warnings += ManifestIssueV1("capability.unknown", path, "Unknown capability is ignored by this Host")
-        } else {
-            check(
-                declaration.operations.keys.containsAll(PluginAbiV1.requiredCapabilityOperations.getValue(capabilityId)),
-                "capability.incomplete",
-                path,
-                "Capability is missing operations required by the Host interface",
-            )
-            declaration.operations.forEach { (operation, config) ->
-                check(operation in knownOperations, "capability.operation", "$path.$operation", "Unknown operation")
+        if (declaration.operations.isNotEmpty() && declaration.operations.keys.none { it in knownOperations }) return@forEach
+        check(declaration.operations.isNotEmpty(), "capability.empty", path, "Capability has no operations")
+        check(
+            declaration.operations.keys.containsAll(PluginAbiV1.requiredCapabilityOperations.getValue(capabilityId)),
+            "capability.incomplete",
+            path,
+            "Capability is missing operations required by the Host interface",
+        )
+        declaration.operations.forEach { (operation, config) ->
+            if (operation in knownOperations) {
                 check(config.directions.size <= 3, "capability.directions", "$path.$operation.directions", "Invalid paging directions")
             }
         }

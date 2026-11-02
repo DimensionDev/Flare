@@ -88,8 +88,13 @@ defineFlareSocialPlugin({
 
 The manifest is the static upper bound. Every declared known operation must
 have the corresponding function, or installation fails. Login returns the
-subset supported by that account and instance. Unknown capability IDs remain
-visible as compatibility warnings but are ignored by this Host.
+subset supported by that account and instance. Unknown capability IDs and
+operation names are silently ignored during installation, login, account
+restoration, and updates. Known operations still require their declared methods
+and complete required operation sets. A capability containing only unsupported
+operations is omitted; an explicitly empty known declaration remains invalid.
+Login and snapshot operation lists retain Set semantics, including deduplication
+before the limit of 32 distinct operation names is checked.
 
 Current method paths are:
 
@@ -179,8 +184,37 @@ For example (other required post fields omitted):
 { detailType: "link", url: "https://example.com/article/123" }
 ```
 
-The URL remains optional for the three internal detail types. Missing or invalid
-link URLs, and unknown or null `detailType` values, are invalid Wire results.
+The URL remains optional for the three internal detail types. An unknown string
+`detailType`, such as `"manga"` or `"novel"`, keeps the post preview but disables
+post, cover, and grid navigation. Independent author and known action clicks keep
+their existing behavior. Omission still defaults to `"post"`; unknown values do
+not use that default or fall back to the URL. Null and non-string values remain
+invalid, as do missing or invalid URLs for the known `"link"` type.
+
+## Additive compatibility within API v1
+
+Hosts with additive compatibility ignore unknown JSON properties in manifests and
+Wire objects. A known object's required fields, types, limits, HTTPS URLs,
+identity, and permissions are still validated. Unknown fields never grant a
+permission or invoke an operation.
+
+- Unknown timeline item types are omitted from the displayed page; both cursors
+  and `endReached` retain their original meaning, even if every item is omitted.
+- Unknown media types are omitted from posts, feeds, cards, and galleries.
+  Unknown actions and relation action tokens are omitted. Unsupported payloads
+  do not need to satisfy the structure of a known variant.
+- Unknown navigation target types become inert. They do not trigger the URL or
+  actor fallback used when a target is absent.
+- Unknown capability IDs and operations do not become available to the account
+  or guest. An account still needs at least one supported displayable capability.
+
+Known malformed data still fails validation. Other enums and control results,
+including login transitions, mutation results, and Host errors, remain strict;
+an unfamiliar outcome is never reported as a successful write. Resource limits
+still apply before unknown entries are discarded. Breaking existing fields,
+required methods, or semantics needs a new API/schema contract rather than an
+additive extension. Previously released Hosts without this handling must be
+upgraded; a newer plugin cannot retrofit compatibility into them.
 
 ## Host API
 

@@ -118,10 +118,20 @@ class WireV1Test {
     }
 
     @Test
-    fun rejectsUnknownOrNullPostDetailTypes() {
+    fun unknownPostDetailTypesDoNotUseTheDefault() {
+        val post = PluginJsonV1.encodeToJsonElement(validPost()).jsonObject
+        listOf("manga", "novel", "Article").forEach { type ->
+            val value = PluginJsonV1.decodeFromJsonElement<PostV1>(JsonObject(post + ("detailType" to JsonPrimitive(type))))
+            value.requireValid()
+            assertEquals(PostDetailTypeV1.Unknown, value.detailType)
+        }
+    }
+
+    @Test
+    fun rejectsNullOrMalformedPostDetailTypes() {
         val post = PluginJsonV1.encodeToJsonElement(validPost()).jsonObject
 
-        listOf(JsonPrimitive("external"), JsonPrimitive("Article"), JsonNull).forEach { invalidType ->
+        listOf(JsonPrimitive(42), JsonPrimitive(true), JsonObject(emptyMap()), JsonNull).forEach { invalidType ->
             assertFailsWith<SerializationException> {
                 PluginJsonV1.decodeFromJsonElement<PostV1>(JsonObject(post + ("detailType" to invalidType)))
             }

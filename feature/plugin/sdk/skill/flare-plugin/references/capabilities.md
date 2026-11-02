@@ -75,6 +75,10 @@ install arbitrary UI or arbitrary action kinds.
 | `gallery` | Internal gallery detail | gallery.detail + comments + recommendations |
 | `link` | Browser according to user settings | Absolute HTTPS `url`, no internal-detail capability needed |
 
+Unknown string detail types keep the preview and disable post, cover, and grid
+clicks. Omitting detailType still defaults to post. Unknown navigation targets
+also disable the click, without applying an absent-target fallback.
+
 Missing internal target capability makes that click unavailable; it does not
 fall back to another detail type. `link` bypasses internal Deep Link matching.
 Grid covers use the same article/gallery/link navigation; author/actions and

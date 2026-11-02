@@ -12,7 +12,7 @@ logging API; do not invent `flare.log` or assume a developer console is availabl
 | --- | --- |
 | No stable version tags | Public repo, stable SemVer tag, matching manifest.version; branches/prereleases are not install choices |
 | Missing required file / nested plugin | Put manifest.json, plugin.js, one supported assets/icon.<extension> at the tagged repository root |
-| Unknown field / unsupported schema | Use API/schema 1 and exact supported fields; strict JSON rejects extra keys |
+| Unknown field / unsupported schema | Compatible Hosts ignore extra fields; keep known field types correct and API/schema 1. Older Hosts require an app upgrade. The editor schema still flags unknown authoring properties |
 | Missing method / incomplete capability | Compare full capability ID, required operation set, registration path, and login negotiation |
 | Host API called during registration / undefined global | Keep top-level work to definitions and synchronous registration; move HTTP/crypto into methods |
 | Platform ID already registered | Choose a distinct stable platform ID; do not impersonate a built-in platform |

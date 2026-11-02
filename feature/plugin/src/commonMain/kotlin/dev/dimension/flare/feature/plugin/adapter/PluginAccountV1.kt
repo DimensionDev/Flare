@@ -31,8 +31,10 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
     success.requireValid()
     mergePluginComposeConfigV1(installed.manifest.platform.composeDefaults, success.composeConfig)
     val manifestCapabilities =
-        installed.manifest.platform.capabilities
-            .mapValues { it.value.operations.keys }
+        PluginAbiV1.knownCapabilities(
+            installed.manifest.platform.capabilities
+                .mapValues { it.value.operations.keys },
+        )
     return PluginAccountCredentialV1(
         snapshot =
             AccountPluginSnapshotV1(
@@ -43,7 +45,7 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
                 accountId = success.accountId,
                 profile = success.profile,
                 manifestCapabilities = manifestCapabilities,
-                negotiatedCapabilities = success.capabilities,
+                negotiatedCapabilities = PluginAbiV1.knownCapabilities(success.capabilities),
                 composeConfig = success.composeConfig,
                 credentialSchemaVersion = installed.manifest.platform.credentialSchemaVersion,
             ),
@@ -130,6 +132,7 @@ internal fun PluginAccountCredentialV1.effectiveCapabilities(plugin: RunningPlug
                 operation !in previousManifest || operation in negotiated
             }
         }.filterValues(Set<String>::isNotEmpty)
+        .let(PluginAbiV1::knownCapabilities)
 }
 
 internal class PlatformDataSourceCredentialAccessV1(
@@ -216,11 +219,9 @@ internal fun RunningPluginV1.accountInvocationContext(
 
 private fun Map<String, Set<String>>.isCapabilitySnapshot(): Boolean =
     size <= 32 &&
-        all { (capability, operations) ->
-            capability in PluginAbiV1.knownCapabilityOperations &&
-                operations.isNotEmpty() &&
-                operations.size <= 32 &&
-                PluginAbiV1.knownCapabilityOperations.getValue(capability).containsAll(operations)
+        all { (id, operations) -> PluginAbiV1.capabilityIdPattern.matches(id) && operations.size <= 32 } &&
+        PluginAbiV1.knownCapabilities(this).all { (_, operations) ->
+            operations.isNotEmpty()
         }
 
 private val PACKAGE_HASH = Regex("[0-9a-f]{64}")

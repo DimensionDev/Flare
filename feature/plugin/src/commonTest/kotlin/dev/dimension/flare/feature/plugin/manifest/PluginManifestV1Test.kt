@@ -20,7 +20,82 @@ import kotlin.test.assertTrue
 
 class PluginManifestV1Test {
     @Test
-    fun editorSchemaMetadataDoesNotRelaxOtherManifestFields() {
+    fun futureOnlyOperationsDoNotLeaveAnInvalidEmptyCapability() {
+        val original = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val future =
+            original.copy(
+                platform =
+                    original.platform.copy(
+                        capabilities =
+                            original.platform.capabilities +
+                                (
+                                    PluginAbiV1.Capabilities.NOTIFICATION to
+                                        CapabilityManifestV1(
+                                            mapOf("markRead" to CapabilityOperationManifestV1()),
+                                        )
+                                ),
+                    ),
+            )
+        assertTrue(future.validate(validMethodTable()).isValid)
+        val decoded = PluginJsonV1.decodeFromString<PluginManifestV1>(PluginJsonV1.encodeToString(future))
+        assertEquals(original, decoded)
+        assertTrue(decoded.validate(validMethodTable()).isValid)
+
+        val empty =
+            future.copy(
+                platform =
+                    future.platform.copy(
+                        capabilities =
+                            future.platform.capabilities +
+                                (PluginAbiV1.Capabilities.NOTIFICATION to CapabilityManifestV1(emptyMap())),
+                    ),
+            )
+        assertTrue(empty.validate(validMethodTable()).errors.any { it.code == "capability.empty" })
+    }
+
+    @Test
+    fun futureCapabilityBodiesAndOperationConfigsAreSkippedBeforeDecoding() {
+        val payload = PluginJsonV1.parseToJsonElement(VALID_MANIFEST).jsonObject
+        val platform = payload.getValue("platform").jsonObject
+        val capabilities = platform.getValue("capabilities").jsonObject
+        val timeline = capabilities.getValue(PluginAbiV1.Capabilities.TIMELINE).jsonObject
+        val operations = timeline.getValue("operations").jsonObject
+        val future =
+            JsonObject(
+                payload +
+                    (
+                        "platform" to
+                            JsonObject(
+                                platform +
+                                    (
+                                        "capabilities" to
+                                            JsonObject(
+                                                capabilities +
+                                                    mapOf(
+                                                        "flare.datasource.novel/v1" to JsonPrimitive("future declaration"),
+                                                        PluginAbiV1.Capabilities.TIMELINE to
+                                                            JsonObject(
+                                                                timeline +
+                                                                    (
+                                                                        "operations" to
+                                                                            JsonObject(operations + ("future" to JsonPrimitive(true)))
+                                                                    ),
+                                                            ),
+                                                    ),
+                                            )
+                                    ),
+                            )
+                    ),
+            )
+        val original = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
+        val decoded = PluginJsonV1.decodeFromJsonElement<PluginManifestV1>(future)
+        assertEquals(original, decoded)
+        assertTrue(decoded.validate(validMethodTable()).isValid)
+        assertEquals(null, PluginAbiV1.capabilityMethod(PluginAbiV1.Capabilities.TIMELINE, "future"))
+    }
+
+    @Test
+    fun editorSchemaAndUnknownMetadataDoNotChangeTheManifestContract() {
         val original = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
         val json = PluginJsonV1.parseToJsonElement(VALID_MANIFEST).jsonObject
         val hint = "https://127.0.0.1:1/never-fetch-this.json"
@@ -33,10 +108,14 @@ class PluginManifestV1Test {
         assertEquals(manifest, PluginJsonV1.decodeFromString<PluginManifestV1>(PluginJsonV1.encodeToString(manifest)))
         assertEquals(original, manifest.copy(schema = null))
         assertTrue(manifest.validate(validMethodTable()).isValid)
-        assertFailsWith<SerializationException> {
+        assertEquals(
+            original,
             PluginJsonV1.decodeFromJsonElement<PluginManifestV1>(
                 JsonObject(json + ("homepage" to JsonPrimitive("https://example.org"))),
-            )
+            ),
+        )
+        assertFailsWith<SerializationException> {
+            PluginJsonV1.decodeFromJsonElement<PluginManifestV1>(JsonObject(json + ("apiVersion" to JsonObject(emptyMap()))))
         }
     }
 
@@ -164,7 +243,7 @@ class PluginManifestV1Test {
     }
 
     @Test
-    fun unknownCapabilityIsPreservedAsWarning() {
+    fun unknownCapabilityIsIgnoredWithoutAWarning() {
         val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
         val unknown =
             manifest.copy(
@@ -184,7 +263,7 @@ class PluginManifestV1Test {
         val result = unknown.validate(validMethodTable())
 
         assertTrue(result.isValid)
-        assertEquals(listOf("capability.unknown"), result.warnings.map(ManifestIssueV1::code))
+        assertEquals(emptyList(), result.warnings)
     }
 
     @Test

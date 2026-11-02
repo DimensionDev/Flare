@@ -355,7 +355,7 @@ internal class PluginDataSourceV1 private constructor(
                                         requestSerializer = EntityRequestV1.serializer(),
                                         responseSerializer = TimelineItemV1.Post.serializer(),
                                         validate = { it.requireValid() },
-                                    ).let(mapper::timelineItem)
+                                    ).let { requireNotNull(mapper.timelineItem(it)) }
                             }
 
                             override suspend fun deleteStatus(statusKey: MicroBlogKey) {

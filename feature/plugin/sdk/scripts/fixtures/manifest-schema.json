@@ -80,7 +80,7 @@
         "homepage": "https://example.org"
       },
       "schemaValid": false,
-      "hostValid": false
+      "hostValid": true
     },
     {
       "name": "unknown platform property",
@@ -90,7 +90,7 @@
         }
       },
       "schemaValid": false,
-      "hostValid": false
+      "hostValid": true
     },
     {
       "name": "invalid metadata type",
@@ -610,10 +610,10 @@
         }
       },
       "schemaValid": false,
-      "hostValid": false
+      "hostValid": true
     },
     {
-      "name": "unknown capability retained",
+      "name": "unknown capability ignored",
       "patch": {
         "platform": {
           "capabilities": {
@@ -1230,6 +1230,70 @@
       },
       "schemaValid": true,
       "hostValid": false
+    },
+    {
+      "name": "unknown capability body is not decoded",
+      "schemaValid": false,
+      "hostValid": true,
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "vendor.novel/v1": {
+              "future": [
+                "payload"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown operation config is not decoded",
+      "schemaValid": false,
+      "hostValid": true,
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.profile/v1": {
+              "operations": {
+                "byId": {},
+                "byHandle": {},
+                "novel": null
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "future-only known capability is ignored",
+      "schemaValid": false,
+      "hostValid": true,
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.notification/v1": {
+              "operations": {
+                "markRead": null
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "explicitly empty known capability remains invalid",
+      "schemaValid": false,
+      "hostValid": false,
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.notification/v1": {
+              "operations": {}
+            }
+          }
+        }
+      }
     }
   ]
 }

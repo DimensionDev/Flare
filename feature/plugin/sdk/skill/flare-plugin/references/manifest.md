@@ -1,7 +1,8 @@
 # Manifest reference
 
-`manifest.json` is UTF-8, strict JSON. Unknown fields, comments, and trailing
-commas are rejected. Property names and enum spellings are case-sensitive.
+`manifest.json` is UTF-8 JSON. Hosts with additive compatibility ignore unknown
+fields; comments and trailing commas remain invalid. Known fields and enum
+spellings are case-sensitive and retain their validation.
 Defaults below apply when a field is omitted; use omission for optional fields
 rather than sending null for non-nullable values. Start from the complete
 [template manifest](../assets/github-template/manifest.json).
@@ -11,6 +12,9 @@ rather than sending null for non-nullable values. Start from the complete
 The self-contained [manifest.schema.json](../manifest.schema.json) uses JSON Schema
 draft-07. Editors such as VS Code use it for field completion, descriptions, enum
 choices, required properties, ranges and static login/capability combinations.
+The editor schema deliberately describes this SDK's exact authoring contract,
+so it can flag unknown properties and operations as possible typos even when a
+compatible Host would ignore them.
 `npx flare-plugin-sdk@next init my-plugin` adds a `$schema` URL pinned to that SDK
 version. The source templates use the npm `next` channel.
 
@@ -116,7 +120,13 @@ An operation configuration is an object, not a function name or boolean.
 declare the actually supported directions explicitly. Non-paging operations use
 `{}`. The [capability matrix](capabilities.md) defines exact names and required
 sets. Known capability declarations with missing methods/operations fail
-installation; unknown capability IDs produce warnings and are ignored.
+installation. Unknown capability IDs and operations are silently ignored before
+their payloads are decoded, including during login and account restoration.
+They never satisfy a known capability's required operation set. API/schema
+versions and resource limits remain enforced.
+Declarations containing only unsupported operations are omitted entirely.
+An explicitly empty known declaration or an incomplete supported operation set
+still fails validation.
 
 `notificationFilters` belongs on the notification capability declaration and
 must be nonempty when `page` is declared. Values: `all`, `mention`, `comment`,

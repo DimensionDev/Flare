@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.runtime
 
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.adapter.PluginSessionCapabilitiesV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
@@ -11,6 +12,10 @@ import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.wire.PageV1
+import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
+import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
+import dev.dimension.flare.feature.plugin.wire.requireValid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -46,6 +51,43 @@ class PluginRuntimePoolTest {
     private val fileSystem = FileSystem.SYSTEM
     private lateinit var root: Path
     private lateinit var input: Path
+
+    @Test
+    fun futureWireContentDoesNotRetireOrPauseTheRuntime() =
+        runBlocking<Unit> {
+            val plugin =
+                install(
+                    pageScript(
+                        """async function() {
+                return { futurePage: true, olderCursor: "next", items: [
+                  { type: "novel", chapter: { id: 1 } },
+                  { type: "post", post: { key: { id: "preview", host: "one.example" },
+                    createdAt: "2026-11-02T00:00:00Z", content: { value: "Preview", future: true },
+                    detailType: "manga", media: [{ type: "spatial" }], actions: [{ action: "ReadNovel" }] } }
+                ] };
+            }""",
+                    ),
+                )
+            val pool = PluginRuntimePool(fileSystem, CapturingTransport())
+            try {
+                val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
+                repeat(4) {
+                    var page: PageV1<TimelineItemV1>? = null
+                    invokePage(pool, plugin, context, JsonObject(emptyMap())) { response ->
+                        page =
+                            PluginJsonV1
+                                .decodeFromJsonElement(PageV1.serializer(TimelineItemV1.serializer()), response)
+                                .also { decoded -> decoded.requireValid { it.requireValid() } }
+                    }
+                    assertEquals("next", page?.olderCursor)
+                    assertEquals(TimelineItemV1.Unknown, page?.items?.first())
+                    assertEquals(PostDetailTypeV1.Unknown, (page?.items?.last() as TimelineItemV1.Post).post.detailType)
+                }
+                assertTrue(pool.issues.value.isEmpty())
+            } finally {
+                pool.close()
+            }
+        }
 
     @BeforeTest
     fun setUp() {

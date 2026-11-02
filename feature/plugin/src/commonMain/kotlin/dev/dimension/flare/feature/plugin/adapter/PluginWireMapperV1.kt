@@ -157,9 +157,13 @@ internal class PluginWireMapperV1(
         return UiTimelineV2.TimelinePostItem(post = value.toUiPost())
     }
 
-    fun timelineItem(value: TimelineItemV1): UiTimelineV2 {
+    fun timelineItem(value: TimelineItemV1): UiTimelineV2? {
         value.requireValid()
         return when (value) {
+            TimelineItemV1.Unknown -> {
+                null
+            }
+
             is TimelineItemV1.Post -> {
                 timelinePost(value)
             }
@@ -314,6 +318,10 @@ internal class PluginWireMapperV1(
     private fun target(value: NavigationTargetV1): ClickEvent {
         val route =
             when (value) {
+                NavigationTargetV1.Unknown -> {
+                    null
+                }
+
                 is NavigationTargetV1.Link -> {
                     DeeplinkRoute.OpenLinkDirectly(value.url)
                 }
@@ -418,7 +426,7 @@ internal class PluginWireMapperV1(
 
     fun gallery(value: GalleryV1): GalleryDetail {
         value.url.requireHttpsUrl()
-        val images = value.images.map { it.toUi(value.actions.any { action -> action.active == true }) }
+        val images = value.images.mapNotNull { it.toUi(value.actions.any { action -> action.active == true }) }
         val bookmark =
             value.actions.firstOrNull {
                 it.action == SemanticActionV1.Bookmark || it.action == SemanticActionV1.Unbookmark
@@ -460,6 +468,10 @@ internal class PluginWireMapperV1(
         val key = key.toMicroBlogKey()
         val detailRoute =
             when (detailType) {
+                PostDetailTypeV1.Unknown -> {
+                    null
+                }
+
                 PostDetailTypeV1.Post -> {
                     DeeplinkRoute.Status
                         .Detail(
@@ -557,7 +569,7 @@ internal class PluginWireMapperV1(
         return UiTimelineV2.Post(
             pluginId = pluginId,
             platformId = platformId,
-            images = media.map { it.toUi(sensitive) }.toPersistentList(),
+            images = media.mapNotNull { it.toUi(sensitive) }.toPersistentList(),
             sensitive = sensitive,
             contentWarning = spoilerText?.takeIf(String::isNotBlank)?.let { UiTranslatableText(it.toUiPlainText()) },
             user = author?.let(::profile),
@@ -661,12 +673,17 @@ internal class PluginWireMapperV1(
         require(value.isNullOrBlank() || mediaNetwork) { "Plugin has no media network permission" }
     }
 
-    private fun MediaV1.toUi(sensitive: Boolean): UiMedia {
+    private fun MediaV1.toUi(sensitive: Boolean): UiMedia? {
+        if (type == MediaTypeV1.Unknown) return null
         requireMediaUrl(url)
         requireMediaUrl(previewUrl)
         requireMediaUrl(downloadUrl)
         requireMediaUrl(originalFrameUrl)
         return when (type) {
+            MediaTypeV1.Unknown -> {
+                null
+            }
+
             MediaTypeV1.Image -> {
                 UiMedia.Image(
                     url,
@@ -711,7 +728,7 @@ internal class PluginWireMapperV1(
             MediaTypeV1.Audio -> {
                 UiMedia.Audio(url, description, previewUrl)
             }
-        }.withProxy(mediaProxy)
+        }?.withProxy(mediaProxy)
     }
 
     private fun String?.toUiImage(): UiMedia.Image? {

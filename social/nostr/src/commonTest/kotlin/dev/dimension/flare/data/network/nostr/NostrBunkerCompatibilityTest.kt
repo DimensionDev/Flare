@@ -45,12 +45,9 @@ class NostrBunkerCompatibilityTest {
                             ?.jsonPrimitive
                             ?.content
                     network.deliver(
-                        NostrConnectEvent.create(
-                            BunkerResponse(
-                                request.getValue("id").jsonPrimitive.content,
-                                user.sign(EventTemplate.fromJson(unsigned)).toJson(),
-                                null,
-                            ),
+                        rustBunkerResponse(
+                            request.getValue("id").jsonPrimitive.content,
+                            user.sign(EventTemplate.fromJson(unsigned)).toJson(),
                             event.pubKey,
                             bunker,
                         ),

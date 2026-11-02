@@ -9,6 +9,7 @@ import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebSocketListener
 import com.vitorpamplona.quartz.nip01Core.relay.sockets.WebsocketBuilder
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSignerInternal
+import com.vitorpamplona.quartz.nip46RemoteSigner.NostrConnectEvent
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.platform.NostrCredential
@@ -23,11 +24,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import com.vitorpamplona.quartz.nip01Core.core.Event as QuartzEvent
 
 // Exercises Quartz's real relay pool without opening sockets or publishing to public relays.
@@ -222,3 +226,26 @@ internal fun nostrTestRelayInfoClient(): HttpClient =
     HttpClient(MockEngine) {
         engine { addHandler { respondOk("{}") } }
     }
+
+// Rust NIP-46 responses include explicit null fields, unlike Quartz's serializer.
+internal suspend fun rustBunkerResponse(
+    id: String,
+    result: String?,
+    recipient: String,
+    bunker: NostrSignerInternal,
+    error: String? = null,
+): NostrConnectEvent =
+    bunker.sign(
+        createdAt = 1700000001,
+        kind = NostrConnectEvent.KIND,
+        tags = arrayOf(arrayOf("p", recipient)),
+        content =
+            bunker.nip44Encrypt(
+                buildJsonObject {
+                    put("id", id)
+                    put("result", result?.let(::JsonPrimitive) ?: JsonNull)
+                    put("error", error?.let(::JsonPrimitive) ?: JsonNull)
+                }.toString(),
+                recipient,
+            ),
+    )

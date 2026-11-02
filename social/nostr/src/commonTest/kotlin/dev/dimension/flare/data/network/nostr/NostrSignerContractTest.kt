@@ -239,7 +239,7 @@ class NostrSignerContractTest {
                                 error("Unexpected command $method")
                             }
                         }
-                    network.deliver(NostrConnectEvent.create(BunkerResponse(id, result, null), event.pubKey, bunker))
+                    network.deliver(rustBunkerResponse(id, result, event.pubKey, bunker))
                 }
                 val credential =
                     NostrSignerCredential.Bunker(
@@ -259,18 +259,16 @@ class NostrSignerContractTest {
         runTest {
             QuartzTestRelays(this).use { network ->
                 val bunker = nostrTestSigner(1)
-                var refusal = false
+                var refusal: String? = null
                 network.onPublished = { event ->
                     val request = JSON.parseToJsonElement(bunker.decrypt(event.content, event.pubKey)).jsonObject
                     network.deliver(
-                        NostrConnectEvent.create(
-                            BunkerResponse(
-                                request.getValue("id").jsonPrimitive.content,
-                                if (refusal) null else other,
-                                if (refusal) "denied" else null,
-                            ),
+                        rustBunkerResponse(
+                            request.getValue("id").jsonPrimitive.content,
+                            if (refusal != null) null else other,
                             event.pubKey,
                             bunker,
+                            error = refusal,
                         ),
                     )
                 }
@@ -284,9 +282,11 @@ class NostrSignerContractTest {
                     NostrBunkerSession(credential, suppliedClient = network.client).use {
                         assertFailsWith<IllegalArgumentException> { it.publicKey() }
                     }
-                    refusal = true
-                    NostrBunkerSession(credential, suppliedClient = network.client).use {
-                        assertFailsWith<SignerExceptions.ManuallyUnauthorizedException> { it.sign(template) }
+                    for (message in listOf("denied", "null")) {
+                        refusal = message
+                        NostrBunkerSession(credential, suppliedClient = network.client).use {
+                            assertFailsWith<SignerExceptions.ManuallyUnauthorizedException> { it.sign(template) }
+                        }
                     }
                 }
             }

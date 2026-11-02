@@ -3,6 +3,7 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.nostr.NostrDataSource
 import dev.dimension.flare.data.model.tab.TimelineSpec
+import dev.dimension.flare.data.network.nostr.initializeNostrBunkerSerialization
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformCapability
 import dev.dimension.flare.model.PlatformDataSourceContext
@@ -23,6 +24,10 @@ internal const val NOSTR_PLATFORM_ID: String = "Nostr"
 public data object NostrPlatformSpec :
     PlatformSpec,
     LoginPlatformProvider by NostrLoginProvider {
+    init {
+        initializeNostrBunkerSerialization()
+    }
+
     public override val platformId: String = NOSTR_PLATFORM_ID
     public override val metadata: PlatformMetadata =
         PlatformMetadata(

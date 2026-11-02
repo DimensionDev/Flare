@@ -78,13 +78,24 @@ public extension ActionMenu.ItemColor {
         switch self {
         case .red: return .red
         case .contentColor: return nil
-        case .primaryColor: return Color(red: 0, green: 186.0 / 255, blue: 124.0 / 255)
+        case .primaryColor: return StatusActionColors.primary
         }
     }
 
     #if os(iOS)
     var uiColor: UIColor? {
-        swiftColor.map { UIColor($0) }
+        switch self {
+        case .red: return .systemRed
+        case .contentColor: return nil
+        case .primaryColor: return StatusActionColors.primaryUIColor
+        }
     }
+    #endif
+}
+
+private enum StatusActionColors {
+    static let primary = Color(red: 0, green: 186.0 / 255, blue: 124.0 / 255)
+    #if os(iOS)
+    static let primaryUIColor = UIColor(primary)
     #endif
 }

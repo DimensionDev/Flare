@@ -370,7 +370,7 @@ private struct StatusActionBarLabel: View {
         let animateNumber = activeMotion.map { $0.effects.number != .none } ?? false
         #endif
         StatusActionContentLayout(metrics: metrics,
-                                  preferredSize: metrics.size(title: state.text, reservesNumberWidth: reservesNumberWidth, expanded: false)) {
+                                  preferredSize: metrics.size(titleWidth: state.text.map(metrics.textWidth), reservesNumberWidth: reservesNumberWidth, expanded: false)) {
             Group {
                 #if os(iOS)
                 if let image = metrics.iconImage(state.icon ?? .more) {

@@ -79,8 +79,10 @@ final class StatusActionsUIView: UIView, ManualLayoutMeasurable, TimelineHeightP
 
     private func updateMetrics() {
         let font = UIFont.preferredFont(forTextStyle: textStyle, compatibleWith: traitCollection)
+        let scale = traitCollection.displayScale > 0 ? traitCollection.displayScale : UIScreen.main.scale
+        guard metrics.fontSize != font.pointSize || metrics.scale != scale else { return }
         metrics = StatusActionLayoutMetrics(fontSize: font.pointSize,
-                                            scale: traitCollection.displayScale > 0 ? traitCollection.displayScale : UIScreen.main.scale)
+                                            scale: scale)
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -581,8 +583,6 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         self.metrics = metrics
         iconScale = metrics.iconScale(imageWidth: image?.size.width ?? 0)
         reservesIconWidth = usesExpandedHitArea || image != nil
-        preferredSize = metrics.size(title: title, reservesNumberWidth: reservesNumberWidth,
-                                     hasIcon: reservesIconWidth, expanded: usesExpandedHitArea)
         self.onTap = onTap
         self.tintColor = tintColor
         self.currentSpacing = reservesIconWidth && (title != nil || reservesNumberWidth) ? StatusActionLayoutMetrics.labelSpacing : 0
@@ -600,6 +600,12 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
         label.font = metrics.nativeFont
         label.textColor = tintColor
         label.isHidden = title == nil
+        let titleWidth = title.map { _ in
+            let width = label.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)).width
+            return ceil(width * metrics.scale) / metrics.scale
+        }
+        preferredSize = metrics.size(titleWidth: titleWidth, reservesNumberWidth: reservesNumberWidth,
+                                     hasIcon: reservesIconWidth, expanded: usesExpandedHitArea)
 
         invalidateIntrinsicContentSize()
         setNeedsLayout()

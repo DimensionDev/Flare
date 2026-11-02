@@ -174,8 +174,8 @@ final class StatusActionLayoutTests: XCTestCase {
     func testFixedCountPlaceholderUsesTheActualFontAndSurvivesHiddenOrZeroCounts() {
         for fontSize: CGFloat in [13, 17, 28] {
             let metrics = StatusActionLayoutMetrics(fontSize: fontSize, scale: 3)
-            let zero = metrics.size(title: nil, reservesNumberWidth: true)
-            let short = metrics.size(title: "8", reservesNumberWidth: true)
+            let zero = metrics.size(titleWidth: nil, reservesNumberWidth: true)
+            let short = metrics.size(titleWidth: metrics.textWidth("8"), reservesNumberWidth: true)
             XCTAssertEqual(zero, short)
             XCTAssertEqual(zero.width, 20 + 2 + metrics.numberWidth + 8)
             XCTAssertGreaterThan(metrics.numberWidth, metrics.textWidth("000"))

@@ -62,12 +62,12 @@ public nonisolated struct StatusActionLayoutMetrics: Sendable {
         ceil((text as NSString).size(withAttributes: [.font: nativeFont]).width * scale) / scale
     }
 
-    public func size(title: String?, reservesNumberWidth: Bool, hasIcon: Bool = true, expanded: Bool = true) -> CGSize {
+    public func size(titleWidth: CGFloat?, reservesNumberWidth: Bool, hasIcon: Bool = true, expanded: Bool = true) -> CGSize {
         let inset = expanded ? Self.padding : 0
-        let hasTitle = title != nil || reservesNumberWidth
-        let titleWidth = max(title.map(textWidth) ?? 0, reservesNumberWidth ? numberWidth : 0)
+        let hasTitle = titleWidth != nil || reservesNumberWidth
+        let width = max(titleWidth ?? 0, reservesNumberWidth ? numberWidth : 0)
         return CGSize(
-            width: (hasIcon ? Self.iconWidth : 0) + (hasIcon && hasTitle ? Self.labelSpacing : 0) + titleWidth + inset * 2,
+            width: (hasIcon ? Self.iconWidth : 0) + (hasIcon && hasTitle ? Self.labelSpacing : 0) + width + inset * 2,
             height: max(hasIcon ? iconHeight : 0, hasTitle ? lineHeight : 0) + inset * 2
         )
     }

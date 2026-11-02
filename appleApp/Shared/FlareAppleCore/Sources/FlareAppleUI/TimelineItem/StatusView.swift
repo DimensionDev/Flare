@@ -458,7 +458,7 @@ public struct StatusView: View {
                         }
 
                         if (postActionStyle != .hidden || isDetail) && !forceHideActions {
-                            StatusActionsView(data: actions, useText: false, topPadding: 8, postKey: String(describing: data.statusKey))
+                            StatusActionsView(data: actions, useText: false, topPadding: 8, isDetail: isDetail, postKey: String(describing: data.statusKey))
                             #if os(macOS)
                                 .font(isDetail ? .body : .callout)
                             #else

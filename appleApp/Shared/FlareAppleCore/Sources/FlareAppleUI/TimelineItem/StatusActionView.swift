@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import SwiftUIBackports
 import FlareAppleCore
 
 #if canImport(UIKit)
@@ -22,16 +21,20 @@ public struct StatusActionsView: View {
     @Environment(\.timelineAppearance.postActionFixedWidth) private var postActionFixedWidth
     @Environment(\.openURL) private var openURL
     #if os(macOS)
-    @ScaledMetric(relativeTo: .callout) private var fontSize = 16
+    @ScaledMetric(relativeTo: .callout) private var fontSize = NSFont.preferredFont(forTextStyle: .callout).pointSize
+    @ScaledMetric(relativeTo: .body) private var bodyFontSize = NSFont.preferredFont(forTextStyle: .body).pointSize
     #else
     @ScaledMetric(relativeTo: .footnote) private var fontSize = 13
+    @ScaledMetric(relativeTo: .body) private var bodyFontSize = 17
     #endif
     private let data: [ActionMenu]
     private let useText: Bool
     private let allowSpacer: Bool
     private let applyPostActionLayout: Bool
     private let topPadding: CGFloat
+    private let isDetail: Bool
     private let postKey: String?
+    @Environment(\.displayScale) private var displayScale
 
     public init(
         data: [ActionMenu],
@@ -39,6 +42,7 @@ public struct StatusActionsView: View {
         allowSpacer: Bool = true,
         applyPostActionLayout: Bool = true,
         topPadding: CGFloat = 0,
+        isDetail: Bool = false,
         postKey: String? = nil
     ) {
         self.data = data
@@ -46,55 +50,33 @@ public struct StatusActionsView: View {
         self.allowSpacer = allowSpacer
         self.applyPostActionLayout = applyPostActionLayout
         self.topPadding = topPadding
+        self.isDetail = isDetail
         self.postKey = postKey
     }
 
     public var body: some View {
+        let metrics = StatusActionLayoutMetrics(fontSize: isDetail || useText ? bodyFontSize : fontSize, scale: displayScale)
         let actions = resolvedData.filter { action in
             if case .divider = onEnum(of: action) { return useText }
             return true
         }
         if useText {
             ForEach(0..<actions.count, id: \.self) { index in
-                StatusActionView(
-                    data: actions[index],
-                    useText: true,
-                    isFixedWidth: false,
-                    fontSize: fontSize,
-                    showNumbers: showNumbers,
-                    openURL: openURL
-                )
+                StatusActionView(data: actions[index], useText: true, isFixedWidth: false,
+                                 metrics: metrics, showNumbers: showNumbers, openURL: openURL)
             }
         } else if !actions.isEmpty {
             let isStretched = postActionStyle == .stretch && allowSpacer
-            let layout = isStretched
-                ? AnyLayout(StatusActionStretchLayout(
-                    iconWidth: StatusActionHitArea.iconWidth(fontSize: fontSize),
-                    trailingNumberWidth: hasTrailingCount(actions) ? fontSize * 2.5 + 2 : 0
-                ))
-                : AnyLayout(HStackLayout(spacing: postActionStyle == .stretch ? nil : 4))
-            layout {
+            StatusActionRowLayout(metrics: metrics, style: postActionStyle, allowSpacer: allowSpacer,
+                                  lastHasNumber: hasTrailingCount(actions)) {
                 ForEach(0..<actions.count, id: \.self) { index in
-                    let item = actions[index]
-                    if (index == actions.count - 1 && postActionStyle == .leftAligned) ||
-                        (postActionStyle == .rightAligned && index == 0) {
-                        if allowSpacer {
-                            Spacer()
-                        }
-                    }
-                    StatusActionView(
-                        data: item,
-                        useText: useText,
-                        isFixedWidth: !isStretched && postActionFixedWidth && index != actions.count - 1,
-                        fontSize: fontSize,
-                        showNumbers: showNumbers,
-                        openURL: openURL,
-                        isStretched: isStretched,
-                        animationIdentity: animationIdentity(for: item, position: index)
-                    )
+                    StatusActionView(data: actions[index], useText: false,
+                                     isFixedWidth: !isStretched && postActionFixedWidth && index != actions.count - 1,
+                                     metrics: metrics, showNumbers: showNumbers, openURL: openURL,
+                                     animationIdentity: animationIdentity(for: actions[index], position: index))
                 }
             }
-            .labelIconToTitleSpacingIfAvailable(2)
+            .font(.system(size: metrics.fontSize))
             .padding(.top, topPadding)
         }
     }
@@ -134,29 +116,26 @@ public struct StatusActionView: View {
     private let data: ActionMenu
     private let useText: Bool
     private let isFixedWidth: Bool
-    private let fontSize: CGFloat
+    private let metrics: StatusActionLayoutMetrics
     private let showNumbers: Bool
     private let openURL: OpenURLAction
-    private let isStretched: Bool
     private let animationIdentity: StatusActionAnimationState.Identity?
 
     public init(
         data: ActionMenu,
         useText: Bool,
         isFixedWidth: Bool,
-        fontSize: CGFloat,
+        metrics: StatusActionLayoutMetrics,
         showNumbers: Bool,
         openURL: OpenURLAction,
-        isStretched: Bool = false,
         animationIdentity: StatusActionAnimationState.Identity? = nil
     ) {
         self.data = data
         self.useText = useText
         self.isFixedWidth = isFixedWidth
-        self.fontSize = fontSize
+        self.metrics = metrics
         self.showNumbers = showNumbers
         self.openURL = openURL
-        self.isStretched = isStretched
         self.animationIdentity = animationIdentity
     }
 
@@ -167,10 +146,9 @@ public struct StatusActionView: View {
                 data: item,
                 useText: useText,
                 isFixedWidth: isFixedWidth,
-                fontSize: fontSize,
+                metrics: metrics,
                 showNumbers: showNumbers,
                 openURL: openURL,
-                isStretched: isStretched,
                 animationIdentity: animationIdentity
             )
         case .group(let group):
@@ -181,7 +159,7 @@ public struct StatusActionView: View {
                         data: group.actions[index],
                         useText: true,
                         isFixedWidth: false,
-                        fontSize: fontSize,
+                        metrics: metrics,
                         showNumbers: showNumbers,
                         openURL: openURL
                     )
@@ -194,48 +172,19 @@ public struct StatusActionView: View {
                             data: group.actions[index],
                             useText: true,
                             isFixedWidth: false,
-                            fontSize: fontSize,
+                            metrics: metrics,
                             showNumbers: showNumbers,
                             openURL: openURL
                         )
                     }
                 } label: {
-                    #if os(iOS)
-                    StatusActionAnimatedLabel(
+                    StatusActionBarLabel(
                         state: StatusActionAnimationState(identity: animationIdentity, item: group.displayItem, showNumbers: showNumbers),
-                        fontSize: fontSize,
-                        isFixedWidth: isFixedWidth,
-                        isStretched: isStretched,
-                        minimumIconOnlySize: StatusActionHitArea.labelContentHeight(fontSize: fontSize)
+                        metrics: metrics,
+                        reservesNumberWidth: isFixedWidth && group.displayItem.count != nil
                     )
-                    .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
-                    #else
-                    Group {
-                        if isStretched {
-                            StatusActionStretchedLabel(
-                                icon: group.displayItem.icon,
-                                text: showNumbers ? group.displayItem.count.map { Text($0.humanized) } : nil,
-                                fontSize: fontSize
-                            )
-                        } else if let text = group.displayItem.count?.humanized, showNumbers, !text.isEmpty {
-                            Label {
-                                Text(text)
-                                    .lineLimit(1)
-                                    .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                            } icon: {
-                                StatusActionIcon(icon: group.displayItem.icon)
-                            }
-                        } else {
-                            StatusActionIcon(icon: group.displayItem.icon)
-                                .frame(minWidth: StatusActionHitArea.labelContentHeight(fontSize: fontSize))
-                                .contentShape(Rectangle())
-                        }
-                    }
-                    .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
-                    .optionalForegroundStyle(group.displayItem.color?.swiftColor)
-                    #endif
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(StatusActionButtonStyle())
                 .accessibilityLabel(
                     Text(
                         verbatim: group.displayItem.text?.resolvedString
@@ -245,15 +194,9 @@ public struct StatusActionView: View {
                 .accessibilityValue(
                     Text(verbatim: showNumbers ? (group.displayItem.count?.humanized ?? "") : "")
                 )
-                .macOSStatusActionHoverStyle(isEnabled: true)
-                .statusActionFixedWidthSlot(
-                    icon: group.displayItem.icon,
-                    fontSize: fontSize,
-                    isEnabled: isFixedWidth &&
-                        showNumbers &&
-                        group.displayItem.count != nil &&
-                        group.displayItem.count?.humanized.isEmpty == true
-                )
+                .disabled(!group.displayItem.enabled)
+                .macOSStatusActionHoverStyle(isEnabled: group.displayItem.enabled)
+
             }
         case .divider:
             Divider()
@@ -268,37 +211,34 @@ public struct StatusActionItemView: View {
     private let data: ActionMenu.Item
     private let useText: Bool
     private let isFixedWidth: Bool
-    private let fontSize: CGFloat
+    private let metrics: StatusActionLayoutMetrics
     private let showNumbers: Bool
     private let openURL: OpenURLAction
-    private let isStretched: Bool
     private let animationIdentity: StatusActionAnimationState.Identity?
 
     public init(
         data: ActionMenu.Item,
         useText: Bool,
         isFixedWidth: Bool,
-        fontSize: CGFloat,
+        metrics: StatusActionLayoutMetrics,
         showNumbers: Bool,
         openURL: OpenURLAction,
-        isStretched: Bool = false,
         animationIdentity: StatusActionAnimationState.Identity? = nil
     ) {
         self.data = data
         self.useText = useText
         self.isFixedWidth = isFixedWidth
-        self.fontSize = fontSize
+        self.metrics = metrics
         self.showNumbers = showNumbers
         self.openURL = openURL
-        self.isStretched = isStretched
         self.animationIdentity = animationIdentity
     }
 
-    private var resolvedText: Text? {
+    private var resolvedTitle: String? {
         if useText, let text = data.text?.resolvedString {
-            return Text(text)
+            return text
         } else if showNumbers, let count = data.count?.humanized, !count.isEmpty {
-            return Text(count)
+            return count
         }
         return nil
     }
@@ -313,7 +253,7 @@ public struct StatusActionItemView: View {
 
     public var body: some View {
         actionControl
-            .buttonStyle(.plain)
+            .buttonStyle(StatusActionButtonStyle())
             .accessibilityLabel(
                 Text(
                     verbatim: data.text?.resolvedString
@@ -324,17 +264,8 @@ public struct StatusActionItemView: View {
                 Text(verbatim: showNumbers ? (data.count?.humanized ?? "") : "")
             )
             .disabled(!data.enabled)
-            .opacity(data.enabled ? 1 : 0.4)
             .macOSStatusActionHoverStyle(isEnabled: !useText && data.enabled)
-            .statusActionFixedWidthSlot(
-                icon: data.icon,
-                fontSize: fontSize,
-                isEnabled: !useText &&
-                    isFixedWidth &&
-                    showNumbers &&
-                    data.count != nil &&
-                    data.count?.humanized.isEmpty == true
-            )
+
     }
 
     @ViewBuilder
@@ -368,40 +299,22 @@ public struct StatusActionItemView: View {
 
     @ViewBuilder
     private var actionLabel: some View {
-        #if os(iOS)
-        if !useText {
-            StatusActionAnimatedLabel(
-                state: StatusActionAnimationState(identity: animationIdentity, item: data, showNumbers: showNumbers),
-                fontSize: fontSize,
-                isFixedWidth: isFixedWidth,
-                isStretched: isStretched
-            )
-            .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
-        } else {
-            staticActionLabel
-        }
-        #else
-        staticActionLabel
-        #endif
-    }
-
-    @ViewBuilder
-    private var staticActionLabel: some View {
-        Group {
-            if isStretched, !useText {
-                StatusActionStretchedLabel(icon: data.icon, text: resolvedText, fontSize: fontSize)
-            } else if let text = resolvedText {
-                Label {
-                    text.frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
-                } icon: {
+        if useText {
+            Group {
+                if let title = resolvedTitle {
+                    Label { Text(title) } icon: { StatusActionIcon(icon: data.icon) }
+                } else {
                     StatusActionIcon(icon: data.icon)
                 }
-            } else {
-                StatusActionIcon(icon: data.icon)
             }
+            .optionalForegroundStyle(data.color?.swiftColor)
+        } else {
+            StatusActionBarLabel(
+                state: StatusActionAnimationState(identity: animationIdentity, item: data, showNumbers: showNumbers),
+                metrics: metrics,
+                reservesNumberWidth: isFixedWidth && data.count != nil
+            )
         }
-        .statusActionContentPadding(isExpanded: !useText, fontSize: fontSize)
-        .optionalForegroundStyle(data.color?.swiftColor)
     }
 
     #if os(macOS)
@@ -431,50 +344,64 @@ public struct StatusActionItemView: View {
 
 // MARK: - Helpers
 
-#if os(iOS)
-private struct StatusActionAnimatedLabel: View {
+private struct StatusActionButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(isEnabled ? (configuration.isPressed ? 0.55 : 1) : 0.4)
+    }
+}
+
+private struct StatusActionBarLabel: View {
     let state: StatusActionAnimationState
-    let fontSize: CGFloat
-    let isFixedWidth: Bool
-    let isStretched: Bool
-    let minimumIconOnlySize: CGFloat?
+    let metrics: StatusActionLayoutMetrics
+    let reservesNumberWidth: Bool
+    #if os(iOS)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isVisible = false
     @State private var motion: StatusActionMotion?
-
-    init(state: StatusActionAnimationState, fontSize: CGFloat, isFixedWidth: Bool,
-         isStretched: Bool, minimumIconOnlySize: CGFloat? = nil) {
-        self.state = state
-        self.fontSize = fontSize
-        self.isFixedWidth = isFixedWidth
-        self.isStretched = isStretched
-        self.minimumIconOnlySize = minimumIconOnlySize
-    }
+    #endif
 
     var body: some View {
+        #if os(iOS)
         let activeMotion = motion?.target == state ? motion : nil
         let animateIcon = activeMotion.map { $0.effects.icon != .none } ?? false
         let animateNumber = activeMotion.map { $0.effects.number != .none } ?? false
-        HStack(spacing: 2) {
-            StatusActionIcon(icon: state.icon)
-                .optionalForegroundStyle(state.color?.swiftColor)
-                .opacity(animateIcon ? 0 : 1)
-                .transaction { $0.animation = nil; $0.disablesAnimations = true }
-                .overlay {
-                    if let activeMotion, animateIcon {
-                        StatusActionIconMotion(motion: activeMotion)
-                            .transition(.identity)
-                            .accessibilityHidden(true)
-                            .allowsHitTesting(false)
-                    }
+        #endif
+        StatusActionContentLayout(metrics: metrics,
+                                  preferredSize: metrics.size(title: state.text, reservesNumberWidth: reservesNumberWidth, expanded: false)) {
+            Group {
+                #if os(iOS)
+                if let image = metrics.iconImage(state.icon ?? .more) {
+                    StatusActionIcon(icon: state.icon ?? .more)
+                        .scaleEffect(metrics.iconScale(imageWidth: image.size.width))
                 }
-                .frame(width: isStretched ? StatusActionHitArea.iconWidth(fontSize: fontSize) : nil)
-                .frame(minWidth: state.text == nil && !isStretched ? minimumIconOnlySize : nil)
+                #else
+                StatusActionIcon(icon: state.icon ?? .more)
+                #endif
+            }
+            .optionalForegroundStyle(state.color?.swiftColor)
+            #if os(iOS)
+            .opacity(animateIcon ? 0 : 1)
+            .transaction { $0.animation = nil; $0.disablesAnimations = true }
+            .overlay {
+                if let activeMotion, animateIcon {
+                    StatusActionIconMotion(motion: activeMotion)
+                        .scaleEffect(metrics.iconScale(imageWidth: metrics.iconImage(state.icon ?? .more)?.size.width ?? 0))
+                        .transition(.identity)
+                        .accessibilityHidden(true)
+                        .allowsHitTesting(false)
+                }
+            }
+            #endif
+            .frame(width: StatusActionLayoutMetrics.iconWidth, height: metrics.iconHeight)
             if let text = state.text {
                 Text(text)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .optionalForegroundStyle(state.color?.swiftColor)
+                    #if os(iOS)
                     .opacity(animateNumber ? 0 : 1)
                     .transaction { $0.animation = nil; $0.disablesAnimations = true }
                     .overlay(alignment: .leading) {
@@ -485,10 +412,14 @@ private struct StatusActionAnimatedLabel: View {
                                 .allowsHitTesting(false)
                         }
                     }
-                    .frame(minWidth: isFixedWidth && !isStretched ? fontSize * 2.5 : nil, alignment: .leading)
+                    #endif
+            } else if reservesNumberWidth {
+                Color.clear.accessibilityHidden(true)
             }
         }
-        .frame(maxWidth: isStretched ? .infinity : nil, alignment: .leading)
+        .padding(StatusActionLayoutMetrics.padding)
+        .contentShape(Rectangle())
+        #if os(iOS)
         .onAppear {
             resetAnimations()
             isVisible = true
@@ -509,13 +440,17 @@ private struct StatusActionAnimatedLabel: View {
                 motion = StatusActionMotion(previous: previous, target: newState, effects: effects)
             }
         }
+        #endif
     }
 
+    #if os(iOS)
     private func resetAnimations() {
         if motion != nil { motion = nil }
     }
+    #endif
 }
 
+#if os(iOS)
 private struct StatusActionMotion {
     let eventID = UUID()
     let previous: StatusActionAnimationState
@@ -623,69 +558,49 @@ private struct StatusActionNumberMotion: View {
 }
 #endif
 
-private nonisolated enum StatusActionHitArea {
-    static let horizontalInset: CGFloat = 4
-    static let verticalInset: CGFloat = 4
-
-    static func iconWidth(fontSize: CGFloat) -> CGFloat {
-        max(20, labelContentHeight(fontSize: fontSize))
-    }
-
-    static func labelContentHeight(fontSize: CGFloat) -> CGFloat {
-        fontSize + 2
-    }
-}
-
-private struct StatusActionStretchedLabel: View {
-    let icon: UiIcon?
-    let text: Text?
-    let fontSize: CGFloat
-
-    var body: some View {
-        HStack(spacing: 2) {
-            StatusActionIcon(icon: icon)
-                .frame(width: StatusActionHitArea.iconWidth(fontSize: fontSize))
-            if let text {
-                text
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-private struct StatusActionStretchLayout: Layout {
-    let iconWidth: CGFloat
-    let trailingNumberWidth: CGFloat
-
-    private func slotWidth(totalWidth: CGFloat, count: Int) -> CGFloat {
-        guard count > 1 else { return totalWidth }
-        // Counts use the space after each icon; only the final count needs a reserved slot.
-        let lastWidth = iconWidth + StatusActionHitArea.horizontalInset * 2 + trailingNumberWidth
-        return max(0, totalWidth - lastWidth) / CGFloat(count - 1)
-    }
+private struct StatusActionContentLayout: Layout {
+    let metrics: StatusActionLayoutMetrics
+    let preferredSize: CGSize
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? subviews.reduce(0) { $0 + $1.sizeThatFits(.unspecified).width }
-        let slot = slotWidth(totalWidth: width, count: subviews.count)
-        let height = subviews.enumerated().reduce(CGFloat.zero) { height, entry in
-            let itemWidth = entry.offset == subviews.count - 1 ? width - slot * CGFloat(entry.offset) : slot
-            return max(height, entry.element.sizeThatFits(ProposedViewSize(width: itemWidth, height: proposal.height)).height)
-        }
-        return CGSize(width: width, height: height)
+        CGSize(width: min(preferredSize.width, proposal.width ?? preferredSize.width), height: preferredSize.height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let slot = slotWidth(totalWidth: bounds.width, count: subviews.count)
+        let iconWidth = StatusActionLayoutMetrics.iconWidth
+        subviews[0].place(at: CGPoint(x: bounds.minX, y: bounds.midY), anchor: .leading,
+                          proposal: ProposedViewSize(width: iconWidth, height: metrics.iconHeight))
+        if subviews.count > 1 {
+            let titleWidth = max(0, bounds.width - iconWidth - StatusActionLayoutMetrics.labelSpacing)
+            let titleX = bounds.minX + iconWidth + StatusActionLayoutMetrics.labelSpacing
+            subviews[1].place(at: CGPoint(x: titleX, y: bounds.midY), anchor: .leading,
+                              proposal: ProposedViewSize(width: titleWidth, height: metrics.lineHeight))
+        }
+    }
+}
+
+private struct StatusActionRowLayout: Layout {
+    let metrics: StatusActionLayoutMetrics
+    let style: PostActionStyle
+    let allowSpacer: Bool
+    let lastHasNumber: Bool
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let naturalWidth = sizes.reduce(CGFloat.zero) { $0 + $1.width } +
+            CGFloat(max(sizes.count - 1, 0)) * StatusActionLayoutMetrics.actionSpacing
+        return CGSize(width: allowSpacer ? (proposal.width ?? naturalWidth) : min(naturalWidth, proposal.width ?? naturalWidth),
+                      height: sizes.map(\.height).max() ?? 0)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
+        let frames = metrics.frames(width: bounds.width, sizes: sizes, style: style, allowSpacer: allowSpacer,
+                                    lastHasNumber: lastHasNumber)
         for (index, subview) in subviews.enumerated() {
-            let offset = slot * CGFloat(index)
-            let itemWidth = index == subviews.count - 1 ? bounds.width - offset : slot
-            subview.place(
-                at: CGPoint(x: bounds.minX + offset, y: bounds.midY),
-                anchor: .leading,
-                proposal: ProposedViewSize(width: itemWidth, height: bounds.height)
-            )
+            let frame = frames[index]
+            subview.place(at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY), anchor: .topLeading,
+                          proposal: ProposedViewSize(frame.size))
         }
     }
 }
@@ -715,41 +630,10 @@ private struct StatusActionHoverModifier: ViewModifier {
 
 private extension View {
     @ViewBuilder
-    func labelIconToTitleSpacingIfAvailable(_ spacing: CGFloat) -> some View {
-        self.backport.flareLabelIconToTitleSpacing(spacing)
-    }
-
     func optionalForegroundStyle(_ color: Color?) -> some View {
-        // Keep the label's identity when an action gains or loses its tint.
-        foregroundStyle(color.map { AnyShapeStyle($0) } ?? AnyShapeStyle(ForegroundStyle()))
-    }
-
-    @ViewBuilder
-    func statusActionContentPadding(isExpanded: Bool, fontSize: CGFloat) -> some View {
-        if isExpanded {
-            self
-                .frame(minHeight: StatusActionHitArea.labelContentHeight(fontSize: fontSize))
-                .padding(.horizontal, StatusActionHitArea.horizontalInset)
-                .padding(.vertical, StatusActionHitArea.verticalInset)
-                .contentShape(Rectangle())
-        } else {
-            self.contentShape(Rectangle())
-        }
-    }
-
-    @ViewBuilder
-    func statusActionFixedWidthSlot(
-        icon: UiIcon?,
-        fontSize: CGFloat,
-        isEnabled: Bool
-    ) -> some View {
-        if isEnabled {
-            ZStack(alignment: .leading) {
-                StatusActionFixedWidthPlaceholder(icon: icon, fontSize: fontSize)
-                    .statusActionContentPadding(isExpanded: true, fontSize: fontSize)
-                    .hidden()
-                self
-            }
+        // Apply only to leaf content so animation state stays above this color branch.
+        if let color {
+            foregroundStyle(color)
         } else {
             self
         }
@@ -766,14 +650,6 @@ private extension View {
 }
 
 public extension ActionMenu.ItemColor {
-    var swiftColor: Color? {
-        switch self {
-        case .red: return .red
-        case .contentColor: return .primary
-        case .primaryColor: return .accentColor
-        }
-    }
-
     var role: ButtonRole? {
         switch self {
         case .red:
@@ -804,20 +680,6 @@ public struct StatusActionIcon: View {
     public var body: some View {
         if let icon = icon {
             icon.image
-        }
-    }
-}
-
-private struct StatusActionFixedWidthPlaceholder: View {
-    let icon: UiIcon?
-    let fontSize: CGFloat
-
-    var body: some View {
-        Label {
-            Text("")
-                .frame(minWidth: fontSize * 2.5)
-        } icon: {
-            StatusActionIcon(icon: icon)
         }
     }
 }

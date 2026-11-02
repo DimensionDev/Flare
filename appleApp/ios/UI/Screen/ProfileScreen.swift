@@ -97,7 +97,8 @@ struct ProfileScreen: View {
                             data: presenter.state.actions,
                             useText: false,
                             allowSpacer: false,
-                            applyPostActionLayout: false
+                            applyPostActionLayout: false,
+                            isDetail: true
                         )
                     }
                 }

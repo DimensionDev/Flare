@@ -265,7 +265,8 @@ class StatusSingleMediaHeightTest {
     fun limitCanBeEnabledAndRestoresTheOriginalWidthWhenDisabled() {
         val file = Files.createTempFile("single-media", ".png").toFile().apply { deleteOnExit() }
         ImageIO.write(BufferedImage(360, 640, BufferedImage.TYPE_INT_RGB), "png", file)
-        val media = UiMedia.Image(file.toURI().toString(), file.toURI().toString(), null, height = 640f, width = 360f, sensitive = false)
+        val uri = file.toPath().toUri().toString()
+        val media = UiMedia.Image(uri, uri, null, height = 640f, width = 360f, sensitive = false)
         var appearance by mutableStateOf(TimelineAppearance.Default.copy(limitSingleMediaHeight = false))
         var post by mutableStateOf(createSampleStatus(createSampleUser()).copy(images = persistentListOf(media)))
         compose.setContent {

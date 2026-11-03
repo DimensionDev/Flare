@@ -577,7 +577,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         try fixture.assertPosition(anchor)
     }
 
-    func testGalleryGapKeepsItsPredecessorAboveTheViewportWhileFillingDownward() async throws {
+    func testGalleryGapKeepsItsSuccessorWhileFillingUpward() async throws {
         let fixture = await GalleryFixture()
         let reading = ReadingState()
         fixture.controller.reading = reading
@@ -589,22 +589,22 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let gapFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: gapPath)?.frame)
         fixture.collection.setContentOffset(CGPoint(x: 0, y: gapFrame.minY), animated: false)
         await fixture.settle()
-        let precedingPath = try XCTUnwrap(fixture.source.indexPath(for: "g:case-3"))
-        let precedingFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: precedingPath)?.frame)
-        let expected = precedingFrame.minY - fixture.collection.contentOffset.y
+        let followingPath = try XCTUnwrap(fixture.source.indexPath(for: "g:case-4"))
+        let followingFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: followingPath)?.frame)
+        let expected = followingFrame.minY - fixture.collection.contentOffset.y
         fixture.controller.willLoadTimelineGap(gap)
         fixture.content.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 4)
         fixture.content.items[6] = .post(makeGap(revision: 1))
         fixture.controller.submit(fixture.content)
         await fixture.settle()
-        try fixture.assertPosition(("g:case-3", expected))
-        XCTAssertEqual(reading.saved.last?.index, 3)
+        try fixture.assertPosition(("g:case-4", expected))
+        XCTAssertEqual(reading.saved.last?.index, 5)
         let insertedPath = try XCTUnwrap(fixture.source.indexPath(for: "g:case-100"))
         let insertedFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: insertedPath)?.frame)
         XCTAssertLessThan(insertedFrame.minY - fixture.collection.contentOffset.y, fixture.collection.bounds.height)
     }
 
-    func testGalleryGapKeepsItsPredecessorWhenPagingReplacesAndExpandsTheWindow() async throws {
+    func testGalleryGapKeepsItsSuccessorWhenPagingReplacesAndExpandsTheWindow() async throws {
         let fixture = await GalleryFixture()
         let heights: [Float] = [240, 1_040, 420, 760]
         fixture.content.items = (0..<40).map { .post(makeTimelineTestRow($0, imageHeight: heights[$0 % heights.count])) }
@@ -612,7 +612,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.content.items.insert(.post(gap), at: 18)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
-        let path = try XCTUnwrap(fixture.source.indexPath(for: "g:case-17"))
+        let path = try XCTUnwrap(fixture.source.indexPath(for: "g:case-18"))
         let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
         fixture.collection.setContentOffset(CGPoint(x: 0, y: frame.minY - 150), animated: false)
         await fixture.settle()
@@ -620,26 +620,26 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         var expanded = fixture.content.items
         expanded.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 18)
         expanded[38] = .post(makeGap(revision: 1))
-        // A refresh loads 20 rows around the predecessor. The remaining gap is
+        // A refresh loads 20 rows around the successor. The remaining gap is
         // outside this window until local paging expands it again.
-        fixture.content.items = Array(expanded[11..<31])
+        fixture.content.items = Array(expanded[32..<52])
         fixture.controller.submit(fixture.content)
         await fixture.settle()
-        try fixture.assertPosition(("g:case-17", 150))
+        try fixture.assertPosition(("g:case-18", 150))
         fixture.content.items = expanded
         fixture.controller.submit(fixture.content)
         await fixture.settle()
-        try fixture.assertPosition(("g:case-17", 150))
+        try fixture.assertPosition(("g:case-18", 150))
     }
 
-    func testGalleryGapKeepsItsPredecessorWhenExistingCardsChangeHeight() async throws {
+    func testGalleryGapKeepsItsSuccessorWhenExistingCardsChangeHeight() async throws {
         for footerChanges in [false, true] {
             let fixture = await GalleryFixture()
             let gap = makeGap()
             fixture.content.items.insert(.post(gap), at: 18)
             fixture.controller.submit(fixture.content)
             await fixture.settle()
-            let path = try XCTUnwrap(fixture.source.indexPath(for: "g:case-17"))
+            let path = try XCTUnwrap(fixture.source.indexPath(for: "g:case-18"))
             let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
             fixture.collection.setContentOffset(CGPoint(x: 0, y: frame.minY - 150), animated: false)
             await fixture.settle()
@@ -648,7 +648,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             if footerChanges { fixture.content.footer = .loading }
             fixture.controller.submit(fixture.content)
             await fixture.settle()
-            try fixture.assertPosition(("g:case-17", 150))
+            try fixture.assertPosition(("g:case-18", 150))
         }
     }
 
@@ -707,13 +707,13 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         try fixture.assertPosition(anchor)
     }
 
-    func testGalleryAppearanceChangesKeepTheGapPredecessor() async throws {
+    func testGalleryAppearanceChangesKeepTheGapSuccessor() async throws {
         let fixture = await GalleryFixture()
         let gap = makeGap()
         fixture.content.items.insert(.post(gap), at: 18)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
-        let path = try XCTUnwrap(fixture.source.indexPath(for: "g:case-17"))
+        let path = try XCTUnwrap(fixture.source.indexPath(for: "g:case-18"))
         let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
         fixture.collection.setContentOffset(CGPoint(x: 0, y: frame.minY - 150), animated: false)
         await fixture.settle()
@@ -724,7 +724,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             patch: helper.setShowMedia(patch: helper.empty, value: false)
         ))
         await fixture.settle()
-        try fixture.assertPosition(("g:case-17", 150))
+        try fixture.assertPosition(("g:case-18", 150))
     }
 
     func testNewReadingTargetReleasesThePreviousGapAnchor() async throws {
@@ -747,25 +747,114 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let gap = makeGap()
         fixture.input.items.insert(.post(gap), at: 18)
         await fixture.apply()
-        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-17"))
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-18"))
         let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
         await fixture.scroll(frame.minY - 150)
         fixture.controller.willLoadTimelineGap(gap)
         var expanded = fixture.input.items
         expanded.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 18)
         expanded[38] = .post(makeGap(revision: 1))
-        fixture.input.items = Array(expanded[17..<37])
+        fixture.input.items = Array(expanded[39..<59])
         await fixture.apply()
-        // The predecessor is temporarily the first row, so +150 cannot be
+        // The successor is temporarily the first row, so +150 cannot be
         // displayed without overscrolling. Expanding must recover the original.
         let clamped = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: IndexPath(item: 0, section: 0))?.frame)
         XCTAssertLessThan(clamped.minY - fixture.collection.contentOffset.y, 150)
         fixture.input.items = expanded
         await fixture.apply()
-        try fixture.assertPosition(("t:case-17", 150))
+        try fixture.assertPosition(("t:case-18", 150))
     }
 
-    func testGalleryRemovingTheGapPredecessorAllowsSubsequentViewportAnchors() async throws {
+    func testGapSuccessorReturnsAfterLeavingTheLoadedWindowInBothLayouts() async throws {
+        let gap = makeGap()
+        let list = await Fixture(posts: true)
+        list.input.items.insert(.post(gap), at: 18)
+        await list.apply()
+        let path = try XCTUnwrap(list.collection.readingIndexPath?("t:case-18"))
+        let frame = try XCTUnwrap(list.collection.layoutAttributesForItem(at: path)?.frame)
+        await list.scroll(frame.minY - 150)
+        list.controller.willLoadTimelineGap(gap)
+        var expanded = list.input.items
+        expanded.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 18)
+        expanded[38] = .post(makeGap(revision: 1))
+        list.input.items = Array(expanded.prefix(20))
+        await list.apply()
+        XCTAssertNil(list.collection.readingIndexPath?("t:case-18"))
+        list.input.items = expanded
+        await list.apply()
+        try list.assertPosition(("t:case-18", 150))
+
+        let gallery = await GalleryFixture()
+        gallery.content.items.insert(.post(gap), at: 18)
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+        let galleryPath = try XCTUnwrap(gallery.source.indexPath(for: "g:case-18"))
+        let galleryFrame = try XCTUnwrap(gallery.collection.layoutAttributesForItem(at: galleryPath)?.frame)
+        gallery.collection.setContentOffset(CGPoint(x: 0, y: galleryFrame.minY - 150), animated: false)
+        await gallery.settle()
+        gallery.controller.willLoadTimelineGap(gap)
+        var galleryExpanded = gallery.content.items
+        galleryExpanded.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 18)
+        galleryExpanded[38] = .post(makeGap(revision: 1))
+        gallery.content.items = Array(galleryExpanded.prefix(20))
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+        XCTAssertNil(gallery.source.indexPath(for: "g:case-18"))
+        gallery.content.items = galleryExpanded
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+        try gallery.assertPosition(("g:case-18", 150))
+    }
+
+    func testGapInsertionRecordsTheNewReadingIndexForReopening() async throws {
+        let fixture = await Fixture(posts: true)
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previous = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        window.rootViewController = fixture.controller
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previous?.makeKey() }
+        let reading = ReadingState()
+        fixture.controller.reading = reading
+        let gap = makeGap()
+        fixture.input.items.insert(.post(gap), at: 4)
+        await fixture.apply()
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-4"))
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+        await fixture.scroll(frame.minY - 80)
+        fixture.controller.willLoadTimelineGap(gap)
+        fixture.input.items.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 4)
+        fixture.input.items[24] = .post(makeGap(revision: 1))
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-4", 80))
+        let position = try XCTUnwrap(reading.viewports.last)
+        XCTAssertNotEqual(position.index, 5, "The pre-insertion index must not become the next bookmark")
+        let reopened = await Fixture(posts: true)
+        reopened.input.items = fixture.input.items
+        reopened.controller.reading = ReadingState(position: position)
+        window.rootViewController = reopened.controller
+        await reopened.apply()
+        try reopened.assertPosition(("t:case-4", 80))
+    }
+
+    func testClosingGapAndChangingHeightsKeepsItsSuccessor() async throws {
+        let fixture = await Fixture(posts: true)
+        let gap = makeGap()
+        fixture.input.items.insert(.post(gap), at: 4)
+        await fixture.apply()
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-4"))
+        let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
+        await fixture.scroll(frame.minY - 150)
+        fixture.controller.willLoadTimelineGap(gap)
+        fixture.input.items.replaceSubrange(4...4, with: [.post(makeRow(100)), .post(makeRow(101))])
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-4", 150))
+        fixture.input.items[5] = .post(makeRow(101, imageHeight: 1_400))
+        await fixture.apply()
+        try fixture.assertPosition(("t:case-4", 150))
+    }
+
+    func testGalleryRemovingTheGapSuccessorAllowsSubsequentViewportAnchors() async throws {
         let fixture = await GalleryFixture()
         let gap = makeGap()
         fixture.content.items.insert(.post(gap), at: 18)
@@ -774,7 +863,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.collection.setContentOffset(CGPoint(x: 0, y: 1_500), animated: false)
         await fixture.settle()
         fixture.controller.willLoadTimelineGap(gap)
-        fixture.content.items.remove(at: 17)
+        fixture.content.items.remove(at: 19)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         let anchor = try fixture.position()
@@ -1012,7 +1101,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertTrue(reading.saved.isEmpty)
     }
 
-    func testLoadingAGapFillsDownwardEvenWhenItsPredecessorIsAboveTheViewport() async throws {
+    func testLoadingAGapKeepsItsSuccessorWhileFillingUpward() async throws {
         let fixture = await Fixture(posts: true)
         let reading = ReadingState()
         fixture.controller.reading = reading
@@ -1020,32 +1109,34 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.input.items.insert(.post(gap), at: 4)
         await fixture.apply()
         let gapPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:\(gap.stableItemKey)"))
-        // Start at the gap itself: preserving the first visible row would move the reader down.
+        // Keep the first old post below the gap at its original screen position.
         let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: gapPath)?.frame)
         await fixture.scroll(frame.minY + 40)
-        let precedingPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-3"))
-        let precedingFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: precedingPath)?.frame)
-        let expected = precedingFrame.minY - fixture.collection.contentOffset.y - fixture.collection.adjustedContentInset.top
+        let followingPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-4"))
+        let followingFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: followingPath)?.frame)
+        let expected = followingFrame.minY - fixture.collection.contentOffset.y - fixture.collection.adjustedContentInset.top
 
         fixture.controller.willLoadTimelineGap(gap)
         fixture.input.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 4)
         fixture.input.items[6] = .post(makeGap(revision: 1))
         await fixture.apply()
 
-        try fixture.assertPosition(("t:case-3", expected))
-        XCTAssertEqual(reading.saved.last?.index, 3)
+        try fixture.assertPosition(("t:case-4", expected))
+        XCTAssertEqual(reading.saved.last?.index, 5)
         XCTAssertFalse(fixture.collection.readingItemIDs?().contains("t:\(gap.stableItemKey)") ?? true)
         let insertedPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-100"))
         let insertedFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: insertedPath)?.frame)
         XCTAssertLessThan(insertedFrame.minY - fixture.collection.contentOffset.y, fixture.collection.bounds.height)
     }
 
-    func testLeadingGapRevealsInsertedPostsDespiteConcurrentRefreshInBothNativeLayouts() async throws {
+    func testLeadingGapKeepsItsSuccessorDespiteConcurrentRefreshInBothNativeLayouts() async throws {
         let gap = makeGap()
         let list = await Fixture(posts: true)
         list.input.items.insert(.post(gap), at: 0)
         await list.apply()
         await list.scroll(0)
+        let listPath = try XCTUnwrap(list.collection.readingIndexPath?("t:case-0"))
+        let listOffset = try XCTUnwrap(list.collection.layoutAttributesForItem(at: listPath)?.frame.minY) - list.collection.contentOffset.y
         list.controller.willLoadTimelineGap(gap)
         list.input.items.insert(.post(makeTimelineTestRow(200)), at: 0)
         list.input.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 1)
@@ -1053,13 +1144,13 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await list.apply()
         list.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100", "case-101"])
         await list.settle()
-        try list.assertPosition(("t:case-100", 0))
+        try list.assertPosition(("t:case-0", listOffset))
 
         let gallery = await GalleryFixture()
         gallery.content.items.insert(.post(gap), at: 0)
         gallery.controller.submit(gallery.content)
         await gallery.settle()
-        let path = try XCTUnwrap(gallery.source.indexPath(for: "g:\(gap.stableItemKey)"))
+        let path = try XCTUnwrap(gallery.source.indexPath(for: "g:case-0"))
         let offset = try XCTUnwrap(gallery.collection.layoutAttributesForItem(at: path)?.frame.minY)
         gallery.controller.willLoadTimelineGap(gap)
         gallery.content.items[0] = .post(makeGap(failed: true))
@@ -1071,16 +1162,16 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         gallery.content.items[3] = .post(makeGap(revision: 1, failed: true))
         gallery.controller.submit(gallery.content)
         await gallery.settle()
-        try gallery.assertPosition(("g:case-100", offset))
+        try gallery.assertPosition(("g:case-0", offset))
     }
 
-    func testGalleryLeadingGapCompletionAfterItsPageHasRenderedRestoresInsertion() async throws {
+    func testGalleryLeadingGapLateCompletionKeepsItsSuccessor() async throws {
         let gap = makeGap()
         let gallery = await GalleryFixture()
         gallery.content.items.insert(.post(gap), at: 0)
         gallery.controller.submit(gallery.content)
         await gallery.settle()
-        let path = try XCTUnwrap(gallery.source.indexPath(for: "g:\(gap.stableItemKey)"))
+        let path = try XCTUnwrap(gallery.source.indexPath(for: "g:case-0"))
         let offset = try XCTUnwrap(gallery.collection.layoutAttributesForItem(at: path)?.frame.minY)
         gallery.controller.willLoadTimelineGap(gap)
         gallery.content.items.insert(contentsOf: [.post(makeTimelineTestRow(200)), .post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 0)
@@ -1089,7 +1180,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await gallery.settle()
         gallery.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100", "case-101"])
         await gallery.settle()
-        try gallery.assertPosition(("g:case-100", offset))
+        try gallery.assertPosition(("g:case-0", offset))
     }
 
     func testFailedLeadingGapDoesNotJumpToALaterRefreshInBothNativeLayouts() async throws {
@@ -1124,6 +1215,45 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         gallery.controller.submit(gallery.content)
         await gallery.settle()
         try gallery.assertPosition(galleryPosition)
+    }
+
+    func testEmptyGalleryReleasesALeadingGapFallbackAnchor() async throws {
+        let gallery = await GalleryFixture()
+        let gap = makeGap()
+        gallery.content.items = [.post(gap)]
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+        gallery.controller.willLoadTimelineGap(gap)
+        gallery.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100"])
+        gallery.content.items = (100..<130).map { .post(makeRow($0)) }
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+
+        gallery.content.items = []
+        gallery.content.state = .empty
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+        gallery.content.state = .loaded
+        gallery.content.items = (200..<220).map { .post(makeRow($0)) } + [.post(makeRow(100))]
+        gallery.controller.submit(gallery.content)
+        await gallery.settle()
+        XCTAssertEqual(try gallery.position().0, "g:case-200", "An empty list must discard the previous gap anchor")
+    }
+
+    func testEmptyTimelineDiscardsALateLeadingGapCompletion() async throws {
+        let list = await Fixture(posts: true)
+        let gap = makeGap()
+        list.input.items = [.post(gap)]
+        await list.apply()
+        list.controller.willLoadTimelineGap(gap)
+        list.input.items = []
+        list.input.state = .empty
+        await list.apply()
+        list.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100"])
+        list.input.state = .loaded
+        list.input.items = (200..<220).map { .post(makeRow($0)) } + [.post(makeRow(100))]
+        await list.apply()
+        XCTAssertEqual(try list.position().id, "t:case-200", "Late completion must not restore an anchor discarded by an empty list")
     }
 
     private final class ReadingState: NSObject, TimelineReadingState {

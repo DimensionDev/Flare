@@ -38,7 +38,7 @@ struct TimelinePagingView: View {
 //            let columnCount = resolvedColumnCount(width: proxy.size.width)
             Group {
                 if reading != nil {
-                    TimelineReadingScrollView(itemKeys: readingItemKeys, gaps: readingGaps) {
+                    TimelineReadingScrollView(itemKeys: readingItemKeys, gaps: readingGaps, isEmpty: data is PagingStateEmpty<UiTimelineV2>) {
                         content(columnCount: 1, availableWidth: proxy.size.width)
                             .padding(.top, topContentInset)
                     }

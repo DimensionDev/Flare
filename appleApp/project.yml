@@ -283,6 +283,26 @@ targets:
         BUNDLE_LOADER: $(TEST_HOST)
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
+  MacTimelineTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: macosTests
+      - path: macos
+        includes:
+          - UI/Component/TimelineReadingScrollView.swift
+    dependencies:
+      - target: FlareAppleCore
+      - target: FlareAppleUI
+      - package: Firebase
+        product: FirebaseCrashlytics
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.mac-timeline-tests
+        INFOPLIST_FILE: ""
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   TimelineUnitTestHost:
     type: application
     platform: iOS
@@ -538,3 +558,12 @@ schemes:
       config: Debug
       targets:
         - TimelineControllerTests
+
+  MacTimelineTests:
+    build:
+      targets:
+        MacTimelineTests: all
+    test:
+      config: Debug
+      targets:
+        - MacTimelineTests

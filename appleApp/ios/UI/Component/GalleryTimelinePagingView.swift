@@ -94,25 +94,30 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
     private var lastLoadedItemIDs: Set<String> = []
 
     // Filling a gap can replace the local paging window several times. Keep its
-    // predecessor until the reader moves, even while the gap is outside the window.
+    // successor until the reader moves, even while the gap is outside the window.
     private var gapScrollAnchor: ScrollAnchor?
     private var leadingGap: (key: String, revision: Int64, insertedKeys: Set<String>?, offset: CGFloat)?
 
     func willLoadTimelineGap(_ message: UiTimelineV2.Gap) {
         guard let success = currentSuccess,
               let gapIndex = (0..<success.items.count).first(where: { success.post(at: Int32($0))?.stableItemKey == message.stableItemKey }) else { return }
-        let predecessor = (0..<gapIndex).reversed().first(where: { success.post(at: Int32($0))?.isPaginationGap == false })
-        let index = predecessor ?? gapIndex
-        guard success.post(at: Int32(index)) != nil,
-              let id = itemIndexMap.first(where: { $0.value == index })?.key,
-              let path = dataSource.indexPath(for: id),
-              let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
-        let offset = frame.minY - effectiveViewportTop
-        if predecessor == nil {
-            leadingGap = (message.stableItemKey, message.revision, nil, offset)
-        } else {
-            gapScrollAnchor = ScrollAnchor(itemID: id, distanceFromViewportTop: offset, keepVisible: false)
-            reading?.positionChanged(index: Int32(index), offset: offset)
+        gapScrollAnchor = nil
+        leadingGap = nil
+        let successor = ((gapIndex + 1)..<success.items.count).first { success.post(at: Int32($0))?.isPaginationGap == false }
+        let visible = captureScrollAnchor().flatMap { itemIndexMap[$0.itemID] }
+        for index in [successor, visible, gapIndex].compactMap({ $0 }) {
+            guard let id = itemIndexMap.first(where: { $0.value == index })?.key,
+                  let path = dataSource.indexPath(for: id),
+                  let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { continue }
+            let offset = frame.minY - effectiveViewportTop
+            if index == gapIndex {
+                leadingGap = (message.stableItemKey, message.revision, nil, offset)
+            } else {
+                gapScrollAnchor = ScrollAnchor(itemID: id, distanceFromViewportTop: offset, keepVisible: false,
+                    itemOrder: collectionView.readingItemIDs?() ?? [id])
+                if frame.intersects(collectionView.bounds) { reading?.positionChanged(index: Int32(index), offset: offset) }
+            }
+            return
         }
     }
 
@@ -209,6 +214,7 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
         let itemID: String
         let distanceFromViewportTop: CGFloat
         var keepVisible = true
+        var itemOrder: [String] = []
     }
 
     override func viewDidLoad() {
@@ -574,8 +580,14 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
                 newLoadedItemIDs: newLoadedItemIDs
             ))
         }
-        if data.state == .loaded || data.state == .empty,
-           let anchor = gapScrollAnchor, !newLoadedItemIDs.contains(anchor.itemID) {
+        if data.state == .empty {
+            gapScrollAnchor = nil
+            leadingGap = nil
+        } else if data.state == .loaded,
+           let anchor = gapScrollAnchor, !newLoadedItemIDs.contains(anchor.itemID),
+           let index = anchor.itemOrder.firstIndex(of: anchor.itemID),
+           anchor.itemOrder[..<index].contains(where: newLoadedItemIDs.contains),
+           anchor.itemOrder.dropFirst(index + 1).contains(where: newLoadedItemIDs.contains) {
             gapScrollAnchor = nil
             leadingGap = nil
         }
@@ -584,21 +596,23 @@ final class UIGalleryTimelineController: UIViewController, UICollectionViewDeleg
                guard let index = newIndexMap[id], let item = data.post(at: Int32(index)) else { return false }
                return !item.isPaginationGap && insertedKeys.contains(item.stableItemKey)
            }) {
-            gapScrollAnchor = ScrollAnchor(itemID: id, distanceFromViewportTop: leadingGap.offset, keepVisible: false)
+            gapScrollAnchor = ScrollAnchor(itemID: id, distanceFromViewportTop: leadingGap.offset, keepVisible: false,
+                itemOrder: itemIDs.filter { newIndexMap[$0].flatMap { data.post(at: Int32($0)) }?.isPaginationGap == false })
             self.leadingGap = nil
         }
+        let activeGapAnchor = gapScrollAnchor.flatMap { newLoadedItemIDs.contains($0.itemID) ? $0 : nil }
         itemIndexMap = newIndexMap
         pruneHeightCache(keepingItemIDs: Set(newIndexMap.keys))
         lastAppliedSignature = newSignature
         lastRenderHashMap = newRenderHashMap
         lastLoadedItemIDs = newLoadedItemIDs
         guard previousSignature != newSignature || !toReconfigure.isEmpty || needsAppearanceReconfigure else {
-            if let gapScrollAnchor { restoreScrollAnchorIfNeeded(gapScrollAnchor) }
+            if let activeGapAnchor { restoreScrollAnchorIfNeeded(activeGapAnchor) }
             restoreBookmarkIfReady()
             scheduleVisiblePagingAccess()
             return
         }
-        let scrollAnchor = gapScrollAnchor ?? (previousSignature != nil
+        let scrollAnchor = activeGapAnchor ?? (previousSignature != nil
             ? captureSnapshotAnchor(keepingItemIDs: newLoadedItemIDs) : nil)
         snapshot.reconfigureItems(toReconfigure)
         // Content-only and footer changes can also reflow the waterfall. Use the

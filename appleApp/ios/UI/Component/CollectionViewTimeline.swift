@@ -147,18 +147,23 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     func willLoadTimelineGap(_ message: UiTimelineV2.Gap) {
         guard let gapIndex = content.items.firstIndex(where: { $0?.post?.stableItemKey == message.stableItemKey }) else { return }
-        let predecessor = (0..<gapIndex).reversed().first(where: { content.items[$0]?.post?.isPaginationGap == false })
-        let index = predecessor ?? gapIndex
-        guard content.items[index]?.post != nil,
-              let id = itemIndexMap.first(where: { $0.value == index })?.key,
-              let path = dataSource.indexPath(for: id),
-              let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { return }
-        let offset = frame.minY - collectionView.contentOffset.y - (collectionView.readingTopInset?() ?? collectionView.restingAdjustedTopInset)
-        if predecessor == nil {
-            leadingGap = (message.stableItemKey, message.revision, nil, offset)
-        } else {
-            gapReadingPosition = .item(id: id, distanceFromTop: offset, itemOrder: [id], keepVisible: false)
-            reading?.positionChanged(index: Int32(index), offset: offset)
+        gapReadingPosition = nil
+        leadingGap = nil
+        let successor = ((gapIndex + 1)..<content.items.count).first { content.items[$0]?.post?.isPaginationGap == false }
+        let visible = collectionView.captureViewportPosition().flatMap { itemIndexMap[$0.itemID] }
+        for index in [successor, visible, gapIndex].compactMap({ $0 }) {
+            guard let id = itemIndexMap.first(where: { $0.value == index })?.key,
+                  let path = dataSource.indexPath(for: id),
+                  let frame = collectionView.layoutAttributesForItem(at: path)?.frame else { continue }
+            let offset = frame.minY - collectionView.contentOffset.y - (collectionView.readingTopInset?() ?? collectionView.restingAdjustedTopInset)
+            if index == gapIndex {
+                leadingGap = (message.stableItemKey, message.revision, nil, offset)
+            } else {
+                gapReadingPosition = .item(id: id, distanceFromTop: offset,
+                    itemOrder: collectionView.readingItemIDs?() ?? [id], keepVisible: false)
+                if frame.intersects(collectionView.bounds) { reading?.positionChanged(index: Int32(index), offset: offset) }
+            }
+            return
         }
     }
 
@@ -1367,8 +1372,14 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             restoresScrollAnchorOnSnapshotChanges
         let survivingIDs: Set<String>? = keepsReadingPosition
             ? (structureChanged ? Set(plan.headerIDs + plan.accessoryIDs + plan.itemIDs) : nil) : []
-        if content.state == .loaded || content.state == .empty,
-           let id = gapReadingPosition?.itemID, !plan.itemIDs.contains(id) {
+        if content.state == .empty {
+            gapReadingPosition = nil
+            leadingGap = nil
+        } else if content.state == .loaded,
+           case .item(let id, _, let order, _) = gapReadingPosition, !plan.itemIDs.contains(id),
+           let index = order.firstIndex(of: id),
+           order[..<index].contains(where: plan.itemIDs.contains),
+           order.dropFirst(index + 1).contains(where: plan.itemIDs.contains) {
             gapReadingPosition = nil
             leadingGap = nil
         }
@@ -1377,10 +1388,13 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
                guard let index = plan.indexMap[id], let item = content.items[index]?.post else { return false }
                return !item.isPaginationGap && insertedKeys.contains(item.stableItemKey)
            }) {
-            gapReadingPosition = .item(id: id, distanceFromTop: leadingGap.offset, itemOrder: [id], keepVisible: false)
+            gapReadingPosition = .item(id: id, distanceFromTop: leadingGap.offset,
+                itemOrder: plan.itemIDs.filter { plan.indexMap[$0].flatMap { content.items[$0]?.post }?.isPaginationGap == false }, keepVisible: false)
             self.leadingGap = nil
         }
-        if let gapReadingPosition { collectionView.restoreReadingPosition(gapReadingPosition) }
+        if let gapReadingPosition, let id = gapReadingPosition.itemID, plan.itemIDs.contains(id) {
+            collectionView.restoreReadingPosition(gapReadingPosition)
+        }
         collectionView.performUpdatesPreservingReadingPosition(keepingItemIDs: survivingIDs) {
             if columnsChanged || kindChanged {
                 clearHeightCache(keepingItemMeasurements: !kindChanged && contentKind != .profileMedia)

@@ -456,6 +456,17 @@ public struct AppearanceMediaSettingsSection: View {
                     Text("appearance_expand_media_size", bundle: FlareAppleUILocalization.bundle)
                     Text("appearance_expand_media_size_description", bundle: FlareAppleUILocalization.bundle)
                 }
+                if appearance.expandMediaSize {
+                    Toggle(isOn: Binding(get: {
+                        appearance.limitSingleMediaHeight
+                    }, set: { newValue in
+                        presenter.state.updateLimitSingleMediaHeight(value: newValue)
+                    })) {
+                        Text("appearance_limit_single_media_height", bundle: FlareAppleUILocalization.bundle)
+                        Text("appearance_limit_single_media_height_description", bundle: FlareAppleUILocalization.bundle)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
                 Picker(selection: Binding(get: {
                     appearance.mediaLayout
                 }, set: { newValue in
@@ -509,5 +520,6 @@ public struct AppearanceMediaSettingsSection: View {
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: appearance.expandMediaSize)
     }
 }

@@ -581,6 +581,7 @@ private extension TimelineAppearance {
             showSensitiveContent: showSensitiveContent,
             expandContentWarning: true,
             expandMediaSize: false,
+            limitSingleMediaHeight: limitSingleMediaHeight,
             mediaLayout: mediaLayout,
             limitMediaGridToNine: limitMediaGridToNine,
             videoAutoplay: .never,

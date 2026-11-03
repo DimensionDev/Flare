@@ -195,6 +195,7 @@ public extension TimelineAppearance {
             showSensitiveContent: showSensitiveContent,
             expandContentWarning: expandContentWarning,
             expandMediaSize: expandMediaSize,
+            limitSingleMediaHeight: limitSingleMediaHeight,
             mediaLayout: mediaLayout,
             limitMediaGridToNine: limitMediaGridToNine,
             videoAutoplay: videoAutoplay,

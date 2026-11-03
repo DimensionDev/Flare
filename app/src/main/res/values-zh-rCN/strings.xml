@@ -303,6 +303,8 @@
     <string name="settings_appearance_expand_content_warning_description">总是显示内容警告隐藏的帖子内容</string>
     <string name="settings_appearance_expand_media">保留媒体比例</string>
     <string name="settings_appearance_expand_media_description">在时间轴中以原始宽高比显示媒体</string>
+    <string name="settings_appearance_limit_single_media_height">限制单附件高度</string>
+    <string name="settings_appearance_limit_single_media_height_description">展开媒体时，等比缩小过高的单附件，减少屏幕占用。</string>
     <string name="settings_appearance_media_layout">媒体布局</string>
     <string name="settings_appearance_media_layout_description">选择时间轴动态中多个媒体项目的排列方式</string>
     <string name="settings_appearance_media_layout_grid">网格</string>

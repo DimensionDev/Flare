@@ -16866,6 +16866,50 @@
         }
       }
     },
+    "appearance_limit_single_media_height" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit single attachment height"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "限制单附件高度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "限制單附件高度"
+          }
+        }
+      }
+    },
+    "appearance_limit_single_media_height_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scale down tall single attachments when expanded to reduce screen space."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "展开媒体时，等比缩小过高的单附件，减少屏幕占用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "展開媒體時，等比縮小過高的單附件，減少螢幕佔用。"
+          }
+        }
+      }
+    },
     "appearance_limit_media_grid_to_nine" : {
       "localizations" : {
         "en" : {

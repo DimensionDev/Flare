@@ -90,6 +90,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
 
             override fun updateExpandMediaSize(value: Boolean) = update(AppearanceKeys.ExpandMediaSize, value)
 
+            override fun updateLimitSingleMediaHeight(value: Boolean) = update(AppearanceKeys.LimitSingleMediaHeight, value)
+
             override fun updateMediaLayout(value: TimelineMediaLayout) = update(AppearanceKeys.MediaLayout, value)
 
             override fun updateLimitMediaGridToNine(value: Boolean) = update(AppearanceKeys.LimitMediaGridToNine, value)
@@ -181,6 +183,8 @@ public class SettingsPresenter : PresenterBase<SettingsPresenter.State>() {
         public fun updateShowPostInMediaViewer(value: Boolean)
 
         public fun updateExpandMediaSize(value: Boolean)
+
+        public fun updateLimitSingleMediaHeight(value: Boolean)
 
         public fun updateMediaLayout(value: TimelineMediaLayout)
 

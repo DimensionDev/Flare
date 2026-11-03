@@ -1,15 +1,638 @@
 import XCTest
+import AVFoundation
 import UIKit
 import SwiftUI
 import ImageIO
 import UniformTypeIdentifiers
 import Kingfisher
 import KotlinSharedUI
+import FlareAppleCore
 @testable import FlareAppleUI
 @testable import Flare
 
 @MainActor
 final class TimelineMediaPreviewTests: XCTestCase {
+    func testSinglePostMediaHeightAndScreenshotsOnBothRenderers() async throws {
+        for renderer in ["uikit", "swiftui"] {
+            for tall in [false, true] {
+                let size = CGSize(width: 360, height: tall ? 1_800 : 640)
+                let fixture = try await Fixture(imageSize: size)
+                let media = fixture.media(path: "single-\(renderer)-\(tall).png", width: Float(size.width), height: Float(size.height))
+                let post = singleMediaPost(media)
+                let host: UIViewController
+                var nativeStatus: StatusUIKitView?
+                if renderer == "uikit" {
+                    host = UIViewController()
+                    let view = StatusUIKitView()
+                    var appearance = StatusUIKitAppearance(timeline: singleMediaAppearance())
+                    appearance.singleMediaMaxHeight = 400
+                    view.configure(data: post, appearance: appearance)
+                    host.view.addSubview(view)
+                    nativeStatus = view
+                } else {
+                    host = UIHostingController(rootView:
+                        VStack(alignment: .leading) {
+                            StatusView(data: post)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(16)
+                        .environment(\.timelineAppearance, singleMediaAppearance())
+                        .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 800)))
+                }
+                let window = try fixture.show(host)
+                window.overrideUserInterfaceStyle = .light
+                host.view.backgroundColor = .systemBackground
+                defer { window.isHidden = true; window.rootViewController = nil }
+                if let nativeStatus {
+                    let width = host.view.bounds.width - 32
+                    nativeStatus.prepareForFitting(width: width)
+                    nativeStatus.frame = CGRect(x: 16, y: host.view.safeAreaInsets.top + 16,
+                                                width: width, height: nativeStatus.timelineHeight(for: width) ?? 0)
+                }
+                for _ in 0..<300 {
+                    host.view.layoutIfNeeded()
+                    if fixture.cache.imageSize(for: media.previewUrl) != nil { break }
+                    try await Task.sleep(for: .milliseconds(10))
+                }
+                try await Task.sleep(for: .milliseconds(150))
+                host.view.layoutIfNeeded()
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 1
+                let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let attachment = XCTAttachment(image: screenshot)
+                attachment.name = "single-media-\(renderer)-\(tall ? "long" : "portrait")"
+                attachment.lifetime = .keepAlways
+                add(attachment)
+                let bounds = try cyanBounds(screenshot)
+                XCTAssertEqual(bounds.width, tall ? 400 * 9 / 21 : 400 * 9 / 16, accuracy: 2)
+                XCTAssertEqual(bounds.height, 400, accuracy: 2)
+                XCTAssertEqual(bounds.minX, 16 + 44 + 8, accuracy: 2, "Keep the existing avatar/content indentation")
+            }
+        }
+    }
+
+    private func singleMediaAppearance(limited: Bool = true, expanded: Bool = true) -> TimelineAppearance {
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        return helper.resolve(base: TimelineAppearance.companion.Default, patch:
+            helper.setExpandMediaSize(patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: limited), value: expanded))
+    }
+
+    private func descendants(_ view: UIView) -> [UIView] { [view] + view.subviews.flatMap(descendants) }
+
+    func testSingleMediaLimitToggleRestoresOriginalBoundsOnBothRenderers() async throws {
+        for renderer in ["uikit", "swiftui"] {
+            let fixture = try await Fixture(imageSize: CGSize(width: 360, height: 640))
+            let media = fixture.media(path: "toggle-\(renderer).png", width: 360, height: 640)
+            let post = singleMediaPost(media)
+            let host: UIViewController
+            let update: (TimelineAppearance) -> Void
+            var native: StatusUIKitView?
+            if renderer == "uikit" {
+                host = UIViewController()
+                let status = StatusUIKitView()
+                native = status
+                host.view.addSubview(status)
+                update = { appearance in
+                    var appearance = StatusUIKitAppearance(timeline: appearance)
+                    appearance.singleMediaMaxHeight = 200
+                    status.configure(data: post, appearance: appearance)
+                    status.prepareForFitting(width: 360)
+                    status.frame = CGRect(x: 16, y: host.view.safeAreaInsets.top + 16,
+                                          width: 360, height: status.timelineHeight(for: 360) ?? 0)
+                }
+            } else {
+                func content(_ appearance: TimelineAppearance) -> some View {
+                    VStack(alignment: .leading) {
+                        StatusView(data: post).frame(width: 360)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .environment(\.timelineAppearance, appearance)
+                    .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+                }
+                let controller = UIHostingController(rootView: content(TimelineAppearance.companion.Default))
+                host = controller
+                update = { controller.rootView = content($0) }
+            }
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for (index, appearance) in [TimelineAppearance.companion.Default, singleMediaAppearance(),
+                                        singleMediaAppearance(limited: true, expanded: false),
+                                        singleMediaAppearance(limited: false), singleMediaAppearance()].enumerated() {
+                update(appearance)
+                for _ in 0..<300 {
+                    host.view.layoutIfNeeded()
+                    if fixture.cache.imageSize(for: media.previewUrl) != nil { break }
+                    try await Task.sleep(for: .milliseconds(10))
+                }
+                try await Task.sleep(for: .milliseconds(150))
+                host.view.layoutIfNeeded()
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 1
+                let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let bounds = try cyanBounds(screenshot)
+                let limited = appearance.limitSingleMediaHeight && appearance.expandMediaSize
+                XCTAssertEqual(bounds.width, limited ? 112.5 : 308, accuracy: 2, "\(renderer), step \(index)")
+                XCTAssertEqual(bounds.height, limited ? 200 : (appearance.expandMediaSize ? 308 * 16 / 9 : 308 * 9 / 16),
+                               accuracy: 2, "\(renderer), step \(index)")
+                XCTAssertEqual(bounds.minX, 68, accuracy: 2)
+                if let native {
+                    XCTAssertEqual(native.bounds.height, native.timelineHeight(for: 360) ?? 0, accuracy: 1)
+                }
+            }
+        }
+    }
+
+    func testSingleMediaLimitRespectsScopeAndKeepsVideoAspectRatio() async throws {
+        let fixture = try await Fixture()
+        let image = fixture.media(width: 360, height: 640)
+        let grid = StatusMediaUIView()
+        func configure(_ items: [UiMedia], expanded: Bool = true) {
+            grid.configure(data: items, sensitive: false, cornerRadius: 16,
+                           singleFollowsImageAspect: expanded, limitMediaGridToNine: true,
+                           mediaLayout: .grid, carouselLeadingPadding: 0, carouselTrailingPadding: 0)
+        }
+        configure([image])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360, "Profile media does not supply a height limit")
+        grid.singleMediaMaxHeight = 400
+        XCTAssertEqual(grid.fittingWidth(for: 360), 225, accuracy: 0.01)
+        grid.singleMediaMaxHeight = 200
+        XCTAssertEqual(grid.fittingWidth(for: 360), 112.5, accuracy: 0.01)
+        configure([image], expanded: false)
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360)
+        configure([image, image])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360)
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil, height: 1_800, width: 360,
+            customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        configure([video])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 40, accuracy: 0.01, "Tall videos retain their original ratio")
+        let audio = UiMediaAudio(url: "https://timeline-preview.invalid/audio.mp3", description: nil,
+                                 previewUrl: nil, customHeaders: nil, proxy: ProxyRef.Global.shared)
+        configure([audio])
+        XCTAssertEqual(grid.fittingWidth(for: 360), 360)
+    }
+
+    func testSingleVideoToggleUpdatesExistingThumbnailAndPlayer() throws {
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/tall.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/tall.png", description: nil, height: 1_800, width: 360,
+            customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        let status = StatusUIKitView()
+        let post = singleMediaPost(video, sensitive: true)
+        func update(limited: Bool) {
+            var appearance = StatusUIKitAppearance(timeline: singleMediaAppearance(limited: limited))
+            appearance.singleMediaMaxHeight = 200
+            status.configure(data: post, appearance: appearance)
+            status.prepareForFitting(width: 360)
+            status.frame.size = CGSize(width: 360, height: status.timelineHeight(for: 360) ?? 0)
+            status.layoutIfNeeded()
+        }
+        update(limited: false)
+        let media = try XCTUnwrap(descendants(status).compactMap { $0 as? MediaUIView }.first)
+        let thumbnail = try XCTUnwrap(descendants(media).compactMap { $0 as? NetworkImageView }.first)
+        let grid = try XCTUnwrap(descendants(status).compactMap { $0 as? StatusMediaUIView }.first)
+        let blur = try XCTUnwrap(grid.subviews.compactMap { $0 as? UIVisualEffectView }.first)
+        let reveal = try XCTUnwrap(grid.subviews.compactMap { $0 as? UIButton }.first)
+        reveal.sendActions(for: .touchUpInside)
+        XCTAssertTrue(blur.isHidden)
+        let surface = VideoPlaybackSurfaceView()
+        media.attachAutoplayPlayer(surface)
+        for enabled in [true, false, true, false] {
+            update(limited: enabled)
+            XCTAssertTrue(descendants(status).contains { $0 === media })
+            XCTAssertTrue(surface.superview === media)
+            XCTAssertTrue(blur.isHidden)
+            XCTAssertTrue(grid.allowsVideoAutoplay)
+            XCTAssertEqual(thumbnail.contentMode, enabled ? .scaleAspectFit : .scaleAspectFill)
+            XCTAssertEqual(surface.playerLayer.videoGravity, enabled ? .resizeAspect : .resizeAspectFill)
+        }
+    }
+
+    func testSinglePostMediaUsesScrollViewportWithoutPlaybackCoordinator() async throws {
+        let fixture = try await Fixture(imageSize: CGSize(width: 360, height: 640))
+        let media = fixture.media(path: "scroll-viewport.png", width: 360, height: 640)
+        let post = singleMediaPost(media)
+        func content(height: CGFloat) -> some View {
+            ScrollView { StatusView(data: post).padding(16) }
+                .environment(\.timelineAppearance, singleMediaAppearance())
+                .frame(height: height)
+                .frame(maxHeight: .infinity, alignment: .top)
+        }
+        let host = UIHostingController(rootView: content(height: 400))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for height: CGFloat in [400, 600] {
+            host.rootView = content(height: height)
+            for _ in 0..<300 {
+                host.view.layoutIfNeeded()
+                if fixture.cache.imageSize(for: media.previewUrl) != nil { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            try await Task.sleep(for: .milliseconds(150))
+            host.view.layoutIfNeeded()
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let bounds = try cyanBounds(screenshot)
+            XCTAssertEqual(bounds.height, height * 0.5, accuracy: 2)
+            XCTAssertEqual(bounds.width, height * 0.5 * 9 / 16, accuracy: 2)
+        }
+    }
+
+    func testNarrowVideoBadgeFitsAndRemainsRetryable() async throws {
+        let fixture = try await Fixture()
+        let view = fixture.view
+        let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+            thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+            height: 1_800, width: 360, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+        view.set(media: video, cornerRadius: 12, fitsMedia: true)
+        var retries = 0
+        for width: CGFloat in [40, 16, 180] {
+            view.frame.size = CGSize(width: width, height: 200)
+            for state: VideoAutoplayOverlayState in [.idle, .loading, .playing(remaining: 61), .error] {
+                view.setAutoplayOverlay(state, progress: 0.42, errorMessage: "Retry video") { retries += 1 }
+                view.setNeedsLayout()
+                view.layoutIfNeeded()
+                let badge = try XCTUnwrap(view.subviews.compactMap { $0 as? UIButton }.first)
+                XCTAssertGreaterThan(badge.bounds.width, 0)
+                XCTAssertTrue(view.bounds.insetBy(dx: -0.5, dy: -0.5).contains(badge.frame), "Badge must fit inside a \(width)pt video")
+                if badge.isUserInteractionEnabled {
+                    let before = retries
+                    badge.sendActions(for: .touchUpInside)
+                    XCTAssertEqual(retries, before + 1)
+                    XCTAssertEqual(view.accessibilityCustomActions?.count, 1)
+                }
+            }
+        }
+    }
+
+    func testUIKitNarrowAltButtonFitsAndOpensCurrentDescription() async throws {
+        let fixture = try await Fixture()
+        let grid = StatusMediaUIView()
+        grid.singleMediaMaxHeight = 200
+        let host = UIViewController()
+        host.view.addSubview(grid)
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        var firstButton: UIButton?
+        for (width, direction): (Float, UISemanticContentAttribute) in [
+            (80, .forceLeftToRight), (200, .forceLeftToRight), (900, .forceLeftToRight),
+            (80, .forceLeftToRight), (80, .forceRightToLeft), (900, .forceRightToLeft),
+        ] {
+            let description = "Description for width \(width)"
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: description,
+                height: 1_000, width: width, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            grid.configure(data: [video], sensitive: false, cornerRadius: 12,
+                           singleFollowsImageAspect: true, limitMediaGridToNine: true,
+                           mediaLayout: .grid, carouselLeadingPadding: 0, carouselTrailingPadding: 0)
+            grid.frame = CGRect(x: 16, y: 100, width: grid.fittingWidth(for: 360), height: 200)
+            grid.layoutIfNeeded()
+            let button = try XCTUnwrap(descendants(grid).compactMap { $0 as? UIButton }.first { $0.configuration?.title == "ALT" })
+            if let firstButton { XCTAssertTrue(button === firstButton) } else { firstButton = button }
+            let cell = try XCTUnwrap(button.superview)
+            cell.semanticContentAttribute = direction
+            cell.setNeedsLayout()
+            cell.layoutIfNeeded()
+            XCTAssertEqual(cell.bounds.width, CGFloat(width / 5), accuracy: 0.5)
+            XCTAssertEqual(cell.bounds.height, 200, accuracy: 0.5)
+            XCTAssertGreaterThan(button.frame.width, 0)
+            XCTAssertTrue(cell.bounds.insetBy(dx: -0.5, dy: -0.5).contains(button.frame),
+                          "ALT \(button.frame) must fit inside \(cell.bounds)")
+            let label = try XCTUnwrap(button.titleLabel)
+            XCTAssertEqual(label.text, "ALT")
+            XCTAssertGreaterThanOrEqual(label.bounds.width + 0.5, label.intrinsicContentSize.width)
+            XCTAssertTrue(cell.bounds.insetBy(dx: -0.5, dy: -0.5).contains(label.convert(label.bounds, to: cell)))
+            XCTAssertTrue(cell.hitTest(button.center, with: nil) === button)
+            if width == 900 {
+                XCTAssertEqual(button.transform, .identity)
+                let trailing = direction == .forceRightToLeft ? button.frame.minX : cell.bounds.maxX - button.frame.maxX
+                XCTAssertEqual(trailing, 8, accuracy: 0.5)
+                XCTAssertEqual(cell.bounds.maxY - button.frame.maxY, 8, accuracy: 0.5)
+            }
+            button.sendActions(for: .touchUpInside)
+            let alert = try XCTUnwrap(host.presentedViewController as? UIAlertController)
+            XCTAssertEqual(alert.message, description)
+            for _ in 0..<100 {
+                if !alert.isBeingPresented { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            await withCheckedContinuation { continuation in
+                host.dismiss(animated: false) { continuation.resume() }
+            }
+        }
+    }
+
+    func testUIKitNarrowSensitiveControlsFitAndToggleRepeatedly() async throws {
+        let fixture = try await Fixture()
+        let host = UIViewController()
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let media = StatusMediaUIView()
+        media.singleMediaMaxHeight = 200
+        host.view.addSubview(media)
+        for direction: UISemanticContentAttribute in [.forceLeftToRight, .forceRightToLeft] {
+            media.semanticContentAttribute = direction
+            for width: Float in [80, 200, 900] {
+                let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                    thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+                    height: 1_000, width: width, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+                media.configure(data: [video], sensitive: true, cornerRadius: 12,
+                                singleFollowsImageAspect: true, limitMediaGridToNine: true,
+                                mediaLayout: .grid, carouselLeadingPadding: 0, carouselTrailingPadding: 0)
+                media.frame = CGRect(x: 16, y: 100, width: media.fittingWidth(for: 360), height: 200)
+                let toggle = try XCTUnwrap(media.subviews.compactMap { $0 as? UIButton }.first)
+                let blur = try XCTUnwrap(media.subviews.compactMap { $0 as? UIVisualEffectView }.first)
+                for revealed in [false, true, false, true] {
+                    media.layoutIfNeeded()
+                    XCTAssertEqual(media.bounds.width, CGFloat(width / 5), accuracy: 0.5)
+                    XCTAssertEqual(media.bounds.height, 200, accuracy: 0.5)
+                    XCTAssertEqual(blur.isHidden, revealed)
+                    XCTAssertEqual(media.allowsVideoAutoplay, revealed)
+                    XCTAssertGreaterThan(toggle.frame.width, 0)
+                    XCTAssertTrue(media.bounds.insetBy(dx: -0.5, dy: -0.5).contains(toggle.frame),
+                                  "Toggle \(toggle.frame) must fit inside \(media.bounds), revealed: \(revealed)")
+                    let icon = try XCTUnwrap(toggle.imageView)
+                    XCTAssertGreaterThan(icon.bounds.width, 0)
+                    XCTAssertTrue(media.bounds.insetBy(dx: -0.5, dy: -0.5).contains(icon.convert(icon.bounds, to: media)))
+                    XCTAssertTrue(media.hitTest(toggle.center, with: nil) === toggle)
+                    if width == 900, revealed {
+                        XCTAssertEqual(toggle.transform, .identity)
+                        let leading = direction == .forceRightToLeft ? media.bounds.maxX - toggle.frame.maxX : toggle.frame.minX
+                        XCTAssertEqual(leading, 12, accuracy: 0.5)
+                        XCTAssertEqual(toggle.frame.minY, 12, accuracy: 0.5)
+                    }
+                    UIView.performWithoutAnimation { toggle.sendActions(for: .touchUpInside) }
+                }
+            }
+        }
+    }
+
+    func testSwiftUINarrowSensitiveMediaShowsRevealAndHideControls() async throws {
+        let fixture = try await Fixture()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = helper.resolve(base: singleMediaAppearance(),
+                                        patch: helper.setVideoAutoplay(patch: helper.empty, value: .never))
+        var mediaBounds = CGRect.zero
+        func content(width: Float, sensitive: Bool) -> some View {
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+                height: 1_000, width: width, customHeaders: ["X-Preview-Test": "fixture"],
+                proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            return StatusMediaView(post: singleMediaPost(video, sensitive: true), data: [video], sensitive: sensitive,
+                cornerRadius: 12, allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                onMediaClicked: { _, _ in })
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .frame(width: 360, alignment: .leading)
+                .tint(.red)
+                .environment(\.timelineAppearance, appearance)
+                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+        }
+        for startsHidden in [true, false] {
+            // Preserve the initial blur state when enabling controls to render both toggle states.
+            let host = UIHostingController(rootView: content(width: 80, sensitive: startsHidden))
+            host.view.backgroundColor = .black
+            let window = try fixture.show(host)
+            window.overrideUserInterfaceStyle = .light
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for width: Float in [80, 200, 900] {
+                host.rootView = content(width: width, sensitive: true)
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(150))
+                XCTAssertEqual(mediaBounds.width, CGFloat(width / 5), accuracy: 0.5)
+                XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 3
+                let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let crop = mediaBounds.applying(CGAffineTransform(scaleX: format.scale, y: format.scale))
+                let mediaImage = try XCTUnwrap(screenshot.cgImage?.cropping(to: crop))
+                var pixels = [UInt8](repeating: 0, count: mediaImage.width * mediaImage.height * 4)
+                let context = try XCTUnwrap(CGContext(data: &pixels, width: mediaImage.width, height: mediaImage.height,
+                    bitsPerComponent: 8, bytesPerRow: mediaImage.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+                context.draw(mediaImage, in: CGRect(x: 0, y: 0, width: mediaImage.width, height: mediaImage.height))
+                let redPixels = stride(from: 0, to: pixels.count, by: 4).filter {
+                    Int(pixels[$0]) > Int(pixels[$0 + 1]) + 60 && Int(pixels[$0]) > Int(pixels[$0 + 2]) + 60
+                }.count
+                XCTAssertGreaterThan(redPixels, 20,
+                                     "The \(startsHidden ? "reveal" : "hide") control must be visible in a \(mediaBounds.width)pt video")
+            }
+        }
+    }
+
+    func testSwiftUIPlaybackBadgesStayInsideNarrowMedia() async throws {
+        let fixture = try await Fixture()
+        var contentBounds = CGRect.zero
+        var badgeBounds = CGRect.zero
+        var mediaBounds = CGRect.zero
+        func content(width: CGFloat, height: CGFloat, state: Int) -> some View {
+            Color.blue
+                .overlay(alignment: .bottomLeading) {
+                    Group {
+                        switch state {
+                        case 0: Image(fontAwesome: .circlePlay)
+                        case 1: ProgressView().tint(.white)
+                        default: Text("1:23").font(.caption).lineLimit(1)
+                        }
+                    }
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { contentBounds = $0 }
+                    .mediaVideoBadgeStyle()
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { badgeBounds = $0 }
+                }
+                .frame(width: width, height: height)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .clipped()
+        }
+        let host = UIHostingController(rootView: content(width: 180, height: 200, state: 0))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for (width, height): (CGFloat, CGFloat) in [(16, 200), (40, 200), (180, 200), (180, 16)] {
+            for state in 0..<3 {
+                host.rootView = content(width: width, height: height, state: state)
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(50))
+                let message = "state \(state), media \(mediaBounds), badge \(badgeBounds), content \(contentBounds)"
+                XCTAssertEqual(mediaBounds.width, width, accuracy: 0.5)
+                XCTAssertEqual(mediaBounds.height, height, accuracy: 0.5)
+                XCTAssertTrue(mediaBounds.insetBy(dx: -0.5, dy: -0.5).contains(badgeBounds), message)
+                XCTAssertGreaterThan(contentBounds.width, 0, message)
+                XCTAssertGreaterThan(contentBounds.height, 0, message)
+                XCTAssertTrue(mediaBounds.insetBy(dx: -0.5, dy: -0.5).contains(contentBounds), message)
+                if width == 180, height == 200 {
+                    XCTAssertEqual(contentBounds.minX - mediaBounds.minX, 24, accuracy: 0.5)
+                    XCTAssertEqual(mediaBounds.maxY - contentBounds.maxY, 24, accuracy: 0.5)
+                }
+            }
+        }
+    }
+
+    func testSwiftUINarrowCappedVideoShowsPlayIndicatorWithoutAutoplay() async throws {
+        let fixture = try await Fixture()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = helper.resolve(base: singleMediaAppearance(),
+                                        patch: helper.setVideoAutoplay(patch: helper.empty, value: .never))
+        var mediaBounds = CGRect.zero
+        func content(width: Float) -> some View {
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+                height: 1_000, width: width, customHeaders: ["X-Preview-Test": "fixture"],
+                proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            return StatusMediaView(post: singleMediaPost(video), data: [video], sensitive: false,
+                cornerRadius: 12, allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                onMediaClicked: { _, _ in })
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .frame(width: 360, alignment: .leading)
+                .environment(\.timelineAppearance, appearance)
+                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+        }
+        let host = UIHostingController(rootView: content(width: 80))
+        host.view.backgroundColor = .black
+        let window = try fixture.show(host)
+        window.overrideUserInterfaceStyle = .light
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for width: Float in [80, 200, 900] {
+            host.rootView = content(width: width)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(150))
+            XCTAssertEqual(mediaBounds.width, CGFloat(width / 5), accuracy: 0.5)
+            XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let mediaImage = try XCTUnwrap(screenshot.cgImage?.cropping(to: mediaBounds))
+            var pixels = [UInt8](repeating: 0, count: mediaImage.width * mediaImage.height * 4)
+            let context = try XCTUnwrap(CGContext(data: &pixels, width: mediaImage.width, height: mediaImage.height,
+                bitsPerComponent: 8, bytesPerRow: mediaImage.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.draw(mediaImage, in: CGRect(x: 0, y: 0, width: mediaImage.width, height: mediaImage.height))
+            let whitePixels = stride(from: 0, to: pixels.count, by: 4).filter {
+                pixels[$0] > 200 && pixels[$0 + 1] > 200 && pixels[$0 + 2] > 200
+            }.count
+            XCTAssertGreaterThan(whitePixels, 30, "The play indicator must remain visible in a \(mediaBounds.width)pt video")
+        }
+    }
+
+    func testSwiftUIAltButtonFitsNarrowMedia() async throws {
+        let fixture = try await Fixture()
+        var overlayBounds = CGRect.zero
+        var mediaBounds = CGRect.zero
+        func content(width: CGFloat) -> some View {
+            Color.blue
+                .overlay(alignment: .bottomTrailing) {
+                    AltTextOverlay(altText: "A tall video with an accessible description")
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { overlayBounds = $0 }
+                }
+                .frame(width: width, height: 200)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .clipped()
+        }
+        let host = UIHostingController(rootView: content(width: 16))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for width: CGFloat in [16, 40, 180] {
+            host.rootView = content(width: width)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(150))
+            XCTAssertEqual(mediaBounds.width, width, accuracy: 0.5)
+            XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+            XCTAssertGreaterThan(overlayBounds.width, 0)
+            XCTAssertGreaterThan(overlayBounds.height, 0)
+            XCTAssertTrue(mediaBounds.insetBy(dx: -0.5, dy: -0.5).contains(overlayBounds),
+                          "ALT \(overlayBounds) must fit inside \(mediaBounds)")
+        }
+    }
+
+    func testSwiftUINarrowCappedVideoRendersAltText() async throws {
+        let fixture = try await Fixture()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = helper.resolve(base: singleMediaAppearance(),
+                                        patch: helper.setVideoAutoplay(patch: helper.empty, value: .never))
+        var mediaBounds = CGRect.zero
+        func content(width: Float) -> some View {
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png",
+                description: "A tall video with an accessible description",
+                height: 1_000, width: width, customHeaders: ["X-Preview-Test": "fixture"],
+                proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            return StatusMediaView(post: singleMediaPost(video), data: [video], sensitive: false,
+                cornerRadius: 12, allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                onMediaClicked: { _, _ in })
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .frame(width: 360, alignment: .leading)
+                .tint(.red)
+                .environment(\.timelineAppearance, appearance)
+                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+        }
+        let host = UIHostingController(rootView: content(width: 80))
+        host.view.backgroundColor = .black
+        let window = try fixture.show(host)
+        window.overrideUserInterfaceStyle = .light
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for width: Float in [80, 200, 900] {
+            host.rootView = content(width: width)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(150))
+            XCTAssertEqual(mediaBounds.width, CGFloat(width / 5), accuracy: 0.5)
+            XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 3
+            let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let crop = mediaBounds.applying(CGAffineTransform(scaleX: format.scale, y: format.scale))
+            let mediaImage = try XCTUnwrap(screenshot.cgImage?.cropping(to: crop))
+            var pixels = [UInt8](repeating: 0, count: mediaImage.width * mediaImage.height * 4)
+            let context = try XCTUnwrap(CGContext(data: &pixels, width: mediaImage.width, height: mediaImage.height,
+                bitsPerComponent: 8, bytesPerRow: mediaImage.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.draw(mediaImage, in: CGRect(x: 0, y: 0, width: mediaImage.width, height: mediaImage.height))
+            let redPixels = stride(from: 0, to: pixels.count, by: 4).filter {
+                Int(pixels[$0]) > Int(pixels[$0 + 1]) + 60 && Int(pixels[$0]) > Int(pixels[$0 + 2]) + 60
+            }.count
+            XCTAssertGreaterThan(redPixels, 20, "The ALT label must remain visible in a \(mediaBounds.width)pt video")
+        }
+    }
+
+    private func singleMediaPost(_ media: UiMedia, sensitive: Bool = false) -> UiTimelineV2.Post {
+        func rich(_ text: String) -> UiRichText {
+            let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
+            return UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
+        }
+        let profile = UiProfile(key: MicroBlogKey(id: "demo", host: "example.invalid"), handle: UiHandle(raw: "flare", host: "example.invalid", displayOverride: nil), avatar: nil as UiMediaImage?, nameInternal: rich("Flare"), platformId: "mastodon", platformIcon: IconType.Material(icon: .world), clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil, pluginId: nil)
+        return UiTimelineV2.Post(platformId: "mastodon", images: [media], sensitive: sensitive, contentWarning: nil, user: profile, platformIcon: IconType.Material(icon: .world), sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich("Single attachment · expanded media\nAligned with the post content"), translation: nil), actions: [], poll: nil, statusKey: MicroBlogKey(id: "media-layout", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "media-layout", pluginId: nil, authorSubtitleInternal: nil)
+    }
+
+    private func cyanBounds(_ image: UIImage) throws -> CGRect {
+        let cg = try XCTUnwrap(image.cgImage)
+        var pixels = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
+        let context = try XCTUnwrap(CGContext(data: &pixels, width: cg.width, height: cg.height,
+            bitsPerComponent: 8, bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        context.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+        var minX = cg.width, minY = cg.height, maxX = -1, maxY = -1
+        for offset in stride(from: 0, to: pixels.count, by: 4) {
+            let r = Int(pixels[offset]), g = Int(pixels[offset + 1]), b = Int(pixels[offset + 2])
+            if g > r + 40 && b > r + 40 {
+                let x = (offset / 4) % cg.width, y = (offset / 4) / cg.width
+                minX = min(minX, x); maxX = max(maxX, x)
+                minY = min(minY, y); maxY = max(maxY, y)
+            }
+        }
+        XCTAssertGreaterThanOrEqual(maxX, minX, "The actual preview must load before capture")
+        return CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
+    }
+
     func testReactionImagesDecodeAtTheirDisplayHeightOnBothRenderers() async throws {
         for kind in ["uikit", "swiftui"] {
             let fixture = try await Fixture()
@@ -759,12 +1382,21 @@ final class TimelineMediaPreviewTests: XCTestCase {
         private var downloaders: [(ImageDownloader, URLSessionConfiguration)] = []
         var imageView: UIImageView { view.subviews.compactMap { $0 as? UIImageView }.first! }
 
-        init(animated: Bool = false, orientation: Int? = nil) async throws {
+        init(animated: Bool = false, orientation: Int? = nil, imageSize: CGSize? = nil) async throws {
             let format = UIGraphicsImageRendererFormat()
             format.scale = 1
             let image = UIGraphicsImageRenderer(
-                size: CGSize(width: 1_024, height: 768), format: format
+                size: imageSize ?? CGSize(width: 1_024, height: 768), format: format
             ).image { context in
+                if let imageSize {
+                    UIColor(red: 0.05, green: 0.65, blue: 0.8, alpha: 1).setFill()
+                    context.fill(CGRect(origin: .zero, size: imageSize))
+                    for y in stride(from: 32, to: Int(imageSize.height), by: 120) {
+                        ("\(y) / \(Int(imageSize.height))" as NSString).draw(at: CGPoint(x: 32, y: y),
+                            withAttributes: [.font: UIFont.monospacedDigitSystemFont(ofSize: 28, weight: .medium), .foregroundColor: UIColor.white])
+                    }
+                    return
+                }
                 UIColor.blue.setFill()
                 context.fill(CGRect(x: 0, y: 0, width: 1_024, height: 768))
             }

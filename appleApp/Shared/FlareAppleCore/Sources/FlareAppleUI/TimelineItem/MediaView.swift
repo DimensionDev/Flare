@@ -10,10 +10,12 @@ import UIKit
 public struct MediaView: View {
     private let data: UiMedia
     private let allowsAutoplay: Bool
+    private let contentMode: ContentMode
 
-    public init(data: UiMedia, allowsAutoplay: Bool = true) {
+    public init(data: UiMedia, allowsAutoplay: Bool = true, contentMode: ContentMode = .fill) {
         self.data = data
         self.allowsAutoplay = allowsAutoplay
+        self.contentMode = contentMode
     }
 
     public var body: some View {
@@ -27,7 +29,7 @@ public struct MediaView: View {
                     }
                     .clipped()
             case .video(let video):
-                MediaVideoView(data: video, allowsAutoplay: allowsAutoplay)
+                MediaVideoView(data: video, allowsAutoplay: allowsAutoplay, contentMode: contentMode)
             case .gif(let gif):
                 Color.gray
                     .overlay {
@@ -61,15 +63,18 @@ public struct MediaVideoView: View {
     @State private var appeared = false
     private let data: any UiMedia
     private let allowsAutoplay: Bool
+    private let contentMode: ContentMode
 
-    public init(data: UiMediaVideo, allowsAutoplay: Bool = true) {
+    public init(data: UiMediaVideo, allowsAutoplay: Bool = true, contentMode: ContentMode = .fill) {
         self.data = data
         self.allowsAutoplay = allowsAutoplay
+        self.contentMode = contentMode
     }
 
     public init(data: UiMediaUgoira, allowsAutoplay: Bool = true) {
         self.data = data
         self.allowsAutoplay = allowsAutoplay
+        self.contentMode = .fill
     }
 
     private var playback: TimelinePlaybackCoordinator { timelinePlayback ?? fallbackPlayback }
@@ -86,7 +91,7 @@ public struct MediaVideoView: View {
     public var body: some View {
         Color.gray
             .overlay {
-                NetworkImage(data: data.preview)
+                NetworkImage(data: data.preview, contentMode: contentMode)
                     .allowsHitTesting(false)
                     .opacity(data is UiMediaUgoira && ugoira.image != nil ? 0 : 1)
             }
@@ -96,12 +101,13 @@ public struct MediaVideoView: View {
                     UgoiraFrameView(media: animation, session: ugoira).allowsHitTesting(false)
                 } else if let avPlayer = player.player {
                     #if os(macOS)
-                    MacAVPlayerView(player: avPlayer, videoGravity: .resizeAspectFill, showsControls: false,
+                    MacAVPlayerView(player: avPlayer, videoGravity: contentMode == .fit ? .resizeAspect : .resizeAspectFill, showsControls: false,
                                     canDisplayFrame: player.hasRestoredPosition)
                         .id(data.url)
                         .allowsHitTesting(false)
                     #elseif os(iOS)
-                    InlineAVPlayerView(player: avPlayer, canDisplayFrame: player.hasRestoredPosition)
+                    InlineAVPlayerView(player: avPlayer, videoGravity: contentMode == .fit ? .resizeAspect : .resizeAspectFill,
+                                       canDisplayFrame: player.hasRestoredPosition)
                         .id(data.url)
                         .allowsHitTesting(false)
                     #endif
@@ -201,6 +207,7 @@ public struct MediaVideoView: View {
                 let remaining = max(Int((duration - player.position).rounded(.down)), 0)
                 Text(String(format: "%d:%02d", remaining / 60, remaining % 60))
                     .font(.caption)
+                    .lineLimit(1)
                     .foregroundStyle(.white)
                     .mediaVideoBadgeStyle()
             case .error(let error):
@@ -252,9 +259,41 @@ struct InlineAVPlayerView: UIViewRepresentable {
 
 extension View {
     func mediaVideoBadgeStyle() -> some View {
-        padding(8)
+        mediaBadgePadding(8)
             .background(.black, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding()
+            .mediaBadgePadding(16)
             .foregroundStyle(.white)
+    }
+
+    func mediaBadgePadding(_ padding: CGFloat) -> some View {
+        MediaVideoBadgePadding(padding: padding) {
+            visualEffect { content, geometry in
+                let available = geometry.bounds(of: .named("mediaVideoBadge"))?.size ?? geometry.size
+                let scale = min(1, available.width / max(geometry.size.width, 1),
+                                available.height / max(geometry.size.height, 1))
+                return content.scaleEffect(scale)
+            }
+        }
+        .coordinateSpace(name: "mediaVideoBadge")
+    }
+}
+
+private struct MediaVideoBadgePadding: Layout {
+    let padding: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let size = subviews[0].sizeThatFits(proposal)
+        return CGSize(width: min(size.width + padding * 2, proposal.width ?? .infinity),
+                      height: min(size.height + padding * 2, proposal.height ?? .infinity))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        // Reserve space for content before padding can consume a narrow preview.
+        let size = subviews[0].sizeThatFits(proposal)
+        let horizontal = min(padding, max(0, (bounds.width - size.width) / 2))
+        let vertical = min(padding, max(0, (bounds.height - size.height) / 2))
+        subviews[0].place(at: CGPoint(x: bounds.midX, y: bounds.midY), anchor: .center,
+                          proposal: ProposedViewSize(width: bounds.width - horizontal * 2,
+                                                     height: bounds.height - vertical * 2))
     }
 }

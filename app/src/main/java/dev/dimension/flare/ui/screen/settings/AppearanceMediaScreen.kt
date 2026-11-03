@@ -262,6 +262,28 @@ internal fun AppearanceMediaScreen(onBack: () -> Unit) {
                     },
                 )
             }
+            AnimatedVisibility(timelineAppearance.showMedia && timelineAppearance.expandMediaSize) {
+                SegmentedListItem(
+                    onClick = {
+                        state.update(AppearanceKeys.LimitSingleMediaHeight, !timelineAppearance.limitSingleMediaHeight)
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_limit_single_media_height))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_limit_single_media_height_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = timelineAppearance.limitSingleMediaHeight,
+                            onCheckedChange = {
+                                state.update(AppearanceKeys.LimitSingleMediaHeight, it)
+                            },
+                        )
+                    },
+                )
+            }
             AnimatedVisibility(timelineAppearance.showMedia) {
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay)) },

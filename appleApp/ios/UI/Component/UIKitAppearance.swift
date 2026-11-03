@@ -42,11 +42,13 @@ struct StatusUIKitAppearance: Equatable {
     let compatLinkPreview: Bool
     let showEmojiReactions: Bool
     let expandMediaSize: Bool
+    let limitSingleMediaHeight: Bool
     let limitMediaGridToNine: Bool
     let mediaLayout: TimelineMediaLayout
     let mediaLayoutID: String
     let aiAgentEnabled: Bool
     let showOriginalWithTranslation: Bool
+    var singleMediaMaxHeight: CGFloat?
 
     init(
         timeline: TimelineAppearance,
@@ -73,6 +75,7 @@ struct StatusUIKitAppearance: Equatable {
         compatLinkPreview = timeline.compatLinkPreview
         showEmojiReactions = timeline.showEmojiReactions
         expandMediaSize = timeline.expandMediaSize
+        limitSingleMediaHeight = timeline.limitSingleMediaHeight
         limitMediaGridToNine = timeline.limitMediaGridToNine
         mediaLayout = timeline.mediaLayout
         mediaLayoutID = timeline.mediaLayout.name
@@ -97,6 +100,8 @@ struct StatusUIKitAppearance: Equatable {
             lhs.compatLinkPreview == rhs.compatLinkPreview &&
             lhs.showEmojiReactions == rhs.showEmojiReactions &&
             lhs.expandMediaSize == rhs.expandMediaSize &&
+            lhs.limitSingleMediaHeight == rhs.limitSingleMediaHeight &&
+            lhs.singleMediaMaxHeight == rhs.singleMediaMaxHeight &&
             lhs.limitMediaGridToNine == rhs.limitMediaGridToNine &&
             lhs.mediaLayoutID == rhs.mediaLayoutID &&
             lhs.aiAgentEnabled == rhs.aiAgentEnabled &&
@@ -105,7 +110,7 @@ struct StatusUIKitAppearance: Equatable {
 }
 
 struct TimelineUIKitAppearance: Equatable {
-    let status: StatusUIKitAppearance
+    var status: StatusUIKitAppearance
     let timelineDisplayMode: TimelineDisplayMode
     let timelineDisplayModeID: String
     let videoAutoplay: VideoAutoplay

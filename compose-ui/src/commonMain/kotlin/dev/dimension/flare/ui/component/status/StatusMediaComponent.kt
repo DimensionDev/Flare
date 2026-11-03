@@ -39,7 +39,9 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -70,10 +72,13 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
+import dev.dimension.flare.ui.component.MediaVideoBadge
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
 import dev.dimension.flare.ui.component.UgoiraPlayer
+import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.accessibleDescription
+import dev.dimension.flare.ui.component.mediaBadgePadding
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
@@ -85,6 +90,7 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.TimelineCarouselLayout
+import dev.dimension.flare.ui.model.TimelineSingleMediaLayout
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -109,6 +115,26 @@ internal fun StatusMediaComponent(
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
+    val singleExpandedMedia =
+        data.singleOrNull()?.takeIf {
+            post.images.size == 1 && appearanceSettings.expandMediaSize && appearanceSettings.limitSingleMediaHeight && it !is UiMedia.Audio
+        }
+    val singleMediaRatio =
+        singleExpandedMedia?.let {
+            TimelineSingleMediaLayout.aspectRatio(it.carouselAspectRatio, cropTallMedia = it !is UiMedia.Video)
+        } ?: 1f
+    val singleMediaMaxHeight =
+        if (singleExpandedMedia != null) {
+            val viewportHeight =
+                with(LocalDensity.current) {
+                    LocalWindowInfo.current.containerSize.height
+                        .toDp()
+                        .value
+                }
+            TimelineSingleMediaLayout.maximumHeight(viewportHeight).dp
+        } else {
+            null
+        }
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
@@ -263,13 +289,17 @@ internal fun StatusMediaComponent(
                             mediaCount = data.size,
                             onMediaClick = { openMedia(index) },
                             hideSensitive = hideSensitive,
-                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize && singleExpandedMedia == null,
+                            fillContainer = singleExpandedMedia != null,
+                            contentScale = if (singleExpandedMedia is UiMedia.Video) ContentScale.Fit else ContentScale.Crop,
                         )
                     }
                 },
                 maxItems = if (appearanceSettings.limitMediaGridToNine) 9 else data.size,
                 modifier = mediaContentModifier,
                 expandedSize = appearanceSettings.expandMediaSize,
+                singleMediaAspectRatio = singleMediaRatio,
+                singleMediaMaxHeight = singleMediaMaxHeight,
             )
         }
         if (showSensitiveButton) {
@@ -294,7 +324,7 @@ internal fun StatusMediaComponent(
                             } else {
                                 it
                             }
-                        }.padding(16.dp),
+                        },
             ) {
                 AnimatedContent(
                     hideSensitive,
@@ -303,36 +333,42 @@ internal fun StatusMediaComponent(
                             .matchParentSize(),
                     label = "StatusMediaComponent",
                 ) {
-                    Box {
+                    Box(Modifier.fillMaxSize()) {
                         if (it) {
                             Box(
                                 modifier =
                                     Modifier
                                         .align(Alignment.Center)
+                                        .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp)
                                         .clip(PlatformTheme.shapes.medium)
                                         .background(PlatformTheme.colorScheme.card)
-                                        .padding(16.dp),
+                                        .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp),
                             ) {
                                 PlatformText(
                                     text = stringResource(Res.string.status_sensitive_media),
                                 )
                             }
                         } else {
-                            PlatformIconButton(
-                                onClick = {
-                                    hideSensitive = true
-                                },
+                            ViewBox(
+                                stretch = false,
                                 modifier =
                                     Modifier
                                         .align(Alignment.TopStart)
-                                        .alpha(0.5f)
-                                        .clip(PlatformTheme.shapes.medium)
-                                        .background(PlatformTheme.colorScheme.card),
+                                        .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp),
                             ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.EyeSlash,
-                                    contentDescription = hideSensitiveMediaLabel,
-                                )
+                                PlatformIconButton(
+                                    onClick = { hideSensitive = true },
+                                    modifier =
+                                        Modifier
+                                            .alpha(0.5f)
+                                            .clip(PlatformTheme.shapes.medium)
+                                            .background(PlatformTheme.colorScheme.card),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.EyeSlash,
+                                        contentDescription = hideSensitiveMediaLabel,
+                                    )
+                                }
                             }
                         }
                     }
@@ -397,6 +433,7 @@ private fun StatusMediaItem(
     keepAspectRatio: Boolean,
     modifier: Modifier = Modifier,
     fillContainer: Boolean = false,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val uriHandler = LocalUriHandler.current
     val viewAltTextLabel = stringResource(Res.string.media_view_alt_text)
@@ -456,6 +493,7 @@ private fun StatusMediaItem(
                         media = media,
                         modifier = if (fillContainer) Modifier.fillMaxSize() else Modifier,
                         keepAspectRatio = keepAspectRatio,
+                        contentScale = contentScale,
                     )
                 }
             } else {
@@ -466,6 +504,7 @@ private fun StatusMediaItem(
                             onMediaClick()
                         },
                     keepAspectRatio = keepAspectRatio,
+                    contentScale = contentScale,
                 )
             }
         }
@@ -478,11 +517,11 @@ private fun StatusMediaItem(
                         modifier =
                             Modifier
                                 .pointerHoverIcon(PointerIcon.Hand)
-                                .padding(16.dp)
+                                .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp)
                                 .background(
                                     color = Color.Black.copy(alpha = 0.75f),
                                     shape = PlatformTheme.shapes.medium,
-                                ).padding(
+                                ).mediaBadgePadding(
                                     horizontal = 8.dp,
                                     vertical = 2.dp,
                                 ).clickable {
@@ -686,21 +725,10 @@ public fun MediaItem(
                                         .fillMaxWidth(),
                             )
                         }
-                        Box(
-                            modifier =
-                                Modifier
-                                    .padding(16.dp)
-                                    .background(
-                                        Color.Black.copy(alpha = 0.5f),
-                                        shape = PlatformTheme.shapes.medium,
-                                    ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .align(Alignment.BottomStart),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                        MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                             PlatformCircularProgressIndicator(
                                 modifier =
                                     Modifier
-                                        .align(Alignment.BottomStart)
                                         .size(16.dp),
                                 color = Color.White,
                             )
@@ -722,17 +750,7 @@ public fun MediaItem(
                                         .fillMaxWidth(),
                             )
                         }
-                        Box(
-                            modifier =
-                                Modifier
-                                    .padding(16.dp)
-                                    .background(
-                                        Color.Black.copy(alpha = 0.5f),
-                                        shape = PlatformTheme.shapes.medium,
-                                    ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .align(Alignment.BottomStart),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                        MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                             FAIcon(
                                 FontAwesomeIcons.Solid.CirclePlay,
                                 contentDescription = stringResource(Res.string.media_play_video),
@@ -746,17 +764,7 @@ public fun MediaItem(
                     remainingTimeContent =
                         if (showCountdown) {
                             {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .padding(16.dp)
-                                            .background(
-                                                Color.Black.copy(alpha = 0.5f),
-                                                shape = PlatformTheme.shapes.medium,
-                                            ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                            .align(Alignment.BottomStart),
-                                    contentAlignment = Alignment.Center,
-                                ) {
+                                MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                                     PlatformText(
                                         text =
                                             remember(it) {
@@ -764,6 +772,7 @@ public fun MediaItem(
                                             },
                                         color = Color.White,
                                         style = PlatformTheme.typography.caption,
+                                        maxLines = 1,
                                     )
                                 }
                             }
@@ -793,17 +802,7 @@ public fun MediaItem(
                                     }
                                 },
                     )
-                    Box(
-                        modifier =
-                            Modifier
-                                .padding(16.dp)
-                                .background(
-                                    Color.Black.copy(alpha = 0.5f),
-                                    shape = PlatformTheme.shapes.medium,
-                                ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                .align(Alignment.BottomStart),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                         FAIcon(
                             FontAwesomeIcons.Solid.CirclePlay,
                             contentDescription = stringResource(Res.string.media_play_video),

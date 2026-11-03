@@ -14,7 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.model.TimelineSingleMediaLayout
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.math.roundToInt
 
 private const val ADAPTIVE_GRID_MAX_ITEMS = 9
 private const val ADAPTIVE_GRID_OVERFLOW_DISPLAY_LIMIT = 100
@@ -26,6 +28,8 @@ internal fun AdaptiveGrid(
     modifier: Modifier = Modifier,
     spacing: Dp = 4.dp,
     expandedSize: Boolean = true,
+    singleMediaAspectRatio: Float = 1f,
+    singleMediaMaxHeight: Dp? = null,
     maxItems: Int = ADAPTIVE_GRID_MAX_ITEMS,
     overflowContent: @Composable (Int) -> Unit = { overflowCount ->
         Box(
@@ -65,7 +69,20 @@ internal fun AdaptiveGrid(
 
             if (visibleMeasurables.size == 1) {
                 val placeable =
-                    if (expandedSize) {
+                    if (expandedSize && singleMediaMaxHeight != null) {
+                        val ratio = TimelineSingleMediaLayout.aspectRatio(singleMediaAspectRatio, cropTallMedia = false)
+                        val heightLimit = minOf(singleMediaMaxHeight.roundToPx(), constraints.maxHeight)
+                        val width =
+                            TimelineSingleMediaLayout
+                                .width(
+                                    availableWidth = constraints.maxWidth.toFloat(),
+                                    aspectRatio = ratio,
+                                    maximumHeight = heightLimit.toFloat(),
+                                ).roundToInt()
+                        visibleMeasurables[0].measure(
+                            Constraints.fixed(width, minOf((width / ratio).roundToInt(), heightLimit)),
+                        )
+                    } else if (expandedSize) {
                         visibleMeasurables[0].measure(
                             Constraints(
                                 maxWidth = constraints.maxWidth,

@@ -60,7 +60,7 @@ packages:
     exactVersion: 1.7.0
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk.git
-    exactVersion: 12.19.1
+    exactVersion: 12.19.3
   GSPlayer:
     url: https://github.com/wxxsw/GSPlayer
     from: 0.2.30
@@ -69,7 +69,7 @@ packages:
     exactVersion: 1.0.5
   Kingfisher:
     url: https://github.com/onevcat/Kingfisher.git
-    exactVersion: 8.14.0
+    exactVersion: 8.15.0
   LazyPager:
     # Temporary 1.2.1 fork: create the selected page before the first layout.
     # Return to upstream once it includes the initial-page flash fix.
@@ -80,7 +80,7 @@ packages:
     exactVersion: 0.65.1
   SwiftUI-Flow:
     url: https://github.com/tevelee/SwiftUI-Flow
-    exactVersion: 3.5.3
+    exactVersion: 3.5.5
   # Temporary fork: upstream Textual currently requires iOS 18 / macOS 15, while Flare still
   # supports iOS 17 / macOS 14. Switch back to gonzalezreal/textual when that is compatible.
   Textual:

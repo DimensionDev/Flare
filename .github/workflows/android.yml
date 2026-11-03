@@ -296,6 +296,7 @@ jobs:
             -only-testing:iOSTests/MediaPlaybackMemoryTests \
             -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
             -only-testing:iOSTests/MediaTransferCancellationTests \
+            -only-testing:iOSTests/StateViewTests \
             -only-testing:iOSTests/TimelineCollectionViewTests/testRefreshCollapseAppliesAPendingPrependBookmarkBeforeAnimating \
             -parallel-testing-enabled NO -collect-test-diagnostics never
       - name: Run timeline media scroll regressions

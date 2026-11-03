@@ -148,6 +148,7 @@ expected_selectors = %w[
   iOSTests/MediaPlaybackMemoryTests
   iOSTests/TimelinePlaybackCoordinatorTests
   iOSTests/MediaTransferCancellationTests
+  iOSTests/StateViewTests
   iOSTests/TimelineCollectionViewTests/testRefreshCollapseAppliesAPendingPrependBookmarkBeforeAnimating
   MediaViewerInteractionTests/TimelineMediaScrollTests
   MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithPost

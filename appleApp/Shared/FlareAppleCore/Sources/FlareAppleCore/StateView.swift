@@ -77,7 +77,7 @@ extension View {
     public func onSuccessOf<T: AnyObject>(of state: UiState<T>, data: @escaping (T) -> Void)
         -> some View
     {
-        onChange(of: state) { _, newValue in
+        onChange(of: state, initial: true) { _, newValue in
             switch onEnum(of: newValue) {
             case .success(let success):
                 data(success.data)

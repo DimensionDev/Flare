@@ -6,6 +6,7 @@ import ImageIO
 import UniformTypeIdentifiers
 import Kingfisher
 import KotlinSharedUI
+import FlareAppleCore
 @testable import FlareAppleUI
 @testable import Flare
 
@@ -269,6 +270,100 @@ final class TimelineMediaPreviewTests: XCTestCase {
                     XCTAssertEqual(view.accessibilityCustomActions?.count, 1)
                 }
             }
+        }
+    }
+
+    func testSwiftUIPlaybackBadgesStayInsideNarrowMedia() async throws {
+        let fixture = try await Fixture()
+        var contentBounds = CGRect.zero
+        var badgeBounds = CGRect.zero
+        var mediaBounds = CGRect.zero
+        func content(width: CGFloat, height: CGFloat, state: Int) -> some View {
+            Color.blue
+                .overlay(alignment: .bottomLeading) {
+                    Group {
+                        switch state {
+                        case 0: Image(fontAwesome: .circlePlay)
+                        case 1: ProgressView().tint(.white)
+                        default: Text("1:23").font(.caption).lineLimit(1)
+                        }
+                    }
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { contentBounds = $0 }
+                    .mediaVideoBadgeStyle()
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { badgeBounds = $0 }
+                }
+                .frame(width: width, height: height)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .clipped()
+        }
+        let host = UIHostingController(rootView: content(width: 180, height: 200, state: 0))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for (width, height): (CGFloat, CGFloat) in [(16, 200), (40, 200), (180, 200), (180, 16)] {
+            for state in 0..<3 {
+                host.rootView = content(width: width, height: height, state: state)
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(50))
+                let message = "state \(state), media \(mediaBounds), badge \(badgeBounds), content \(contentBounds)"
+                XCTAssertEqual(mediaBounds.width, width, accuracy: 0.5)
+                XCTAssertEqual(mediaBounds.height, height, accuracy: 0.5)
+                XCTAssertTrue(mediaBounds.insetBy(dx: -0.5, dy: -0.5).contains(badgeBounds), message)
+                XCTAssertGreaterThan(contentBounds.width, 0, message)
+                XCTAssertGreaterThan(contentBounds.height, 0, message)
+                XCTAssertTrue(mediaBounds.insetBy(dx: -0.5, dy: -0.5).contains(contentBounds), message)
+                if width == 180, height == 200 {
+                    XCTAssertEqual(contentBounds.minX - mediaBounds.minX, 24, accuracy: 0.5)
+                    XCTAssertEqual(mediaBounds.maxY - contentBounds.maxY, 24, accuracy: 0.5)
+                }
+            }
+        }
+    }
+
+    func testSwiftUINarrowCappedVideoShowsPlayIndicatorWithoutAutoplay() async throws {
+        let fixture = try await Fixture()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = helper.resolve(base: singleMediaAppearance(),
+                                        patch: helper.setVideoAutoplay(patch: helper.empty, value: .never))
+        var mediaBounds = CGRect.zero
+        func content(width: Float) -> some View {
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+                height: 1_000, width: width, customHeaders: ["X-Preview-Test": "fixture"],
+                proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            return StatusMediaView(post: singleMediaPost(video), data: [video], sensitive: false,
+                cornerRadius: 12, allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                onMediaClicked: { _, _ in })
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .frame(width: 360, alignment: .leading)
+                .environment(\.timelineAppearance, appearance)
+                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+        }
+        let host = UIHostingController(rootView: content(width: 80))
+        host.view.backgroundColor = .black
+        let window = try fixture.show(host)
+        window.overrideUserInterfaceStyle = .light
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for width: Float in [80, 200, 900] {
+            host.rootView = content(width: width)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(150))
+            XCTAssertEqual(mediaBounds.width, CGFloat(width / 5), accuracy: 0.5)
+            XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let mediaImage = try XCTUnwrap(screenshot.cgImage?.cropping(to: mediaBounds))
+            var pixels = [UInt8](repeating: 0, count: mediaImage.width * mediaImage.height * 4)
+            let context = try XCTUnwrap(CGContext(data: &pixels, width: mediaImage.width, height: mediaImage.height,
+                bitsPerComponent: 8, bytesPerRow: mediaImage.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.draw(mediaImage, in: CGRect(x: 0, y: 0, width: mediaImage.width, height: mediaImage.height))
+            let whitePixels = stride(from: 0, to: pixels.count, by: 4).filter {
+                pixels[$0] > 200 && pixels[$0 + 1] > 200 && pixels[$0 + 2] > 200
+            }.count
+            XCTAssertGreaterThan(whitePixels, 30, "The play indicator must remain visible in a \(mediaBounds.width)pt video")
         }
     }
 

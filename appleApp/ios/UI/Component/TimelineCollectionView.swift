@@ -462,7 +462,8 @@ final class TimelineCollectionView: UICollectionView {
         _ updates: () -> Void
     ) {
         let viewportTop = readingViewportTop()
-        var item = preservesReadingPosition && (hasScrollGesture || isAnimatingRefreshCollapse) &&
+        var item = preservesReadingPosition &&
+            (hasScrollGesture || isAnimatingRefreshCollapse || keepingItemIDs?.isEmpty == false) &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
             ? firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) : nil
         let keepsGestureItem = hasScrollGesture &&

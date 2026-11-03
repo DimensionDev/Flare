@@ -133,17 +133,11 @@ private fun EventTemplate<out QuartzEvent>.unsignedJson(pubkey: String): String 
         put("id", EventHasher.hashId(pubkey, createdAt, kind, tags, content))
     }.toString()
 
-internal expect fun initializeNostrBunkerSerialization()
-
 internal class NostrBunkerSession(
     private val credential: NostrSignerCredential.Bunker,
     private val expectedPubkey: String? = credential.userPubkeyHex,
     suppliedClient: INostrClient? = null,
 ) : AutoCloseable {
-    init {
-        initializeNostrBunkerSerialization()
-    }
-
     private val localSigner = NostrSignerInternal(KeyPair(requireNotNull(parseNostrSecret(requireNotNull(credential.secret)))))
     private val transport = if (suppliedClient == null) NostrRelayClient() else null
     private val client = suppliedClient ?: requireNotNull(transport).client

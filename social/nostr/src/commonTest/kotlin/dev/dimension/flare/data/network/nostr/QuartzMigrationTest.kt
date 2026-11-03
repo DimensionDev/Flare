@@ -154,12 +154,16 @@ class QuartzMigrationTest {
                 val event = localSigner().sign(template())
                 network.storedEvents += event
                 nostrEventSigner(NostrSignerCredential.LocalKey(secret), pubkey, noAmber).use { signer ->
-                    network.client.authenticateNostrRelays(this, signer) { network.relays }
-                    assertEquals(
-                        listOf(event.id),
-                        network.client.fetchNostrEvents(network.relays, listOf(Filter(kinds = listOf(1)))).map { it.id },
-                    )
-                    assertEquals(network.relays, network.authenticatedRelays)
+                    val auth = network.client.authenticateNostrRelays(this, signer) { network.relays }
+                    try {
+                        assertEquals(
+                            listOf(event.id),
+                            network.client.fetchNostrEvents(network.relays, listOf(Filter(kinds = listOf(1)))).map { it.id },
+                        )
+                        assertEquals(network.relays, network.authenticatedRelays)
+                    } finally {
+                        auth.destroy()
+                    }
                 }
             }
         }

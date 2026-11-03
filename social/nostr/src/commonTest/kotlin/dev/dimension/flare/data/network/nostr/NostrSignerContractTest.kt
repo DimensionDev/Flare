@@ -156,14 +156,18 @@ class NostrSignerContractTest {
                         }
                     }
                 val auth = network.client.authenticateNostrRelays(this, signer) { setOf(allowed) }
-                val request = RelayAuthEvent.build(allowed, "challenge")
-                assertTrue(auth.signWithAllLoggedInUsers(network.relays.last(), request, true).isEmpty())
-                assertTrue(auth.signWithAllLoggedInUsers(allowed, request, false).isEmpty())
-                assertEquals(0, calls)
-                val event = auth.signWithAllLoggedInUsers(allowed, request, true).single()
-                assertTrue(event.verify())
-                assertEquals(me, event.pubKey)
-                assertEquals(1, calls)
+                try {
+                    val request = RelayAuthEvent.build(allowed, "challenge")
+                    assertTrue(auth.signWithAllLoggedInUsers(network.relays.last(), request, true).isEmpty())
+                    assertTrue(auth.signWithAllLoggedInUsers(allowed, request, false).isEmpty())
+                    assertEquals(0, calls)
+                    val event = auth.signWithAllLoggedInUsers(allowed, request, true).single()
+                    assertTrue(event.verify())
+                    assertEquals(me, event.pubKey)
+                    assertEquals(1, calls)
+                } finally {
+                    auth.destroy()
+                }
             }
         }
 

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.compose
 import androidx.compose.runtime.mutableStateOf
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.model.DraftContent
@@ -20,7 +21,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ComposeVisibilityTest {
+class ComposeVisibilityTest : RobolectricTest() {
     private val weibo =
         ComposeConfig.Visibility(
             allVisibilities = persistentListOf(Visibility.Public, Visibility.Friends, Visibility.SelfOnly),

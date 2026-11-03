@@ -297,7 +297,7 @@ class SaveDraftUseCaseTest : RobolectricTest() {
 
             assertNotNull(draft)
             assertEquals("", draft.content.text)
-            assertEquals(UiTimelineV2.Post.Visibility.Public, draft.content.visibility)
+            assertNull(draft.content.visibility)
             assertEquals(listOf("en"), draft.content.language)
             assertEquals(false, draft.content.sensitive)
             assertNull(draft.content.spoilerText)

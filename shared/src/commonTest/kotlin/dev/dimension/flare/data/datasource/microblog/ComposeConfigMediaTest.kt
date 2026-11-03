@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ComposeConfigMediaTest {
@@ -36,7 +37,7 @@ class ComposeConfigMediaTest {
     }
 
     @Test
-    fun mergedAccountsIntersectPluginMediaAndVisibilityConstraints() {
+    fun mergedAccountsIntersectMediaConstraintsAndHideIncompatibleVisibility() {
         val first =
             media(
                 maxSizeBytes = 16_000_000,
@@ -68,13 +69,7 @@ class ComposeConfigMediaTest {
 
         assertEquals(2, merged.media?.minCountForNew)
         assertEquals(setOf("image/png"), merged.media?.supportedMimeTypes)
-        assertEquals(
-            setOf(
-                UiTimelineV2.Post.Visibility.Home,
-                UiTimelineV2.Post.Visibility.Followers,
-            ),
-            merged.visibility?.allVisibilities?.toSet(),
-        )
+        assertNull(merged.visibility)
     }
 
     @Test

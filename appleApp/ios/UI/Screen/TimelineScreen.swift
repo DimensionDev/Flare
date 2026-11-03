@@ -63,7 +63,7 @@ struct TimelineScreen: View {
                     .backport
                     .glassEffect(.regularInteractive, in: .capsule, fallbackBackground: .regularMaterial)
                     .accessibilityIdentifier("home-new-content")
-                    .transition(reduceMotion ? .opacity : .move(edge: .top))
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
                 }
             }
             .animation(

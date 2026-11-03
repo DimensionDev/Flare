@@ -72,6 +72,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.LocalTimelineCarouselItem
 import dev.dimension.flare.ui.component.LocalTimelinePlayback
+import dev.dimension.flare.ui.component.MediaVideoBadge
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
 import dev.dimension.flare.ui.component.UgoiraPlayer
@@ -716,21 +717,10 @@ public fun MediaItem(
                                         .fillMaxWidth(),
                             )
                         }
-                        Box(
-                            modifier =
-                                Modifier
-                                    .padding(16.dp)
-                                    .background(
-                                        Color.Black.copy(alpha = 0.5f),
-                                        shape = PlatformTheme.shapes.medium,
-                                    ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .align(Alignment.BottomStart),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                        MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                             PlatformCircularProgressIndicator(
                                 modifier =
                                     Modifier
-                                        .align(Alignment.BottomStart)
                                         .size(16.dp),
                                 color = Color.White,
                             )
@@ -752,17 +742,7 @@ public fun MediaItem(
                                         .fillMaxWidth(),
                             )
                         }
-                        Box(
-                            modifier =
-                                Modifier
-                                    .padding(16.dp)
-                                    .background(
-                                        Color.Black.copy(alpha = 0.5f),
-                                        shape = PlatformTheme.shapes.medium,
-                                    ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .align(Alignment.BottomStart),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                        MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                             FAIcon(
                                 FontAwesomeIcons.Solid.CirclePlay,
                                 contentDescription = stringResource(Res.string.media_play_video),
@@ -776,17 +756,7 @@ public fun MediaItem(
                     remainingTimeContent =
                         if (showCountdown) {
                             {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .padding(16.dp)
-                                            .background(
-                                                Color.Black.copy(alpha = 0.5f),
-                                                shape = PlatformTheme.shapes.medium,
-                                            ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                            .align(Alignment.BottomStart),
-                                    contentAlignment = Alignment.Center,
-                                ) {
+                                MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                                     PlatformText(
                                         text =
                                             remember(it) {
@@ -794,6 +764,7 @@ public fun MediaItem(
                                             },
                                         color = Color.White,
                                         style = PlatformTheme.typography.caption,
+                                        maxLines = 1,
                                     )
                                 }
                             }
@@ -823,17 +794,7 @@ public fun MediaItem(
                                     }
                                 },
                     )
-                    Box(
-                        modifier =
-                            Modifier
-                                .padding(16.dp)
-                                .background(
-                                    Color.Black.copy(alpha = 0.5f),
-                                    shape = PlatformTheme.shapes.medium,
-                                ).padding(horizontal = 8.dp, vertical = 4.dp)
-                                .align(Alignment.BottomStart),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                    MediaVideoBadge(modifier = Modifier.align(Alignment.BottomStart)) {
                         FAIcon(
                             FontAwesomeIcons.Solid.CirclePlay,
                             contentDescription = stringResource(Res.string.media_play_video),

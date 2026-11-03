@@ -36,7 +36,7 @@ class HomeTabSettingsPresenterTest {
                         avatarShape = defaults.avatarShape,
                     )!!
                 assertEquals(value != null, updated.contains(AppearanceKeys.LimitSingleMediaHeight))
-                assertEquals(value ?: false, updated[AppearanceKeys.LimitSingleMediaHeight])
+                assertEquals(value ?: true, updated[AppearanceKeys.LimitSingleMediaHeight])
                 assertEquals(true, updated[AppearanceKeys.FullWidthPost])
             }
         }

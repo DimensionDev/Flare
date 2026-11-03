@@ -27,10 +27,10 @@ import kotlin.test.assertTrue
 
 class AppearancePatchTest {
     @Test
-    fun singleMediaHeightLimitDefaultsOffAndPreservesExplicitOverrides() {
-        assertFalse(TimelineAppearance.Default.limitSingleMediaHeight)
-        assertFalse(AppearanceBag().toPatch().toTimelineAppearance().limitSingleMediaHeight)
-        assertFalse(
+    fun singleMediaHeightLimitDefaultsOnAndPreservesExplicitOverrides() {
+        assertTrue(TimelineAppearance.Default.limitSingleMediaHeight)
+        assertTrue(AppearanceBag().toPatch().toTimelineAppearance().limitSingleMediaHeight)
+        assertTrue(
             AppearanceSettings.Default
                 .toPatch()
                 .toTimelineAppearance()

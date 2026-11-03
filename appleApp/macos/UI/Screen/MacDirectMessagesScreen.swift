@@ -547,6 +547,7 @@ private struct MacDMConversationColumn: View {
                 onSend: send
             )
         }
+        .timelineMediaViewport()
         .navigationTitle(dynamicTitle)
     }
 

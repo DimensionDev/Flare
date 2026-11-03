@@ -124,6 +124,7 @@ struct GalleryDetailScreen: View {
             }
             .padding(.bottom, 24)
         }
+        .timelineMediaViewport()
         .sheet(isPresented: $showInfoSheet) {
             NavigationStack {
                 ScrollView {
@@ -144,6 +145,7 @@ struct GalleryDetailScreen: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
                 }
+                .timelineMediaViewport()
                 .navigationTitle("Info")
                 .navigationBarTitleDisplayMode(.inline)
             }

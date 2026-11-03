@@ -39,6 +39,7 @@ struct PostActionLayoutScreen: View {
                 }
             }
         }
+        .timelineMediaViewport()
         .navigationTitle("Post actions")
         .onAppear {
             config = normalizedTimelineConfig

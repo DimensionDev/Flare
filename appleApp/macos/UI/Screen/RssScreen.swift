@@ -256,6 +256,7 @@ private struct RssTimelineItemList: View {
             content
         }
         .listStyle(.plain)
+        .timelineMediaViewport()
         .id(key)
         .onChange(of: selectedItemID) { _, newValue in
             syncSelection(id: newValue)

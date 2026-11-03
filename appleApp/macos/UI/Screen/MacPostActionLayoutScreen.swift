@@ -53,6 +53,7 @@ struct MacPostActionLayoutScreen: View {
                 PostActionLayoutPreview(config: config)
                     .padding(.vertical, 8)
             }
+            .timelineMediaViewport()
         }
         .padding(24)
         .frame(maxHeight: .infinity, alignment: .top)

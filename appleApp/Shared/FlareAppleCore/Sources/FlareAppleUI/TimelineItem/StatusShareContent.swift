@@ -118,6 +118,7 @@ public struct StatusShareReplyPicker: View {
             }
         }
         .listStyle(.plain)
+        .timelineMediaViewport()
     }
 
     private var selectionCount: some View {

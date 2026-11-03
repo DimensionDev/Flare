@@ -16,6 +16,7 @@ public extension EnvironmentValues {
 
 extension EnvironmentValues {
     @Entry var timelinePlaybackViewport: CGRect? = nil
+    @Entry var timelineMediaViewportHeight: CGFloat? = nil
 }
 
 @available(iOS 17.0, macOS 14.0, *)
@@ -87,10 +88,18 @@ private struct DetectScrollingModifier: ViewModifier {
 }
 
 public extension View {
+    /// Apply to a scroll container so lazy media receives its height before the first layout.
+    func timelineMediaViewport() -> some View {
+        GeometryReader { geometry in
+            self.environment(\.timelineMediaViewportHeight, geometry.size.height)
+        }
+    }
+
     @ViewBuilder
     func detectScrolling(debounceIdle: TimeInterval = 0.200) -> some View {
         if #available(iOS 17.0, macOS 14.0, *) {
             modifier(DetectScrollingModifier(debounceIdleSeconds: debounceIdle))
+                .timelineMediaViewport()
         } else {
             environment(\.isScrolling, false)
         }

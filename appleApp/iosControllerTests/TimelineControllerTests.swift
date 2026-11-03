@@ -775,7 +775,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await list.scroll(frame.minY - 150)
         list.controller.willLoadTimelineGap(gap)
         var expanded = list.input.items
-        expanded.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 18)
+        expanded.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 18)
         expanded[38] = .post(makeGap(revision: 1))
         list.input.items = Array(expanded.prefix(20))
         await list.apply()
@@ -794,7 +794,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await gallery.settle()
         gallery.controller.willLoadTimelineGap(gap)
         var galleryExpanded = gallery.content.items
-        galleryExpanded.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 18)
+        galleryExpanded.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 18)
         galleryExpanded[38] = .post(makeGap(revision: 1))
         gallery.content.items = Array(galleryExpanded.prefix(20))
         gallery.controller.submit(gallery.content)
@@ -823,7 +823,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
         await fixture.scroll(frame.minY - 80)
         fixture.controller.willLoadTimelineGap(gap)
-        fixture.input.items.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 4)
+        fixture.input.items.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 4)
         fixture.input.items[24] = .post(makeGap(revision: 1))
         await fixture.apply()
         try fixture.assertPosition(("t:case-4", 80))
@@ -846,10 +846,10 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let frame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame)
         await fixture.scroll(frame.minY - 150)
         fixture.controller.willLoadTimelineGap(gap)
-        fixture.input.items.replaceSubrange(4...4, with: [.post(makeRow(100)), .post(makeRow(101))])
+        fixture.input.items.replaceSubrange(4...4, with: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))])
         await fixture.apply()
         try fixture.assertPosition(("t:case-4", 150))
-        fixture.input.items[5] = .post(makeRow(101, imageHeight: 1_400))
+        fixture.input.items[5] = .post(makeTimelineTestRow(101, imageHeight: 1_400))
         await fixture.apply()
         try fixture.assertPosition(("t:case-4", 150))
     }
@@ -1225,7 +1225,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await gallery.settle()
         gallery.controller.willLoadTimelineGap(gap)
         gallery.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100"])
-        gallery.content.items = (100..<130).map { .post(makeRow($0)) }
+        gallery.content.items = (100..<130).map { .post(makeTimelineTestRow($0)) }
         gallery.controller.submit(gallery.content)
         await gallery.settle()
 
@@ -1234,7 +1234,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         gallery.controller.submit(gallery.content)
         await gallery.settle()
         gallery.content.state = .loaded
-        gallery.content.items = (200..<220).map { .post(makeRow($0)) } + [.post(makeRow(100))]
+        gallery.content.items = (200..<220).map { .post(makeTimelineTestRow($0)) } + [.post(makeTimelineTestRow(100))]
         gallery.controller.submit(gallery.content)
         await gallery.settle()
         XCTAssertEqual(try gallery.position().0, "g:case-200", "An empty list must discard the previous gap anchor")
@@ -1251,7 +1251,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await list.apply()
         list.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100"])
         list.input.state = .loaded
-        list.input.items = (200..<220).map { .post(makeRow($0)) } + [.post(makeRow(100))]
+        list.input.items = (200..<220).map { .post(makeTimelineTestRow($0)) } + [.post(makeTimelineTestRow(100))]
         await list.apply()
         XCTAssertEqual(try list.position().id, "t:case-200", "Late completion must not restore an anchor discarded by an empty list")
     }

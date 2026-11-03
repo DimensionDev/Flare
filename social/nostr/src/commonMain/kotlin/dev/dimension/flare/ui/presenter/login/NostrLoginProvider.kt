@@ -171,8 +171,9 @@ private class NostrCredentialLoginHandler(
         )
 }
 
-private class NostrQrLoginHandler(
+internal class NostrQrLoginHandler(
     private val context: LoginContext,
+    private val beginQrLogin: () -> NostrService.Companion.PendingQrLogin = { NostrService.beginQrLogin() },
 ) : LoginMethodHandler {
     private val accountService: AccountService by koinInject()
     private var pendingQrLogin: NostrService.Companion.PendingQrLogin? = null
@@ -209,14 +210,19 @@ private class NostrQrLoginHandler(
         _state.value = state(loading = true)
         runCatching {
             pendingQrLogin?.close()
-            val session = NostrService.beginQrLogin()
+            val session = beginQrLogin()
             pendingQrLogin = session
             waiting = true
             _effects.emit(LoginEffect.ShowQr(session.connectUri))
             _state.value = state()
             val imported =
-                withTimeout(2.minutes) {
-                    session.awaitAccount()
+                try {
+                    withTimeout(2.minutes) {
+                        session.awaitAccount()
+                    }
+                } catch (error: Throwable) {
+                    if (pendingQrLogin !== session) return
+                    throw error
                 }
             if (pendingQrLogin === session) {
                 _state.value = state(loading = true)

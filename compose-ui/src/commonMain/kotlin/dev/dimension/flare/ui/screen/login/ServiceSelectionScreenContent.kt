@@ -520,7 +520,7 @@ private fun LoginMethodPicker(
 }
 
 @Composable
-private fun LoginFlowContent(
+internal fun LoginFlowContent(
     state: LoginFlowPresenter.State,
     qrContent: String?,
     onQrDismiss: () -> Unit,
@@ -547,16 +547,22 @@ private fun LoginFlowContent(
                 )
             }
         }
-        qrContent?.let {
+        qrContent?.takeIf { !flowState.loading && flowState.error == null }?.let {
             QrLoginContent(
                 content = it,
-                onDismiss = onQrDismiss,
+                onDismiss = {
+                    state.clear()
+                    onQrDismiss()
+                },
             )
         }
         flowState.actions.fastForEach { action ->
             PlatformFilledTonalButton(
                 onClick = {
                     state.perform(action.id)
+                    if (action.id == "cancel") {
+                        onQrDismiss()
+                    }
                 },
                 modifier = Modifier.width(300.dp),
                 enabled = action.enabled && !flowState.loading,

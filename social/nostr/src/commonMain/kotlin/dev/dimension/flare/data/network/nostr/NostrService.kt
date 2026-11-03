@@ -1,5 +1,13 @@
 package dev.dimension.flare.data.network.nostr
 
+import com.vitorpamplona.quartz.nip01Core.core.toHexKey
+import com.vitorpamplona.quartz.nip01Core.crypto.KeyPair
+import com.vitorpamplona.quartz.nip01Core.hints.EventHintBundle
+import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
+import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
+import com.vitorpamplona.quartz.nip19Bech32.entities.NEvent
+import com.vitorpamplona.quartz.nip19Bech32.entities.NNote
+import com.vitorpamplona.quartz.nip19Bech32.toNsec
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.UploadMedia
 import dev.dimension.flare.common.jsonObjectOrNull
@@ -46,7 +54,6 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
-import io.ktor.http.encodeURLParameter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -54,41 +61,19 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
-import rust.nostr.sdk.Client
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
-import rust.nostr.sdk.Contact as RustContact
-import rust.nostr.sdk.CustomNostrSigner as RustCustomNostrSigner
-import rust.nostr.sdk.Event as RustSignedEvent
-import rust.nostr.sdk.EventBuilder as RustEventBuilder
-import rust.nostr.sdk.EventDeletionRequest as RustEventDeletionRequest
-import rust.nostr.sdk.EventId as RustEventId
-import rust.nostr.sdk.Keys as RustKeys
-import rust.nostr.sdk.Kind as RustKind
-import rust.nostr.sdk.MuteList as RustMuteList
-import rust.nostr.sdk.Nip19Enum as RustNip19Enum
-import rust.nostr.sdk.NostrConnect as RustNostrConnect
-import rust.nostr.sdk.NostrConnectUri as RustNostrConnectUri
-import rust.nostr.sdk.NostrSigner as RustNostrSigner
-import rust.nostr.sdk.PublicKey as RustPublicKey
-import rust.nostr.sdk.RelayUrl as RustRelayUrl
-import rust.nostr.sdk.Report as RustReport
-import rust.nostr.sdk.SecretKey as RustSecretKey
-import rust.nostr.sdk.SendEventOutput as RustSendEventOutput
-import rust.nostr.sdk.SignerBackend as RustSignerBackend
-import rust.nostr.sdk.Tag as RustTag
-import rust.nostr.sdk.TagKind as RustTagKind
-import rust.nostr.sdk.Timestamp as RustTimestamp
-import rust.nostr.sdk.UnsignedEvent as RustUnsignedEvent
+import com.vitorpamplona.quartz.nip01Core.core.Event as QuartzEvent
+import com.vitorpamplona.quartz.nip18Reposts.GenericRepostEvent as QuartzGenericRepostEvent
+import com.vitorpamplona.quartz.nip25Reactions.ReactionEvent as QuartzReactionEvent
 
 internal val defaultNostrRelays: List<String> =
     listOf(
@@ -104,18 +89,13 @@ internal class NostrService(
     credential: NostrCredential,
     private val amberSignerBridge: AmberSignerBridge,
     initialRelays: List<String> = emptyList(),
+    private val suppliedClient: INostrClient? = null,
     private val relayInfoClient: HttpClient = ktorClient(ProxyRef.System) { expectSuccess = true },
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
-        private val HEX_DIGITS = "0123456789abcdef".toCharArray()
         internal const val NOSTR_HOST: String = "nostr"
         private const val RELAY_LIST_METADATA_KIND = 10_002
-        private const val MIN_EARLY_RETURN_EVENTS = 4
-        private const val PUBLISH_SUCCESS_QUORUM = 3
-        private const val RELAY_PUBLISH_TIMEOUT_MILLIS = 1_500L
-        private const val RELAY_TIMEOUT_MILLIS = 3_500L
-        private const val RELAY_SETTLE_TIMEOUT_MILLIS = 350L
         private const val MAX_REFERENCE_FETCH_ROUNDS = 4
         private const val MAX_EVENT_ID_BATCH = 100
         private const val MAX_ADDRESS_FILTER_BATCH = 32
@@ -126,15 +106,13 @@ internal class NostrService(
             val value = input.removePrefix("nostr:").trim()
             require(value.isNotEmpty()) { "A public key, private key, or bunker URI is required" }
 
-            parseSecret(value)?.use { secretKey ->
-                val pubkeyHex =
-                    RustKeys(secretKey).use { keys ->
-                        keys.publicKey().use { it.toHex() }
-                    }
+            parseNostrSecret(value)?.let { secretKey ->
+                val keys = KeyPair(secretKey)
+                val pubkeyHex = keys.pubKey.toHexKey()
                 return ImportedAccount.LocalKey(
                     pubkeyHex = pubkeyHex,
                     npub = nostrBech32PublicKey(pubkeyHex),
-                    nsec = secretKey.toBech32(),
+                    nsec = secretKey.toNsec(),
                 )
             }
 
@@ -153,11 +131,12 @@ internal class NostrService(
         }
 
         internal fun generateAccount(): ImportedAccount.LocalKey =
-            RustKeys.Companion.generate().use { keys ->
+            KeyPair().let { keys ->
+                val pubkeyHex = keys.pubKey.toHexKey()
                 ImportedAccount.LocalKey(
-                    pubkeyHex = keys.publicKey().use { it.toHex() },
-                    npub = keys.publicKey().use { it.toBech32() },
-                    nsec = keys.secretKey().use { it.toBech32() },
+                    pubkeyHex = pubkeyHex,
+                    npub = nostrBech32PublicKey(pubkeyHex),
+                    nsec = requireNotNull(keys.privKey).toNsec(),
                 )
             }
 
@@ -168,37 +147,29 @@ internal class NostrService(
         }
 
         internal fun beginQrLogin(relays: List<String> = defaultNostrRelays): PendingQrLogin =
-            PendingQrLoginSession(normalizeRelayUrls(relays))
+            NostrQrLogin(normalizeRelayUrls(relays).ifEmpty { defaultNostrRelays })
 
         internal suspend fun resolvePublicRelays(
             pubkeyHex: String,
             bootstrapRelays: List<String> = defaultNostrRelays,
         ): List<String> {
-            val normalizedBootstrap = normalizeRelayUrls(bootstrapRelays)
-            val client = Client(null)
-            val relayUrls = mutableListOf<RustRelayUrl>()
-            return try {
-                normalizedBootstrap.forEach { relay ->
-                    val relayUrl = RustRelayUrl.parse(relay)
-                    relayUrls += relayUrl
-                    client.addRelay(relayUrl)
-                }
-                client.connect()
+            val normalizedBootstrap = normalizeRelayUrls(bootstrapRelays).ifEmpty { defaultNostrRelays }
+            return NostrRelayClient().use { transport ->
                 val events =
-                    client
-                        .fetchEvents(
-                            Filter(
-                                authors = listOf(pubkeyHex),
-                                kinds = listOf(RELAY_LIST_METADATA_KIND, ContactListEvent.KIND),
-                                limit = 10,
-                            ).toRust(),
+                    transport.client
+                        .fetchNostrEvents(
+                            relays = normalizedNostrRelays(normalizedBootstrap),
+                            filters =
+                                listOf(
+                                    Filter(
+                                        authors = listOf(pubkeyHex),
+                                        kinds = listOf(RELAY_LIST_METADATA_KIND, ContactListEvent.KIND),
+                                        limit = 10,
+                                    ),
+                                ),
                             timeout = 10.seconds,
-                        ).toVec()
-                        .map { it.use { event -> event.toCompatEvent() } }
+                        ).map { it.toCompatEvent() }
                 extractRelayUrls(events).ifEmpty { normalizedBootstrap }
-            } finally {
-                client.close()
-                relayUrls.forEach { it.close() }
             }
         }
 
@@ -207,7 +178,7 @@ internal class NostrService(
             requireNotNull(secretKey) {
                 "Nostr account does not have an exportable private key"
             }
-            val normalizedSecret = parseSecret(secretKey)?.use { it.toBech32() }
+            val normalizedSecret = parseNostrSecret(secretKey)?.toNsec()
             return ImportedAccount.LocalKey(
                 pubkeyHex = credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") },
                 npub = nostrBech32PublicKey(credential.pubkeyHex.ifBlank { error("Nostr account is missing a public key") }),
@@ -216,47 +187,22 @@ internal class NostrService(
         }
 
         private suspend fun importBunkerAccount(uri: String): ImportedAccount.RemoteSigner {
-            val parsedUri = RustNostrConnectUri.parse(uri)
-            val generatedKeys = RustKeys.Companion.generate()
-            val appSecret = generatedKeys.secretKey().use { it.toBech32() }
-            val connect = RustNostrConnect(parsedUri, generatedKeys, 10.seconds, null)
-            return try {
-                val pubkeyHex = connect.getPublicKey().use { it.toHex() }
+            val credential =
+                NostrSignerCredential.Bunker(
+                    uri = uri,
+                    secret = requireNotNull(KeyPair().privKey).toNsec(),
+                )
+            return NostrBunkerSession(credential).use { session ->
+                val pubkeyHex = session.publicKey(connect = true)
                 ImportedAccount.RemoteSigner(
                     pubkeyHex = pubkeyHex,
                     npub = nostrBech32PublicKey(pubkeyHex),
-                    signerCredential =
-                        NostrSignerCredential.Bunker(
-                            uri = uri,
-                            userPubkeyHex = pubkeyHex,
-                            secret = appSecret,
-                        ),
+                    signerCredential = credential.copy(userPubkeyHex = pubkeyHex),
                 )
-            } finally {
-                connect.close()
-                generatedKeys.close()
-                parsedUri.close()
             }
         }
 
-        private fun parseSecret(raw: String): RustSecretKey? {
-            val value = raw.removePrefix("nostr:").trim()
-            return when {
-                value.startsWith("nsec1", ignoreCase = true) -> {
-                    RustKeys.parse(value).use { it.secretKey() }
-                }
-
-                HEX_KEY_REGEX.matches(value) -> {
-                    RustSecretKey.Companion.parse(value.lowercase())
-                }
-
-                else -> {
-                    null
-                }
-            }
-        }
-
-        private fun extractRelayUrls(events: List<Event>): List<String> {
+        internal fun extractRelayUrls(events: List<Event>): List<String> {
             val relayListEvent =
                 events
                     .filter { it.kind == RELAY_LIST_METADATA_KIND }
@@ -295,150 +241,44 @@ internal class NostrService(
 
         private fun normalizeRelayUrls(relays: List<String>): List<String> =
             relays
-                .ifEmpty { defaultNostrRelays }
                 .map(String::trim)
                 .filter(String::isNotEmpty)
                 .distinct()
-
-        private class PendingQrLoginSession(
-            relays: List<String>,
-        ) : PendingQrLogin {
-            private val appKeys = RustKeys.Companion.generate()
-            private val appSecret = appKeys.secretKey().use { it.toBech32() }
-            private val clientPubkeyHex = appKeys.publicKey().use { it.toHex() }
-            override val connectUri: String =
-                buildString {
-                    append("nostrconnect://")
-                    append(clientPubkeyHex)
-                    append("?")
-                    append(
-                        relays.joinToString("&") {
-                            "relay=${it.encodeURLParameter()}"
-                        },
-                    )
-                    append(
-                        "&metadata=${
-                            buildJsonObject {
-                                put("name", "Flare")
-                            }.toString().encodeURLParameter()
-                        }",
-                    )
-                }
-            private val uri = RustNostrConnectUri.parse(connectUri)
-            private val connect = RustNostrConnect(uri, appKeys, 2.minutes, null)
-
-            override suspend fun awaitAccount(): ImportedAccount.RemoteSigner {
-                val pubkeyHex = connect.getPublicKey().use { it.toHex() }
-                val bunkerUri =
-                    runCatching {
-                        connect.bunkerUri().use { it.toString() }
-                    }.getOrDefault(connectUri)
-                val signerRelay =
-                    connect.relays().firstOrNull()?.use { it.toString() }
-                return ImportedAccount.RemoteSigner(
-                    pubkeyHex = pubkeyHex,
-                    npub = nostrBech32PublicKey(pubkeyHex),
-                    signerCredential =
-                        NostrSignerCredential.Bunker(
-                            uri = bunkerUri,
-                            userPubkeyHex = pubkeyHex,
-                            signerRelay = signerRelay,
-                            secret = appSecret,
-                        ),
-                )
-            }
-
-            override fun close() {
-                connect.close()
-                uri.close()
-                appKeys.close()
-            }
-        }
     }
 
-    private var connected = false
-    private val relayMutex = Mutex()
-    private val currentRelays = linkedMapOf<String, RustRelayUrl>()
     private val relayLimitsMutex = Mutex()
     private val relayLookupMutexes = mutableMapOf<String, Mutex>()
 
-    // ponytail: Cache NIP-11, including unavailable documents, for this session; add expiry if live changes matter.
+    // shortcut: Cache NIP-11 for this session, add expiry if live changes matter.
     private val relayTextLimits = mutableMapOf<String, NostrTextLimits>()
 
-    private val initialRelays = initialRelays.normalizeRelayUrls()
     private val credential = credential.normalized(accountKey)
-    private val signerHandle by lazy {
-        signerHandleOf(credential.effectiveSigner)
-    }
-    internal val canSign: Boolean
-        get() = signerHandle.canSign
-    private val pubKey by lazy {
-        publicKey(credential.effectivePubkeyHex(accountKey))
-    }
-    private val pubKeyHex by lazy {
-        credential.effectivePubkeyHex(accountKey)
-    }
-    private val client by lazy {
-        Client(signerHandle.rustSigner)
-    }
+    private val pubKeyHex = this.credential.effectivePubkeyHex(accountKey)
+    private val signerHandle = nostrEventSigner(this.credential.effectiveSigner, pubKeyHex, amberSignerBridge)
+    private val currentRelays = MutableStateFlow(normalizedNostrRelays(normalizeRelayUrls(initialRelays).ifEmpty { defaultNostrRelays }))
+    private val relayClient by lazy { NostrRelayClient(signerHandle) { currentRelays.value } }
+    private val client get() = suppliedClient ?: relayClient.client
+    internal val canSign: Boolean get() = signerHandle.canSign
     private val blossomUploader by lazy {
         NostrBlossomUploader(
             buildAuthHeader = { sha256 ->
-                buildBlossomAuthorizationHeader(
-                    buildBlossomUploadAuthEvent(sha256 = sha256),
-                )
+                buildBlossomAuthorizationHeader(buildBlossomUploadAuthEvent(sha256))
             },
         )
     }
 
     override fun close() {
         relayInfoClient.close()
-        client.close()
-        currentRelays.values.forEach { it.close() }
-        currentRelays.clear()
-        pubKey.close()
+        if (suppliedClient == null) relayClient.close()
         signerHandle.close()
     }
 
     suspend fun ensureConnection() {
-        relayMutex.withLock {
-            syncRelaysLocked(initialRelays)
-            if (connected) {
-                return
-            }
-            client.connect()
-            connected = true
-        }
+        client.connect()
     }
 
     suspend fun updateRelays(relays: List<String>) {
-        relayMutex.withLock {
-            syncRelaysLocked(relays.normalizeRelayUrls())
-        }
-    }
-
-    private suspend fun syncRelaysLocked(relays: List<String>) {
-        val targetRelays = relays.toSet()
-        val removedRelays = currentRelays.keys - targetRelays
-
-        removedRelays.forEach { relay ->
-            currentRelays.remove(relay)?.let { url ->
-                client.removeRelay(url)
-                url.close()
-            }
-        }
-
-        relays.forEach { relay ->
-            if (relay in currentRelays) {
-                return@forEach
-            }
-            val url = RustRelayUrl.parse(relay)
-            currentRelays[relay] = url
-            client.addRelay(url)
-            if (connected) {
-                client.connectRelay(url)
-            }
-        }
+        currentRelays.value = normalizedNostrRelays(normalizeRelayUrls(relays).ifEmpty { defaultNostrRelays })
     }
 
     internal sealed interface ImportedAccount {
@@ -468,116 +308,13 @@ internal class NostrService(
         ) : ImportedAccount
     }
 
-    private sealed interface SignerHandle : AutoCloseable {
-        val rustSigner: RustNostrSigner?
-        val canSign: Boolean
-
-        data object ReadOnly : SignerHandle {
-            override val rustSigner: RustNostrSigner? = null
-            override val canSign: Boolean = false
-
-            override fun close() = Unit
-        }
-
-        class LocalKey(
-            nsec: String,
-        ) : SignerHandle {
-            private val secretKey = RustSecretKey.parse(nsec)
-            private val keys = RustKeys(secretKey)
-            override val rustSigner: RustNostrSigner = RustNostrSigner.keys(keys)
-            override val canSign: Boolean = true
-
-            override fun close() {
-                rustSigner.close()
-                keys.close()
-                secretKey.close()
-            }
-        }
-
-        class Bunker(
-            credential: NostrSignerCredential.Bunker,
-        ) : SignerHandle {
-            private val appKeys =
-                RustKeys.parse(
-                    credential.secret ?: error("Bunker signer requires an app secret"),
-                )
-            private val uri = RustNostrConnectUri.parse(credential.uri)
-            private val connect = RustNostrConnect(uri, appKeys, 10.seconds, null)
-            override val rustSigner: RustNostrSigner = RustNostrSigner.nostrConnect(connect)
-            override val canSign: Boolean = true
-
-            override fun close() {
-                rustSigner.close()
-                connect.close()
-                uri.close()
-                appKeys.close()
-            }
-        }
-
-        class Amber(
-            private val credential: NostrSignerCredential.Amber,
-            private val amberSignerBridge: AmberSignerBridge,
-        ) : SignerHandle {
-            private val customSigner =
-                object : RustCustomNostrSigner {
-                    override fun backend(): RustSignerBackend = RustSignerBackend.Custom("amber")
-
-                    override suspend fun getPublicKey(): RustPublicKey = RustPublicKey.parse(amberSignerBridge.getPublicKey(credential))
-
-                    override suspend fun signEvent(unsignedEvent: RustUnsignedEvent): RustSignedEvent =
-                        RustSignedEvent.fromJson(
-                            amberSignerBridge.signEvent(
-                                credential = credential,
-                                unsignedEventJson = unsignedEvent.asJson(),
-                            ),
-                        )
-
-                    override suspend fun nip04Encrypt(
-                        publicKey: RustPublicKey,
-                        content: String,
-                    ): String = error("Amber NIP-04 encrypt is not supported")
-
-                    override suspend fun nip04Decrypt(
-                        publicKey: RustPublicKey,
-                        encryptedContent: String,
-                    ): String = error("Amber NIP-04 decrypt is not supported")
-
-                    override suspend fun nip44Encrypt(
-                        publicKey: RustPublicKey,
-                        content: String,
-                    ): String = error("Amber NIP-44 encrypt is not supported")
-
-                    override suspend fun nip44Decrypt(
-                        publicKey: RustPublicKey,
-                        payload: String,
-                    ): String = error("Amber NIP-44 decrypt is not supported")
-                }
-            override val rustSigner: RustNostrSigner = RustNostrSigner.custom(customSigner)
-            override val canSign: Boolean = amberSignerBridge.isAvailable()
-
-            override fun close() {
-                rustSigner.close()
-            }
-        }
-    }
-
-    private fun signerHandleOf(credential: NostrSignerCredential?): SignerHandle =
-        when (credential) {
-            null -> SignerHandle.ReadOnly
-            is NostrSignerCredential.LocalKey -> SignerHandle.LocalKey(credential.nsec)
-            is NostrSignerCredential.Bunker -> SignerHandle.Bunker(credential)
-            is NostrSignerCredential.Amber -> SignerHandle.Amber(credential, amberSignerBridge)
-        }
-
-    private fun List<String>.normalizeRelayUrls(): List<String> = normalizeRelayUrls(this)
-
     internal suspend fun loadHomeTimeline(
         pageSize: Int,
         until: Long?,
     ): List<UiTimelineV2> {
         val authors = loadAuthors(pubKeyHex)
         val events =
-            queryFirstRelay(
+            queryAllRelays(
                 filters =
                     listOf(
                         Filter(
@@ -587,10 +324,6 @@ internal class NostrService(
                             limit = pageSize,
                         ),
                     ),
-                minEventsBeforeReturn =
-                    pageSize
-                        .coerceAtMost(MIN_EARLY_RETURN_EVENTS)
-                        .coerceAtLeast(1),
             ).filter(::isTimelineRootEvent)
                 .sortedByDescending { it.createdAt }
 
@@ -918,79 +651,49 @@ internal class NostrService(
     internal suspend fun follow(targetPubkey: String) {
         val latest = loadLatestContactList(pubKeyHex)
         val follows = (latest?.verifiedFollowKeySet().orEmpty() + targetPubkey).distinct()
-        sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.contactList(
-                    follows.map { RustContact(publicKey(it), null, null) },
-                ),
-        )
+        sendEventBuilder(eventTemplate(ContactListEvent.KIND, tags = follows.map(::pTag)))
     }
 
     internal suspend fun unfollow(targetPubkey: String) {
         val latest = loadLatestContactList(pubKeyHex)
         val follows = latest?.verifiedFollowKeySet().orEmpty().filterNot { it == targetPubkey }
-        sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.contactList(
-                    follows.map { RustContact(publicKey(it), null, null) },
-                ),
-        )
+        sendEventBuilder(eventTemplate(ContactListEvent.KIND, tags = follows.map(::pTag)))
     }
 
     internal suspend fun block(targetPubkey: String) {
         val latest = loadLatestBlockList(pubKeyHex)
-        val blockList = (latest?.tags?.userIdSet().orEmpty() + targetPubkey).distinct()
+        val users = (latest?.tags?.userIdSet().orEmpty() + targetPubkey).distinct()
         sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.followSet(
-                    PeopleListEvent.BLOCK_LIST_D_TAG,
-                    blockList.map(::publicKey),
-                ),
+            eventTemplate(
+                PeopleListEvent.KIND,
+                tags =
+                    listOf(arrayOf("d", PeopleListEvent.BLOCK_LIST_D_TAG)) + users.map(::pTag),
+            ),
         )
     }
 
     internal suspend fun unblock(targetPubkey: String) {
         val latest = loadLatestBlockList(pubKeyHex) ?: return
-        val blockList = latest.tags.userIdSet().filterNot { it == targetPubkey }
+        val users = latest.tags.userIdSet().filterNot { it == targetPubkey }
         sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.followSet(
-                    PeopleListEvent.BLOCK_LIST_D_TAG,
-                    blockList.map(::publicKey),
-                ),
+            eventTemplate(
+                PeopleListEvent.KIND,
+                tags =
+                    listOf(arrayOf("d", PeopleListEvent.BLOCK_LIST_D_TAG)) + users.map(::pTag),
+            ),
         )
     }
 
     internal suspend fun mute(targetPubkey: String) {
         val latest = loadLatestMuteList(pubKeyHex)
-        val mutedUsers = (latest?.tags?.mutedUserIdSet().orEmpty() + targetPubkey).distinct()
-        sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.muteList(
-                    RustMuteList(
-                        mutedUsers.map(::publicKey),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                    ),
-                ),
-        )
+        val users = (latest?.tags?.mutedUserIdSet().orEmpty() + targetPubkey).distinct()
+        sendEventBuilder(eventTemplate(MuteListEvent.KIND, tags = users.map(::pTag)))
     }
 
     internal suspend fun unmute(targetPubkey: String) {
         val latest = loadLatestMuteList(pubKeyHex) ?: return
-        val mutedUsers = latest.tags.mutedUserIdSet().filterNot { it == targetPubkey }
-        sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.muteList(
-                    RustMuteList(
-                        mutedUsers.map(::publicKey),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                    ),
-                ),
-        )
+        val users = latest.tags.mutedUserIdSet().filterNot { it == targetPubkey }
+        sendEventBuilder(eventTemplate(MuteListEvent.KIND, tags = users.map(::pTag)))
     }
 
     internal suspend fun uploadMedia(
@@ -1069,59 +772,34 @@ internal class NostrService(
     }
 
     internal suspend fun repost(statusKey: MicroBlogKey): String {
-        val target =
-            loadEvent(statusKey = statusKey)
-                ?: error("Repost target not found: $statusKey")
+        val target = loadEvent(statusKey) ?: error("Repost target not found: $statusKey")
         return sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.repost(
-                    target.toRust(),
-                ),
+            if (target.kind == TextNoteEvent.KIND) {
+                eventTemplate(RepostEvent.KIND, target.toJson(), listOf(arrayOf("e", target.id), pTag(target.pubKey)))
+            } else {
+                QuartzGenericRepostEvent.build(EventHintBundle(QuartzEvent.fromJson(target.toJson())))
+            },
         )
     }
 
     internal suspend fun react(statusKey: MicroBlogKey): String {
-        val target =
-            loadEvent(statusKey = statusKey)
-                ?: error("Reaction target not found: $statusKey")
-        return sendEventBuilder(
-            builder = RustEventBuilder.Companion.reaction(target.toRust(), ReactionEvent.LIKE),
-        )
+        val target = loadEvent(statusKey) ?: error("Reaction target not found: $statusKey")
+        return sendEventBuilder(QuartzReactionEvent.like(EventHintBundle(QuartzEvent.fromJson(target.toJson()))))
     }
 
     internal suspend fun report(statusKey: MicroBlogKey) {
-        val target =
-            loadEvent(statusKey = statusKey)
-                ?: error("Report target not found: $statusKey")
+        val target = loadEvent(statusKey) ?: error("Report target not found: $statusKey")
         sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.report(
-                    listOf(
-                        RustTag.Companion.eventReport(eventId(target.id), RustReport.SPAM),
-                        RustTag.Companion.publicKeyReport(
-                            publicKey(target.pubKey),
-                            RustReport.SPAM,
-                        ),
-                    ),
-                    "",
-                ),
+            eventTemplate(
+                kind = 1984,
+                tags = listOf(arrayOf("e", target.id, "spam"), arrayOf("p", target.pubKey, "spam")),
+            ),
         )
     }
 
     internal suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        val target =
-            loadEvent(statusKey = statusKey)
-                ?: error("Delete target not found: $statusKey")
-        sendEventBuilder(
-            builder =
-                RustEventBuilder.Companion.delete(
-                    RustEventDeletionRequest(
-                        listOf(eventId(target.id)),
-                        emptyList(),
-                        "",
-                    ),
-                ),
-        )
+        val target = loadEvent(statusKey) ?: error("Delete target not found: $statusKey")
+        sendEventBuilder(eventTemplate(DeletionEvent.KIND, tags = listOf(arrayOf("e", target.id))))
     }
 
     private suspend fun loadAuthors(accountPubkey: String): List<String> {
@@ -1248,41 +926,8 @@ internal class NostrService(
                 }
             }.distinct()
 
-    private suspend fun queryFirstRelay(
-        filters: List<Filter>,
-        minEventsBeforeReturn: Int = MIN_EARLY_RETURN_EVENTS,
-    ): List<Event> =
-        queryRelays(
-            filters = filters,
-            waitForAllRelays = false,
-            minEventsBeforeReturn = minEventsBeforeReturn,
-        )
-
     private suspend fun queryAllRelays(filters: List<Filter>): List<Event> =
-        queryRelays(
-            filters = filters,
-            waitForAllRelays = true,
-            minEventsBeforeReturn = null,
-        )
-
-    private suspend fun queryRelays(
-        filters: List<Filter>,
-        waitForAllRelays: Boolean,
-        minEventsBeforeReturn: Int?,
-    ): List<Event> =
-        coroutineScope {
-            val events =
-                filters
-                    .map {
-                        async {
-                            client.fetchEvents(it.toRust(), timeout = 1.minutes).toVec()
-                        }
-                    }.awaitAll()
-                    .flatten()
-
-            events
-                .map { it.use { it.toCompatEvent() } }
-        }
+        client.fetchNostrEvents(currentRelays.value, filters).map { it.toCompatEvent() }
 
     internal suspend fun fetchTextLimits(relay: String): NostrTextLimits {
         val lookupMutex = relayLimitsMutex.withLock { relayLookupMutexes.getOrPut(relay) { Mutex() } }
@@ -1323,54 +968,23 @@ internal class NostrService(
         return limits
     }
 
-    private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
+    private suspend fun sendEventBuilder(builder: EventTemplate<out QuartzEvent>): String {
         requireWritable()
-        val relays = relayMutex.withLock { currentRelays.keys.toList() }
-        val requiredSuccessCount = minOf(PUBLISH_SUCCESS_QUORUM, relays.size)
-        require(requiredSuccessCount > 0) { "No valid relay URLs available for publishing" }
-        return client.signEventBuilder(builder).use { event ->
-            val eventJson = event.asJson()
-            val checks =
-                coroutineScope {
-                    relays.map { relay -> async { relay to fetchTextLimits(relay).error(event.content(), eventJson) } }.awaitAll()
-                }
-            val eligible = checks.filter { it.second == null }.map { RustRelayUrl.parse(it.first) }
-            try {
-                if (eligible.size < requiredSuccessCount) {
-                    val errors = checks.mapNotNull { (relay, error) -> error?.let { "$relay: $it" } }
-                    throw IllegalArgumentException(errors.joinToString("; "))
-                }
-                val output = client.sendEventTo(eligible, event)
-                ensurePublishQuorum(output, requiredSuccessCount)
-                output.id.toHex()
-            } finally {
-                eligible.forEach { it.close() }
+        val relays = currentRelays.value
+        val required = minOf(3, relays.size)
+        require(required > 0) { "No valid relay URLs available for publishing" }
+        val event = signerHandle.sign(builder)
+        val eventJson = event.toJson()
+        val checks =
+            coroutineScope {
+                relays.map { relay -> async { relay to fetchTextLimits(relay.url).error(event.content, eventJson) } }.awaitAll()
             }
+        val eligible = checks.filter { it.second == null }.map { it.first }.toSet()
+        require(eligible.size >= required) {
+            checks.mapNotNull { (relay, error) -> error?.let { "${relay.url}: $it" } }.joinToString("; ")
         }
+        return client.publishNostrEvent(event, eligible)
     }
-
-    private fun ensurePublishQuorum(
-        output: RustSendEventOutput,
-        requiredSuccessCount: Int,
-    ) {
-        val successCount = output.success.size
-        if (successCount >= requiredSuccessCount) {
-            return
-        }
-        throw PublishToRelayException(
-            requiredSuccessCount = requiredSuccessCount,
-            successCount = successCount,
-            failures = output.failed.map { (relay, message) -> IllegalStateException("$relay: $message") },
-        )
-    }
-
-    private class PublishToRelayException(
-        requiredSuccessCount: Int,
-        successCount: Int,
-        val failures: List<Throwable>,
-    ) : Exception(
-            "Failed to publish event to enough relays: $successCount/$requiredSuccessCount succeeded.",
-        )
 
     private fun requireWritable() {
         check(canSign) {
@@ -1378,63 +992,26 @@ internal class NostrService(
         }
     }
 
-    private fun parseSearchProfilePubkey(raw: String): String? {
-        val value = raw.removePrefix("nostr:").trim()
-        return when {
-            value.startsWith("npub1", ignoreCase = true) -> {
-                withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
-                }
-            }
-
-            value.startsWith("nprofile1", ignoreCase = true) -> {
-                withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
-                        profile.publicKey().use { it.toHex() }
-                    }
-                }
-            }
-
-            HEX_KEY_REGEX.matches(value) -> {
-                value.lowercase()
-            }
-
-            else -> {
-                null
-            }
-        }
-    }
+    private fun parseSearchProfilePubkey(raw: String): String? = parsePublicKeyHex(raw)
 
     private fun parseSearchStatusEventId(raw: String): String? {
         val value = raw.removePrefix("nostr:").trim()
         return when {
-            value.startsWith("note1", ignoreCase = true) -> {
-                withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() }
-                }
-            }
-
-            value.startsWith("nevent1", ignoreCase = true) -> {
-                withNip19(value) { nip19 ->
-                    (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
-                        event.eventId().use { it.toHex() }
-                    }
-                }
-            }
-
             HEX_KEY_REGEX.matches(value) -> {
                 value.lowercase()
             }
 
             else -> {
-                null
+                withNip19(value) {
+                    when (it) {
+                        is NNote -> it.hex
+                        is NEvent -> it.hex
+                        else -> null
+                    }
+                }
             }
         }
     }
-
-    private fun publicKey(hex: String): RustPublicKey = RustPublicKey.Companion.parse(hex)
-
-    private fun eventId(hex: String): RustEventId = RustEventId.Companion.parse(hex)
 
     private fun pTag(pubKey: String): Array<String> = arrayOf("p", pubKey)
 
@@ -1479,32 +1056,37 @@ internal class NostrService(
         }
     }
 
+    private fun eventTemplate(
+        kind: Int,
+        content: String = "",
+        tags: List<Array<String>> = emptyList(),
+    ): EventTemplate<QuartzEvent> =
+        EventTemplate(
+            createdAt = Clock.System.now().epochSeconds,
+            kind = kind,
+            tags = tags.toTypedArray(),
+            content = content,
+        )
+
     private fun textNoteBuilder(
         content: String,
         tags: List<Array<String>> = emptyList(),
-    ): RustEventBuilder =
-        RustEventBuilder.Companion
-            .textNote(content)
-            .tags(tags.map { RustTag.Companion.parse(it.toList()) })
+    ): EventTemplate<QuartzEvent> = eventTemplate(TextNoteEvent.KIND, content, tags)
 
-    private suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
+    internal suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
         requireWritable()
-        val expirationSeconds =
-            (Clock.System.now().toEpochMilliseconds() / 1000L).toULong() +
-                5.minutes.inWholeSeconds.toULong()
-        return client
-            .signEventBuilder(
-                RustEventBuilder(
-                    RustKind(24242u),
-                    "",
-                ).tags(
-                    listOf(
-                        RustTag.Companion.hashtag("upload"),
-                        RustTag.Companion.custom(RustTagKind.Unknown("x"), listOf(sha256)),
-                        RustTag.Companion.expiration(RustTimestamp.fromSecs(expirationSeconds)),
-                    ),
+        return signerHandle
+            .sign(
+                eventTemplate(
+                    kind = 24242,
+                    tags =
+                        listOf(
+                            arrayOf("t", "upload"),
+                            arrayOf("x", sha256),
+                            arrayOf("expiration", (Clock.System.now() + 5.minutes).epochSeconds.toString()),
+                        ),
                 ),
-            ).use { it.asJson() }
+            ).toJson()
     }
 
     private fun buildReplyTags(target: Event): List<Array<String>> =
@@ -1851,182 +1433,183 @@ internal class NostrService(
         val stats = interactionStats[id] ?: InteractionStats()
         val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
         val contentWarning = contentWarningReason()?.toUiPlainText()?.let { UiTranslatableText(original = it) }
-        return UiTimelineV2.Post(
-            platformId = NOSTR_PLATFORM_ID,
-            images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
-            sensitive = false,
-            contentWarning = contentWarning,
-            user = profile,
-            content =
-                UiTranslatableText(
-                    original = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
-                ),
-            actions =
-                buildList {
-                    if (canSign) {
-                        add(
-                            ActionMenu.Item(
-                                icon = UiIcon.Reply,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
-                                clickEvent =
-                                    ClickEvent.Deeplink(
-                                        DeeplinkRoute.Compose.Reply(
-                                            accountKey = accountKey,
-                                            statusKey = statusKey,
+        return UiTimelineV2
+            .Post(
+                platformId = NOSTR_PLATFORM_ID,
+                images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
+                sensitive = false,
+                contentWarning = contentWarning,
+                user = profile,
+                content =
+                    UiTranslatableText(
+                        original = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
+                    ),
+                actions =
+                    buildList {
+                        if (canSign) {
+                            add(
+                                ActionMenu.Item(
+                                    icon = UiIcon.Reply,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                                    clickEvent =
+                                        ClickEvent.Deeplink(
+                                            DeeplinkRoute.Compose.Reply(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
                                         ),
-                                    ),
-                                count = UiNumber(0L),
-                                actionFamily = PostActionFamily.Reply,
-                            ),
-                        )
-                        add(
-                            ActionMenu.Group(
-                                displayItem =
-                                    ActionMenu.nostrRepost(
-                                        statusKey = statusKey,
-                                        repostEventId = stats.myRepostEventId,
-                                        count = stats.repostCount,
-                                        accountKey = accountKey,
-                                    ),
-                                actions =
-                                    listOf(
+                                    count = UiNumber(0L),
+                                    actionFamily = PostActionFamily.Reply,
+                                ),
+                            )
+                            add(
+                                ActionMenu.Group(
+                                    displayItem =
                                         ActionMenu.nostrRepost(
                                             statusKey = statusKey,
                                             repostEventId = stats.myRepostEventId,
                                             count = stats.repostCount,
                                             accountKey = accountKey,
                                         ),
-                                        ActionMenu.Item(
-                                            icon = UiIcon.Quote,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
-                                            clickEvent =
-                                                ClickEvent.Deeplink(
-                                                    DeeplinkRoute.Compose.Quote(
-                                                        accountKey = accountKey,
-                                                        statusKey = statusKey,
-                                                    ),
-                                                ),
-                                            actionFamily = PostActionFamily.Quote,
-                                        ),
-                                    ).toImmutableList(),
-                            ),
-                        )
-                        add(
-                            ActionMenu.nostrLike(
-                                statusKey = statusKey,
-                                reactionEventId = stats.myReactionEventId,
-                                count = stats.reactionCount,
-                                accountKey = accountKey,
-                            ),
-                        )
-                    }
-                    add(
-                        ActionMenu.Group(
-                            displayItem =
-                                ActionMenu.Item(
-                                    icon = UiIcon.More,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
-                                ),
-                            actions =
-                                buildList {
-                                    add(
-                                        ActionMenu.Item(
-                                            icon = UiIcon.Share,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                            clickEvent =
-                                                ClickEvent.Deeplink(
-                                                    DeeplinkRoute.Status.ShareSheet(
-                                                        statusKey = statusKey,
-                                                        accountType = AccountType.Specific(accountKey),
-                                                        shareUrl = statusShareUrl(statusKey.id),
-                                                    ),
-                                                ),
-                                            actionFamily = PostActionFamily.Share,
-                                        ),
-                                    )
-                                    if (canSign && pubKey == accountKey.id) {
-                                        add(
+                                    actions =
+                                        listOf(
+                                            ActionMenu.nostrRepost(
+                                                statusKey = statusKey,
+                                                repostEventId = stats.myRepostEventId,
+                                                count = stats.repostCount,
+                                                accountKey = accountKey,
+                                            ),
                                             ActionMenu.Item(
-                                                icon = UiIcon.Delete,
-                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                                color = ActionMenu.Item.Color.Red,
+                                                icon = UiIcon.Quote,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                                 clickEvent =
                                                     ClickEvent.Deeplink(
-                                                        DeeplinkRoute.Status.DeleteConfirm(
-                                                            accountType =
-                                                                AccountType.Specific(
-                                                                    accountKey,
-                                                                ),
+                                                        DeeplinkRoute.Compose.Quote(
+                                                            accountKey = accountKey,
                                                             statusKey = statusKey,
                                                         ),
                                                     ),
-                                                actionFamily = PostActionFamily.Delete,
+                                                actionFamily = PostActionFamily.Quote,
                                             ),
-                                        )
-                                    } else {
-                                        add(ActionMenu.Divider)
-                                        addAll(
-                                            userActionsMenu(
-                                                accountKey = accountKey,
-                                                userKey = profile.key,
-                                                handle = profile.handle.canonical,
-                                            ),
-                                        )
-                                        add(ActionMenu.Divider)
+                                        ).toImmutableList(),
+                                ),
+                            )
+                            add(
+                                ActionMenu.nostrLike(
+                                    statusKey = statusKey,
+                                    reactionEventId = stats.myReactionEventId,
+                                    count = stats.reactionCount,
+                                    accountKey = accountKey,
+                                ),
+                            )
+                        }
+                        add(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        icon = UiIcon.More,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                                    ),
+                                actions =
+                                    buildList {
                                         add(
                                             ActionMenu.Item(
-                                                icon = UiIcon.Report,
-                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                                color = ActionMenu.Item.Color.Red,
+                                                icon = UiIcon.Share,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                                 clickEvent =
-                                                    ClickEvent.event(accountKey) {
-                                                        dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
-                                                            postKey = statusKey,
-                                                            accountKey = accountKey,
-                                                        )
-                                                    },
-                                                actionFamily = PostActionFamily.Report,
+                                                    ClickEvent.Deeplink(
+                                                        DeeplinkRoute.Status.ShareSheet(
+                                                            statusKey = statusKey,
+                                                            accountType = AccountType.Specific(accountKey),
+                                                            shareUrl = statusShareUrl(statusKey.id),
+                                                        ),
+                                                    ),
+                                                actionFamily = PostActionFamily.Share,
                                             ),
                                         )
-                                    }
-                                }.toImmutableList(),
-                        ),
-                    )
-                }.toImmutableList(),
-            poll = null,
-            statusKey = statusKey,
-            card = null,
-            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
-            emojiReactions = persistentListOf(),
-            sourceChannel = null,
-            visibility = null,
-            replyToHandle = null,
-            references =
-                (
-                    parentEventIds().map {
-                        UiTimelineV2.Post.Reference(
-                            statusKey = MicroBlogKey(it, NOSTR_HOST),
-                            type = ReferenceType.Reply,
+                                        if (canSign && pubKey == accountKey.id) {
+                                            add(
+                                                ActionMenu.Item(
+                                                    icon = UiIcon.Delete,
+                                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                                    color = ActionMenu.Item.Color.Red,
+                                                    clickEvent =
+                                                        ClickEvent.Deeplink(
+                                                            DeeplinkRoute.Status.DeleteConfirm(
+                                                                accountType =
+                                                                    AccountType.Specific(
+                                                                        accountKey,
+                                                                    ),
+                                                                statusKey = statusKey,
+                                                            ),
+                                                        ),
+                                                    actionFamily = PostActionFamily.Delete,
+                                                ),
+                                            )
+                                        } else {
+                                            add(ActionMenu.Divider)
+                                            addAll(
+                                                userActionsMenu(
+                                                    accountKey = accountKey,
+                                                    userKey = profile.key,
+                                                    handle = profile.handle.canonical,
+                                                ),
+                                            )
+                                            add(ActionMenu.Divider)
+                                            add(
+                                                ActionMenu.Item(
+                                                    icon = UiIcon.Report,
+                                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                                    color = ActionMenu.Item.Color.Red,
+                                                    clickEvent =
+                                                        ClickEvent.event(accountKey) {
+                                                            dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
+                                                                postKey = statusKey,
+                                                                accountKey = accountKey,
+                                                            )
+                                                        },
+                                                    actionFamily = PostActionFamily.Report,
+                                                ),
+                                            )
+                                        }
+                                    }.toImmutableList(),
+                            ),
                         )
-                    } +
-                        quoteEventIds()
-                            .map {
-                                UiTimelineV2.Post.Reference(
-                                    statusKey = MicroBlogKey(it, NOSTR_HOST),
-                                    type = ReferenceType.Quote,
-                                )
-                            }
-                ).distinctBy { it.type to it.statusKey }
-                    .toImmutableList(),
-            clickEvent =
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Status.Detail(
-                        statusKey = statusKey,
-                        accountType = AccountType.Specific(accountKey),
+                    }.toImmutableList(),
+                poll = null,
+                statusKey = statusKey,
+                card = null,
+                createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
+                emojiReactions = persistentListOf(),
+                sourceChannel = null,
+                visibility = null,
+                replyToHandle = null,
+                references =
+                    (
+                        parentEventIds().map {
+                            UiTimelineV2.Post.Reference(
+                                statusKey = MicroBlogKey(it, NOSTR_HOST),
+                                type = ReferenceType.Reply,
+                            )
+                        } +
+                            quoteEventIds()
+                                .map {
+                                    UiTimelineV2.Post.Reference(
+                                        statusKey = MicroBlogKey(it, NOSTR_HOST),
+                                        type = ReferenceType.Quote,
+                                    )
+                                }
+                    ).distinctBy { it.type to it.statusKey }
+                        .toImmutableList(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Status.Detail(
+                            statusKey = statusKey,
+                            accountType = AccountType.Specific(accountKey),
+                        ),
                     ),
-                ),
-            accountType = AccountType.Specific(accountKey),
-        ).bindMediaProxy()
+                accountType = AccountType.Specific(accountKey),
+            ).bindMediaProxy()
     }
 
     private fun TextNoteEvent.toUiTimelineItem(
@@ -2056,31 +1639,33 @@ internal class NostrService(
                 .mapNotNull { parentId ->
                     val event = parentId.takeUnless { it in visited }?.let(eventsById::get) ?: return@mapNotNull null
                     val parent = resolveEvent(event, visited) ?: return@mapNotNull null
-                    UiTimelineV2.TimelinePostItem(
-                        post = parent,
-                        presentation =
-                            UiTimelineV2.PostPresentation(
-                                quotes =
-                                    (event as? TextNoteEvent)
-                                        ?.resolveQuotes(
-                                            eventsById,
-                                            visited + parentId,
-                                            resolveEvent,
-                                        ).orEmpty()
-                                        .toImmutableList(),
-                            ),
-                    ).bindMediaProxy()
+                    UiTimelineV2
+                        .TimelinePostItem(
+                            post = parent,
+                            presentation =
+                                UiTimelineV2.PostPresentation(
+                                    quotes =
+                                        (event as? TextNoteEvent)
+                                            ?.resolveQuotes(
+                                                eventsById,
+                                                visited + parentId,
+                                                resolveEvent,
+                                            ).orEmpty()
+                                            .toImmutableList(),
+                                ),
+                        ).bindMediaProxy()
                 }.toImmutableList()
         val quotes = resolveQuotes(eventsById, visited, resolveEvent)
         return if (inlineParents.isNotEmpty() || quotes.isNotEmpty()) {
-            UiTimelineV2.TimelinePostItem(
-                post = post,
-                presentation =
-                    UiTimelineV2.PostPresentation(
-                        inlineParents = inlineParents,
-                        quotes = quotes,
-                    ),
-            ).bindMediaProxy()
+            UiTimelineV2
+                .TimelinePostItem(
+                    post = post,
+                    presentation =
+                        UiTimelineV2.PostPresentation(
+                            inlineParents = inlineParents,
+                            quotes = quotes,
+                        ),
+                ).bindMediaProxy()
         } else {
             post
         }
@@ -2110,7 +1695,7 @@ internal class NostrService(
     ).distinctBy { it.statusKey }
         .toImmutableList()
 
-    private fun statusShareUrl(eventIdHex: String): String = "https://nostter.app/${eventId(eventIdHex).toBech32()}"
+    private fun statusShareUrl(eventIdHex: String): String = "https://nostter.app/${NNote.create(eventIdHex)}"
 
     private fun TextNoteEvent.parentEventIds(): List<String> {
         val rootIds = tags.mapNotNull(MarkedETag::parseRootId)
@@ -2296,19 +1881,20 @@ internal class NostrService(
         val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
         val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey, createdAt)
-        return UiTimelineV2.TimelinePostItem(
-            post = wrapperPost,
-            presentation =
-                UiTimelineV2.PostPresentation(
-                    message =
-                        repostMessage(
-                            actor = actor,
-                            statusKey = wrapperStatusKey,
-                            createdAt = createdAt,
-                        ),
-                    repost = boostedPost,
-                ),
-        ).bindMediaProxy()
+        return UiTimelineV2
+            .TimelinePostItem(
+                post = wrapperPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        message =
+                            repostMessage(
+                                actor = actor,
+                                statusKey = wrapperStatusKey,
+                                createdAt = createdAt,
+                            ),
+                        repost = boostedPost,
+                    ),
+            ).bindMediaProxy()
     }
 
     private fun GenericRepostEvent.toUiGenericRepost(
@@ -2322,19 +1908,20 @@ internal class NostrService(
         val actor = profiles.getValue(pubKey)
         val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
         val wrapperPost = boostedPost.toRepostWrapperPost(actor, wrapperStatusKey, createdAt)
-        return UiTimelineV2.TimelinePostItem(
-            post = wrapperPost,
-            presentation =
-                UiTimelineV2.PostPresentation(
-                    message =
-                        repostMessage(
-                            actor = actor,
-                            statusKey = wrapperStatusKey,
-                            createdAt = createdAt,
-                        ),
-                    repost = boostedPost,
-                ),
-        ).bindMediaProxy()
+        return UiTimelineV2
+            .TimelinePostItem(
+                post = wrapperPost,
+                presentation =
+                    UiTimelineV2.PostPresentation(
+                        message =
+                            repostMessage(
+                                actor = actor,
+                                statusKey = wrapperStatusKey,
+                                createdAt = createdAt,
+                            ),
+                        repost = boostedPost,
+                    ),
+            ).bindMediaProxy()
     }
 
     private fun UiTimelineV2.Post.toRepostWrapperPost(
@@ -2383,21 +1970,22 @@ internal class NostrService(
         statusKey: MicroBlogKey,
         createdAt: Long,
     ): UiTimelineV2.Message =
-        UiTimelineV2.Message(
-            user = actor,
-            statusKey = statusKey,
-            icon = UiIcon.Retweet,
-            type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost),
-            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
-            clickEvent =
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Profile.User(
-                        accountType = AccountType.Specific(accountKey),
-                        userKey = actor.key,
+        UiTimelineV2
+            .Message(
+                user = actor,
+                statusKey = statusKey,
+                icon = UiIcon.Retweet,
+                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost),
+                createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Profile.User(
+                            accountType = AccountType.Specific(accountKey),
+                            userKey = actor.key,
+                        ),
                     ),
-                ),
-            accountType = AccountType.Specific(accountKey),
-        ).bindMediaProxy()
+                accountType = AccountType.Specific(accountKey),
+            ).bindMediaProxy()
 
     private fun UiTimelineV2.withPresentationMessage(message: UiTimelineV2.Message): UiTimelineV2 {
         val post = asTimelinePostItem() ?: return this
@@ -2495,25 +2083,26 @@ internal class NostrService(
                         ?: return null
                 val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
-                UiTimelineV2.TimelinePostItem(
-                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
-                    presentation =
-                        UiTimelineV2.PostPresentation(
-                            message =
-                                notificationMessage(
-                                    actor = actor,
-                                    statusKey = wrapperStatusKey,
-                                    createdAt = createdAt,
-                                    icon = UiIcon.Retweet,
-                                    type =
-                                        UiTimelineV2.Message.Type.Localized(
-                                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
-                                        ),
-                                ),
-                            repost = boosted,
-                            notificationKey = wrapperStatusKey,
-                        ),
-                ).bindMediaProxy()
+                UiTimelineV2
+                    .TimelinePostItem(
+                        post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
+                        presentation =
+                            UiTimelineV2.PostPresentation(
+                                message =
+                                    notificationMessage(
+                                        actor = actor,
+                                        statusKey = wrapperStatusKey,
+                                        createdAt = createdAt,
+                                        icon = UiIcon.Retweet,
+                                        type =
+                                            UiTimelineV2.Message.Type.Localized(
+                                                UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                            ),
+                                    ),
+                                repost = boosted,
+                                notificationKey = wrapperStatusKey,
+                            ),
+                    ).bindMediaProxy()
             }
 
             is GenericRepostEvent -> {
@@ -2525,25 +2114,26 @@ internal class NostrService(
                         ?: return null
                 val actor = profiles.getValue(pubKey)
                 val wrapperStatusKey = MicroBlogKey(id, NOSTR_HOST)
-                UiTimelineV2.TimelinePostItem(
-                    post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
-                    presentation =
-                        UiTimelineV2.PostPresentation(
-                            message =
-                                notificationMessage(
-                                    actor = actor,
-                                    statusKey = wrapperStatusKey,
-                                    createdAt = createdAt,
-                                    icon = UiIcon.Retweet,
-                                    type =
-                                        UiTimelineV2.Message.Type.Localized(
-                                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
-                                        ),
-                                ),
-                            repost = boosted,
-                            notificationKey = wrapperStatusKey,
-                        ),
-                ).bindMediaProxy()
+                UiTimelineV2
+                    .TimelinePostItem(
+                        post = boosted.toRepostWrapperPost(actor, wrapperStatusKey, createdAt),
+                        presentation =
+                            UiTimelineV2.PostPresentation(
+                                message =
+                                    notificationMessage(
+                                        actor = actor,
+                                        statusKey = wrapperStatusKey,
+                                        createdAt = createdAt,
+                                        icon = UiIcon.Retweet,
+                                        type =
+                                            UiTimelineV2.Message.Type.Localized(
+                                                UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                            ),
+                                    ),
+                                repost = boosted,
+                                notificationKey = wrapperStatusKey,
+                            ),
+                    ).bindMediaProxy()
             }
 
             else -> {
@@ -2884,19 +2474,20 @@ internal class NostrService(
         icon: UiIcon,
         type: UiTimelineV2.Message.Type,
     ): UiTimelineV2.Message =
-        UiTimelineV2.Message(
-            user = actor,
-            statusKey = statusKey,
-            icon = icon,
-            type = type,
-            createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
-            clickEvent =
-                ClickEvent.Deeplink(
-                    DeeplinkRoute.Profile.User(
-                        accountType = AccountType.Specific(accountKey),
-                        userKey = actor.key,
+        UiTimelineV2
+            .Message(
+                user = actor,
+                statusKey = statusKey,
+                icon = icon,
+                type = type,
+                createdAt = Instant.fromEpochSeconds(createdAt).toUi(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Profile.User(
+                            accountType = AccountType.Specific(accountKey),
+                            userKey = actor.key,
+                        ),
                     ),
-                ),
-            accountType = AccountType.Specific(accountKey),
-        ).bindMediaProxy()
+                accountType = AccountType.Specific(accountKey),
+            ).bindMediaProxy()
 }

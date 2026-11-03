@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.nostr
 
+import com.vitorpamplona.quartz.nip19Bech32.entities.NNote
 import dev.dimension.flare.di.startKoin
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
@@ -131,9 +132,7 @@ class NostrRichTextParserTest {
     fun parsesNoteAsStatusLinkAndLeavesTrailingPunctuationPlain() {
         val eventIdHex = "2222222222222222222222222222222222222222222222222222222222222222"
         val note =
-            rust.nostr.sdk.EventId
-                .parse(eventIdHex)
-                .use { it.toBech32() }
+            NNote.create(eventIdHex)
         val result = parseNostrRichText("Check nostr:$note!", accountKey)
 
         val content = assertIs<RenderContent.Text>(result.renderRuns.single())
@@ -190,9 +189,7 @@ class NostrRichTextParserTest {
     fun removesQuotedEventTextWhenQTagExists() {
         val eventIdHex = "3333333333333333333333333333333333333333333333333333333333333333"
         val note =
-            rust.nostr.sdk.EventId
-                .parse(eventIdHex)
-                .use { it.toBech32() }
+            NNote.create(eventIdHex)
         val tags = arrayOf(arrayOf("q", eventIdHex))
 
         val result = parseNostrRichText("before nostr:$note\nafter", tags, accountKey)

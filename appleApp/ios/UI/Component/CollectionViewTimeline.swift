@@ -112,7 +112,7 @@ struct UITimelineCollectionViewAccessoryItem {
 
 // MARK: - Controller
 
-final class UITimelineCollectionViewController: UIViewController, UICollectionViewDelegate, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout, TimelineGapActionObserver {
+final class UITimelineCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSourcePrefetching, UIScrollViewDelegate, CHTCollectionViewDelegateWaterfallLayout, TimelineGapActionObserver {
 
     // Use Int for section and String for item to avoid Sendable issues
     private static let sectionAccessories = 0
@@ -537,10 +537,12 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         collectionView.endScrollInteraction()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
+        pendingHeightPrefetch.removeAll()
         accessoryItemMap.values.forEach { $0.onVisibilityChanged?(false) }
     }
 
     deinit {
+        heightPrefetchTask?.cancel()
         postRefreshPoolCleanupTask?.cancel()
         deferredPoolCleanupTask?.cancel()
     }
@@ -581,7 +583,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
             self?.isReadingLayoutReady(at: indexPath) == true
         }
         collectionView.prepareVisibleCells = { [weak self] in
-            guard let self, self.columnCount > 1 else { return false }
+            guard let self else { return false }
             // UIKit has installed these cells even when diffable completion is still pending.
             for case let cell as TimelineUIKitCollectionViewCell in self.collectionView.visibleCells
                 where !cell.hasMeasuredHeight(for: cell.bounds.width) {
@@ -601,6 +603,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         }
         collectionView.keyboardDismissMode = .interactive
         collectionView.delegate = self
+        collectionView.prefetchDataSource = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
@@ -692,6 +695,51 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private var itemHeightCache = TimelineItemHeightCache()
     private var isHeightCorrectionFlushScheduled = false
+    private var heightPrefetchCell: TimelineUIKitCollectionViewCell?
+    private var pendingHeightPrefetch: [String] = []
+    private var heightPrefetchTask: Task<Void, Never>?
+
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        guard contentKind != .profileMedia else { return }
+        for path in indexPaths {
+            guard pendingHeightPrefetch.count < max(4, columnCount * 2) else { break }
+            guard let id = dataSource.itemIdentifier(for: path), timelineItem(for: id) != nil,
+                  !pendingHeightPrefetch.contains(id) else { continue }
+            pendingHeightPrefetch.append(id)
+        }
+        guard heightPrefetchTask == nil, !pendingHeightPrefetch.isEmpty else { return }
+        heightPrefetchTask = Task { @MainActor [weak self] in
+            await Task.yield()
+            while !Task.isCancelled, self?.precomputeNextRowHeight() == true {
+                await Task.yield()
+            }
+            self?.heightPrefetchCell?.performDeferredPoolCleanup()
+            self?.heightPrefetchTask = nil
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+        let ids = Set(indexPaths.compactMap { dataSource.itemIdentifier(for: $0) })
+        pendingHeightPrefetch.removeAll { ids.contains($0) }
+    }
+
+    private func precomputeNextRowHeight() -> Bool {
+        guard !pendingHeightPrefetch.isEmpty else { return false }
+        let id = pendingHeightPrefetch.removeFirst()
+        guard let row = timelineItem(for: id), let path = dataSource.indexPath(for: id),
+              collectionView.cellForItem(at: path) == nil,
+              let layout = collectionView.collectionViewLayout as? CHTCollectionViewWaterfallLayout else { return true }
+        let width = layout.itemWidthInSection(at: path.section)
+        guard width > 1,
+              itemHeightCache.measuredHeight(for: id, geometry: heightGeometry(itemID: id, width: width),
+                                             renderHash: row.data.renderHash) == nil else { return true }
+        let cell = heightPrefetchCell ?? TimelineUIKitCollectionViewCell()
+        heightPrefetchCell = cell
+        // The existing layout uses media metadata and text metrics, without waiting for decoded images.
+        configureTimelineCell(cell, itemID: id)
+        cell.reportPreferredHeightIfNeeded(width: width)
+        return true
+    }
 
     private func clearHeightCache(keepingItemMeasurements: Bool = false) {
         heightCache.removeAll(keepingCapacity: true)

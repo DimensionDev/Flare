@@ -27,23 +27,23 @@ internal fun MediaVideoBadge(
     Row(
         modifier =
             modifier
-                .badgePadding(horizontal = 16.dp, vertical = 16.dp)
+                .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp)
                 .clip(PlatformTheme.shapes.medium)
                 .background(Color.Black.copy(alpha = 0.5f))
                 .let { if (onClick != null) it.clickable(role = Role.Button, onClick = onClick) else it }
-                .badgePadding(horizontal = 8.dp, vertical = 4.dp),
+                .mediaBadgePadding(horizontal = 8.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
 }
 
-private fun Modifier.badgePadding(
+internal fun Modifier.mediaBadgePadding(
     horizontal: Dp,
     vertical: Dp,
 ): Modifier =
     layout { measurable, constraints ->
-        // Reserve space for the indicator before padding can consume a narrow preview.
+        // Reserve space for content before padding can consume a narrow preview.
         val content = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
         val horizontalPadding = minOf(horizontal.roundToPx(), (constraints.maxWidth - content.width) / 2)
         val verticalPadding = minOf(vertical.roundToPx(), (constraints.maxHeight - content.height) / 2)

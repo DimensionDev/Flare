@@ -77,6 +77,7 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
 import dev.dimension.flare.ui.component.UgoiraPlayer
 import dev.dimension.flare.ui.component.accessibleDescription
+import dev.dimension.flare.ui.component.mediaBadgePadding
 import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
@@ -509,11 +510,11 @@ private fun StatusMediaItem(
                         modifier =
                             Modifier
                                 .pointerHoverIcon(PointerIcon.Hand)
-                                .padding(16.dp)
+                                .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp)
                                 .background(
                                     color = Color.Black.copy(alpha = 0.75f),
                                     shape = PlatformTheme.shapes.medium,
-                                ).padding(
+                                ).mediaBadgePadding(
                                     horizontal = 8.dp,
                                     vertical = 2.dp,
                                 ).clickable {

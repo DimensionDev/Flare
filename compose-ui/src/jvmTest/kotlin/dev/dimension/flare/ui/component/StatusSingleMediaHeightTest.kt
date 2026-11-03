@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -15,6 +16,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsEqualTo
@@ -22,12 +25,16 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.media_play_video
+import dev.dimension.flare.compose.ui.media_view_alt_text
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
@@ -48,6 +55,79 @@ import kotlin.test.assertTrue
 class StatusSingleMediaHeightTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Test
+    fun narrowCappedVideoKeepsAltTextVisibleAndClickable() {
+        var mediaWidth by mutableStateOf(200f)
+        var opens = 0
+        var altDescription = ""
+        val description = "A tall video with an accessible description"
+        val samplePost = createSampleStatus(createSampleUser())
+        compose.setContent {
+            val window =
+                object : WindowInfo by LocalWindowInfo.current {
+                    override val containerSize = IntSize(412, 400)
+                }
+            val media = UiMedia.Video("", "", description, height = 1_000f, width = mediaWidth)
+            val post = samplePost.copy(images = persistentListOf(media))
+            FluentTheme {
+                altDescription = stringResource(Res.string.media_view_alt_text)
+                CompositionLocalProvider(
+                    LocalTimelineAppearance provides TimelineAppearance(limitSingleMediaHeight = true, videoAutoplay = VideoAutoplay.NEVER),
+                    LocalWindowInfo provides window,
+                    LocalDensity provides Density(1f),
+                ) {
+                    Box(Modifier.requiredSize(412.dp, 400.dp)) {
+                        Row {
+                            Spacer(Modifier.width(52.dp))
+                            key(mediaWidth) {
+                                StatusMediaComponent(
+                                    post = post,
+                                    data = post.images,
+                                    onMediaClick = { opens++ },
+                                    sensitive = false,
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier.testTag("media"),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for ((width, expectedWidth) in listOf(200f to 40.dp, 80f to 16.dp, 900f to 180.dp)) {
+            compose.runOnIdle { mediaWidth = width }
+            compose.onNodeWithText(description).assertDoesNotExist()
+            val mediaBounds =
+                compose
+                    .onNodeWithTag("media")
+                    .assertWidthIsEqualTo(expectedWidth)
+                    .assertHeightIsEqualTo(200.dp)
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+            val alt =
+                compose
+                    .onNodeWithContentDescription(altDescription, useUnmergedTree = true)
+                    .assertIsDisplayed()
+                    .assertHasClickAction()
+            val altBounds = alt.fetchSemanticsNode().boundsInRoot
+            assertTrue(altBounds.width > 0 && altBounds.height > 0)
+            assertTrue(
+                altBounds.left >= mediaBounds.left && altBounds.top >= mediaBounds.top &&
+                    altBounds.right <= mediaBounds.right && altBounds.bottom <= mediaBounds.bottom,
+            )
+            val textLayouts = mutableListOf<TextLayoutResult>()
+            alt.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(textLayouts) }
+            assertTrue(textLayouts.isNotEmpty() && textLayouts.none { it.hasVisualOverflow })
+            if (expectedWidth == 180.dp) {
+                assertEquals(24f, mediaBounds.right - altBounds.right, 0.5f)
+                assertEquals(18f, mediaBounds.bottom - altBounds.bottom, 0.5f)
+            }
+            alt.performTouchInput { click() }
+            compose.onNodeWithText(description).assertIsDisplayed()
+            compose.runOnIdle { assertEquals(0, opens, "ALT opens the description, not the media viewer") }
+        }
+    }
 
     @Test
     fun narrowCappedVideoKeepsThePlayIndicatorAndMediaClick() {

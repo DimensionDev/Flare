@@ -450,7 +450,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
     private var mediaLayout: TimelineMediaLayout = .grid
     private var carouselLeadingPadding: CGFloat = 0
     private var carouselTrailingPadding: CGFloat = 0
-    private var toggleButtonPositionConstraints: [NSLayoutConstraint] = []
     private var aspectConstraint: NSLayoutConstraint?
     private var lastLayoutWidth: CGFloat = 0
     private let spacing: CGFloat = 4
@@ -540,7 +539,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
         blurView.isHidden = true
         addSubview(blurView)
 
-        toggleButton.translatesAutoresizingMaskIntoConstraints = false
         toggleButton.addTarget(self, action: #selector(toggleBlur), for: .touchUpInside)
         addSubview(toggleButton)
 
@@ -563,6 +561,21 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             }
         } else {
             layoutGrid()
+        }
+        if areSensitiveControlsInstalled, sensitive, bounds.width > 0, bounds.height > 0 {
+            let size = toggleButton.sizeThatFits(UIView.layoutFittingCompressedSize)
+            let scale = min(1, bounds.width / max(size.width, 1), bounds.height / max(size.height, 1))
+            let width = size.width * scale
+            let height = size.height * scale
+            let leading = min(12, max(0, (bounds.width - width) / 2))
+            let top = min(12, max(0, (bounds.height - height) / 2))
+            toggleButton.bounds = CGRect(origin: .zero, size: size)
+            toggleButton.transform = CGAffineTransform(scaleX: scale, y: scale)
+            let centerX = effectiveUserInterfaceLayoutDirection == .rightToLeft
+                ? bounds.maxX - leading - width / 2 : bounds.minX + leading + width / 2
+            toggleButton.center = isBlurred
+                ? CGPoint(x: bounds.midX, y: bounds.midY)
+                : CGPoint(x: centerX, y: bounds.minY + top + height / 2)
         }
         if abs(bounds.width - lastLayoutWidth) > 0.5 {
             lastLayoutWidth = bounds.width
@@ -1126,8 +1139,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
             installSensitiveControlsIfNeeded()
         }
         blurView.isHidden = !(sensitive && isBlurred)
-        NSLayoutConstraint.deactivate(toggleButtonPositionConstraints)
-        toggleButtonPositionConstraints = []
         if !sensitive {
             toggleButton.isHidden = true
             return
@@ -1144,11 +1155,6 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
                 localized: "show_sensitive_media",
                 defaultValue: "Show sensitive media"
             )
-            // Center over blurred content.
-            toggleButtonPositionConstraints = [
-                toggleButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-                toggleButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            ]
         } else {
             cfg.title = nil
             cfg.image = UIImage(fontAwesome: .eyeSlash)
@@ -1157,12 +1163,8 @@ final class StatusMediaUIView: UIView, TimelineHeightProviding, UICollectionView
                 localized: "hide_sensitive_media",
                 defaultValue: "Hide sensitive media"
             )
-            toggleButtonPositionConstraints = [
-                toggleButton.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-                toggleButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            ]
         }
-        NSLayoutConstraint.activate(toggleButtonPositionConstraints)
+        setNeedsLayout()
     }
 
     @objc private func toggleBlur() {

@@ -83,7 +83,8 @@ struct StatusMediaView: View {
                     .accessibilityLabel(
                         Text("show_sensitive_media", bundle: FlareAppleUILocalization.bundle)
                     )
-                    .padding()
+                    .fixedSize()
+                    .mediaBadgePadding(16)
                 } else {
                     Button {
                         withAnimation {
@@ -97,7 +98,8 @@ struct StatusMediaView: View {
                     .accessibilityLabel(
                         Text("hide_sensitive_media", bundle: FlareAppleUILocalization.bundle)
                     )
-                    .padding()
+                    .fixedSize()
+                    .mediaBadgePadding(16)
                 }
             } else {
                 EmptyView()

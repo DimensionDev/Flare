@@ -330,6 +330,105 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
+    func testUIKitNarrowSensitiveControlsFitAndToggleRepeatedly() async throws {
+        let fixture = try await Fixture()
+        let host = UIViewController()
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        let media = StatusMediaUIView()
+        media.singleMediaMaxHeight = 200
+        host.view.addSubview(media)
+        for direction: UISemanticContentAttribute in [.forceLeftToRight, .forceRightToLeft] {
+            media.semanticContentAttribute = direction
+            for width: Float in [80, 200, 900] {
+                let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                    thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+                    height: 1_000, width: width, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+                media.configure(data: [video], sensitive: true, cornerRadius: 12,
+                                singleFollowsImageAspect: true, limitMediaGridToNine: true,
+                                mediaLayout: .grid, carouselLeadingPadding: 0, carouselTrailingPadding: 0)
+                media.frame = CGRect(x: 16, y: 100, width: media.fittingWidth(for: 360), height: 200)
+                let toggle = try XCTUnwrap(media.subviews.compactMap { $0 as? UIButton }.first)
+                let blur = try XCTUnwrap(media.subviews.compactMap { $0 as? UIVisualEffectView }.first)
+                for revealed in [false, true, false, true] {
+                    media.layoutIfNeeded()
+                    XCTAssertEqual(media.bounds.width, CGFloat(width / 5), accuracy: 0.5)
+                    XCTAssertEqual(media.bounds.height, 200, accuracy: 0.5)
+                    XCTAssertEqual(blur.isHidden, revealed)
+                    XCTAssertEqual(media.allowsVideoAutoplay, revealed)
+                    XCTAssertGreaterThan(toggle.frame.width, 0)
+                    XCTAssertTrue(media.bounds.insetBy(dx: -0.5, dy: -0.5).contains(toggle.frame),
+                                  "Toggle \(toggle.frame) must fit inside \(media.bounds), revealed: \(revealed)")
+                    let icon = try XCTUnwrap(toggle.imageView)
+                    XCTAssertGreaterThan(icon.bounds.width, 0)
+                    XCTAssertTrue(media.bounds.insetBy(dx: -0.5, dy: -0.5).contains(icon.convert(icon.bounds, to: media)))
+                    XCTAssertTrue(media.hitTest(toggle.center, with: nil) === toggle)
+                    if width == 900, revealed {
+                        XCTAssertEqual(toggle.transform, .identity)
+                        let leading = direction == .forceRightToLeft ? media.bounds.maxX - toggle.frame.maxX : toggle.frame.minX
+                        XCTAssertEqual(leading, 12, accuracy: 0.5)
+                        XCTAssertEqual(toggle.frame.minY, 12, accuracy: 0.5)
+                    }
+                    UIView.performWithoutAnimation { toggle.sendActions(for: .touchUpInside) }
+                }
+            }
+        }
+    }
+
+    func testSwiftUINarrowSensitiveMediaShowsRevealAndHideControls() async throws {
+        let fixture = try await Fixture()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = helper.resolve(base: singleMediaAppearance(),
+                                        patch: helper.setVideoAutoplay(patch: helper.empty, value: .never))
+        var mediaBounds = CGRect.zero
+        func content(width: Float, sensitive: Bool) -> some View {
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: nil,
+                height: 1_000, width: width, customHeaders: ["X-Preview-Test": "fixture"],
+                proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            return StatusMediaView(post: singleMediaPost(video, sensitive: true), data: [video], sensitive: sensitive,
+                cornerRadius: 12, allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                onMediaClicked: { _, _ in })
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .frame(width: 360, alignment: .leading)
+                .tint(.red)
+                .environment(\.timelineAppearance, appearance)
+                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+        }
+        for startsHidden in [true, false] {
+            // Preserve the initial blur state when enabling controls to render both toggle states.
+            let host = UIHostingController(rootView: content(width: 80, sensitive: startsHidden))
+            host.view.backgroundColor = .black
+            let window = try fixture.show(host)
+            window.overrideUserInterfaceStyle = .light
+            defer { window.isHidden = true; window.rootViewController = nil }
+            for width: Float in [80, 200, 900] {
+                host.rootView = content(width: width, sensitive: true)
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(150))
+                XCTAssertEqual(mediaBounds.width, CGFloat(width / 5), accuracy: 0.5)
+                XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 3
+                let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let crop = mediaBounds.applying(CGAffineTransform(scaleX: format.scale, y: format.scale))
+                let mediaImage = try XCTUnwrap(screenshot.cgImage?.cropping(to: crop))
+                var pixels = [UInt8](repeating: 0, count: mediaImage.width * mediaImage.height * 4)
+                let context = try XCTUnwrap(CGContext(data: &pixels, width: mediaImage.width, height: mediaImage.height,
+                    bitsPerComponent: 8, bytesPerRow: mediaImage.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+                context.draw(mediaImage, in: CGRect(x: 0, y: 0, width: mediaImage.width, height: mediaImage.height))
+                let redPixels = stride(from: 0, to: pixels.count, by: 4).filter {
+                    Int(pixels[$0]) > Int(pixels[$0 + 1]) + 60 && Int(pixels[$0]) > Int(pixels[$0 + 2]) + 60
+                }.count
+                XCTAssertGreaterThan(redPixels, 20,
+                                     "The \(startsHidden ? "reveal" : "hide") control must be visible in a \(mediaBounds.width)pt video")
+            }
+        }
+    }
+
     func testSwiftUIPlaybackBadgesStayInsideNarrowMedia() async throws {
         let fixture = try await Fixture()
         var contentBounds = CGRect.zero

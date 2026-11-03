@@ -678,19 +678,26 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
 
     private func updateSingleMediaHeightLimit() {
         guard contentKind != .profileMedia else { return }
+        var viewport = collectionView.bounds
+        if let window = collectionView.window {
+            // Window safe areas exclude device chrome without following collapsing bars.
+            viewport = viewport.intersection(collectionView.convert(window.safeAreaLayoutGuide.layoutFrame, from: window))
+        }
+        guard !viewport.isEmpty else { return }
         let height = CGFloat(TimelineSingleMediaLayout.shared.maximumHeight(
-            viewportHeight: Float(collectionView.bounds.inset(by: collectionView.safeAreaInsets).height)
+            viewportHeight: Float(viewport.height)
         ))
         guard heightCacheWidthKey(for: height) != heightCacheWidthKey(for: singleMediaMaxHeight) else { return }
         guard appearance.status.expandMediaSize, appearance.status.limitSingleMediaHeight else {
             singleMediaMaxHeight = height
             return
         }
-        collectionView.prepareForLayoutChange()
-        singleMediaMaxHeight = height
-        clearHeightCache(keepingItemMeasurements: true)
-        reconfigureVisibleCells()
-        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.invalidateMeasuredHeights {
+            self.singleMediaMaxHeight = height
+            self.clearHeightCache(keepingItemMeasurements: true)
+            self.reconfigureVisibleCells()
+            return true
+        }
     }
 
     private var itemHeightCache = TimelineItemHeightCache()

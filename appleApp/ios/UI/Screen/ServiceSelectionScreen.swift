@@ -387,7 +387,7 @@ private struct LoginFlowView: View {
                 .transition(ServiceSelectionAnimation.inline)
             }
 
-            if let qrContent {
+            if let qrContent, !presenter.state.flowState.loading, presenter.state.flowState.error == nil {
                 QRLoginView(content: qrContent)
                     .transition(ServiceSelectionAnimation.panel)
             }

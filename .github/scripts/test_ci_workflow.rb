@@ -1,5 +1,7 @@
 require 'yaml'
 require 'set'
+require 'open3'
+require 'tmpdir'
 
 root = ARGV.fetch(0, File.expand_path('../..', __dir__))
 load_yaml = YAML.respond_to?(:unsafe_load_file) ? YAML.method(:unsafe_load_file) : YAML.method(:load_file)
@@ -18,7 +20,7 @@ end
 linux = %w[build-linux build-web build-fdroid]
 apple = %w[build-ios build-macos]
 builds = linux + apple + %w[build-windows]
-check(jobs.keys.to_set == (builds + %w[lint upload]).to_set, 'CI jobs changed without preserving the validation graph')
+check(jobs.keys.to_set == (builds + %w[lint upload publish-google-play]).to_set, 'CI jobs changed without preserving the validation graph')
 builds.each do |id|
   check(Array(jobs.fetch(id).fetch('needs')) == ['lint'], "#{id} must start after the fast lint gate")
   check(jobs.fetch(id).fetch('if').include?("github.event_name == 'push'"), "Tag builds must include #{id}")
@@ -33,6 +35,7 @@ dispatches = {
   'windows' => %w[build-windows],
   'web' => %w[build-web],
   'fdroid' => %w[build-fdroid],
+  'google-play' => [],
 }
 triggers = workflow['on'] || workflow[true]
 check(triggers.dig('workflow_dispatch', 'inputs', 'target', 'options').to_set == dispatches.keys.to_set, 'Every supported dispatch target must be selectable')
@@ -51,7 +54,44 @@ check(groups.uniq.size == builds.size, 'Independent platforms must not cancel ea
 check(jobs.fetch('upload').fetch('needs').to_set == (builds + ['lint']).to_set, 'Publishing must wait for every validation job')
 check(jobs.fetch('upload').fetch('if') == "startsWith(github.ref, 'refs/tags/')", 'Publishing must remain tag-only')
 publishers = jobs.select { |_, job| job.fetch('steps').any? { |step| step.fetch('uses', '').start_with?('r0adkll/upload-google-play@') } }
-check(publishers.keys == ['upload'], 'Google Play publishing must wait for all checks')
+check(publishers.keys.to_set == %w[upload publish-google-play].to_set, 'Only tag releases and the explicit manual target may publish to Google Play')
+
+play = jobs.fetch('publish-google-play')
+check(play.fetch('if') == "github.event_name == 'workflow_dispatch' && inputs.target == 'google-play'", 'Manual Google Play publishing must require an explicit target')
+check(Array(play.fetch('needs')) == ['lint'], 'Manual Google Play publishing must pass lint without waiting for other platforms')
+check(play.dig('env', 'BUILD_NUMBER') == '${{ github.run_number }}', 'Manual Google Play builds must retain the Android release run counter')
+check(!play.fetch('env').key?('BUILD_VERSION'), 'Manual Google Play builds must use fdroid.properties instead of a branch name')
+check(workflow.dig('concurrency', 'cancel-in-progress') == "${{ inputs.target != 'google-play' }}", 'Manual Google Play publishing must not be canceled by a newer run')
+check(workflow.dig('concurrency', 'group').include?("inputs.target == 'google-play' && github.run_id || github.ref"), 'Manual Google Play workflows must not replace each other in the pending queue')
+check(play.fetch('concurrency') == jobs.fetch('upload').fetch('concurrency') && play.dig('concurrency', 'cancel-in-progress') == false, 'Tag and manual Google Play publishing must serialize edits without cancellation')
+check(play.dig('concurrency', 'queue') == 'max', 'Multiple waiting Google Play uploads must queue instead of replacing a pending tag release')
+play_commands = commands(play)
+%w[allTests :app:check :app:lint :app:bundleRelease].each do |task|
+  check(play_commands.include?(task), "Manual Google Play publishing must retain #{task}")
+end
+android_regressions = jobs.fetch('build-linux').fetch('steps').find { |step| step.fetch('uses', '').start_with?('reactivecircus/android-emulator-runner@') }
+check(play.fetch('steps').include?(android_regressions), 'Manual Google Play publishing must retain Android UI regressions')
+publish = jobs.fetch('upload').fetch('steps').find { |step| step.fetch('uses', '').start_with?('r0adkll/upload-google-play@') }
+check(play.fetch('steps').last == publish && publish.dig('with', 'track') == 'internal', 'Manual Google Play publishing must reuse the internal-track release configuration')
+
+credentials = play.fetch('steps').find { |step| step.dig('env', 'SERVICE_ACCOUNT_JSON') }
+required_secrets = %w[ALIAS KEY_PASSWORD KEY_STORE_PASSWORD SIGNING_KEY GOOGLE_SERVICES SERVICE_ACCOUNT_JSON]
+check(credentials && credentials.fetch('env').keys.to_set == required_secrets.to_set, 'Manual Google Play builds must provide signing, Firebase, and upload credentials')
+Dir.mktmpdir('flare-google-play-credentials') do |fixture|
+  Dir.mkdir(File.join(fixture, '.github'))
+  signer = File.join(fixture, '.github/apply_signing.sh')
+  File.write(signer, "#!/bin/sh\ntouch signing-applied\n")
+  File.chmod(0755, signer)
+  marker = File.join(fixture, 'signing-applied')
+  env = required_secrets.to_h { |name| [name, 'test-credential'] }
+  _, _, status = Open3.capture3(env, 'bash', '-e', '-c', credentials.fetch('run'), chdir: fixture)
+  check(status.success? && File.exist?(marker), 'Complete Google Play credentials must reach the signing step')
+  File.delete(marker)
+  required_secrets.each do |name|
+    stdout, _, status = Open3.capture3(env.merge(name => ''), 'bash', '-e', '-c', credentials.fetch('run'), chdir: fixture)
+    check(!status.success? && stdout.include?("#{name} is not set") && !File.exist?(marker), "Missing #{name} must fail before signing or building a fallback variant")
+  end
+end
 
 { 'build-ios' => 'iosSimulatorArm64', 'build-macos' => 'macosArm64' }.each do |id, target|
   steps = jobs.fetch(id).fetch('steps')
@@ -97,18 +137,24 @@ expected_selectors = %w[
   TimelineControllerTests/WebViewProxyTests
   TimelineControllerTests/LoginCookieSnapshotTests
   TimelineControllerTests/UgoiraPlaybackTests
+  TimelineControllerTests/TimelineControllerIntegrationTests/testSingleMediaLimitUsesStableWindowAndEmbeddedViewportGeometry
+  TimelineControllerTests/TimelineControllerIntegrationTests/testViewportHeightChangeResizesSingleMediaAndPreservesReadingPosition
+  TimelineControllerTests/TimelineControllerIntegrationTests/testSingleMediaLimitSwitchKeepsReadingPosition
+  TimelineControllerTests/TimelineMediaPreviewTests/testSwiftUIMediaKeepsItsInitialHeightWhenLazyRowsAppearAndReturn
+  TimelineControllerTests/TimelineMediaPreviewTests/testSwiftUIMediaIgnoresPlaybackViewportAndChromeInsetsButRespondsToResize
   iOSTests/VideoPlaybackSessionTests
   iOSTests/MediaPlaybackMemoryTests
   iOSTests/TimelinePlaybackCoordinatorTests
   iOSTests/MediaTransferCancellationTests
+  MediaViewerInteractionTests/TimelineMediaScrollTests
   MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithPost
   MediaViewerInteractionTests/MediaViewerInteractionTests/testTranslationErrorDetailsAreOnlyAccessibleFromFailureAlertWithoutPost
 ]
 check(ios.scan(/-only-testing:([^\s]+)/).flatten.to_set == expected_selectors.to_set, 'iOS regression coverage must remain unchanged')
 check(ios.scan('xcodebuild build-for-testing').size == 1, 'iOS regression targets must be built once')
-check(ios.scan('xcodebuild test-without-building').size == 2 && !ios.match?(/xcodebuild test\s/), 'iOS regressions must reuse the built products')
-check(ios.scan('-scheme CI-iOS').size == 3, 'iOS builds and tests must use the same scheme')
-check(ios.scan('-derivedDataPath build/DerivedData').size == 3, 'iOS builds and tests must use the same products directory')
+check(ios.scan('xcodebuild test-without-building').size == 3 && !ios.match?(/xcodebuild test\s/), 'iOS regressions must reuse the built products')
+check(ios.scan('-scheme CI-iOS').size == 4, 'iOS builds and tests must use the same scheme')
+check(ios.scan('-derivedDataPath build/DerivedData').size == 4, 'iOS builds and tests must use the same products directory')
 
 targets = project.fetch('targets')
 owners = targets.select { |_, target| Array(target['preBuildScripts']).any? { |script| script['name'] == 'Compile Kotlin' } }.keys

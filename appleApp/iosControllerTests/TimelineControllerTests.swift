@@ -7,6 +7,85 @@ import FlareAppleUI
 
 @MainActor
 final class TimelineControllerIntegrationTests: XCTestCase {
+    func testUpcomingMediaRowsUsePrecomputedHeightsAndKeepPrefetchBounded() async throws {
+        let fixture = await Fixture(posts: true)
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
+            base: TimelineAppearance.companion.Default,
+            patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
+        fixture.collection.isPrefetchingEnabled = false
+        fixture.input.items = (0..<60).map {
+            .post(makeRow($0 + 1_000, imageHeight: 1_600, mediaCount: 1, textRepeatCount: 0))
+        }
+        await fixture.apply()
+        let list = fixture.collection
+        let paths = try (20..<60).map { try XCTUnwrap(list.readingIndexPath?("t:case-\($0 + 1_000)")) }
+        let target = paths[1]
+        let prefetch = try XCTUnwrap(list.prefetchDataSource)
+        let expected = try fixture.position()
+        prefetch.collectionView(list, prefetchItemsAt: paths)
+        prefetch.collectionView?(list, cancelPrefetchingForItemsAt: [paths[0]])
+        await fixture.settle()
+        try fixture.assertPosition(expected)
+        let prepared = try XCTUnwrap(list.layoutAttributesForItem(at: target)?.frame)
+        XCTAssertGreaterThan(prepared.height, 300, "Reserve the 300pt media plus text before the row becomes visible")
+        XCTAssertNil(list.cellForItem(at: target), "Preparing nearby geometry must not install offscreen cells")
+        XCTAssertEqual(list.layoutAttributesForItem(at: paths[0])?.frame.height, 240, "Cancelled work must remain cold")
+        XCTAssertEqual(list.layoutAttributesForItem(at: try XCTUnwrap(paths.last))?.frame.height, 240,
+                       "Do not premeasure the whole feed")
+        await fixture.scroll(prepared.minY)
+        let displayed = try XCTUnwrap(list.layoutAttributesForItem(at: target)?.frame)
+        XCTAssertEqual(displayed.height, prepared.height, accuracy: 1)
+        let cell = try XCTUnwrap(list.cellForItem(at: target))
+        let media = try XCTUnwrap(descendants(cell).compactMap { $0 as? StatusMediaUIView }.first)
+        XCTAssertEqual(media.bounds.height, 300, accuracy: 1)
+        XCTAssertEqual(media.bounds.width, 150, accuracy: 1)
+    }
+
+    func testSingleMediaRowsKeepTheirFirstVisiblePositionsWhileScrolling() async throws {
+        for columns in [1, 2] {
+            let fixture = await Fixture(posts: true, columns: columns)
+            let helper = TimelinePresentationAppearancePatchHelper.shared
+            fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
+                base: TimelineAppearance.companion.Default,
+                patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
+            fixture.collection.isPrefetchingEnabled = false
+            fixture.input.items = (0..<60).map {
+                .post(makeRow($0 + 1_000, imageHeight: $0 % 2 == 0 ? 1_600 : 400,
+                              mediaCount: 1, textRepeatCount: $0 % 4))
+            }
+            await fixture.apply()
+            let list = fixture.collection
+            var compared = Set<String>()
+            for delta: CGFloat in [480, 480, 480, 480, -480, -480] {
+                var firstFrames: [String: CGFloat] = [:]
+                let didLayout = list.onReadingLayoutChanged
+                list.onReadingLayoutChanged = {
+                    didLayout?()
+                    guard firstFrames.isEmpty else { return }
+                    firstFrames = Dictionary(uniqueKeysWithValues: list.visibleCells.compactMap { cell -> (String, CGFloat)? in
+                        guard let path = list.indexPath(for: cell), let id = list.readingItemID?(path),
+                              cell.frame.minY >= list.contentOffset.y,
+                              cell.frame.minY < list.contentOffset.y + list.bounds.height else { return nil }
+                        return (id, cell.frame.minY - list.contentOffset.y)
+                    })
+                }
+                list.setContentOffset(CGPoint(x: 0, y: list.contentOffset.y + delta), animated: false)
+                list.layoutIfNeeded()
+                await fixture.settle()
+                list.onReadingLayoutChanged = didLayout
+                for (id, top) in firstFrames {
+                    let path = try XCTUnwrap(list.readingIndexPath?(id))
+                    let frame = try XCTUnwrap(list.layoutAttributesForItem(at: path)?.frame)
+                    XCTAssertEqual(frame.minY - list.contentOffset.y, top, accuracy: 1,
+                                   "\(columns) columns: \(id) moved after becoming visible")
+                    compared.insert(id)
+                }
+            }
+            XCTAssertGreaterThan(compared.count, 3)
+        }
+    }
+
     func testViewportHeightChangeResizesSingleMediaAndPreservesReadingPosition() async throws {
         let fixture = await Fixture(posts: true)
         let helper = TimelinePresentationAppearancePatchHelper.shared

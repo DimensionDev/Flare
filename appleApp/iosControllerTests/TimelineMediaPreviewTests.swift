@@ -367,6 +367,87 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
+    func testSwiftUIAltButtonFitsNarrowMedia() async throws {
+        let fixture = try await Fixture()
+        var overlayBounds = CGRect.zero
+        var mediaBounds = CGRect.zero
+        func content(width: CGFloat) -> some View {
+            Color.blue
+                .overlay(alignment: .bottomTrailing) {
+                    AltTextOverlay(altText: "A tall video with an accessible description")
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { overlayBounds = $0 }
+                }
+                .frame(width: width, height: 200)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .clipped()
+        }
+        let host = UIHostingController(rootView: content(width: 16))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for width: CGFloat in [16, 40, 180] {
+            host.rootView = content(width: width)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(150))
+            XCTAssertEqual(mediaBounds.width, width, accuracy: 0.5)
+            XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+            XCTAssertGreaterThan(overlayBounds.width, 0)
+            XCTAssertGreaterThan(overlayBounds.height, 0)
+            XCTAssertTrue(mediaBounds.insetBy(dx: -0.5, dy: -0.5).contains(overlayBounds),
+                          "ALT \(overlayBounds) must fit inside \(mediaBounds)")
+        }
+    }
+
+    func testSwiftUINarrowCappedVideoRendersAltText() async throws {
+        let fixture = try await Fixture()
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        let appearance = helper.resolve(base: singleMediaAppearance(),
+                                        patch: helper.setVideoAutoplay(patch: helper.empty, value: .never))
+        var mediaBounds = CGRect.zero
+        func content(width: Float) -> some View {
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png",
+                description: "A tall video with an accessible description",
+                height: 1_000, width: width, customHeaders: ["X-Preview-Test": "fixture"],
+                proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            return StatusMediaView(post: singleMediaPost(video), data: [video], sensitive: false,
+                cornerRadius: 12, allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                onMediaClicked: { _, _ in })
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
+                .frame(width: 360, alignment: .leading)
+                .tint(.red)
+                .environment(\.timelineAppearance, appearance)
+                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+        }
+        let host = UIHostingController(rootView: content(width: 80))
+        host.view.backgroundColor = .black
+        let window = try fixture.show(host)
+        window.overrideUserInterfaceStyle = .light
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for width: Float in [80, 200, 900] {
+            host.rootView = content(width: width)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(150))
+            XCTAssertEqual(mediaBounds.width, CGFloat(width / 5), accuracy: 0.5)
+            XCTAssertEqual(mediaBounds.height, 200, accuracy: 0.5)
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 3
+            let screenshot = UIGraphicsImageRenderer(size: window.bounds.size, format: format).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let crop = mediaBounds.applying(CGAffineTransform(scaleX: format.scale, y: format.scale))
+            let mediaImage = try XCTUnwrap(screenshot.cgImage?.cropping(to: crop))
+            var pixels = [UInt8](repeating: 0, count: mediaImage.width * mediaImage.height * 4)
+            let context = try XCTUnwrap(CGContext(data: &pixels, width: mediaImage.width, height: mediaImage.height,
+                bitsPerComponent: 8, bytesPerRow: mediaImage.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.draw(mediaImage, in: CGRect(x: 0, y: 0, width: mediaImage.width, height: mediaImage.height))
+            let redPixels = stride(from: 0, to: pixels.count, by: 4).filter {
+                Int(pixels[$0]) > Int(pixels[$0 + 1]) + 60 && Int(pixels[$0]) > Int(pixels[$0 + 2]) + 60
+            }.count
+            XCTAssertGreaterThan(redPixels, 20, "The ALT label must remain visible in a \(mediaBounds.width)pt video")
+        }
+    }
+
     private func singleMediaPost(_ media: UiMedia, sensitive: Bool = false) -> UiTimelineV2.Post {
         func rich(_ text: String) -> UiRichText {
             let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)

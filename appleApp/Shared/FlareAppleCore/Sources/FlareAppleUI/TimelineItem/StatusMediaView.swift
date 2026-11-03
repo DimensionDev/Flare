@@ -422,9 +422,10 @@ struct AltTextOverlay: View {
         } label: {
             Text("ALT", bundle: FlareAppleUILocalization.bundle)
         }
-        .padding()
         .backport
         .glassButtonStyle(fallbackStyle: .bordered)
+        .fixedSize()
+        .mediaBadgePadding(16)
         .accessibilityLabel(
             Text("media_view_alt_text", bundle: FlareAppleUILocalization.bundle)
         )

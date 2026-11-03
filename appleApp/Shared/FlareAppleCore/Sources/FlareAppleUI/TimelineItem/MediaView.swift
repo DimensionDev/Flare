@@ -259,19 +259,22 @@ struct InlineAVPlayerView: UIViewRepresentable {
 
 extension View {
     func mediaVideoBadgeStyle() -> some View {
-        MediaVideoBadgePadding(padding: 16) {
-            MediaVideoBadgePadding(padding: 8) {
-                visualEffect { content, geometry in
-                    let available = geometry.bounds(of: .named("mediaVideoBadge"))?.size ?? geometry.size
-                    let scale = min(1, available.width / max(geometry.size.width, 1),
-                                    available.height / max(geometry.size.height, 1))
-                    return content.scaleEffect(scale)
-                }
-            }
-            .coordinateSpace(name: "mediaVideoBadge")
+        mediaBadgePadding(8)
             .background(.black, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .mediaBadgePadding(16)
+            .foregroundStyle(.white)
+    }
+
+    func mediaBadgePadding(_ padding: CGFloat) -> some View {
+        MediaVideoBadgePadding(padding: padding) {
+            visualEffect { content, geometry in
+                let available = geometry.bounds(of: .named("mediaVideoBadge"))?.size ?? geometry.size
+                let scale = min(1, available.width / max(geometry.size.width, 1),
+                                available.height / max(geometry.size.height, 1))
+                return content.scaleEffect(scale)
+            }
         }
-        .foregroundStyle(.white)
+        .coordinateSpace(name: "mediaVideoBadge")
     }
 }
 
@@ -285,7 +288,7 @@ private struct MediaVideoBadgePadding: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        // Reserve space for the indicator before padding can consume a narrow preview.
+        // Reserve space for content before padding can consume a narrow preview.
         let size = subviews[0].sizeThatFits(proposal)
         let horizontal = min(padding, max(0, (bounds.width - size.width) / 2))
         let vertical = min(padding, max(0, (bounds.height - size.height) / 2))

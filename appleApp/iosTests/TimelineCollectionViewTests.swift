@@ -626,6 +626,37 @@ final class TimelineCollectionViewTests: XCTestCase {
         XCTAssertEqual(try fixture.readingPosition().distance, 0, accuracy: 0.5)
     }
 
+    func testRefreshCollapseAppliesAPendingPrependBookmarkBeforeAnimating() async throws {
+        let fixture = Fixture(width: 390, columns: 1)
+        let window = fixture.showInWindow()
+        defer { window.isHidden = true }
+        let view = fixture.collectionView
+        view.setTopContentInset(52)
+        fixture.scroll(to: -52)
+        view.refreshControl = UIRefreshControl()
+        view.beginRefreshing(revealingIndicator: true)
+        try await Task.sleep(for: .milliseconds(400))
+
+        let bookmark = try XCTUnwrap(view.captureReadingPosition())
+        let offsetBeforePrepend = view.contentOffset
+        let topBeforePrepend = -offsetBeforePrepend.y
+        var snapshot = fixture.dataSource.snapshot()
+        snapshot.insertItems(["200", "201", "202", "203", "204"], beforeItem: "0")
+        await fixture.dataSource.apply(snapshot, animatingDifferences: false)
+        // Snapshot completion may precede the layout that applies its bookmark.
+        view.setContentOffset(offsetBeforePrepend, animated: false)
+        view.restoreReadingPosition(bookmark)
+        view.endRefreshing()
+
+        let path = try XCTUnwrap(fixture.dataSource.indexPath(for: "0"))
+        let frame = try XCTUnwrap(view.layoutAttributesForItem(at: path)?.frame)
+        XCTAssertEqual(frame.minY - view.contentOffset.y, topBeforePrepend, accuracy: 1,
+                       "Collapse must start at the restored reading item, not the pre-snapshot offset")
+        try await Task.sleep(for: .milliseconds(500))
+        XCTAssertEqual(frame.minY - view.contentOffset.y, 52, accuracy: 1)
+        XCTAssertFalse(view.isPresentingRefresh)
+    }
+
     func testRefreshKeepsItsIndicatorAndReadingItemThroughHeightAndSnapshotChanges() async throws {
         let fixture = Fixture(width: 390, columns: 1)
         let window = fixture.showInWindow()

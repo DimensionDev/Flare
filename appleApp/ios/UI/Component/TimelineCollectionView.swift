@@ -59,6 +59,7 @@ final class TimelineCollectionView: UICollectionView {
     private var pendingRefreshReveal = false
     private var isEndingRefresh = false
     private var isAnimatingRefreshCollapse = false
+    private var refreshCollapseTopInset: CGFloat = 0
     private var isRevealingRefresh = false
     // A refresh started away from the top has no visible gap to collapse.
     private var preservesRefreshGap = false
@@ -107,6 +108,16 @@ final class TimelineCollectionView: UICollectionView {
 
     override func adjustedContentInsetDidChange() {
         super.adjustedContentInsetDidChange()
+        if isAnimatingRefreshCollapse {
+            let inset = readingPosition?.itemID == nil ? adjustedContentInset.top : (readingTopInset?() ?? restingAdjustedTopInset)
+            if inset != refreshCollapseTopInset {
+                // Collapsing bars must adjust the running scroll trajectory, not its final bookmark.
+                let context = TimelineWaterfallLayout.ReadingOffsetInvalidationContext()
+                context.contentOffsetAdjustment.y = refreshCollapseTopInset - inset
+                refreshCollapseTopInset = inset
+                collectionViewLayout.invalidateLayout(with: context)
+            }
+        }
         if isEndingRefresh, refreshInset <= 0.5 {
             DispatchQueue.main.async { [weak self] in self?.finishRefreshingIfReady() }
         }
@@ -178,6 +189,8 @@ final class TimelineCollectionView: UICollectionView {
         // UIKit removes the model inset before its collapse animation finishes.
         // Hand the final reading position to one native scroll animation.
         prepareForLayoutChange()
+        // A snapshot's completion can precede the layout that applies its bookmark.
+        layoutIfNeeded()
         readingPositionGeneration += 1
         refreshRequested = false
         isEndingRefresh = refreshControl?.isRefreshing == true
@@ -449,7 +462,8 @@ final class TimelineCollectionView: UICollectionView {
         _ updates: () -> Void
     ) {
         let viewportTop = readingViewportTop()
-        var item = preservesReadingPosition && (hasScrollGesture || isAnimatingRefreshCollapse) &&
+        var item = preservesReadingPosition &&
+            (hasScrollGesture || isAnimatingRefreshCollapse || keepingItemIDs?.isEmpty == false) &&
             !isProgrammaticScrolling && !isExternalScrollInteractionActive && !isRevealingRefresh
             ? firstVisibleReadingItem(viewportTop: viewportTop, preferringVisibleTop: preferringVisibleTop) : nil
         let keepsGestureItem = hasScrollGesture &&
@@ -612,6 +626,7 @@ final class TimelineCollectionView: UICollectionView {
         if abs(contentOffset.y - offsetY) > tolerance {
             if animated, window != nil {
                 // Internal collapse retains its bookmark; explicit navigation discards it.
+                refreshCollapseTopInset = targetIndexPath == nil ? adjustedContentInset.top : (readingTopInset?() ?? restingAdjustedTopInset)
                 isAnimatingRefreshCollapse = true
                 super.setContentOffset(CGPoint(x: contentOffset.x, y: offsetY), animated: true)
                 return
@@ -819,7 +834,7 @@ final class TimelineWaterfallLayout: CHTCollectionViewWaterfallLayout {
         return true
     }
 
-    private final class ReadingOffsetInvalidationContext: UICollectionViewLayoutInvalidationContext {}
+    fileprivate final class ReadingOffsetInvalidationContext: UICollectionViewLayoutInvalidationContext {}
 
     private final class MeasuredHeightInvalidationContext: UICollectionViewLayoutInvalidationContext {
         let items: [IndexPath]

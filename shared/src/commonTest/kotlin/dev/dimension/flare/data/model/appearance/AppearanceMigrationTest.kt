@@ -20,6 +20,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class AppearanceMigrationTest {
     @OptIn(ExperimentalSerializationApi::class)
@@ -61,7 +62,7 @@ class AppearanceMigrationTest {
                     .toAppearanceSettings(),
             )
             assertFalse(fs.exists(oldPath))
-            assertFalse(
+            assertTrue(
                 store.data
                     .first()
                     .toPatch()

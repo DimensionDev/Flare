@@ -563,7 +563,8 @@ private struct StatusActionContentLayout: Layout {
     let preferredSize: CGSize
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        CGSize(width: min(preferredSize.width, proposal.width ?? preferredSize.width), height: preferredSize.height)
+        let width = proposal.width ?? preferredSize.width
+        return CGSize(width: width.isFinite ? width : preferredSize.width, height: preferredSize.height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {

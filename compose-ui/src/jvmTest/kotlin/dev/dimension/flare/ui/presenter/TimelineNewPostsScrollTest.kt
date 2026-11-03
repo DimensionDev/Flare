@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter
 
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,12 +9,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -29,7 +33,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.TimelineReadingPosition
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -370,34 +378,48 @@ class TimelineNewPostsScrollTest {
     }
 
     @Test
-    fun fillingAGapAtTheViewportTopRevealsTheInsertedPostsWithoutFollowingTheGapDown() = checkGap(PaddingValues(0.dp))
+    fun fillingAGapKeepsItsSuccessorAtTheSameOffset() = checkGap(PaddingValues(0.dp))
 
     @Test
-    fun fillingAGapKeepsItsPredecessorWithContentPadding() = checkGap(PaddingValues(top = 40.dp))
+    fun fillingAGapKeepsItsSuccessorWithContentPadding() = checkGap(PaddingValues(top = 40.dp))
 
     @Test
-    fun fillingAGapAtTheStartOfTheLoadedWindowRevealsTheInsertedPosts() = checkGap(PaddingValues(0.dp), leading = true)
+    fun fillingALeadingGapKeepsItsSuccessor() = checkGap(PaddingValues(0.dp), leading = true)
 
     @Test
     fun failedLeadingGapDoesNotTreatALaterRefreshAsItsInsertedPage() = checkGap(PaddingValues(0.dp), leading = true, failed = true)
 
     @Test
-    fun partiallyFailedLeadingGapStillRevealsTheSuccessfullyInsertedPosts() =
-        checkGap(PaddingValues(0.dp), leading = true, partialFailure = true)
+    fun partiallyFailedLeadingGapKeepsItsSuccessor() = checkGap(PaddingValues(0.dp), leading = true, partialFailure = true)
 
     @Test
     fun refreshWhileALeadingGapLoadsDoesNotStealItsInsertionAnchor() =
         checkGap(PaddingValues(0.dp), leading = true, refreshDuringLoad = true)
 
     @Test
-    fun coalescedRefreshAndGapInsertionChooseOnlyTheGapPosts() =
+    fun coalescedRefreshAndGapInsertionKeepTheSuccessor() =
         checkGap(PaddingValues(0.dp), leading = true, refreshDuringLoad = true, coalesced = true)
 
     @Test
-    fun gapCompletionAfterThePageIsRenderedStillRevealsItsPosts() = checkGap(PaddingValues(0.dp), leading = true, callbackAfterPage = true)
+    fun gapCompletionAfterThePageIsRenderedKeepsTheSuccessor() = checkGap(PaddingValues(0.dp), leading = true, callbackAfterPage = true)
 
     @Test
     fun doubleClickingALeadingGapKeepsTheFirstInsertionAnchor() = checkGap(PaddingValues(0.dp), leading = true, doubleClick = true)
+
+    @Test
+    fun fillingALargeGapInTwoColumnsKeepsItsSuccessor() = checkGap(PaddingValues(top = 40.dp), columns = 2, insertedCount = 241)
+
+    @Test
+    fun closingAGapKeepsItsSuccessor() = checkGap(PaddingValues(0.dp), closesGap = true)
+
+    @Test
+    fun gapSuccessorSurvivesLaterHeightChanges() = checkGap(PaddingValues(0.dp), closesGap = true, changesHeight = true)
+
+    @Test
+    fun scrollingDuringGapLoadingReleasesItsSuccessor() = checkGap(PaddingValues(0.dp), userScroll = true)
+
+    @Test
+    fun aNewReadingTargetReleasesTheGapSuccessor() = checkGap(PaddingValues(0.dp), restoresLatest = true)
 
     private fun checkGap(
         contentPadding: PaddingValues,
@@ -408,9 +430,20 @@ class TimelineNewPostsScrollTest {
         coalesced: Boolean = false,
         callbackAfterPage: Boolean = false,
         doubleClick: Boolean = false,
+        columns: Int = 1,
+        insertedCount: Int = 2,
+        closesGap: Boolean = false,
+        changesHeight: Boolean = false,
+        userScroll: Boolean = false,
+        restoresLatest: Boolean = false,
     ) {
         lateinit var onInserted: (List<String>) -> Unit
         var activations = 0
+        lateinit var scope: CoroutineScope
+        var scrollJob: Job? = null
+        val reading = if (restoresLatest) Reading(TimelineReadingPosition(3, 100.0)) else null
+        var recordFrames = false
+        val renderedOffsets = mutableListOf<Int?>()
 
         fun post(index: Int): UiTimelineV2 =
             UiTimelineV2.Feed(
@@ -441,16 +474,20 @@ class TimelineNewPostsScrollTest {
                 items,
                 LoadStates(LoadState.NotLoading(false), LoadState.NotLoading(true), LoadState.NotLoading(true)),
             )
+        var rowHeight by mutableStateOf(100.dp)
+        val inserted = (1000 until 1000 + insertedCount).map(::post)
         val firstGap = gap(0)
         val prefix = if (leading) emptyList() else listOf(post(0), post(1))
         val pages = MutableStateFlow(data(prefix + listOf(firstGap, post(8), post(9), post(10))))
         val scroll = LazyStaggeredGridState(initialFirstVisibleItemIndex = prefix.size)
         lateinit var state: TimelineWithLazyListState
         composeRule.setContent {
+            scope = rememberCoroutineScope()
             val paging = pages.collectAsLazyPagingItems().toPagingState()
             val base =
                 object : TimelineItemPresenter.State {
                     override val listState = paging
+                    override val reading = reading
                     override val isRefreshing = false
 
                     override fun refreshSync() = Unit
@@ -460,17 +497,32 @@ class TimelineNewPostsScrollTest {
             val timeline = rememberTimelineWithLazyListState(base, scroll)
             SideEffect { state = timeline }
             LazyVerticalStaggeredGrid(
-                StaggeredGridCells.Fixed(1),
-                Modifier.size(300.dp, 150.dp),
+                StaggeredGridCells.Fixed(columns),
+                Modifier.size(300.dp, 150.dp).drawWithContent {
+                    drawContent()
+                    if (recordFrames) {
+                        renderedOffsets +=
+                            scroll.layoutInfo.visibleItemsInfo
+                                .firstOrNull { it.key == "post-8" }
+                                ?.offset
+                                ?.y
+                    }
+                },
                 state = scroll,
                 contentPadding = contentPadding,
             ) {
                 paging.onSuccess {
-                    items(itemCount, key = itemKey { it.stableItemKey }) { Box(Modifier.fillMaxWidth().height(100.dp)) }
+                    items(itemCount, key = itemKey { it.stableItemKey }, span = {
+                        if (peek(it)?.isPaginationGap == true) StaggeredGridItemSpan.FullLine else StaggeredGridItemSpan.SingleLane
+                    }) { index ->
+                        Box(Modifier.fillMaxWidth().height(if (peek(index)?.isPaginationGap == true) 100.dp else rowHeight))
+                    }
                 }
             }
         }
+        composeRule.waitUntil { reading?.restorePosition == null }
         composeRule.runOnIdle {
+            recordFrames = true
             state.loadGap(firstGap)
             if (doubleClick) state.loadGap(firstGap)
             assertEquals(1, activations)
@@ -492,29 +544,71 @@ class TimelineNewPostsScrollTest {
             composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == 5 }
             composeRule.waitForIdle()
         }
+        if (userScroll || restoresLatest) {
+            composeRule.runOnIdle {
+                recordFrames = false
+                if (restoresLatest) {
+                    reading?.restorePosition = TimelineReadingPosition(0, 0.0)
+                } else {
+                    scrollJob =
+                        scope.launch {
+                            scroll.scroll(MutatePriority.UserInput) {
+                                scrollBy(40f)
+                                awaitCancellation()
+                            }
+                        }
+                }
+            }
+            composeRule.waitUntil { if (userScroll) scroll.isScrollInProgress else reading?.restorePosition == null }
+        }
         composeRule.runOnIdle {
-            if (!failed && !callbackAfterPage) onInserted(listOf("post-2", "post-3"))
+            if (!failed && !callbackAfterPage) onInserted(inserted.map { it.stableItemKey })
             val refresh = if (refreshDuringLoad) listOf(post(100)) else emptyList()
             val remainingGap = if (failed) firstGap.copy(failed = true) else gap(1).copy(failed = partialFailure)
             pages.value =
-                data(refresh + prefix + listOf(post(2), post(3), remainingGap, post(8), post(9), post(10)))
+                data(
+                    refresh + prefix + inserted + (if (closesGap) emptyList() else listOf(remainingGap)) +
+                        listOf(post(8), post(9), post(10)),
+                )
         }
-        composeRule.waitUntil { (state.listState as? PagingState.Success)?.itemCount == prefix.size + 6 + if (refreshDuringLoad) 1 else 0 }
+        composeRule.waitUntil {
+            (state.listState as? PagingState.Success)?.itemCount ==
+                prefix.size + insertedCount + 3 + (if (closesGap) 0 else 1) + if (refreshDuringLoad) 1 else 0
+        }
+        if (userScroll) composeRule.runOnIdle { scrollJob?.cancel() }
         if (callbackAfterPage) {
             composeRule.waitForIdle()
-            composeRule.runOnIdle { onInserted(listOf("post-2", "post-3")) }
+            composeRule.runOnIdle { onInserted(inserted.map { it.stableItemKey }) }
+        }
+        if (changesHeight) {
+            composeRule.runOnIdle { rowHeight = 180.dp }
+            composeRule.waitForIdle()
         }
         composeRule.runOnIdle {
+            if (!userScroll && !restoresLatest) {
+                assertFalse(renderedOffsets.isEmpty())
+                assertEquals(setOf(100), renderedOffsets.toSet(), "Every drawn frame must preserve the successor")
+            }
+            if (restoresLatest) {
+                assertEquals(
+                    "post-0",
+                    scroll.layoutInfo.visibleItemsInfo
+                        .first()
+                        .key,
+                )
+                assertEquals(0, scroll.firstVisibleItemScrollOffset)
+                return@runOnIdle
+            }
             assertEquals(
-                if (failed) firstGap.stableItemKey else "post-2",
+                "post-8",
                 scroll.layoutInfo.visibleItemsInfo
-                    .first { it.key == if (failed) firstGap.stableItemKey else "post-2" }
+                    .first { it.key == "post-8" }
                     .key,
             )
             assertEquals(
-                0,
+                if (userScroll) 60 else 100,
                 scroll.layoutInfo.visibleItemsInfo
-                    .first { it.key == if (failed) firstGap.stableItemKey else "post-2" }
+                    .first { it.key == "post-8" }
                     .offset.y,
             )
         }

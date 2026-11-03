@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,11 +17,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalDensity
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.tab.UiTimelineTabItem
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.withContext
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.math.roundToInt
 
@@ -55,7 +60,9 @@ public fun rememberTimelineItemPresenterWithLazyListState(
     val baseState by producePresenter("timeline_${item.id}_${item.contentSourceKey}_$isHomeTimeline") {
         remember(item.id, item.contentSourceKey, isHomeTimeline) { TimelineItemPresenter(item, isHomeTimeline) }.invoke()
     }
-    return rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState, leadingItemCount, LocalDensity.current.density)
+    return key(item.id, item.contentSourceKey, isHomeTimeline) {
+        rememberTimelineWithLazyListState(baseState, lazyStaggeredGridState, leadingItemCount, LocalDensity.current.density)
+    }
 }
 
 @Composable
@@ -70,6 +77,7 @@ internal fun rememberTimelineWithLazyListState(
     var restoring by remember { mutableStateOf(false) }
     var scrollingByUser by remember { mutableStateOf(false) }
     var gapAnchor by remember { mutableStateOf<GapScrollAnchor?>(null) }
+    var activatingGaps by remember { mutableStateOf(emptySet<Pair<String, Long>>()) }
     var newPostCount by remember { mutableIntStateOf(0) }
     val isAtTheTop by remember(lazyListState) {
         derivedStateOf {
@@ -80,39 +88,56 @@ internal fun rememberTimelineWithLazyListState(
     LaunchedEffect(lazyListState, baseState.reading != null) {
         latestReading?.restoreCurrentPosition()
     }
+    if (baseState.listState is PagingState.Empty) SideEffect { gapAnchor = null }
     baseState.listState.onSuccess {
         val currentPagingState by rememberUpdatedState(this)
-        LaunchedEffect(this, gapAnchor) {
+        SideEffect {
+            val anchor = gapAnchor
+            if (anchor != null && !lazyListState.isScrollInProgress && latestReading?.restorePosition == null) {
+                val index = (0 until itemCount).firstOrNull { peek(it)?.stableItemKey == anchor.itemKey }
+                val visible = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == anchor.itemKey }
+                if (index != null && (visible?.index != index + leadingItemCount || visible.offset.y != -anchor.scrollOffset)) {
+                    lazyListState.requestScrollToItem(index + leadingItemCount, anchor.scrollOffset)
+                }
+            }
+        }
+        LaunchedEffect(this, gapAnchor, leadingItemCount) {
             val anchor = gapAnchor ?: return@LaunchedEffect
-            if (lazyListState.isScrollInProgress) {
-                gapAnchor = null
+            val index = (0 until itemCount).firstOrNull { peek(it)?.stableItemKey == anchor.itemKey }
+            if (index == null) {
+                val keys = (0 until itemCount).mapNotNull { peek(it)?.stableItemKey }.toSet()
+                val oldIndex = anchor.itemOrder.indexOf(anchor.itemKey)
+                // A clipped paging window is not evidence that the reading item was deleted.
+                if (anchor.itemOrder.take(oldIndex).any { it in keys } &&
+                    anchor.itemOrder.drop(oldIndex + 1).any { it in keys }
+                ) {
+                    gapAnchor = null
+                }
                 return@LaunchedEffect
             }
-            val gap = (0 until itemCount).mapNotNull { peek(it) as? UiTimelineV2.Gap }.firstOrNull { it.stableItemKey == anchor.gapKey }
-            if (anchor.itemKey == null && anchor.insertedKeys == null) return@LaunchedEffect
-            val index =
-                (0 until itemCount).firstOrNull {
-                    val item = peek(it)
-                    if (anchor.itemKey != null) {
-                        item?.stableItemKey == anchor.itemKey
-                    } else {
-                        item != null && !item.isPaginationGap && item.stableItemKey in anchor.insertedKeys.orEmpty()
+            // Queue a remeasure during layout notification, before the displaced item is drawn.
+            withContext(Dispatchers.Main.immediate) {
+                snapshotFlow {
+                    val layout = lazyListState.layoutInfo
+                    layout.totalItemsCount to layout.visibleItemsInfo.map { Triple(it.key, it.offset, it.size) }
+                }.collect {
+                    if (lazyListState.isScrollInProgress || latestReading?.restorePosition != null) return@collect
+                    val visible = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == anchor.itemKey }
+                    if (visible?.index == index + leadingItemCount && visible.offset.y == -anchor.scrollOffset) return@collect
+                    restoring = true
+                    try {
+                        lazyListState.requestScrollToItem(index + leadingItemCount, anchor.scrollOffset)
+                    } finally {
+                        restoring = false
                     }
-                } ?: return@LaunchedEffect
-            restoring = true
-            try {
-                lazyListState.scrollToItem(index + anchor.headerCount + if (anchor.afterItem) 1 else 0, anchor.scrollOffset)
-            } finally {
-                restoring = false
+                }
             }
-            val loading =
-                gap?.loading == true
-            if (anchor.itemKey == null || gap == null || (!loading && gap.renderHash != anchor.renderHash)) gapAnchor = null
         }
         val target = baseState.reading?.restorePosition
         // A replacement page can contain the target without changing itemCount.
         LaunchedEffect(target, this, lazyListState, leadingItemCount) {
             if (target == null || lazyListState.isScrollInProgress) return@LaunchedEffect
+            gapAnchor = null
             val index = target.index.takeIf { it in 0 until itemCount && peek(it) != null } ?: return@LaunchedEffect
             restoring = true
             try {
@@ -249,57 +274,38 @@ internal fun rememberTimelineWithLazyListState(
 
         override fun loadGap(message: UiTimelineV2.Gap) {
             val activate = message.onActivate ?: return
-            if (message.loading ||
-                gapAnchor?.let { it.gapKey == message.stableItemKey && it.renderHash == message.renderHash } == true
-            ) {
-                return
-            }
+            val request = message.stableItemKey to message.revision
+            if (message.loading || request in activatingGaps) return
+            activatingGaps += request
+            gapAnchor = null
             baseState.listState.onSuccess {
                 val gapIndex = (0 until itemCount).firstOrNull { peek(it)?.stableItemKey == message.stableItemKey } ?: return@onSuccess
-                val previous = (gapIndex - 1 downTo 0).firstOrNull { peek(it)?.isPaginationGap == false }
-                val key = previous?.let { peek(it)?.stableItemKey }
-                if (key != null) {
-                    val visible = lazyListState.layoutInfo.visibleItemsInfo
-                    val above = visible.firstOrNull { it.key == key }
-                    val gap = visible.firstOrNull { it.key == message.stableItemKey }
-                    val headerCount = leadingItemCount
-                    val top = above?.offset?.y ?: gap?.offset?.y ?: 0
-                    gapAnchor =
-                        GapScrollAnchor(message.stableItemKey, message.renderHash, key, -top, above == null, headerCount)
-                    if (above != null) latestReading?.positionChanged(checkNotNull(previous), top.toDouble() / density)
-                } else {
-                    val top =
-                        lazyListState.layoutInfo.visibleItemsInfo
-                            .firstOrNull { it.key == message.stableItemKey }
-                            ?.offset
-                            ?.y ?: 0
+                val next = (gapIndex + 1 until itemCount).firstOrNull { peek(it)?.isPaginationGap == false }
+                val visible = lazyListState.layoutInfo.visibleItemsInfo
+                val below = next?.let { index -> visible.firstOrNull { it.key == peek(index)?.stableItemKey } }
+                val anchor =
+                    below ?: visible
+                        .filter { info ->
+                            val index = info.index - leadingItemCount
+                            info.offset.y + info.size.height > 0 && index in 0 until itemCount &&
+                                peek(index)?.let { !it.isPaginationGap && it.stableItemKey == info.key } == true
+                        }.minWithOrNull(compareBy({ it.offset.y }, { it.offset.x }))
+                if (anchor != null) {
                     gapAnchor =
                         GapScrollAnchor(
-                            message.stableItemKey,
-                            message.renderHash,
-                            null,
-                            -top,
-                            false,
-                            leadingItemCount,
+                            checkNotNull(peek(anchor.index - leadingItemCount)).stableItemKey,
+                            -anchor.offset.y,
+                            (0 until itemCount).mapNotNull { peek(it)?.takeUnless { it.isPaginationGap }?.stableItemKey },
                         )
                 }
             }
-            val requestAnchor = gapAnchor
-            activate { keys ->
-                if (gapAnchor === requestAnchor && requestAnchor?.itemKey == null) {
-                    gapAnchor = requestAnchor?.takeIf { keys.isNotEmpty() }?.copy(insertedKeys = keys.toSet())
-                }
-            }
+            activate { activatingGaps -= request }
         }
     }
 }
 
 private data class GapScrollAnchor(
-    val gapKey: String,
-    val renderHash: Int,
-    val itemKey: String?,
+    val itemKey: String,
     val scrollOffset: Int,
-    val afterItem: Boolean,
-    val headerCount: Int,
-    val insertedKeys: Set<String>? = null,
+    val itemOrder: List<String>,
 )

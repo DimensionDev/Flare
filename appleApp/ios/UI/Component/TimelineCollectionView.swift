@@ -601,7 +601,7 @@ final class TimelineCollectionView: UICollectionView {
             }
             guard let frame = collectionViewLayout.layoutAttributesForItem(at: indexPath)?.frame else { return }
             // Resizing can make a card shorter; keep the reading item visible.
-            // Gap filling keeps its predecessor's exact offset even above the viewport.
+            // Gap filling keeps its anchor's exact offset, including offscreen positions.
             let distance = keepVisible ? max(distanceFromTop, (readingTopOcclusion?() ?? 0) + 1 - frame.height) : distanceFromTop
             targetY = frame.minY - distance - (readingTopInset?() ?? restingAdjustedTopInset) - readingRefreshInset
         }

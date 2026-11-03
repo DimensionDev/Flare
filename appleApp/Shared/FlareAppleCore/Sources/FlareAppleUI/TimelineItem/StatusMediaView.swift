@@ -16,7 +16,7 @@ struct StatusMediaView: View {
     let carouselTrailingPadding: CGFloat
     @Environment(\.timelineAppearance.expandMediaSize) private var expandMediaSize
     @Environment(\.timelineAppearance.limitSingleMediaHeight) private var limitSingleMediaHeight
-    @Environment(\.timelinePlaybackViewport) private var timelinePlaybackViewport
+    @Environment(\.timelineMediaViewportHeight) private var timelineMediaViewportHeight
     @Environment(\.timelineAppearance.mediaLayout) private var mediaLayout
     @Environment(\.timelineAppearance.limitMediaGridToNine) private var limitMediaGridToNine
     @Environment(\.timelineMediaActionHandler) private var timelineMediaActionHandler
@@ -26,7 +26,6 @@ struct StatusMediaView: View {
     @State private var carouselID = UUID().uuidString
     @State private var carouselOffset: CGFloat?
     @State private var verticalOffset: CGFloat?
-    @State private var scrollViewportHeight: CGFloat?
 //    @State private var selectedIndex: Int? = nil
 
     init(
@@ -117,17 +116,16 @@ struct StatusMediaView: View {
                 self.activeCarouselIndex = nil
             }
         }
-        .onGeometryChange(for: CGRect?.self) { geometry in
-            geometry.bounds(of: .scrollView(axis: .vertical))
-        } action: { bounds in
-            let offset = bounds?.minY ?? 0
+        .onGeometryChange(for: CGFloat?.self) { geometry in
             if #unavailable(iOS 18.0, macOS 15.0) {
-                if let verticalOffset, verticalOffset != offset {
-                    playback?.moved(source: "vertical", vertical: true)
-                }
+                return geometry.bounds(of: .scrollView(axis: .vertical))?.minY
+            }
+            return nil
+        } action: { offset in
+            if let verticalOffset, verticalOffset != offset {
+                playback?.moved(source: "vertical", vertical: true)
             }
             verticalOffset = offset
-            scrollViewportHeight = bounds?.height
         }
     }
 
@@ -245,7 +243,7 @@ struct StatusMediaView: View {
                     sourceAspectRatio: Float($0.carouselLayoutAspectRatio ?? 0), cropTallMedia: !($0 is UiMediaVideo)))
             } ?? data.first?.aspectRatio,
             singleMediaMaxHeight: singleExpandedMedia == nil ? nil : CGFloat(
-                TimelineSingleMediaLayout.shared.maximumHeight(viewportHeight: Float(timelinePlaybackViewport?.height ?? scrollViewportHeight ?? 0))),
+                TimelineSingleMediaLayout.shared.maximumHeight(viewportHeight: Float(timelineMediaViewportHeight ?? 0))),
             spacing: 4,
             maxColumns: 3,
         ) {

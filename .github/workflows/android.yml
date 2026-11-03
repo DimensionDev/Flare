@@ -272,7 +272,7 @@ jobs:
             -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -derivedDataPath build/DerivedData -skipPackagePluginValidation -skipMacroValidation \
             GRADLE_JVM_ARGS="-Xmx4G -Dfile.encoding=UTF-8" CODE_SIGNING_ALLOWED=NO
-      - name: Run native proxy and playback regressions
+      - name: Run native proxy, playback, and timeline regressions
         working-directory: ./appleApp
         run: |
           xcodebuild test-without-building -project Flare.xcodeproj -scheme CI-iOS \
@@ -282,10 +282,22 @@ jobs:
             -only-testing:TimelineControllerTests/WebViewProxyTests \
             -only-testing:TimelineControllerTests/LoginCookieSnapshotTests \
             -only-testing:TimelineControllerTests/UgoiraPlaybackTests \
+            -only-testing:TimelineControllerTests/TimelineControllerIntegrationTests/testSingleMediaLimitUsesStableWindowAndEmbeddedViewportGeometry \
+            -only-testing:TimelineControllerTests/TimelineControllerIntegrationTests/testViewportHeightChangeResizesSingleMediaAndPreservesReadingPosition \
+            -only-testing:TimelineControllerTests/TimelineControllerIntegrationTests/testSingleMediaLimitSwitchKeepsReadingPosition \
+            -only-testing:TimelineControllerTests/TimelineMediaPreviewTests/testSwiftUIMediaKeepsItsInitialHeightWhenLazyRowsAppearAndReturn \
+            -only-testing:TimelineControllerTests/TimelineMediaPreviewTests/testSwiftUIMediaIgnoresPlaybackViewportAndChromeInsetsButRespondsToResize \
             -only-testing:iOSTests/VideoPlaybackSessionTests \
             -only-testing:iOSTests/MediaPlaybackMemoryTests \
             -only-testing:iOSTests/TimelinePlaybackCoordinatorTests \
             -only-testing:iOSTests/MediaTransferCancellationTests \
+            -parallel-testing-enabled NO -collect-test-diagnostics never
+      - name: Run timeline media scroll regressions
+        working-directory: ./appleApp
+        run: |
+          xcodebuild test-without-building -project Flare.xcodeproj -scheme CI-iOS \
+            -derivedDataPath build/DerivedData -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
+            -only-testing:MediaViewerInteractionTests/TimelineMediaScrollTests \
             -parallel-testing-enabled NO -collect-test-diagnostics never
       - name: Run image translation error UI regressions
         working-directory: ./appleApp

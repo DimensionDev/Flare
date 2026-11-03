@@ -37,7 +37,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                         }
                         .padding(16)
                         .environment(\.timelineAppearance, singleMediaAppearance())
-                        .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 800)))
+                        .inMediaViewport(height: 800))
                 }
                 let window = try fixture.show(host)
                 window.overrideUserInterfaceStyle = .light
@@ -111,7 +111,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
                     .environment(\.timelineAppearance, appearance)
-                    .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+                    .inMediaViewport(height: 400)
                 }
                 let controller = UIHostingController(rootView: content(TimelineAppearance.companion.Default))
                 host = controller
@@ -213,12 +213,82 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
+    func testSwiftUIMediaKeepsItsInitialHeightWhenLazyRowsAppearAndReturn() async throws {
+        let fixture = try await Fixture(imageSize: CGSize(width: 800, height: 1_600))
+        let post = singleMediaPost(fixture.media(width: 800, height: 1_600))
+        for hasPlaybackCoordinator in [false, true] {
+            var heights: [Int: [CGFloat]] = [:]
+            let content = ScrollView {
+                LazyVStack {
+                    ForEach(0..<40) { index in
+                        StatusMediaView(post: post, data: post.images, sensitive: false, cornerRadius: 12,
+                                        allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                                        onMediaClicked: { _, _ in })
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                                heights[index, default: []].append(height)
+                            }
+                    }
+                }
+            }
+            .if(hasPlaybackCoordinator) { $0.detectScrolling() }
+            .if(!hasPlaybackCoordinator) { $0.timelineMediaViewport() }
+            .frame(width: 360, height: 600)
+            .environment(\.timelineAppearance, singleMediaAppearance())
+            let host = UIHostingController(rootView: content)
+            let window = try fixture.show(host)
+            defer { window.isHidden = true; window.rootViewController = nil }
+            try await Task.sleep(for: .milliseconds(150))
+            let scroll = try XCTUnwrap(descendants(host.view).compactMap { $0 as? UIScrollView }.first)
+            for offset: CGFloat in [600, 1_200, 2_400, 4_000, 2_400, 1_200, 0] {
+                scroll.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
+                host.view.layoutIfNeeded()
+                try await Task.sleep(for: .milliseconds(50))
+            }
+            XCTAssertGreaterThan(heights.count, 8)
+            for (index, values) in heights {
+                XCTAssertTrue(values.allSatisfy { abs($0 - 300) <= 1 },
+                              "Row \(index), coordinator \(hasPlaybackCoordinator): \(values)")
+            }
+        }
+    }
+
+    func testSwiftUIMediaIgnoresPlaybackViewportAndChromeInsetsButRespondsToResize() async throws {
+        let fixture = try await Fixture(imageSize: CGSize(width: 800, height: 1_600))
+        let post = singleMediaPost(fixture.media(width: 800, height: 1_600))
+        var measuredHeight: CGFloat = 0
+        func content(height: CGFloat, chrome: CGFloat) -> some View {
+            ScrollView {
+                StatusMediaView(post: post, data: post.images, sensitive: false, cornerRadius: 12,
+                                allowsCarousel: false, carouselLeadingPadding: 0, carouselTrailingPadding: 0,
+                                onMediaClicked: { _, _ in })
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measuredHeight = $0 }
+            }
+            .safeAreaInset(edge: .top) { Color.clear.frame(height: chrome) }
+            .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: chrome, width: 360, height: height - chrome))
+            .timelineMediaViewport()
+            .frame(width: 360, height: height)
+            .environment(\.timelineAppearance, singleMediaAppearance())
+        }
+        let host = UIHostingController(rootView: content(height: 600, chrome: 0))
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        for (height, chrome, expected): (CGFloat, CGFloat, CGFloat) in [
+            (600, 0, 300), (600, 54, 300), (600, 0, 300), (400, 0, 200), (800, 0, 400)
+        ] {
+            host.rootView = content(height: height, chrome: chrome)
+            host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(50))
+            XCTAssertEqual(measuredHeight, expected, accuracy: 1)
+        }
+    }
+
     func testSinglePostMediaUsesScrollViewportWithoutPlaybackCoordinator() async throws {
         let fixture = try await Fixture(imageSize: CGSize(width: 360, height: 640))
         let media = fixture.media(path: "scroll-viewport.png", width: 360, height: 640)
         let post = singleMediaPost(media)
         func content(height: CGFloat) -> some View {
             ScrollView { StatusView(data: post).padding(16) }
+                .timelineMediaViewport()
                 .environment(\.timelineAppearance, singleMediaAppearance())
                 .frame(height: height)
                 .frame(maxHeight: .infinity, alignment: .top)
@@ -393,7 +463,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                 .frame(width: 360, alignment: .leading)
                 .tint(.red)
                 .environment(\.timelineAppearance, appearance)
-                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+                .inMediaViewport(height: 400)
         }
         for startsHidden in [true, false] {
             // Preserve the initial blur state when enabling controls to render both toggle states.
@@ -492,7 +562,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mediaBounds = $0 }
                 .frame(width: 360, alignment: .leading)
                 .environment(\.timelineAppearance, appearance)
-                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+                .inMediaViewport(height: 400)
         }
         let host = UIHostingController(rootView: content(width: 80))
         host.view.backgroundColor = .black
@@ -572,7 +642,7 @@ final class TimelineMediaPreviewTests: XCTestCase {
                 .frame(width: 360, alignment: .leading)
                 .tint(.red)
                 .environment(\.timelineAppearance, appearance)
-                .environment(\.timelinePlaybackViewport, CGRect(x: 0, y: 0, width: 400, height: 400))
+                .inMediaViewport(height: 400)
         }
         let host = UIHostingController(rootView: content(width: 80))
         host.view.backgroundColor = .black
@@ -1518,4 +1588,10 @@ private final class PreviewImageProtocol: URLProtocol, @unchecked Sendable {
         client?.urlProtocolDidFinishLoading(self)
     }
     override func stopLoading() {}
+}
+
+private extension View {
+    func inMediaViewport(height: CGFloat) -> some View {
+        timelineMediaViewport().frame(height: height).frame(maxHeight: .infinity, alignment: .top)
+    }
 }

@@ -15,7 +15,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
         fixture.collection.isPrefetchingEnabled = false
         fixture.input.items = (0..<60).map {
-            .post(makeRow($0 + 1_000, imageHeight: 1_600, mediaCount: 1, textRepeatCount: 0))
+            .post(makeTimelineTestRow($0 + 1_000, imageHeight: 1_600, mediaCount: 1, textRepeatCount: 0))
         }
         await fixture.apply()
         let list = fixture.collection
@@ -51,7 +51,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
             fixture.collection.isPrefetchingEnabled = false
             fixture.input.items = (0..<60).map {
-                .post(makeRow($0 + 1_000, imageHeight: $0 % 2 == 0 ? 1_600 : 400,
+                .post(makeTimelineTestRow($0 + 1_000, imageHeight: $0 % 2 == 0 ? 1_600 : 400,
                               mediaCount: 1, textRepeatCount: $0 % 4))
             }
             await fixture.apply()
@@ -92,7 +92,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
             base: TimelineAppearance.companion.Default,
             patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
-        fixture.input.items = (0..<40).map { .post(makeRow($0, imageHeight: 1_600, mediaCount: 1)) }
+        fixture.input.items = (0..<40).map { .post(makeTimelineTestRow($0, imageHeight: 1_600, mediaCount: 1)) }
         await fixture.apply()
         await fixture.scroll(2_500)
         let expected = try fixture.position()
@@ -120,7 +120,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     func testSingleMediaLimitSwitchKeepsReadingPosition() async throws {
         let fixture = await Fixture(posts: true)
-        fixture.input.items = (0..<40).map { .post(makeRow($0, imageHeight: 1_600, mediaCount: 1)) }
+        fixture.input.items = (0..<40).map { .post(makeTimelineTestRow($0, imageHeight: 1_600, mediaCount: 1)) }
         await fixture.apply()
         await fixture.scroll(2_500)
         let anchor = try fixture.position()
@@ -150,6 +150,67 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
     }
 
+    func testSingleMediaLimitUsesStableWindowAndEmbeddedViewportGeometry() async throws {
+        let fixture = await Fixture(posts: true)
+        let helper = TimelinePresentationAppearancePatchHelper.shared
+        fixture.controller.appearance = TimelineUIKitAppearance(timeline: helper.resolve(
+            base: TimelineAppearance.companion.Default,
+            patch: helper.setLimitSingleMediaHeight(patch: helper.empty, value: true)))
+        fixture.input.items = (0..<60).map {
+            .post(makeTimelineTestRow($0, imageHeight: 1_600, mediaCount: 1, textRepeatCount: 0))
+        }
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        let host = UIViewController()
+        window.rootViewController = host
+        host.addChild(fixture.controller)
+        host.view.addSubview(fixture.controller.view)
+        fixture.controller.didMove(toParent: host)
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil; previousKeyWindow?.makeKey() }
+        fixture.controller.view.frame = host.view.bounds
+        await fixture.apply()
+        let expectedHeight = min(window.safeAreaLayoutGuide.layoutFrame.height * 0.5, 420)
+        func assertMediaHeight(_ height: CGFloat) throws {
+            let media = fixture.collection.visibleCells.flatMap(descendants)
+                .compactMap { $0 as? StatusMediaUIView }.filter { !$0.isHidden }
+            XCTAssertFalse(media.isEmpty)
+            for view in media {
+                XCTAssertEqual(view.bounds.height, height, accuracy: 1)
+                XCTAssertEqual(view.bounds.width, height / 2, accuracy: 1)
+            }
+        }
+        try assertMediaHeight(expectedHeight)
+        let knownPath = try XCTUnwrap(fixture.collection.readingIndexPath?("t:case-0"))
+        let knownHeight = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: knownPath)?.frame.height)
+        await fixture.scroll(2_500)
+        let anchor = try fixture.position()
+        for inset: CGFloat in [54, 20, 0, 54, 0] {
+            fixture.controller.additionalSafeAreaInsets = UIEdgeInsets(top: inset, left: 0, bottom: inset, right: 0)
+            await fixture.settle()
+            try assertMediaHeight(expectedHeight)
+            try fixture.assertPosition(anchor)
+            XCTAssertEqual(fixture.collection.layoutAttributesForItem(at: knownPath)?.frame.height, knownHeight,
+                           "Known offscreen rows must not fall back to estimates when bars move")
+        }
+
+        // Real container resizing still changes the cap and retains the reading item.
+        let path = try XCTUnwrap(fixture.collection.readingIndexPath?(anchor.id))
+        let top = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: path)?.frame.minY)
+        await fixture.scroll(top)
+        let expectedPosition = try fixture.position()
+        let safeFrame = window.safeAreaLayoutGuide.layoutFrame
+        for requestedHeight: CGFloat in [360, 520, 360] {
+            let height = min(requestedHeight, safeFrame.height - 40)
+            fixture.controller.view.frame = CGRect(x: 20, y: safeFrame.minY + 20,
+                                                   width: window.bounds.width - 40, height: height)
+            await fixture.settle()
+            try assertMediaHeight(height * 0.5)
+            try fixture.assertPosition(expectedPosition)
+        }
+    }
+
     func testAppendedTwoColumnRowsHaveFinalPositionsInTheirFirstLayout() async throws {
         let fixture = await Fixture(posts: true, columns: 2)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
@@ -158,7 +219,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         window.isHidden = false
         defer { window.isHidden = true; window.rootViewController = nil }
         fixture.collection.isPrefetchingEnabled = false
-        fixture.input.items = (0..<2).map { .post(makeRow($0, mediaCount: 0, textRepeatCount: 0)) }
+        fixture.input.items = (0..<2).map { .post(makeTimelineTestRow($0, mediaCount: 0, textRepeatCount: 0)) }
         await fixture.apply()
         let list = fixture.collection
         list.beginExternalScrollInteraction()
@@ -178,7 +239,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         }
         defer { list.onReadingLayoutChanged = didLayout }
         fixture.input.items += (2..<20).map {
-            .post(makeRow($0, mediaCount: $0 % 2 == 0 ? 0 : 4, textRepeatCount: $0 % 4))
+            .post(makeTimelineTestRow($0, mediaCount: $0 % 2 == 0 ? 0 : 4, textRepeatCount: $0 % 4))
         }
         await fixture.apply()
         XCTAssertGreaterThan(firstFrames.count, 2)
@@ -194,7 +255,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let fixture = await Fixture(posts: true, columns: 2)
         fixture.collection.isPrefetchingEnabled = false
         func row(_ index: Int) -> TimelineContent.Item {
-            .post(makeRow(index, mediaCount: index % 2 == 0 ? 0 : 4,
+            .post(makeTimelineTestRow(index, mediaCount: index % 2 == 0 ? 0 : 4,
                           textRepeatCount: index % 3 == 0 ? 0 : index % 4 + 1))
         }
         fixture.input.items = (0..<20).map(row)
@@ -261,7 +322,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
     func testCachedReadingOrderTracksHeadersGapsPlaceholdersDuplicatesAndDeletedAnchors() async throws {
         for columns in [1, 2] {
             let fixture = await Fixture(posts: true, columns: columns,
-                header: UiStateSuccess(data: makeRow(200)),
+                header: UiStateSuccess(data: makeTimelineTestRow(200)),
                 accessories: [UITimelineCollectionViewAccessoryItem(id: "tabs", view: Header())])
             fixture.input.items.insert(.post(makeGap()), at: 1)
             fixture.input.items.insert(nil, at: 2)
@@ -287,7 +348,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
     func testUnchangedErrorRowsReplaceMessagesAndRetryCallbacks() async throws {
         for footer in [false, true] {
             let fixture = await Fixture(posts: true)
-            fixture.input.items = footer ? [.post(makeRow(1))] : []
+            fixture.input.items = footer ? [.post(makeTimelineTestRow(1))] : []
             fixture.input.state = footer ? .loaded : .error
             fixture.input.footer = footer ? .error : .none
             var retries: [String] = []
@@ -312,11 +373,11 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.reading = reading
         await fixture.settle()
         XCTAssertNotNil(reading.restorePosition)
-        fixture.input.items = (0..<60).map { .post(makeRow($0)) }
+        fixture.input.items = (0..<60).map { .post(makeTimelineTestRow($0)) }
         await fixture.apply()
         XCTAssertNil(reading.restorePosition)
         try fixture.assertPosition(("t:case-30", -37))
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
         try fixture.assertPosition(("t:case-30", -37))
     }
@@ -330,7 +391,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.reading = reading
         await fixture.settle()
         XCTAssertNotNil(reading.restorePosition)
-        fixture.content.items = (0..<60).map { .post(makeRow($0)) }
+        fixture.content.items = (0..<60).map { .post(makeTimelineTestRow($0)) }
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         XCTAssertNil(reading.restorePosition)
@@ -348,7 +409,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let reading = ReadingState(position: TimelineReadingPosition(index: 30, offset: -37))
         fixture.controller.reading = reading
         await fixture.settle()
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
         NotificationCenter.default.post(name: UIApplication.willResignActiveNotification, object: nil)
         XCTAssertEqual(reading.viewports.last?.index, 31)
@@ -403,7 +464,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.settle()
         let reading = ReadingState(position: TimelineReadingPosition(index: 0, offset: 0))
         fixture.controller.reading = reading
-        fixture.content.items.insert(.post(makeRow(100)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(("g:case-100", 0))
@@ -416,9 +477,9 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.settle()
         let anchor = try fixture.position()
         fixture.controller.scrollViewWillBeginDragging(fixture.collection)
-        fixture.content.items.insert(.post(makeRow(100)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
-        fixture.content.items.insert(.post(makeRow(101)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(101)), at: 0)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         XCTAssertEqual(fixture.collection.numberOfItems(inSection: 0), 40)
@@ -497,7 +558,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.settle()
         fixture.collection.setContentOffset(CGPoint(x: 0, y: -fixture.collection.adjustedContentInset.top), animated: false)
         fixture.content.isRefreshing = true
-        fixture.content.items.insert(.post(makeRow(100)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
         fixture.controller.scrollViewDidEndDragging(fixture.collection, willDecelerate: false)
         await fixture.settle()
@@ -532,7 +593,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let precedingFrame = try XCTUnwrap(fixture.collection.layoutAttributesForItem(at: precedingPath)?.frame)
         let expected = precedingFrame.minY - fixture.collection.contentOffset.y
         fixture.controller.willLoadTimelineGap(gap)
-        fixture.content.items.insert(contentsOf: [.post(makeRow(100)), .post(makeRow(101))], at: 4)
+        fixture.content.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 4)
         fixture.content.items[6] = .post(makeGap(revision: 1))
         fixture.controller.submit(fixture.content)
         await fixture.settle()
@@ -546,7 +607,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
     func testGalleryGapKeepsItsPredecessorWhenPagingReplacesAndExpandsTheWindow() async throws {
         let fixture = await GalleryFixture()
         let heights: [Float] = [240, 1_040, 420, 760]
-        fixture.content.items = (0..<40).map { .post(makeRow($0, imageHeight: heights[$0 % heights.count])) }
+        fixture.content.items = (0..<40).map { .post(makeTimelineTestRow($0, imageHeight: heights[$0 % heights.count])) }
         let gap = makeGap()
         fixture.content.items.insert(.post(gap), at: 18)
         fixture.controller.submit(fixture.content)
@@ -557,7 +618,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.settle()
         fixture.controller.willLoadTimelineGap(gap)
         var expanded = fixture.content.items
-        expanded.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 18)
+        expanded.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 18)
         expanded[38] = .post(makeGap(revision: 1))
         // A refresh loads 20 rows around the predecessor. The remaining gap is
         // outside this window until local paging expands it again.
@@ -583,7 +644,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             fixture.collection.setContentOffset(CGPoint(x: 0, y: frame.minY - 150), animated: false)
             await fixture.settle()
             fixture.controller.willLoadTimelineGap(gap)
-            fixture.content.items[14] = .post(makeRow(14, imageHeight: 1_200))
+            fixture.content.items[14] = .post(makeTimelineTestRow(14, imageHeight: 1_200))
             if footerChanges { fixture.content.footer = .loading }
             fixture.controller.submit(fixture.content)
             await fixture.settle()
@@ -622,7 +683,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(("g:case-30", -37))
-        fixture.content.items.insert(.post(makeRow(100)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(("g:case-30", -37))
@@ -640,7 +701,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.scrollViewDidEndDragging(fixture.collection, willDecelerate: false)
         await fixture.settle()
         let anchor = try fixture.position()
-        fixture.content.items.insert(.post(makeRow(100)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(anchor)
@@ -676,7 +737,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.reading = reading
         await fixture.apply()
         try fixture.assertPosition(("t:case-30", -37))
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
         try fixture.assertPosition(("t:case-30", -37))
     }
@@ -691,7 +752,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.scroll(frame.minY - 150)
         fixture.controller.willLoadTimelineGap(gap)
         var expanded = fixture.input.items
-        expanded.insert(contentsOf: (100..<120).map { .post(makeRow($0)) }, at: 18)
+        expanded.insert(contentsOf: (100..<120).map { .post(makeTimelineTestRow($0)) }, at: 18)
         expanded[38] = .post(makeGap(revision: 1))
         fixture.input.items = Array(expanded[17..<37])
         await fixture.apply()
@@ -717,7 +778,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         let anchor = try fixture.position()
-        fixture.content.items.insert(.post(makeRow(100)), at: 0)
+        fixture.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(anchor)
@@ -728,7 +789,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             let fixture = await GalleryFixture()
             var firstRetries = 0
             var latestRetries = 0
-            fixture.content.items = footer ? [.post(makeRow(1))] : []
+            fixture.content.items = footer ? [.post(makeTimelineTestRow(1))] : []
             fixture.content.state = footer ? .loaded : .error
             fixture.content.footer = footer ? .error : .none
             let first = TimelineContent.Failure(error: KotlinThrowable(message: "first error"), retry: { firstRetries += 1 })
@@ -760,7 +821,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
         init() async {
             content.state = .loaded
-            content.items = (0..<40).map { .post(makeRow($0)) }
+            content.items = (0..<40).map { .post(makeTimelineTestRow($0)) }
             controller.submit(content)
             controller.loadViewIfNeeded()
             controller.view.frame = CGRect(x: 0, y: 0, width: 390, height: 600)
@@ -889,7 +950,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             base: TimelineAppearance.companion.Default,
             patch: helper.setMediaLayout(patch: helper.empty, value: .carousel)
         ))
-        fixture.input.items = [.post(makeRow(1))]
+        fixture.input.items = [.post(makeTimelineTestRow(1))]
         await fixture.apply()
         let nested = descendants(fixture.collection).compactMap { $0 as? UIScrollView }
             .filter { $0 !== fixture.collection && !$0.isHidden && $0.isScrollEnabled }
@@ -945,7 +1006,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         XCTAssertNil(reading.restorePosition)
         XCTAssertTrue(reading.saved.isEmpty)
 
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
         try fixture.assertPosition(("t:case-30", -37))
         XCTAssertTrue(reading.saved.isEmpty)
@@ -967,7 +1028,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let expected = precedingFrame.minY - fixture.collection.contentOffset.y - fixture.collection.adjustedContentInset.top
 
         fixture.controller.willLoadTimelineGap(gap)
-        fixture.input.items.insert(contentsOf: [.post(makeRow(100)), .post(makeRow(101))], at: 4)
+        fixture.input.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 4)
         fixture.input.items[6] = .post(makeGap(revision: 1))
         await fixture.apply()
 
@@ -986,8 +1047,8 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await list.apply()
         await list.scroll(0)
         list.controller.willLoadTimelineGap(gap)
-        list.input.items.insert(.post(makeRow(200)), at: 0)
-        list.input.items.insert(contentsOf: [.post(makeRow(100)), .post(makeRow(101))], at: 1)
+        list.input.items.insert(.post(makeTimelineTestRow(200)), at: 0)
+        list.input.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 1)
         list.input.items[3] = .post(makeGap(revision: 1))
         await list.apply()
         list.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100", "case-101"])
@@ -1005,8 +1066,8 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         gallery.controller.submit(gallery.content)
         await gallery.settle()
         gallery.controller.didLoadTimelineGap(gap, insertedKeys: ["case-100", "case-101"])
-        gallery.content.items.insert(.post(makeRow(200)), at: 0)
-        gallery.content.items.insert(contentsOf: [.post(makeRow(100)), .post(makeRow(101))], at: 1)
+        gallery.content.items.insert(.post(makeTimelineTestRow(200)), at: 0)
+        gallery.content.items.insert(contentsOf: [.post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 1)
         gallery.content.items[3] = .post(makeGap(revision: 1, failed: true))
         gallery.controller.submit(gallery.content)
         await gallery.settle()
@@ -1022,7 +1083,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let path = try XCTUnwrap(gallery.source.indexPath(for: "g:\(gap.stableItemKey)"))
         let offset = try XCTUnwrap(gallery.collection.layoutAttributesForItem(at: path)?.frame.minY)
         gallery.controller.willLoadTimelineGap(gap)
-        gallery.content.items.insert(contentsOf: [.post(makeRow(200)), .post(makeRow(100)), .post(makeRow(101))], at: 0)
+        gallery.content.items.insert(contentsOf: [.post(makeTimelineTestRow(200)), .post(makeTimelineTestRow(100)), .post(makeTimelineTestRow(101))], at: 0)
         gallery.content.items[3] = .post(makeGap(revision: 1))
         gallery.controller.submit(gallery.content)
         await gallery.settle()
@@ -1042,7 +1103,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         list.input.items[0] = .post(makeGap(failed: true))
         await list.apply()
         let position = try list.position()
-        list.input.items.insert(.post(makeRow(100)), at: 0)
+        list.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await list.apply()
         try list.assertPosition(position)
 
@@ -1059,7 +1120,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let realPostPath = try XCTUnwrap(gallery.source.indexPath(for: "g:case-0"))
         let realPostFrame = try XCTUnwrap(gallery.collection.layoutAttributesForItem(at: realPostPath)?.frame)
         let galleryPosition = ("g:case-0", realPostFrame.minY - gallery.collection.contentOffset.y)
-        gallery.content.items.insert(.post(makeRow(100)), at: 0)
+        gallery.content.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         gallery.controller.submit(gallery.content)
         await gallery.settle()
         try gallery.assertPosition(galleryPosition)
@@ -1156,7 +1217,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
 
                 if changesHeader {
-                    fixture.input.header = UiStateSuccess(data: makeRow(200))
+                    fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(200))
                 } else {
                     fixture.controller.accessoryItems = [
                         UITimelineCollectionViewAccessoryItem(id: "notice", view: Header())
@@ -1208,15 +1269,15 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 await fixture.apply()
 
                 if headerFirst {
-                    fixture.input.header = UiStateSuccess(data: makeRow(100))
+                    fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(100))
                 } else {
                     fixture.input.state = .loaded
-                    fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+                    fixture.input.items = (0..<20).map { .post(makeTimelineTestRow($0)) }
                 }
                 await fixture.apply()
-                fixture.input.header = UiStateSuccess(data: makeRow(100))
+                fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(100))
                 fixture.input.state = .loaded
-                fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+                fixture.input.items = (0..<20).map { .post(makeTimelineTestRow($0)) }
                 await fixture.apply()
 
                 XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
@@ -1229,12 +1290,12 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.input.header = UiStateLoading<UiTimelineV2>()
         await fixture.apply()
         fixture.input.state = .loaded
-        fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+        fixture.input.items = (0..<20).map { .post(makeTimelineTestRow($0)) }
         await fixture.apply()
         await fixture.scroll(1_200)
         let position = try fixture.position()
 
-        fixture.input.header = UiStateSuccess(data: makeRow(100))
+        fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(100))
         await fixture.apply()
 
         try fixture.assertPosition(position)
@@ -1251,12 +1312,12 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             } else {
                 await fixture.apply()
             }
-            fixture.input.header = UiStateSuccess(data: makeRow(100))
+            fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(100))
             await fixture.apply()
             XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
 
             fixture.input.state = .loaded
-            fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+            fixture.input.items = (0..<20).map { .post(makeTimelineTestRow($0)) }
             await fixture.apply()
             XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
         }
@@ -1293,7 +1354,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             }
 
             fixture.input.state = .loaded
-            fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+            fixture.input.items = (0..<20).map { .post(makeTimelineTestRow($0)) }
             await fixture.apply()
             if offset == 0 {
                 XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
@@ -1323,7 +1384,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 }
                 fixture.controller.accessoryItems = accessories(sections.initial)
                 fixture.input.state = .loaded
-                fixture.input.items = (0..<20).map { .post(makeRow($0)) }
+                fixture.input.items = (0..<20).map { .post(makeTimelineTestRow($0)) }
                 await fixture.apply()
                 XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
                 if offset > 0 { await fixture.scroll(offset) }
@@ -1344,7 +1405,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
     func testPrependingPostsAtTopStillPreservesTheReadingItem() async throws {
         let fixture = await Fixture(posts: true)
         let position = try fixture.position()
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
         try fixture.assertPosition(position)
     }
@@ -1381,7 +1442,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             XCTAssertLessThan(fixture.controller.effectiveContentOffsetY, -1)
 
             if changesHeader {
-                fixture.input.header = UiStateSuccess(data: makeRow(200))
+                fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(200))
             } else {
                 fixture.controller.accessoryItems = [
                     UITimelineCollectionViewAccessoryItem(id: "notice", view: Header())
@@ -1403,7 +1464,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.controller.restoreEffectiveContentOffsetAfterNextSnapshot(0)
         await fixture.scroll(1_000)
         let expected = try fixture.position()
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
         try fixture.assertPosition(expected)
     }
@@ -1457,7 +1518,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             await fixture.settle()
 
             fixture.input.state = .loaded
-            fixture.input.items = [.post(makeRow(0))]
+            fixture.input.items = [.post(makeTimelineTestRow(0))]
             fixture.input.isRefreshing = true
             fixture.controller.submit(fixture.input, columns: 1)
 
@@ -1502,7 +1563,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
         fixture.input.key = switchedContent ? "next" : "previous"
         fixture.input.state = .loaded
-        fixture.input.items = (100..<160).map { .post(makeRow($0)) }
+        fixture.input.items = (100..<160).map { .post(makeTimelineTestRow($0)) }
         await fixture.apply()
         fixture.input.isRefreshing = true
         await fixture.apply()
@@ -1549,7 +1610,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             await fixture.settle()
 
             fixture.input.key = "reposts"
-            fixture.input.items = [.post(makeRow(100))]
+            fixture.input.items = [.post(makeTimelineTestRow(100))]
             fixture.input.isRefreshing = true
             fixture.controller.submit(fixture.input, columns: 1)
             XCTAssertFalse(fixture.collection.isPresentingRefresh,
@@ -1578,9 +1639,9 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         collection.setContentOffset(CGPoint(x: 0, y: -180), animated: false)
         collection.beginRefreshing(revealingIndicator: false)
 
-        fixture.input.items.insert(.post(makeRow(100)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
         await fixture.apply()
-        fixture.input.items.insert(.post(makeRow(101)), at: 0)
+        fixture.input.items.insert(.post(makeTimelineTestRow(101)), at: 0)
         await fixture.apply()
         XCTAssertEqual(collection.readingItemIDs?(), originalIDs,
             "A prepend must not turn the elastic pull distance into a reading offset")
@@ -1601,7 +1662,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         let fixture = await Fixture()
         fixture.controller.suppressInitialRefreshIndicator = true
         fixture.input.state = .loaded
-        fixture.input.items = [.post(makeRow(0))]
+        fixture.input.items = [.post(makeTimelineTestRow(0))]
         fixture.input.isRefreshing = true
         await fixture.apply()
         XCTAssertFalse(fixture.collection.isPresentingRefresh)
@@ -1612,8 +1673,8 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             let fixture = await Fixture(posts: true, columns: columns)
             await fixture.scroll(2_500)
             let expected = try fixture.position()
-            fixture.input.items.insert(.post(makeRow(100)), at: 0)
-            fixture.input.items.append(.post(makeRow(101)))
+            fixture.input.items.insert(.post(makeTimelineTestRow(100)), at: 0)
+            fixture.input.items.append(.post(makeTimelineTestRow(101)))
             await fixture.apply()
             try fixture.assertPosition(expected)
             XCTAssertFalse(fixture.collection.hasReadingPosition)
@@ -1625,7 +1686,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             let fixture = await Fixture(posts: true, columns: columns)
             await fixture.scroll(2_500)
             let expected = try fixture.position()
-            fixture.input.items.insert(contentsOf: (1_000..<2_000).map { .post(makeRow($0)) }, at: 0)
+            fixture.input.items.insert(contentsOf: (1_000..<2_000).map { .post(makeTimelineTestRow($0)) }, at: 0)
             await fixture.apply()
             try fixture.assertPosition(expected)
             XCTAssertFalse(fixture.collection.hasReadingPosition)
@@ -1637,7 +1698,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.collection.setContentOffset(CGPoint(x: 0, y: 2_500), animated: false)
         await fixture.settle()
         let expected = try fixture.position()
-        fixture.content.items.insert(contentsOf: (1_000..<2_000).map { .post(makeRow($0)) }, at: 0)
+        fixture.content.items.insert(contentsOf: (1_000..<2_000).map { .post(makeTimelineTestRow($0)) }, at: 0)
         fixture.controller.submit(fixture.content)
         await fixture.settle()
         try fixture.assertPosition(expected)
@@ -1649,7 +1710,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.scroll(2_500)
         fixture.input.isRefreshing = true
         await fixture.apply()
-        fixture.input.items = (100..<160).map { .post(makeRow($0)) }
+        fixture.input.items = (100..<160).map { .post(makeTimelineTestRow($0)) }
         fixture.input.isRefreshing = false
         await fixture.apply()
         XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
@@ -1666,7 +1727,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             fixture.collection.cellForItem(at: path).map { (path, $0) }
         })
         let index = try XCTUnwrap(visible.sorted().first?.item)
-        fixture.input.items[index] = .post(makeRow(index, liked: true))
+        fixture.input.items[index] = .post(makeTimelineTestRow(index, liked: true))
         await fixture.apply()
         try fixture.assertPosition(expected)
         for (path, cell) in oldCells where path.item != index {
@@ -1679,7 +1740,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         var accessed: [Int] = []
         for generation in 1...20 {
             var input = fixture.input
-            input.items = (generation * 100..<generation * 100 + 60).map { .post(makeRow($0)) }
+            input.items = (generation * 100..<generation * 100 + 60).map { .post(makeTimelineTestRow($0)) }
             input.access = { accessed.append(generation * 100 + $0) }
             fixture.controller.submit(input, columns: generation.isMultiple(of: 2) ? 1 : 2)
         }
@@ -1695,11 +1756,11 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         await fixture.scroll(2_500)
         let expected = try fixture.position()
         fixture.input.footer = .loading
-        fixture.input.items[4] = .post(makeRow(4, liked: true))
+        fixture.input.items[4] = .post(makeTimelineTestRow(4, liked: true))
         await fixture.apply()
         try fixture.assertPosition(expected)
         fixture.input.footer = .end
-        fixture.input.items.append(.post(makeRow(120)))
+        fixture.input.items.append(.post(makeTimelineTestRow(120)))
         await fixture.apply()
         try fixture.assertPosition(expected)
         XCTAssertFalse(fixture.collection.hasReadingPosition)
@@ -1714,7 +1775,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
         fixture.input.items = []
         await fixture.apply()
         fixture.input.state = .loaded
-        fixture.input.items = [.post(makeRow(100))] + items
+        fixture.input.items = [.post(makeTimelineTestRow(100))] + items
         await fixture.apply()
         try fixture.assertPosition(expected)
     }
@@ -1735,7 +1796,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             XCTAssertEqual(fixture.controller.effectiveContentOffsetY, 0, accuracy: 0.5)
 
             if changesHeader {
-                fixture.input.header = UiStateSuccess(data: makeRow(200))
+                fixture.input.header = UiStateSuccess(data: makeTimelineTestRow(200))
             } else {
                 fixture.controller.accessoryItems = [
                     UITimelineCollectionViewAccessoryItem(id: "notice", view: Header())
@@ -1744,7 +1805,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
             await fixture.apply()
 
             fixture.input.state = .loaded
-            fixture.input.items = [.post(makeRow(100))] + items
+            fixture.input.items = [.post(makeTimelineTestRow(100))] + items
             await fixture.apply()
             try fixture.assertPosition(expected)
         }
@@ -1803,7 +1864,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
 
     func testEstimatedCellHeightDoesNotPaintOverTheFollowingItem() throws {
         let cell = TimelineUIKitCollectionViewCell(frame: CGRect(x: 0, y: 0, width: 390, height: 240))
-        cell.configureTimeline(data: makeRow(0), index: 0, totalCount: 2,
+        cell.configureTimeline(data: makeTimelineTestRow(0), index: 0, totalCount: 2,
                                appearance: TimelineUIKitAppearance(timeline: TimelineAppearance.companion.Default), detailStatusKey: nil,
                                aiTldrEnabled: false, isMultipleColumn: false, openURL: nil)
         let container = UIView(frame: CGRect(x: 0, y: 0, width: 390, height: 800))
@@ -1834,7 +1895,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
     }
 
     func testQuotedCarouselClipsImagesToTheCardCornersAfterScrollingAndResizing() throws {
-        let post = try XCTUnwrap(makeRow(1) as? UiTimelineV2.TimelinePostItem).post
+        let post = try XCTUnwrap(makeTimelineTestRow(1) as? UiTimelineV2.TimelinePostItem).post
         let helper = TimelinePresentationAppearancePatchHelper.shared
         let appearance = StatusUIKitAppearance(timeline: helper.resolve(
             base: TimelineAppearance.companion.Default,
@@ -1935,7 +1996,7 @@ final class TimelineControllerIntegrationTests: XCTestCase {
                 input.state = initialState
             } else if posts {
                 input.state = .loaded
-                input.items = (0..<60).map { .post(makeRow($0)) }
+                input.items = (0..<60).map { .post(makeTimelineTestRow($0)) }
             } else {
                 controller.accessoryItems = (0..<80).map { UITimelineCollectionViewAccessoryItem(id: String($0), view: Header()) }
             }
@@ -1998,17 +2059,4 @@ private func makeGap(revision: Int64 = 0, failed: Bool = false) -> UiTimelineV2.
         createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: revision).toUi(),
         nextKey: "cursor", lowerBound: [:], revision: revision,
         itemKey: "timeline-gap:test", loading: false, failed: failed, onActivate: nil)
-}
-
-@MainActor
-private func makeRow(_ index: Int, liked: Bool = false, imageHeight: Float = 600,
-                     mediaCount: Int? = nil, textRepeatCount: Int? = nil) -> UiTimelineV2 {
-    let text = "Post \(index): " + String(repeating: "Rotation should preserve this reading item while text wraps and media resizes. ", count: textRepeatCount ?? (index % 4 + 1))
-    let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false, monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
-    let rich = UiRichText(renderRuns: [RenderContent.Text(runs: [RenderRun.Text(text: text, style: style)], block: RenderBlockStyle())], isRtl: false, raw: text, innerText: text, imageUrls: [])
-    let action = ActionMenu.Item(updateKey: "like", icon: liked ? .unlike : .like, text: nil, count: UiNumber(value: liked ? 2 : 1), color: liked ? .red : .contentColor, clickEvent: ClickEventNoop.shared, actionFamily: .like, enabled: true)
-    let images: [UiMedia] = (0..<(mediaCount ?? (index % 3 == 0 ? 1 : 4))).map { i in UiMediaImage(url: "https://example.invalid/fixture-\(i).png", previewUrl: "https://example.invalid/fixture-\(i).png", description: nil, height: imageHeight, width: 800, sensitive: false, customHeaders: nil, proxy: ProxyRef.Unbound.shared) }
-    let profile = UiProfile(key: MicroBlogKey(id: "user", host: "example.invalid"), handle: UiHandle(raw: "reader", host: "example.invalid", displayOverride: nil), avatar: nil as UiMediaImage?, nameInternal: rich, platformId: "mastodon", platformIcon: IconType.Material(icon: .world), clickEvent: ClickEventNoop.shared, banner: nil, description: nil, sourceLanguages: [], translationDisplayState: .hidden, matrices: UiProfile.Matrices(fansCount: 0, followsCount: 0, statusesCount: 0, platformFansCount: nil), mark: [], bottomContent: nil, pluginId: nil)
-    let post = UiTimelineV2.Post(platformId: "mastodon", images: images, sensitive: false, contentWarning: nil, user: profile, platformIcon: IconType.Material(icon: .world), sourceLanguages: [], translationDisplayState: .hidden, content: UiTranslatableText(original: rich, translation: nil), actions: [action], poll: nil, statusKey: MicroBlogKey(id: "case-\(index)", host: "example.invalid"), card: nil, createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(), emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil, references: [], clickEvent: ClickEventNoop.shared, mediaClickPolicy: .openStatusMedia, accountType: AccountType.Guest.shared, itemKey: "case-\(index)", pluginId: nil, authorSubtitleInternal: nil)
-    return UiTimelineV2.TimelinePostItem(post: post, presentation: UiTimelineV2.PostPresentation(message: nil, inlineParents: [], quotes: [], repost: nil, notificationKey: nil), itemKey: "case-\(index)")
 }

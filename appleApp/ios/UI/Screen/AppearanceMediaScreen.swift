@@ -6,6 +6,7 @@ struct AppearanceMediaScreen: View {
         List {
             AppearanceMediaSettingsSection()
         }
+        .timelineMediaViewport()
         .navigationTitle("appearance_media_group_title")
     }
 }

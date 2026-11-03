@@ -43,6 +43,7 @@ public struct VVOStatusScreen: View {
                         .padding(.vertical, 8)
                     }
                 }
+                .timelineMediaViewport()
                 .padding(.leading)
                 .frame(width: 400)
             }

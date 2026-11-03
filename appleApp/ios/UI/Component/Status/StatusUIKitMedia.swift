@@ -1241,6 +1241,22 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate,
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard let button = altButton, !button.isHidden, bounds.width > 0, bounds.height > 0 else { return }
+        let size = button.sizeThatFits(UIView.layoutFittingCompressedSize)
+        let scale = min(1, bounds.width / max(size.width, 1), bounds.height / max(size.height, 1))
+        let width = size.width * scale
+        let height = size.height * scale
+        let trailing = min(8, max(0, (bounds.width - width) / 2))
+        let bottom = min(8, max(0, (bounds.height - height) / 2))
+        button.bounds = CGRect(origin: .zero, size: size)
+        button.transform = CGAffineTransform(scaleX: scale, y: scale)
+        let centerX = effectiveUserInterfaceLayoutDirection == .rightToLeft
+            ? bounds.minX + trailing + width / 2 : bounds.maxX - trailing - width / 2
+        button.center = CGPoint(x: centerX, y: bounds.maxY - bottom - height / 2)
+    }
+
     func configure(media: UiMedia, index: Int, showsDownloadAll: Bool, cornerRadius: CGFloat, fitsMedia: Bool = false) {
         tag = index
         self.index = index
@@ -1254,12 +1270,7 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate,
                 button = altButton
             } else {
                 button = AltTextButton(text: altText)
-                button.translatesAutoresizingMaskIntoConstraints = false
                 addSubview(button)
-                NSLayoutConstraint.activate([
-                    button.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-                    button.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-                ])
                 altButton = button
             }
             button.configure(text: altText)
@@ -1267,6 +1278,7 @@ private final class MediaGridCellView: UIView, UIContextMenuInteractionDelegate,
         } else {
             altButton?.isHidden = true
         }
+        setNeedsLayout()
     }
 
     func prepareForPoolRemoval() {

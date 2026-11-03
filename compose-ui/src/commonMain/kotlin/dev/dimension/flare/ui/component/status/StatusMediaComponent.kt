@@ -76,6 +76,7 @@ import dev.dimension.flare.ui.component.MediaVideoBadge
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.TimelineCarouselItem
 import dev.dimension.flare.ui.component.UgoiraPlayer
+import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.accessibleDescription
 import dev.dimension.flare.ui.component.mediaBadgePadding
 import dev.dimension.flare.ui.component.platform.LocalWifiState
@@ -323,7 +324,7 @@ internal fun StatusMediaComponent(
                             } else {
                                 it
                             }
-                        }.padding(16.dp),
+                        },
             ) {
                 AnimatedContent(
                     hideSensitive,
@@ -332,36 +333,42 @@ internal fun StatusMediaComponent(
                             .matchParentSize(),
                     label = "StatusMediaComponent",
                 ) {
-                    Box {
+                    Box(Modifier.fillMaxSize()) {
                         if (it) {
                             Box(
                                 modifier =
                                     Modifier
                                         .align(Alignment.Center)
+                                        .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp)
                                         .clip(PlatformTheme.shapes.medium)
                                         .background(PlatformTheme.colorScheme.card)
-                                        .padding(16.dp),
+                                        .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp),
                             ) {
                                 PlatformText(
                                     text = stringResource(Res.string.status_sensitive_media),
                                 )
                             }
                         } else {
-                            PlatformIconButton(
-                                onClick = {
-                                    hideSensitive = true
-                                },
+                            ViewBox(
+                                stretch = false,
                                 modifier =
                                     Modifier
                                         .align(Alignment.TopStart)
-                                        .alpha(0.5f)
-                                        .clip(PlatformTheme.shapes.medium)
-                                        .background(PlatformTheme.colorScheme.card),
+                                        .mediaBadgePadding(horizontal = 16.dp, vertical = 16.dp),
                             ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.EyeSlash,
-                                    contentDescription = hideSensitiveMediaLabel,
-                                )
+                                PlatformIconButton(
+                                    onClick = { hideSensitive = true },
+                                    modifier =
+                                        Modifier
+                                            .alpha(0.5f)
+                                            .clip(PlatformTheme.shapes.medium)
+                                            .background(PlatformTheme.colorScheme.card),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.EyeSlash,
+                                        contentDescription = hideSensitiveMediaLabel,
+                                    )
+                                }
                             }
                         }
                     }

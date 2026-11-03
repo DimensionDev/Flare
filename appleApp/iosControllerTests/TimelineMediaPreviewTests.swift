@@ -273,6 +273,63 @@ final class TimelineMediaPreviewTests: XCTestCase {
         }
     }
 
+    func testUIKitNarrowAltButtonFitsAndOpensCurrentDescription() async throws {
+        let fixture = try await Fixture()
+        let grid = StatusMediaUIView()
+        grid.singleMediaMaxHeight = 200
+        let host = UIViewController()
+        host.view.addSubview(grid)
+        let window = try fixture.show(host)
+        defer { window.isHidden = true; window.rootViewController = nil }
+        var firstButton: UIButton?
+        for (width, direction): (Float, UISemanticContentAttribute) in [
+            (80, .forceLeftToRight), (200, .forceLeftToRight), (900, .forceLeftToRight),
+            (80, .forceLeftToRight), (80, .forceRightToLeft), (900, .forceRightToLeft),
+        ] {
+            let description = "Description for width \(width)"
+            let video = UiMediaVideo(url: "https://timeline-preview.invalid/movie.mp4",
+                thumbnailUrl: "https://timeline-preview.invalid/thumbnail.png", description: description,
+                height: 1_000, width: width, customHeaders: nil, proxy: ProxyRef.Global.shared, downloadUrl: nil)
+            grid.configure(data: [video], sensitive: false, cornerRadius: 12,
+                           singleFollowsImageAspect: true, limitMediaGridToNine: true,
+                           mediaLayout: .grid, carouselLeadingPadding: 0, carouselTrailingPadding: 0)
+            grid.frame = CGRect(x: 16, y: 100, width: grid.fittingWidth(for: 360), height: 200)
+            grid.layoutIfNeeded()
+            let button = try XCTUnwrap(descendants(grid).compactMap { $0 as? UIButton }.first { $0.configuration?.title == "ALT" })
+            if let firstButton { XCTAssertTrue(button === firstButton) } else { firstButton = button }
+            let cell = try XCTUnwrap(button.superview)
+            cell.semanticContentAttribute = direction
+            cell.setNeedsLayout()
+            cell.layoutIfNeeded()
+            XCTAssertEqual(cell.bounds.width, CGFloat(width / 5), accuracy: 0.5)
+            XCTAssertEqual(cell.bounds.height, 200, accuracy: 0.5)
+            XCTAssertGreaterThan(button.frame.width, 0)
+            XCTAssertTrue(cell.bounds.insetBy(dx: -0.5, dy: -0.5).contains(button.frame),
+                          "ALT \(button.frame) must fit inside \(cell.bounds)")
+            let label = try XCTUnwrap(button.titleLabel)
+            XCTAssertEqual(label.text, "ALT")
+            XCTAssertGreaterThanOrEqual(label.bounds.width + 0.5, label.intrinsicContentSize.width)
+            XCTAssertTrue(cell.bounds.insetBy(dx: -0.5, dy: -0.5).contains(label.convert(label.bounds, to: cell)))
+            XCTAssertTrue(cell.hitTest(button.center, with: nil) === button)
+            if width == 900 {
+                XCTAssertEqual(button.transform, .identity)
+                let trailing = direction == .forceRightToLeft ? button.frame.minX : cell.bounds.maxX - button.frame.maxX
+                XCTAssertEqual(trailing, 8, accuracy: 0.5)
+                XCTAssertEqual(cell.bounds.maxY - button.frame.maxY, 8, accuracy: 0.5)
+            }
+            button.sendActions(for: .touchUpInside)
+            let alert = try XCTUnwrap(host.presentedViewController as? UIAlertController)
+            XCTAssertEqual(alert.message, description)
+            for _ in 0..<100 {
+                if !alert.isBeingPresented { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            await withCheckedContinuation { continuation in
+                host.dismiss(animated: false) { continuation.resume() }
+            }
+        }
+    }
+
     func testSwiftUIPlaybackBadgesStayInsideNarrowMedia() async throws {
         let fixture = try await Fixture()
         var contentBounds = CGRect.zero

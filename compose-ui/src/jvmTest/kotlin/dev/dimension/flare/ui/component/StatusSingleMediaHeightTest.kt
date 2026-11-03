@@ -33,8 +33,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.hide_sensitive_media
 import dev.dimension.flare.compose.ui.media_play_video
 import dev.dimension.flare.compose.ui.media_view_alt_text
+import dev.dimension.flare.compose.ui.show_sensitive_media
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
@@ -55,6 +57,75 @@ import kotlin.test.assertTrue
 class StatusSingleMediaHeightTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Test
+    fun narrowSensitiveVideoCanBeRevealedHiddenAndRevealedAgain() {
+        var mediaWidth by mutableStateOf(80f)
+        var mediaOpens = 0
+        var showLabel = ""
+        var hideLabel = ""
+        val samplePost = createSampleStatus(createSampleUser())
+        compose.setContent {
+            val window =
+                object : WindowInfo by LocalWindowInfo.current {
+                    override val containerSize = IntSize(412, 400)
+                }
+            val media = UiMedia.Video("", "", null, height = 1_000f, width = mediaWidth)
+            val post = samplePost.copy(images = persistentListOf(media), sensitive = true)
+            FluentTheme {
+                showLabel = stringResource(Res.string.show_sensitive_media)
+                hideLabel = stringResource(Res.string.hide_sensitive_media)
+                CompositionLocalProvider(
+                    LocalTimelineAppearance provides
+                        TimelineAppearance(
+                            limitSingleMediaHeight = true,
+                            showSensitiveContent = false,
+                            videoAutoplay = VideoAutoplay.NEVER,
+                        ),
+                    LocalWindowInfo provides window,
+                    LocalDensity provides Density(1f),
+                ) {
+                    Box(Modifier.requiredSize(412.dp, 400.dp)) {
+                        Row {
+                            Spacer(Modifier.width(52.dp))
+                            key(mediaWidth) {
+                                StatusMediaComponent(
+                                    post = post,
+                                    data = post.images,
+                                    onMediaClick = { mediaOpens++ },
+                                    sensitive = true,
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier.testTag("media"),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for ((width, expectedWidth) in listOf(80f to 16.dp, 200f to 40.dp, 900f to 180.dp)) {
+            compose.runOnIdle { mediaWidth = width }
+            val bounds =
+                compose
+                    .onNodeWithTag("media")
+                    .assertWidthIsEqualTo(expectedWidth)
+                    .assertHeightIsEqualTo(200.dp)
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+            compose.onNodeWithContentDescription(showLabel).assertIsDisplayed().performTouchInput { click() }
+            val hide = compose.onNodeWithContentDescription(hideLabel, useUnmergedTree = true).assertIsDisplayed()
+            val hideBounds = hide.fetchSemanticsNode().boundsInRoot
+            assertTrue(hideBounds.width > 0 && hideBounds.height > 0)
+            assertTrue(
+                hideBounds.left >= bounds.left && hideBounds.top >= bounds.top &&
+                    hideBounds.right <= bounds.right && hideBounds.bottom <= bounds.bottom,
+            )
+            hide.performTouchInput { click() }
+            compose.onNodeWithContentDescription(showLabel).assertIsDisplayed().performTouchInput { click() }
+            compose.onNodeWithContentDescription(hideLabel, useUnmergedTree = true).assertIsDisplayed()
+            compose.runOnIdle { assertEquals(0, mediaOpens) }
+        }
+    }
 
     @Test
     fun narrowCappedVideoKeepsAltTextVisibleAndClickable() {

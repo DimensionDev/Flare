@@ -227,6 +227,7 @@ targets:
     type: bundle.unit-test
     platform: iOS
     dependencies:
+      - package: GSPlayer
       - package: LazyPager
       - package: CHTCollectionViewWaterfallLayout
         product: CHTCollectionViewWaterfallLayoutObjC
@@ -460,6 +461,9 @@ targets:
         excludes:
           - Resources/**
     dependencies:
+      - package: GSPlayer
+        destinationFilters: [iOS]
+        link: false
       - package: Kingfisher
         link: false
       - package: iOS-Backports

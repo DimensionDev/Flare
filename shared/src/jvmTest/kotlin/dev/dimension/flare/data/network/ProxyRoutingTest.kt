@@ -110,6 +110,27 @@ class ProxyRoutingTest {
                 }
                 assertEquals(listOf("/alice"), calls.map { it.first })
 
+                val systemMedia = UiMedia.Video("$base/range", "", null, 0f, 0f, proxy = ProxyRef.System)
+                assertEquals(systemMedia.url, MediaProxy.playbackSource(systemMedia).url)
+                val forced = MediaProxy.playbackSource(systemMedia, forceRelay = true)
+                try {
+                    assertNotEquals(systemMedia.url, forced.url)
+                    local
+                        .newCall(
+                            Request
+                                .Builder()
+                                .url(forced.url)
+                                .header("Range", "bytes=2-5")
+                                .build(),
+                        ).execute()
+                        .use {
+                            assertEquals(206, it.code)
+                            assertEquals("2345", it.body.string())
+                        }
+                } finally {
+                    MediaProxy.release(forced)
+                }
+
                 val authenticated =
                     UiMedia.Image(
                         "$base/redirect",

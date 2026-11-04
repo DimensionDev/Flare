@@ -32,10 +32,13 @@ import kotlin.uuid.Uuid
 
 public actual object MediaProxy {
     @Throws(Exception::class)
-    public actual suspend fun playbackSource(media: UiMedia): MediaPlaybackSource {
+    public actual suspend fun playbackSource(
+        media: UiMedia,
+        forceRelay: Boolean,
+    ): MediaPlaybackSource {
         if (!media.isRemote) return MediaPlaybackSource(media.url, media.url)
         val snapshot = ProxyNetwork.snapshot(media.proxy)
-        if (snapshot.connection.mode == ProxyMode.SYSTEM && media.customHeaders.isNullOrEmpty()) {
+        if (!forceRelay && snapshot.connection.mode == ProxyMode.SYSTEM && media.customHeaders.isNullOrEmpty()) {
             return MediaPlaybackSource(media.url, snapshot.key + "|" + media.cacheKey, media.url, snapshot)
         }
         resolveMediaUrl(media.url, media.url)

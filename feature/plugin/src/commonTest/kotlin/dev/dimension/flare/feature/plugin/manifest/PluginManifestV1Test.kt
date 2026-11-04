@@ -267,7 +267,7 @@ class PluginManifestV1Test {
     }
 
     @Test
-    fun authOriginRejectsInvalidHostAndPort() {
+    fun originGrantsRejectInvalidHostAndPort() {
         val manifest = PluginJsonV1.decodeFromString<PluginManifestV1>(VALID_MANIFEST)
 
         listOf(
@@ -278,13 +278,14 @@ class PluginManifestV1Test {
             "https://example.com:0443",
             "https://EXAMPLE.com",
         ).forEach { origin ->
-            val result =
-                manifest
-                    .copy(permissions = PluginPermissionsV1(authOrigins = setOf(origin)))
-                    .validate(validMethodTable())
-
-            assertFalse(result.isValid)
-            assertTrue(result.errors.any { it.code == "permission.origin" })
+            listOf(
+                PluginPermissionsV1(authOrigins = setOf(origin)),
+                PluginPermissionsV1(httpOrigins = setOf(origin)),
+            ).forEach { permissions ->
+                val result = manifest.copy(permissions = permissions).validate(validMethodTable())
+                assertFalse(result.isValid)
+                assertTrue(result.errors.any { it.code == "permission.origin" })
+            }
         }
     }
 

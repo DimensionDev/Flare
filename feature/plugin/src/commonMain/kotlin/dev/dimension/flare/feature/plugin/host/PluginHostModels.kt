@@ -88,6 +88,7 @@ public class PluginInvocationContextV1 private constructor(
             authOrigins: Set<String>,
             locale: String,
             expectedAccountId: String? = null,
+            httpOrigins: Set<String> = emptySet(),
         ): PluginInvocationContextV1 =
             create(
                 pluginId = pluginId,
@@ -95,7 +96,7 @@ public class PluginInvocationContextV1 private constructor(
                 packageHash = packageHash,
                 scope = PluginInvocationScopeV1.Login,
                 origin = candidateOrigin,
-                additionalOrigins = authOrigins,
+                additionalOrigins = authOrigins + httpOrigins,
                 locale = locale,
                 accountId = expectedAccountId,
             )
@@ -109,6 +110,7 @@ public class PluginInvocationContextV1 private constructor(
             locale: String,
             credential: PluginCredentialAccess,
             assets: Map<String, PluginAsset> = emptyMap(),
+            httpOrigins: Set<String> = emptySet(),
         ): PluginInvocationContextV1 =
             create(
                 pluginId = pluginId,
@@ -116,6 +118,7 @@ public class PluginInvocationContextV1 private constructor(
                 packageHash = packageHash,
                 scope = PluginInvocationScopeV1.Account,
                 origin = origin,
+                additionalOrigins = httpOrigins,
                 accountId = accountId,
                 locale = locale,
                 credential = credential,
@@ -128,6 +131,7 @@ public class PluginInvocationContextV1 private constructor(
             packageHash: String,
             origin: String,
             locale: String,
+            httpOrigins: Set<String> = emptySet(),
         ): PluginInvocationContextV1 =
             create(
                 pluginId = pluginId,
@@ -135,6 +139,7 @@ public class PluginInvocationContextV1 private constructor(
                 packageHash = packageHash,
                 scope = PluginInvocationScopeV1.Guest,
                 origin = origin,
+                additionalOrigins = httpOrigins,
                 locale = locale,
             )
 

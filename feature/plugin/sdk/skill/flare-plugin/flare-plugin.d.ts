@@ -18,7 +18,7 @@ interface PluginInvocationContextV1 {
   /** Present for account calls; login and guest calls do not expose an account credential. */
   readonly accountId?: string;
   readonly locale: string;
-  /** HTTP allowlist for this scope; authOrigins expands login only, not account/guest access. */
+  /** HTTP allowlist: httpOrigins expands login/account/guest; authOrigins expands login only. Detector uses its candidate origin only. */
   readonly approvedOrigins: readonly string[];
   readonly credentialAvailable: boolean;
   readonly assetHandles: readonly string[];

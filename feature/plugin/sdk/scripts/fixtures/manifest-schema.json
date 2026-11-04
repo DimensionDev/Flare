@@ -11,6 +11,166 @@
   },
   "cases": [
     {
+      "name": "additional HTTP origins",
+      "patch": {
+        "permissions": {
+          "authOrigins": [
+            "https://api.example.org"
+          ],
+          "httpOrigins": [
+            "https://api.example.org",
+            "https://cdn.example.org:8443"
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "HTTP origin must use HTTPS",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "http://api.example.org"
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "HTTP origin rejects wildcard",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "https://*.example.org"
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "HTTP origin rejects a path",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "https://api.example.org/data"
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "HTTP origin canonical port is Host validated",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "https://api.example.org:443"
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
+      "name": "too many HTTP origins",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "https://api0.example.org",
+            "https://api1.example.org",
+            "https://api2.example.org",
+            "https://api3.example.org",
+            "https://api4.example.org",
+            "https://api5.example.org",
+            "https://api6.example.org",
+            "https://api7.example.org",
+            "https://api8.example.org",
+            "https://api9.example.org",
+            "https://api10.example.org",
+            "https://api11.example.org",
+            "https://api12.example.org",
+            "https://api13.example.org",
+            "https://api14.example.org",
+            "https://api15.example.org",
+            "https://api16.example.org"
+          ]
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "HTTP origin does not grant Cookie probes",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "https://api.example.org"
+          ]
+        },
+        "platform": {
+          "loginMethods": [
+            {
+              "id": "cookie",
+              "interaction": "WebCookie",
+              "title": "Cookie",
+              "cookie": {
+                "startUrl": "https://api.example.org/login",
+                "probes": [
+                  {
+                    "url": "https://api.example.org/me",
+                    "cookies": [
+                      {
+                        "name": "session",
+                        "required": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
+      "name": "HTTP origin does not grant deep links",
+      "patch": {
+        "permissions": {
+          "httpOrigins": [
+            "https://api.example.org"
+          ]
+        },
+        "platform": {
+          "deepLinks": [
+            {
+              "origin": "https://api.example.org",
+              "path": [
+                {
+                  "type": "literal",
+                  "value": "profile"
+                },
+                {
+                  "type": "capture",
+                  "name": "handle"
+                }
+              ],
+              "target": {
+                "type": "Profile",
+                "value": "{handle}"
+              }
+            }
+          ]
+        }
+      },
+      "schemaValid": true,
+      "hostValid": false
+    },
+    {
       "name": "defaults may be omitted",
       "patch": {},
       "schemaValid": true,

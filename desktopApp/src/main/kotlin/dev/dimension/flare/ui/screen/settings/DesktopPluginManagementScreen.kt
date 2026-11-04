@@ -90,7 +90,9 @@ import dev.dimension.flare.plugin_issues
 import dev.dimension.flare.plugin_operation_failed
 import dev.dimension.flare.plugin_permission_account_origin
 import dev.dimension.flare.plugin_permission_account_origin_label
+import dev.dimension.flare.plugin_permission_auth_origin
 import dev.dimension.flare.plugin_permission_cookie
+import dev.dimension.flare.plugin_permission_http_origin
 import dev.dimension.flare.plugin_permission_media_network
 import dev.dimension.flare.plugin_permissions
 import dev.dimension.flare.plugin_rebuild_index
@@ -449,6 +451,9 @@ internal fun PluginPermission.localizedDescription(): String {
     if (type == dev.dimension.flare.data.model.PluginPermissionType.MediaNetwork) {
         return stringResource(Res.string.plugin_permission_media_network)
     }
+    if (type == dev.dimension.flare.data.model.PluginPermissionType.HttpOrigin) {
+        return stringResource(Res.string.plugin_permission_http_origin, origin)
+    }
     val accountRelativePath =
         origin
             .takeIf { it == PluginAbiV1.ACCOUNT_ORIGIN || it.startsWith("${PluginAbiV1.ACCOUNT_ORIGIN}/") }
@@ -464,7 +469,7 @@ internal fun PluginPermission.localizedDescription(): String {
     } ?: if (accountRelativePath != null) {
         stringResource(Res.string.plugin_permission_account_origin)
     } else {
-        displayOrigin
+        stringResource(Res.string.plugin_permission_auth_origin, displayOrigin)
     }
 }
 
@@ -776,7 +781,7 @@ private fun PluginInstallWarningV1.localizedMessage(): String {
             },
         )
     val localizedDetail =
-        detail?.replace(
+        permission?.localizedDescription() ?: detail?.replace(
             PluginAbiV1.ACCOUNT_ORIGIN,
             stringResource(Res.string.plugin_permission_account_origin_label),
         )

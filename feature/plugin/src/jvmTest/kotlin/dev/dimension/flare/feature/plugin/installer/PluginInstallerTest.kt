@@ -396,6 +396,33 @@ class PluginInstallerTest {
         }
 
     @Test
+    fun expandingALoginOriginToRuntimeHttpIsANewPermission() =
+        runBlocking<Unit> {
+            val manifest =
+                TestFppFactory.validManifest.replace(
+                    "\"name\": \"Test plugin\",",
+                    "\"name\": \"Test plugin\", \"permissions\": {\"authOrigins\": [\"https://api.example\"]},",
+                )
+            TestFppFactory.write(input, TestFppFactory.validEntries(manifest = manifest))
+            installer.inspect(input).also { installer.commit(it, confirmed = true, activate = stateStore::install) }
+            val expanded = manifest.replace("\"permissions\": {", "\"permissions\": {\"httpOrigins\": [\"https://api.example\"],")
+            TestFppFactory.write(input, TestFppFactory.validEntries(manifest = expanded))
+            val preview = installer.inspect(input)
+            val permission = preview.permissions.single { it.type == PluginPermissionType.HttpOrigin }
+            assertEquals("https://api.example", permission.origin)
+            assertTrue(preview.permissions.any { it.type == PluginPermissionType.NetworkOrigin && it.origin == permission.origin })
+            assertEquals(permission, preview.warnings.single { it.type == PluginInstallWarningTypeV1.AddedPermission }.permission)
+            assertFailsWith<IllegalArgumentException> { installer.commit(preview, confirmed = false, activate = stateStore::install) }
+            val installed = installer.commit(preview, confirmed = true, activate = stateStore::install)
+            val restored =
+                PluginStateStore
+                    .open(fileSystem, stateStore.paths.root)
+                    .running.plugins
+                    .getValue(installed.pluginId)
+            assertEquals(setOf("https://api.example"), restored.installed.manifest.permissions.httpOrigins)
+        }
+
+    @Test
     fun mediaNetworkAccessIsReviewedAndNewGrantsAreWarned() =
         runBlocking<Unit> {
             TestFppFactory.write(input)

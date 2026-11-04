@@ -121,6 +121,18 @@
           "maxItems": 16,
           "uniqueItems": true
         },
+        "httpOrigins": {
+          "type": "array",
+          "description": "Additional exact HTTPS origins for HTTP requests during login, account, and guest calls. Does not grant login-page, Cookie-probe, or deep-link access.",
+          "items": {
+            "type": "string",
+            "description": "Exact canonical HTTPS origin; no path, credentials, wildcard, or trailing slash. Flare checks DNS/port normalization.",
+            "pattern": "^(?:https://[a-z0-9.-]+(?::[0-9]{1,5})?)(?![\\s\\S])"
+          },
+          "default": [],
+          "maxItems": 16,
+          "uniqueItems": true
+        },
         "mediaNetwork": {
           "type": "boolean",
           "default": false,

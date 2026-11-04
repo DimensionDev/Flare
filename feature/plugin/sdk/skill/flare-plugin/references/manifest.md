@@ -76,11 +76,15 @@ runtime `WireTextV1`; see [localization](recipes.md#localization).
 | Field | Default | Meaning |
 | --- | --- | --- |
 | `authOrigins` | `[]` | Up to 16 additional exact HTTPS origins for login, e.g. `https://login.example.org` |
+| `httpOrigins` | `[]` | Up to 16 additional exact HTTPS origins for HTTP requests during login, account, and guest calls |
 | `mediaNetwork` | `false` | Allows automatic remote media loading, including avatars, HTML images, audio/video, and covers |
 
-Auth origins have no paths, trailing slash, query, fragment, wildcard, or URL
+Auth and HTTP origins have no paths, trailing slash, query, fragment, wildcard, or URL
 credentials. Use normalized host casing and omit the default `:443` port.
-They do not grant account/guest HTTP access to extra origins. Media permission
+`authOrigins` does not grant account/guest HTTP access. `httpOrigins` does not
+grant authorization-page, Cookie-probe, or Deep Link access. An origin may appear
+in both lists when both uses are needed; expanding a login-only grant to HTTP
+access is recorded as a new permission during installation review. Media permission
 allows destinations across websites, including CDNs/federated servers; it does
 not expand the HTTP API. See [origin rules](runtime-http.md#origins-and-permissions).
 

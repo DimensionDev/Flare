@@ -659,7 +659,7 @@ public struct PluginManagementView: View {
             key = "plugin_warning_tag_moved"
         }
         let message = String(localized: String.LocalizationValue(key))
-        let detail = warning.detail?.replacingOccurrences(
+        let detail = warning.permission.map(pluginPermissionText) ?? warning.detail?.replacingOccurrences(
             of: "$accountOrigin",
             with: String(localized: "plugin_permission_account_origin_label")
         )
@@ -697,6 +697,9 @@ func pluginPermissionText(_ permission: PluginPermission) -> String {
     if permission.type == .mediaNetwork {
         return String(localized: "plugin_permission_media_network")
     }
+    if permission.type == .httpOrigin {
+        return String(format: String(localized: "plugin_permission_http_origin"), permission.origin)
+    }
     let accountToken = "$accountOrigin"
     let accountRelativePath =
         permission.origin == accountToken || permission.origin.hasPrefix(accountToken + "/")
@@ -707,7 +710,7 @@ func pluginPermissionText(_ permission: PluginPermission) -> String {
     } ?? permission.origin
     guard let cookieName = permission.cookieName else {
         return accountRelativePath == nil
-            ? origin
+            ? String(format: String(localized: "plugin_permission_auth_origin"), origin)
             : String(localized: "plugin_permission_account_origin")
     }
     return String(

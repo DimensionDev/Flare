@@ -18,6 +18,9 @@ internal fun RunningPluginV1.requireLoginMethod(
         .singleOrNull { it.id == methodId && it.interaction == interaction }
         ?: throw PluginLoginException("login.method", "Login method is not declared")
 
+internal fun RunningPluginV1.approvedLoginOrigins(origin: String): Set<String> =
+    setOf(PluginUrlPolicy.requireOrigin(origin)) + installed.manifest.permissions.authOrigins
+
 internal fun RunningPluginV1.requireLoginSuccess(
     value: LoginSuccessV1,
     expectedOrigin: String,

@@ -21,7 +21,7 @@ logging API; do not invent `flare.log` or assume a developer console is availabl
 | Form login did not complete | Password/CredentialImport/Form begin must return success or throw a typed error |
 | Cookie login pending indefinitely | Declared probe URL/name/path scope, browser HTTPS, actual server login, and check's profile verification |
 | OAuth state/expiry/package error | Use supplied state/redirectUri, resume with pendingPayload, and restart login after a package change or expiry |
-| HTTP origin is not approved | Use an absolute selected-origin API URL; authOrigins adds login origins only |
+| HTTP origin is not approved | Use an absolute approved HTTPS URL; httpOrigins adds login/account/guest HTTP destinations, while authOrigins adds login destinations only. Older Hosts ignore httpOrigins; inspect context.approvedOrigins |
 | Request header is not allowed | Use structured authorization/cookies and let the Host manage transport headers |
 | JSON parse error | Inspect status/content type/body; handle 204/empty responses and HTML error pages explicitly |
 | Missing images with working text | mediaNetwork, current running grant, valid HTTPS URLs, and correct media DTOs |

@@ -352,6 +352,7 @@ public class PreparedPluginInstallV1 internal constructor(
 public data class PluginInstallWarningV1(
     val type: PluginInstallWarningTypeV1,
     val detail: String? = null,
+    val permission: PluginPermission? = null,
 )
 
 public data class PluginIndexRebuildResultV1(
@@ -398,6 +399,7 @@ private fun buildWarnings(
                     PluginInstallWarningV1(
                         type = PluginInstallWarningTypeV1.AddedPermission,
                         detail = permission.cookieName?.let { "${permission.origin}: $it" } ?: permission.origin,
+                        permission = permission,
                     ),
                 )
             }
@@ -415,6 +417,9 @@ internal fun PluginManifestV1.sensitivePermissions(): Set<PluginPermission> =
         add(PluginPermission(PluginPermissionType.NetworkOrigin, PluginAbiV1.ACCOUNT_ORIGIN))
         permissions.authOrigins.forEach { origin ->
             add(PluginPermission(PluginPermissionType.NetworkOrigin, origin))
+        }
+        permissions.httpOrigins.forEach { origin ->
+            add(PluginPermission(PluginPermissionType.HttpOrigin, origin))
         }
         if (permissions.mediaNetwork) {
             add(PluginPermission(PluginPermissionType.MediaNetwork, "*"))

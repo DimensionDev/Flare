@@ -14,6 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -28,6 +29,50 @@ import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter as QuartzFilter
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class NostrRelayCompatibilityTest {
+    @Test
+    fun replaceableListsStillCollectNewerVersionsFromSlowerRelays() =
+        runTest {
+            QuartzTestRelays(this).use { network ->
+                network.silentRelays = setOf(network.relays.last())
+                val old = nostrTestEvent(kind = 3, time = 1)
+                val newer = nostrTestEvent(kind = 3, time = 2, tags = listOf(listOf("p", nostrTestSigner(1).pubKey)))
+                network.storedEvents += old
+                backgroundScope.launch {
+                    delay(2_500)
+                    network.deliver(newer)
+                }
+                val events = network.client.fetchNostrEvents(network.relays, listOf(Filter(kinds = listOf(3), limit = 1)))
+                assertEquals(newer.id, events.first().id)
+                assertEquals(0, network.client.registrySizes().liveRequests)
+            }
+        }
+
+    @Test
+    fun silentRelayDoesNotHoldHealthyResultsForAMinute() =
+        runTest {
+            QuartzTestRelays(this).use { network ->
+                network.silentRelays = setOf(network.relays.last())
+                val event = nostrTestEvent()
+                network.storedEvents += event
+                backgroundScope.launch {
+                    while (true) {
+                        delay(500)
+                        network.deliver(event)
+                    }
+                }
+                val start = testScheduler.currentTime
+                assertEquals(
+                    listOf(event.id),
+                    network.client.fetchNostrEvents(network.relays, listOf(Filter(kinds = listOf(1)))).map { it.id },
+                )
+                assertTrue(
+                    testScheduler.currentTime - start < 5_000,
+                    "A silent relay held the completed results for ${testScheduler.currentTime - start} ms",
+                )
+                assertEquals(0, network.client.registrySizes().liveRequests)
+            }
+        }
+
     @Test
     fun firstQueryDoesNotCancelAHandshakeStillInProgress() =
         runTest {

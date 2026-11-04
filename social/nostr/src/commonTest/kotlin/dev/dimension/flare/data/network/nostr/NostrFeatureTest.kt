@@ -116,6 +116,111 @@ class NostrFeatureTest {
         }
 
     @Test
+    fun homeRecoversMissingRelayDataFromVerifiedPublicCacheAndStillPagesByAuthorAndTime() =
+        runTest {
+            QuartzTestRelays(this).use { network ->
+                val contacts = nostrTestEvent(kind = 3, tags = listOf(listOf("p", other)))
+                val own = nostrTestEvent("own archived post", time = 100)
+                val followed = nostrTestEvent("followed archived post", time = 99, author = 1)
+                val unrelated = nostrTestEvent(time = 101, author = 2)
+                val forged = QuartzEvent.fromJson(own.toJson().replace("own archived post", "forged archived post"))
+                val metadata =
+                    listOf(nostrTestEvent("""{"name":"alice"}""", kind = 0), nostrTestEvent("""{"name":"bob"}""", kind = 0, author = 1))
+                val requests = mutableListOf<String>()
+                val publicCache =
+                    NostrPublicEventCache { method, _ ->
+                        requests += method
+                        when (method) {
+                            "contact_list" -> listOf(contacts)
+                            "feed" -> listOf(forged, own, followed, unrelated) + metadata
+                            "user_infos" -> metadata
+                            else -> error("Unexpected cache request: $method")
+                        }
+                    }
+                network.service(publicEventCache = publicCache).use { service ->
+                    assertEquals(listOf(own.id, followed.id), service.loadHomeTimeline(20, null).ids())
+                    assertEquals(listOf(followed.id), service.loadHomeTimeline(20, 99).ids())
+                    assertTrue(service.loadHomeTimeline(20, 98).isEmpty())
+                    network.storedEvents += nostrTestEvent("""{"name":"updated"}""", kind = 0, time = 1_800_000_000)
+                    assertEquals("updated", service.loadProfile(me).name.raw)
+                }
+                assertTrue("contact_list" in requests)
+                assertTrue("feed" in requests)
+                assertTrue(network.published.isEmpty())
+            }
+        }
+
+    @Test
+    fun homeCacheKeepsPartialResultsAndReportsTotalFailure() =
+        runTest {
+            QuartzTestRelays(this).use { network ->
+                val contacts = nostrTestEvent(kind = 3, tags = listOf(listOf("p", other)))
+                val own = nostrTestEvent(time = 100)
+                var allFailed = false
+                val publicCache =
+                    NostrPublicEventCache { method, parameters ->
+                        when (method) {
+                            "contact_list" -> {
+                                listOf(contacts)
+                            }
+
+                            "feed" -> {
+                                if (allFailed ||
+                                    parameters["notes"]?.jsonPrimitive?.content == "follows"
+                                ) {
+                                    error("cache unavailable")
+                                } else {
+                                    listOf(own)
+                                }
+                            }
+
+                            "user_infos" -> {
+                                emptyList()
+                            }
+
+                            else -> {
+                                error("Unexpected cache request: $method")
+                            }
+                        }
+                    }
+                network.service(publicEventCache = publicCache).use { service ->
+                    assertEquals(listOf(own.id), service.loadHomeTimeline(20, null).ids())
+                    allFailed = true
+                    assertFailsWith<IllegalStateException> { service.loadHomeTimeline(20, null) }
+                }
+                assertTrue(network.published.isEmpty())
+            }
+        }
+
+    @Test
+    fun unavailableArchiveMetadataDoesNotHideAvailablePostsButMissingFeedsStillFail() =
+        runTest {
+            QuartzTestRelays(this).use { network ->
+                val own = nostrTestEvent()
+                network.storedEvents += listOf(nostrTestEvent(kind = 3), own)
+                val publicCache = NostrPublicEventCache { _, _ -> error("archive unavailable") }
+                network.service(publicEventCache = publicCache).use { service ->
+                    assertEquals(listOf(own.id), service.loadHomeTimeline(20, null).ids())
+                    network.storedEvents.remove(own)
+                    assertFailsWith<IllegalStateException> { service.loadHomeTimeline(20, null) }
+                }
+            }
+        }
+
+    @Test
+    fun explicitEmptyRelayContactsDoNotResurrectArchivedFollows() =
+        runTest {
+            QuartzTestRelays(this).use { network ->
+                val own = nostrTestEvent()
+                network.storedEvents += listOf(nostrTestEvent(kind = 3), own, nostrTestEvent(author = 1), nostrTestEvent("{}", kind = 0))
+                val publicCache = NostrPublicEventCache { _, _ -> error("Relay data must take precedence") }
+                network.service(publicEventCache = publicCache).use { service ->
+                    assertEquals(listOf(own.id), service.loadHomeTimeline(20, null).ids())
+                }
+            }
+        }
+
+    @Test
     fun homeUsesNewestContactsIncludesSelfAndPagesByTimestamp() =
         runTest {
             QuartzTestRelays(this).use { network ->

@@ -24,6 +24,7 @@ import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,13 +32,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import com.vitorpamplona.quartz.nip01Core.core.Event as QuartzEvent
 
 internal class NostrRelayClient(
@@ -89,23 +92,44 @@ internal fun normalizedNostrRelays(relays: List<String>): Set<NormalizedRelayUrl
 internal suspend fun INostrClient.fetchNostrEvents(
     relays: Set<NormalizedRelayUrl>,
     filters: List<Filter>,
-    timeout: Duration = 1.minutes,
+    timeout: Duration = 10.seconds,
 ): List<QuartzEvent> {
     if (relays.isEmpty() || filters.isEmpty()) return emptyList()
     val queries = filters.map { it.toQuartz() }
     val events = linkedMapOf<String, QuartzEvent>()
-    // Keep partial results when the hard deadline expires, including if a relay never sends EOSE.
-    withTimeoutOrNull(timeout) {
-        fetchAllWithHooks(
-            filters = relays.associateWith { queries },
-            idleTimeoutMs = timeout.inWholeMilliseconds,
-        ) { _, event ->
-            if (event.id !in events && queries.any { it.match(event) } && event.verify()) {
-                events[event.id] = event
-                true
-            } else {
-                false
+    // Replaceable lists can feed account updates, so collect their newer versions until completion.
+    val settleAfterFirstEvent =
+        filters.all { filter ->
+            val hasReplaceableKind = filter.kinds.any { it == 0 || it == 3 || it in 10_000..19_999 || it in 30_000..39_999 }
+            filter.ids.isNotEmpty() || (filter.kinds.isNotEmpty() && !hasReplaceableKind)
+        }
+    coroutineScope {
+        val firstEvent = CompletableDeferred<Unit>()
+        val fetch =
+            launch {
+                withTimeoutOrNull(timeout) {
+                    fetchAllWithHooks(
+                        filters = relays.associateWith { queries },
+                        idleTimeoutMs = minOf(timeout.inWholeMilliseconds, 3_000),
+                    ) { _, event ->
+                        if (event.id !in events && queries.any { it.match(event) } && event.verify()) {
+                            events[event.id] = event
+                            if (settleAfterFirstEvent) firstEvent.complete(Unit)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
             }
+        try {
+            select<Unit> {
+                fetch.onJoin { }
+                // Live events from healthy relays must not extend the wait for a silent peer.
+                firstEvent.onAwait { withTimeoutOrNull(2.seconds) { fetch.join() } }
+            }
+        } finally {
+            fetch.cancelAndJoin()
         }
     }
     return events.values.sortedWith(compareByDescending<QuartzEvent> { it.createdAt }.thenBy { it.id })

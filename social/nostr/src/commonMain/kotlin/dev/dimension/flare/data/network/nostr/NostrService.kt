@@ -79,7 +79,6 @@ internal val defaultNostrRelays: List<String> =
     listOf(
         "wss://relay.damus.io",
         "wss://nos.lol",
-        "wss://relay.plebstr.com",
         "wss://nostr.bitcoiner.social",
     )
 
@@ -91,6 +90,7 @@ internal class NostrService(
     initialRelays: List<String> = emptyList(),
     private val suppliedClient: INostrClient? = null,
     private val relayInfoClient: HttpClient = ktorClient(ProxyRef.System) { expectSuccess = true },
+    private val publicEventCache: NostrPublicEventCache = NostrPublicEventCache(),
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -158,7 +158,7 @@ internal class NostrService(
                 val events =
                     transport.client
                         .fetchNostrEvents(
-                            relays = normalizedNostrRelays(normalizedBootstrap),
+                            relays = normalizedNostrRelays(normalizedBootstrap + "wss://purplepag.es"),
                             filters =
                                 listOf(
                                     Filter(
@@ -324,6 +324,7 @@ internal class NostrService(
                             limit = pageSize,
                         ),
                     ),
+                homePubkey = pubKeyHex,
             ).filter(::isTimelineRootEvent)
                 .sortedByDescending { it.createdAt }
 
@@ -331,25 +332,28 @@ internal class NostrService(
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(roots = events)
-        val interactionStats =
-            loadInteractionStats(
-                accountPubkey = pubKeyHex,
-                targetEventIds = eventGraph.keys.toList(),
-            )
-
-        val renderContexts = eventGraph.buildRenderContexts()
-        val profiles =
-            loadProfiles(
-                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
-            )
-        return events.toUiTimeline(
-            profiles = profiles,
-            eventsById = eventGraph,
-            interactionStats = interactionStats,
-            renderContexts = renderContexts,
-        )
+        return loadTimeline(events)
     }
+
+    private suspend fun loadTimeline(events: List<Event>): List<UiTimelineV2> =
+        coroutineScope {
+            val eventGraph = loadEventGraph(roots = events)
+            val renderContexts = eventGraph.buildRenderContexts()
+            val interactionStats =
+                async {
+                    loadInteractionStats(accountPubkey = pubKeyHex, targetEventIds = eventGraph.keys.toList())
+                }
+            val profiles =
+                async {
+                    loadProfiles(pubKeys = eventGraph.profilePubKeysForRendering(renderContexts))
+                }
+            events.toUiTimeline(
+                profiles = profiles.await(),
+                eventsById = eventGraph,
+                interactionStats = interactionStats.await(),
+                renderContexts = renderContexts,
+            )
+        }
 
     internal suspend fun loadProfile(targetPubkey: String): UiProfile {
         val cachedProfile = cache.getProfiles(listOf(targetPubkey))[targetPubkey]
@@ -390,23 +394,7 @@ internal class NostrService(
         if (events.isEmpty()) {
             return emptyList()
         }
-        val eventGraph = loadEventGraph(roots = events)
-        val interactionStats =
-            loadInteractionStats(
-                accountPubkey = pubKeyHex,
-                targetEventIds = eventGraph.keys.toList(),
-            )
-        val renderContexts = eventGraph.buildRenderContexts()
-        val profiles =
-            loadProfiles(
-                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
-            )
-        return events.toUiTimeline(
-            profiles = profiles,
-            eventsById = eventGraph,
-            interactionStats = interactionStats,
-            renderContexts = renderContexts,
-        )
+        return loadTimeline(events)
     }
 
     internal suspend fun searchStatus(
@@ -453,23 +441,7 @@ internal class NostrService(
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(roots = events)
-        val interactionStats =
-            loadInteractionStats(
-                accountPubkey = pubKeyHex,
-                targetEventIds = eventGraph.keys.toList(),
-            )
-        val renderContexts = eventGraph.buildRenderContexts()
-        val profiles =
-            loadProfiles(
-                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
-            )
-        return events.toUiTimeline(
-            profiles = profiles,
-            eventsById = eventGraph,
-            interactionStats = interactionStats,
-            renderContexts = renderContexts,
-        )
+        return loadTimeline(events)
     }
 
     internal suspend fun searchUser(
@@ -926,8 +898,30 @@ internal class NostrService(
                 }
             }.distinct()
 
-    private suspend fun queryAllRelays(filters: List<Filter>): List<Event> =
-        client.fetchNostrEvents(currentRelays.value, filters).map { it.toCompatEvent() }
+    private suspend fun queryAllRelays(
+        filters: List<Filter>,
+        homePubkey: String? = null,
+    ): List<Event> {
+        publicEventCache.find(filters)?.let { return it.map { event -> event.toCompatEvent() } }
+        val events = client.fetchNostrEvents(currentRelays.value, filters)
+        val resolved =
+            events.ifEmpty {
+                try {
+                    publicEventCache.fetch(filters, homePubkey)
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    if (homePubkey != null ||
+                        filters.any { it.kinds == listOf(ContactListEvent.KIND) || it.kinds == timelineEventKinds }
+                    ) {
+                        throw error
+                    }
+                    // Missing optional profiles or references must not hide posts already fetched.
+                    emptyList()
+                }
+            }
+        return resolved.map { it.toCompatEvent() }
+    }
 
     internal suspend fun fetchTextLimits(relay: String): NostrTextLimits {
         val lookupMutex = relayLimitsMutex.withLock { relayLookupMutexes.getOrPut(relay) { Mutex() } }

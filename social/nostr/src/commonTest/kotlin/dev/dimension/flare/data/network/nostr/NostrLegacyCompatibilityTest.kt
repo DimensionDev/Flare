@@ -135,6 +135,7 @@ class NostrLegacyCompatibilityTest {
                         initialRelays = network.relays.map { it.url },
                         suppliedClient = network.client,
                         relayInfoClient = nostrTestRelayInfoClient(),
+                        publicEventCache = NostrPublicEventCache { _, _ -> emptyList() },
                     ).use { it.action() }
                     val actual = published.distinctBy { it.id }.single()
                     val expected = rustNostrEventFixtures.getValue(name)

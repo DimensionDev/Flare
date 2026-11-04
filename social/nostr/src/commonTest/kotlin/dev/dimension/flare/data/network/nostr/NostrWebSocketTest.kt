@@ -165,7 +165,7 @@ class NostrWebSocketTest {
     }
 
     @OptIn(InternalAPI::class)
-    private class TestSession(
+    internal class TestSession(
         context: CoroutineContext,
     ) : DefaultWebSocketSession {
         override val coroutineContext = context + Job(context[Job])

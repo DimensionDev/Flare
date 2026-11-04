@@ -45,6 +45,7 @@ internal class QuartzTestRelays(
     val published = mutableListOf<QuartzEvent>()
     val acceptedPublications = mutableListOf<Pair<NormalizedRelayUrl, QuartzEvent>>()
     var endStoredEvents = true
+    var silentRelays = emptySet<NormalizedRelayUrl>()
     var acceptedRelays = relays
     var requireAuthentication = false
     var acceptAuthentication = true
@@ -118,6 +119,7 @@ internal class QuartzTestRelays(
                         val id = frame[1].jsonPrimitive.content
                         subscriptions[id] = frame.drop(2).map { it.jsonObject }
                         queries += url to subscriptions.getValue(id)
+                        if (url in silentRelays) return@launch
                         if (requireAuthentication && url !in authenticatedRelays) {
                             out.onMessage("[\"CLOSED\",\"$id\",\"auth-required: authenticate first\"]")
                         } else {
@@ -202,6 +204,7 @@ internal fun QuartzTestRelays.service(
                 ),
         ),
     relayInfoClient: HttpClient = nostrTestRelayInfoClient(),
+    publicEventCache: NostrPublicEventCache = NostrPublicEventCache { _, _ -> emptyList() },
     cache: NostrCache =
         object : NostrCache {
             override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> = emptyMap()
@@ -220,6 +223,7 @@ internal fun QuartzTestRelays.service(
         relays.map { it.url },
         client,
         relayInfoClient,
+        publicEventCache,
     )
 
 internal fun nostrTestRelayInfoClient(): HttpClient =

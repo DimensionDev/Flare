@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respondOk
 import io.ktor.http.Url
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,6 +22,7 @@ class NostrPublicationLimitsTest {
                     val http =
                         HttpClient(MockEngine) {
                             engine {
+                                dispatcher = StandardTestDispatcher(testScheduler)
                                 addHandler { request ->
                                     val limit = if (request.url.host in excludedHosts) 1 else 100
                                     respondOk("""{"limitation":{"max_content_length":$limit}}""")
@@ -49,7 +51,10 @@ class NostrPublicationLimitsTest {
             QuartzTestRelays(backgroundScope).use { network ->
                 val http =
                     HttpClient(MockEngine) {
-                        engine { addHandler { respondOk("""{"limitation":{"max_content_length":100,"max_message_length":1}}""") } }
+                        engine {
+                            dispatcher = StandardTestDispatcher(testScheduler)
+                            addHandler { respondOk("""{"limitation":{"max_content_length":100,"max_message_length":1}}""") }
+                        }
                     }
                 network.service(relayInfoClient = http).use { service ->
                     assertFailsWith<IllegalArgumentException> { service.composeNote("note") }

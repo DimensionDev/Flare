@@ -17,6 +17,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import dev.dimension.flare.data.model.PluginPermission
 import dev.dimension.flare.data.model.PluginPermissionType
+import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningTypeV1
+import dev.dimension.flare.feature.plugin.installer.PluginInstallWarningV1
 import dev.dimension.flare.feature.plugin.management.PluginGitHubInstallStateV1
 import dev.dimension.flare.feature.plugin.management.PluginInstallReviewV1
 import dev.dimension.flare.feature.plugin.management.PluginManagementStateV1
@@ -47,6 +49,26 @@ class GitHubInstallDialogTest {
             sourceUrl = url,
             permissions = listOf(PluginPermission(PluginPermissionType.MediaNetwork, "*")),
         )
+
+    @Test
+    fun runtimeHttpPermissionIsDistinctFromLoginAccessInTheUpdateReview() {
+        val origin = "https://api.example.org"
+        val permission = PluginPermission(PluginPermissionType.HttpOrigin, origin)
+        state =
+            state.copy(
+                pendingInstall =
+                    review.copy(
+                        permissions = listOf(PluginPermission(PluginPermissionType.NetworkOrigin, origin), permission),
+                        warnings = listOf(PluginInstallWarningV1(PluginInstallWarningTypeV1.AddedPermission, origin, permission)),
+                    ),
+            )
+        show()
+        compose.onNodeWithText("• Access $origin during login").performScrollTo().assertIsDisplayed()
+        compose.onAllNodesWithText("Send requests and data to $origin while using the plugin", substring = true).assertCountEquals(2)
+        compose.runOnIdle { assertEquals(0, confirmations) }
+        compose.onNodeWithText(install).performClick()
+        compose.runOnIdle { assertEquals(1, confirmations) }
+    }
 
     @Test
     fun downloadRetryAndPermissionConfirmationStayInTheSameDialog() {

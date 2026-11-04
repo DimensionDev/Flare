@@ -304,6 +304,43 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun accountAndGuestRequestsUseTheRunningPackagesHttpOrigins() =
+        runBlocking {
+            val requests = mutableListOf<PluginTransportRequestV1>()
+            runtimePool.close()
+            runtimePool =
+                PluginRuntimePool(
+                    fileSystem,
+                    object : PluginHttpTransport {
+                        override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 {
+                            requests += request
+                            return PluginTransportResponseV1(200, emptyMap(), "{}".encodeToByteArray())
+                        }
+                    },
+                )
+            val manifest =
+                MANIFEST
+                    .replace("\"mediaNetwork\": true", "\"mediaNetwork\": true, \"httpOrigins\": [\"https://api.example\"]")
+                    .replace("\"capabilities\": {", "\"guest\": {\"enabled\": true}, \"capabilities\": {")
+            val script =
+                SCRIPT.replace(
+                    "page(request) {",
+                    "async page(request) { await flare.http.request({url: 'https://api.example/data'});",
+                )
+            val plugin = install(manifest, script)
+            assertEquals(5, detailPosts(authenticated(plugin)).size)
+            assertEquals(5, detailPosts(PluginDataSourceV1.guest(plugin, runtimePool, ORIGIN, "en", emptyMap(), null)).size)
+            assertEquals(2, requests.size)
+            assertTrue(requests.all { it.url == "https://api.example/data" && it.headers.isEmpty() })
+            val removed = install(manifest.replace("\"httpOrigins\": [\"https://api.example\"]", "\"httpOrigins\": []"), script)
+            assertFailsWith<PluginRuntimeUnavailableException> { detailPosts(authenticated(removed)) }
+            assertFailsWith<PluginRuntimeUnavailableException> {
+                detailPosts(PluginDataSourceV1.guest(removed, runtimePool, ORIGIN, "en", emptyMap(), null))
+            }
+            assertEquals(2, requests.size)
+        }
+
+    @Test
     fun guestsKeepDetailRoutesWithoutAccountCapabilities() =
         runBlocking<Unit> {
             val plugin = install(manifest = MANIFEST.replace("\"capabilities\": {", "\"guest\": {\"enabled\": true}, \"capabilities\": {"))

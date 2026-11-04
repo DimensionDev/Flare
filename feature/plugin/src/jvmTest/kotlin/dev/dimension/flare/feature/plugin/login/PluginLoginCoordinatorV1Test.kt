@@ -155,12 +155,17 @@ class PluginLoginCoordinatorV1Test {
     @Test
     fun loginAndReloginHttpRequestsKeepPolicyAfterOAuthRecreation() =
         runBlocking {
-            val httpProbe = "await flare.http.request({ url: request.origin + '/probe' });"
+            val httpProbe = "await flare.http.request({ url: 'https://api.example/probe' });"
             plugin =
                 install(
                     LOGIN_SCRIPT
                         .replace("async begin(request) {", "async begin(request) { $httpProbe")
                         .replace("async resume(request) {", "async resume(request) { $httpProbe"),
+                    manifest =
+                        LOGIN_MANIFEST.replace(
+                            "\"platform\": {",
+                            "\"permissions\": {\"httpOrigins\": [\"https://api.example\"]}, \"platform\": {",
+                        ),
                 )
             val requests = mutableListOf<PluginTransportRequestV1>()
             pool.close()
@@ -189,7 +194,24 @@ class PluginLoginCoordinatorV1Test {
                 )
                 val expected = expectedAccountId?.let { ProxyRef.Account(MicroBlogKey(it, "plugin.example")) } ?: ProxyRef.Global
                 assertEquals(List(5) { expected }, requests.map { it.proxy })
+                assertEquals(4, requests.count { it.url == "https://api.example/probe" })
             }
+        }
+
+    @Test
+    fun httpOriginsAllowLoginHttpWithoutGrantingAnAuthorizationPage() =
+        runBlocking {
+            val script = LOGIN_SCRIPT.replace("request.origin + \"/oauth?state=\"", "\"https://api.example/oauth?state=\"")
+            val manifest =
+                LOGIN_MANIFEST.replace(
+                    "\"platform\": {",
+                    "\"permissions\": {\"httpOrigins\": [\"https://api.example\"], \"authOrigins\": []}, \"platform\": {",
+                )
+            plugin = install(script, manifest)
+            assertFailsWith<IllegalArgumentException> { oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en") }
+            plugin = install(script, manifest.replace("\"authOrigins\": []", "\"authOrigins\": [\"https://api.example\"]"))
+            val start = assertIs<PluginOAuthStartV1.ExternalBrowser>(oauthCoordinator().begin(plugin, "oauth", ORIGIN, "en"))
+            assertTrue(start.url.startsWith("https://api.example/oauth?"))
         }
 
     @Test

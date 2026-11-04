@@ -215,6 +215,7 @@ internal fun RunningPluginV1.accountInvocationContext(
         locale = locale,
         credential = credentialAccess,
         assets = assets,
+        httpOrigins = installed.manifest.permissions.httpOrigins,
     )
 
 private fun Map<String, Set<String>>.isCapabilitySnapshot(): Boolean =

@@ -250,8 +250,12 @@ await flare.http.request({
 ```
 
 Detector calls may access only the candidate origin. Login calls may also use
-exact HTTPS origins listed in `permissions.authOrigins`. Account and guest
-calls use the verified account origin. Redirects stay on the current origin.
+exact HTTPS origins listed in `permissions.authOrigins` and `permissions.httpOrigins`.
+Account and guest calls may use their selected origin and `permissions.httpOrigins`.
+Additional HTTP origins do not grant authorization-page, Cookie-probe, or Deep Link
+access. Credentials are sent only when explicitly supplied in the request;
+extra destinations do not change account identity or proxy routing.
+Redirects stay on the current origin, even when both origins are approved.
 
 Automatic media loading is a separate permission, disabled by default. A plugin
 that returns avatars, images, audio, video, covers, or HTML images must declare

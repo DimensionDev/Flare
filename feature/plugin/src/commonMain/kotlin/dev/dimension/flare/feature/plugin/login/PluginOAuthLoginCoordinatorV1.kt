@@ -100,7 +100,7 @@ public class PluginOAuthLoginCoordinatorV1(
             }
         return when (transition) {
             is LoginTransitionV1.ExternalBrowser -> {
-                PluginUrlPolicy.requireRequestUrl(transition.url, context.metadata.approvedOrigins)
+                PluginUrlPolicy.requireRequestUrl(transition.url, plugin.approvedLoginOrigins(canonicalOrigin))
                 val pending =
                     PluginOAuthPendingV1(
                         pluginId = plugin.installed.pluginId,
@@ -251,6 +251,7 @@ internal fun RunningPluginV1.loginContext(
         authOrigins = installed.manifest.permissions.authOrigins,
         locale = locale,
         expectedAccountId = expectedAccountId,
+        httpOrigins = installed.manifest.permissions.httpOrigins,
     )
 
 internal fun RunningPluginV1.loginKey(flowId: String): PluginRuntimeKeyV1 =

@@ -7,6 +7,8 @@ import dev.dimension.flare.feature.plugin.wire.HttpMultipartPartV1
 import dev.dimension.flare.feature.plugin.wire.HttpRequestV1
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import okio.Buffer
 import okio.Source
 import kotlin.test.Test
@@ -18,6 +20,59 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class PluginHttpHostTest {
+    @Test
+    fun additionalHttpOriginsKeepAccountRoutingAndRequireExactOrigins() =
+        runBlocking {
+            val origin = "https://instance.example"
+            val extra = "https://api.example"
+            val grants = setOf(extra)
+            val credential = MemoryCredential()
+            credential.replace(JsonObject(mapOf("accessToken" to JsonPrimitive("secret"))))
+            val contexts =
+                listOf(
+                    PluginInvocationContextV1.login(
+                        PLUGIN_ID,
+                        PLATFORM_ID,
+                        HASH,
+                        origin,
+                        setOf("https://auth.example"),
+                        "en",
+                        httpOrigins = grants,
+                    ),
+                    PluginInvocationContextV1.login(
+                        PLUGIN_ID,
+                        PLATFORM_ID,
+                        HASH,
+                        origin,
+                        emptySet(),
+                        "en",
+                        expectedAccountId = "1",
+                        httpOrigins = grants,
+                    ),
+                    PluginInvocationContextV1.account(PLUGIN_ID, PLATFORM_ID, HASH, origin, "1", "en", credential, httpOrigins = grants),
+                    PluginInvocationContextV1.guest(PLUGIN_ID, PLATFORM_ID, HASH, origin, "en", httpOrigins = grants),
+                )
+            for (context in contexts) {
+                val transport = RecordingTransport()
+                val host = PluginHttpHost(transport)
+                host.execute(HttpRequestV1(url = "$extra/data", method = "POST", body = HttpBodyV1.Text("payload")), context, 30_000)
+                val sent = transport.requests.single()
+                assertEquals(context.proxy, sent.proxy)
+                assertEquals(origin, context.metadata.origin)
+                assertTrue(sent.headers.isEmpty(), "Account credentials must not be attached automatically")
+                for (denied in listOf("https://sub.api.example", "$extra:8443", "http://api.example", "https://other.example")) {
+                    assertFails { host.execute(HttpRequestV1(url = "$denied/data"), context, 30_000) }
+                }
+                assertEquals(1, transport.requests.size)
+            }
+            val detector = PluginInvocationContextV1.detector(PLUGIN_ID, PLATFORM_ID, HASH, origin, "en")
+            val transport = RecordingTransport()
+            assertFails { PluginHttpHost(transport).execute(HttpRequestV1(url = "$extra/data"), detector, 30_000) }
+            assertTrue(transport.requests.isEmpty())
+            assertEquals(ProxyRef.Account(MicroBlogKey("1", "instance.example")), contexts[2].proxy)
+            assertEquals(contexts[2].proxy, contexts[1].proxy)
+        }
+
     @Test
     fun hostSelectsRoutesForEveryScopeAndPreservesThemAcrossRedirectsAndAuthOrigins() =
         runBlocking {
@@ -166,10 +221,11 @@ class PluginHttpHostTest {
             assertFails {
                 PluginHttpHost(crossOrigin).execute(
                     HttpRequestV1(url = "https://instance.example/start"),
-                    context(authOrigins = setOf("https://auth.example")),
+                    context(httpOrigins = setOf("https://auth.example")),
                     30_000,
                 )
             }
+            assertEquals(1, crossOrigin.requests.size, "A redirect must not send a request to another approved origin")
             Unit
         }
 
@@ -283,6 +339,7 @@ class PluginHttpHostTest {
     private fun context(
         authOrigins: Set<String> = emptySet(),
         assets: Map<String, PluginAsset> = emptyMap(),
+        httpOrigins: Set<String> = emptySet(),
     ): PluginInvocationContextV1 =
         if (assets.isEmpty()) {
             PluginInvocationContextV1.login(
@@ -292,6 +349,7 @@ class PluginHttpHostTest {
                 candidateOrigin = "https://instance.example",
                 authOrigins = authOrigins,
                 locale = "en",
+                httpOrigins = httpOrigins,
             )
         } else {
             PluginInvocationContextV1.account(
@@ -303,6 +361,7 @@ class PluginHttpHostTest {
                 locale = "en",
                 credential = MemoryCredential(),
                 assets = assets,
+                httpOrigins = httpOrigins,
             )
         }
 }

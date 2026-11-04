@@ -1385,6 +1385,40 @@
       }
     }
   },
+  "plugin_permission_http_origin": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Send requests and data to %1$@ while using the plugin"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "使用插件期间向 %1$@ 发送请求和数据"
+        }
+      }
+    }
+  },
+  "plugin_permission_auth_origin": {
+    "extractionState": "manual",
+    "localizations": {
+      "en": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "Access %1$@ during login"
+        }
+      },
+      "zh-Hans": {
+        "stringUnit": {
+          "state": "translated",
+          "value": "登录期间访问 %1$@"
+        }
+      }
+    }
+  },
   "plugin_permission_media_network": {
     "extractionState": "manual",
     "localizations": {

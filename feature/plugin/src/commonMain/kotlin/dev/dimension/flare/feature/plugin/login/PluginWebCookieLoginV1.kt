@@ -78,13 +78,14 @@ public class PluginWebCookieLoginCoordinatorV1(
         val cookie = requireNotNull(method.cookie)
         val canonicalOrigin = PluginUrlPolicy.requireOrigin(origin)
         val context = plugin.loginContext(canonicalOrigin, locale, expectedAccountId)
+        val loginOrigins = plugin.approvedLoginOrigins(canonicalOrigin)
         val request =
             PluginWebCookieRequestV1(
-                startUrl = resolveManifestUrl(cookie.startUrl, canonicalOrigin, context.metadata.approvedOrigins),
+                startUrl = resolveManifestUrl(cookie.startUrl, canonicalOrigin, loginOrigins),
                 probes =
                     cookie.probes.map { probe ->
                         PluginCookieProbeV1(
-                            url = resolveManifestUrl(probe.url, canonicalOrigin, context.metadata.approvedOrigins),
+                            url = resolveManifestUrl(probe.url, canonicalOrigin, loginOrigins),
                             cookies = probe.cookies,
                         )
                     },
@@ -111,7 +112,7 @@ public class PluginWebCookieLoginCoordinatorV1(
             val webCookie =
                 transition as? LoginTransitionV1.WebCookie
                     ?: throw PluginLoginException("login.transition", "Cookie login did not open a WebView")
-            val returnedStart = PluginUrlPolicy.requireRequestUrl(webCookie.startUrl, context.metadata.approvedOrigins).toString()
+            val returnedStart = PluginUrlPolicy.requireRequestUrl(webCookie.startUrl, loginOrigins).toString()
             require(returnedStart == request.startUrl) { "Cookie login start URL differs from the manifest" }
             return PluginWebCookieSessionV1(
                 runtimePool = runtimePool,

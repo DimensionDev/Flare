@@ -83,18 +83,33 @@ construct a different account identity or widen permissions from remote data.
 | Scope | HTTP origins | Credential API | Proxy routing |
 | --- | --- | --- | --- |
 | Detector | Candidate origin | Unavailable | Global |
-| New login | Selected origin + declared authOrigins | Unavailable | Global |
-| Relogin | Selected origin + declared authOrigins | Unavailable | Existing account |
-| Account | Verified account origin | Current account only | Account |
-| Guest | Selected guest origin | Unavailable | Global |
+| New login | Selected origin + authOrigins + httpOrigins | Unavailable | Global |
+| Relogin | Selected origin + authOrigins + httpOrigins | Unavailable | Existing account |
+| Account | Verified account origin + httpOrigins | Current account only | Account |
+| Guest | Selected guest origin + httpOrigins | Unavailable | Global |
 
 Supply absolute HTTPS request URLs without URL credentials or fragments. Same
-hostname with a different scheme/port is a different origin. A website whose
-authenticated API is on another origin must be designed around the selected
-API origin; adding `authOrigins` does not grant cross-origin account requests.
+hostname with a different scheme/port is a different origin. Declare an API or
+public-resource origin in `permissions.httpOrigins` when it differs from the
+selected origin. `authOrigins` still adds login-only access. Additional HTTP
+origins do not grant authorization-page, Cookie-probe, or Deep Link access.
+
+```json
+{ "permissions": { "httpOrigins": ["https://api.example.org", "https://cdn.example.org"] } }
+```
+
+The Host never automatically attaches account credentials to these requests.
+Supply structured authorization or Cookies explicitly for the destination that
+needs them; omit them for public resources. HTTP-origin permission allows sending
+data to that website and does not restrict the contents of a URL, header, or body.
+Account identity and proxy routing still use the selected account origin.
+`context.approvedOrigins` contains the effective HTTP allowlist for this call.
+Older Hosts ignore the new manifest field and continue rejecting extra origins;
+check this context before invoking features that require the grant and report a
+typed Unsupported error if unavailable.
 
 Only GET/HEAD redirects are supported, up to five, staying on the current origin
-even if another origin is approved for login. Redirected POST uploads/token
+even if another origin is approved. Redirected POST uploads/token
 exchanges must use their final endpoint directly.
 
 `mediaNetwork: true` separately permits automatic remote images/avatars/covers/

@@ -780,6 +780,7 @@ internal class PluginDataSourceV1 private constructor(
                             packageHash = plugin.installed.packageHash,
                             origin = canonicalOrigin,
                             locale = invocationLocale.ifBlank { locale },
+                            httpOrigins = plugin.installed.manifest.permissions.httpOrigins,
                         )
                     },
                 )

@@ -65,6 +65,10 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     permissions.authOrigins.forEachIndexed { index, origin ->
         check(origin.isExactHttpsOrigin(), "permission.origin", "permissions.authOrigins[$index]", "Auth origin must be exact HTTPS origin")
     }
+    check(permissions.httpOrigins.size <= 16, "permission.count", "permissions.httpOrigins", "Too many HTTP origins")
+    permissions.httpOrigins.forEachIndexed { index, origin ->
+        check(origin.isExactHttpsOrigin(), "permission.origin", "permissions.httpOrigins[$index]", "HTTP origin must be exact HTTPS origin")
+    }
 
     check(platform.capabilities.size <= 32, "capability.count", "platform.capabilities", "Too many capabilities")
     platform.capabilities.forEach { (capabilityId, declaration) ->

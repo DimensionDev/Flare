@@ -14,4 +14,5 @@ public enum class PluginPermissionType {
     NetworkOrigin,
     MediaNetwork,
     Cookie,
+    HttpOrigin,
 }

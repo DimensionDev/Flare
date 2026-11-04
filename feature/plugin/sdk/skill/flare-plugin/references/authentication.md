@@ -147,7 +147,10 @@ field updates, an extra resume call, or a pending-form transition.
 Declare `{ "id": "oauth", "interaction": "OAuth", "title": "Authorize" }`
 without fields or Cookie config. Implement `login.oauth.begin` and `.resume`.
 Add exact `authOrigins` for a separate authorization/token origin when needed;
-this does not expand later account HTTP access.
+this does not expand later account HTTP access. Use `httpOrigins` for additional
+HTTP destinations during login or later calls. An authorization page or Cookie
+probe still needs `authOrigins` when outside the selected origin; an HTTP-only
+grant cannot open that origin as an authorization page or read its browser Cookies.
 
 1. `begin` receives Host-owned `flowId`, `state`, `redirectUri`, and selected
    origin. Use the supplied state and redirect URI. Register a client only if

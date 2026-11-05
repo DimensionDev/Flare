@@ -2,18 +2,15 @@ import XCTest
 
 final class CounterInteractionTests: XCTestCase {
     @MainActor
-    func testRustStateAndRepeatedPageExitReleaseNativeResources() {
+    func testCruxStateAndRepeatedPageExit() {
         let app = XCUIApplication()
         app.launchArguments = ["--counter-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
         defer { app.terminate() }
-        let resources = app.staticTexts["counter-resources"]
-        expect(resources, "0,0,0")
 
         for _ in 0..<8 {
             app.buttons["counter-compose"].tap()
             expect(app.staticTexts["counter-value"], "0")
-            expect(resources, "1,1,1")
             app.buttons["counter-increment"].tap()
             expect(app.staticTexts["counter-value"], "1")
             app.buttons["counter-decrement"].tap()
@@ -23,23 +20,20 @@ final class CounterInteractionTests: XCTestCase {
             app.buttons["counter-reset"].tap()
             expect(app.staticTexts["counter-value"], "0")
             app.navigationBars["Counter"].buttons.firstMatch.tap()
-            expect(resources, "0,0,0")
         }
     }
 
     @MainActor
-    func testInteractiveBackReleasesPendingSubscription() {
+    func testInteractiveBackReturnsToHome() {
         let app = XCUIApplication()
         app.launchArguments = ["--counter-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
         defer { app.terminate() }
         XCTAssertTrue(app.buttons["counter-compose"].waitForExistence(timeout: 15))
         app.buttons["counter-compose"].tap()
-        expect(app.staticTexts["counter-resources"], "1,1,1")
         let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
         let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5))
         start.press(forDuration: 0.1, thenDragTo: end)
-        expect(app.staticTexts["counter-resources"], "0,0,0")
         XCTAssertTrue(app.buttons["counter-compose"].exists)
     }
 
@@ -55,12 +49,9 @@ final class CounterInteractionTests: XCTestCase {
         app.buttons["counter-increment"].tap()
         expect(app.staticTexts["counter-value"], "1")
         app.buttons["counter-detail"].tap()
-        expect(app.staticTexts["counter-resources"], "1,0,1")
         app.navigationBars["Detail"].buttons.firstMatch.tap()
         expect(app.staticTexts["counter-value"], "1")
-        expect(app.staticTexts["counter-resources"], "1,1,1")
         app.navigationBars["Counter"].buttons.firstMatch.tap()
-        expect(app.staticTexts["counter-resources"], "0,0,0")
     }
 
     @MainActor
@@ -76,12 +67,10 @@ final class CounterInteractionTests: XCTestCase {
         app.buttons["counter-increment"].tap()
         expect(app.staticTexts["counter-error"], "counter value or state revision would overflow")
         expect(app.staticTexts["counter-value"], maximum)
-        expect(app.staticTexts["counter-resources"], "1,1,1")
         app.buttons["counter-reset"].tap()
         expect(app.staticTexts["counter-value"], "0")
         XCTAssertFalse(app.staticTexts["counter-error"].exists)
         app.navigationBars["Counter"].buttons.firstMatch.tap()
-        expect(app.staticTexts["counter-resources"], "0,0,0")
     }
 
     @MainActor

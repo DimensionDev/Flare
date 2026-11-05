@@ -1,3 +1,2 @@
-# UniFFI calls JNA interfaces and Structure fields by their generated names.
+# BoltFFI JNI entry points depend on the generated Kotlin class names.
 -keep class dev.dimension.flare.rust.** { *; }
--keep class com.sun.jna.** { *; }

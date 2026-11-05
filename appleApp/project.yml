@@ -49,6 +49,8 @@ settings:
       VALIDATE_PRODUCT: YES
 
 packages:
+  FlareCounterTypes:
+    path: ../rust/bindings/types/swift/FlareCounterTypes
   ChatLayout:
     url: https://github.com/ekazaev/ChatLayout
     exactVersion: 2.5.2
@@ -146,52 +148,61 @@ targets:
     type: framework.static
     platform: iOS
     sources:
-      - path: ../rust/bindings/swift/FlareRust.swift
+      - path: ../rust/bindings/swift/FlareFfiBoltFFI.swift
     preBuildScripts:
       - name: Generate Bindings and Compile Rust
         basedOnDependencyAnalysis: false
         inputFiles:
           - "$(SRCROOT)/../rust/Cargo.toml"
           - "$(SRCROOT)/../rust/Cargo.lock"
-          - "$(SRCROOT)/../rust/xtask/Cargo.toml"
-          - "$(SRCROOT)/../rust/xtask/src/main.rs"
+          - "$(SRCROOT)/../rust/Justfile"
+          - "$(SRCROOT)/../rust/crates/flare-core/src/bin/codegen.rs"
         outputFiles:
-          - "$(SRCROOT)/../rust/bindings/swift/FlareRust.swift"
-          - "$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.h"
+          - "$(SRCROOT)/../rust/bindings/swift/FlareFfiBoltFFI.swift"
+          - "$(SRCROOT)/../rust/bindings/swift/boltffi.h"
           - "$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
-          - "$(SRCROOT)/ios/Common/RustPresenterBindings.swift"
+          - "$(SRCROOT)/../rust/bindings/types/swift/FlareCounterTypes/Package.swift"
           - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
         script: |
           set -eu
           cd "$SRCROOT/../rust"
-          CARGO="${CARGO:-$HOME/.cargo/bin/cargo}"
-          HOST="$("$CARGO" -vV | sed -n 's/^host: //p')"
-          # Keep Xcode's SDK settings out of the host generator only.
-          env -u SDKROOT -u IPHONEOS_DEPLOYMENT_TARGET -u MACOSX_DEPLOYMENT_TARGET \
-            -u TVOS_DEPLOYMENT_TARGET -u WATCHOS_DEPLOYMENT_TARGET -u XROS_DEPLOYMENT_TARGET \
-            "$CARGO" run --locked --package xtask --target "$HOST" --target-dir target -- bindings
+          export CARGO="${CARGO:-$HOME/.cargo/bin/cargo}"
+          export PATH="$(dirname "$CARGO"):/opt/homebrew/bin:/usr/local/bin:$PATH"
+          "${JUST:-just}" --justfile "$PWD/Justfile" swift-bindings
           PROFILE=dev
           ARTIFACT_PROFILE=debug
           if [ "$CONFIGURATION" = Release ]; then
             PROFILE=release
             ARTIFACT_PROFILE=release
           fi
+          OVERLAY="$DERIVED_FILE_DIR/boltffi-apple.toml"
+          mkdir -p "$DERIVED_FILE_DIR"
+          IOS_ARCHS=""
+          SIMULATOR_ARCHS=""
           set --
           for ARCH in $ARCHS; do
             case "$PLATFORM_NAME/$ARCH" in
-              iphoneos/arm64) TARGET=aarch64-apple-ios ;;
-              iphonesimulator/arm64) TARGET=aarch64-apple-ios-sim ;;
-              iphonesimulator/x86_64) TARGET=x86_64-apple-ios ;;
+              iphoneos/arm64) TARGET=aarch64-apple-ios; IOS_ARCHS="\"arm64\"," ;;
+              iphonesimulator/arm64) TARGET=aarch64-apple-ios-sim; SIMULATOR_ARCHS="$SIMULATOR_ARCHS\"arm64\"," ;;
+              iphonesimulator/x86_64) TARGET=x86_64-apple-ios; SIMULATOR_ARCHS="$SIMULATOR_ARCHS\"x86_64\"," ;;
               *) echo "Unsupported Rust Apple target: $PLATFORM_NAME/$ARCH" >&2; exit 1 ;;
             esac
-            "$CARGO" build --locked -p flare-ffi --lib --target "$TARGET" \
-              --profile "$PROFILE" --target-dir target
             set -- "$@" "$PWD/target/$TARGET/$ARTIFACT_PROFILE/libflare_ffi.a"
           done
           if [ "$#" -eq 0 ]; then
             echo "ARCHS must contain at least one Apple architecture" >&2
             exit 1
           fi
+          printf '[targets.apple]\ninclude_macos = false\nios_architectures = [%s]\nsimulator_architectures = [%s]\n' \
+            "$IOS_ARCHS" "$SIMULATOR_ARCHS" > "$OVERLAY"
+          # BoltFFI builds the ABI exports consumed by its generated Swift bindings.
+          (
+            cd crates/flare-ffi
+            env -u SDKROOT -u IPHONEOS_DEPLOYMENT_TARGET -u MACOSX_DEPLOYMENT_TARGET \
+              -u TVOS_DEPLOYMENT_TARGET -u WATCHOS_DEPLOYMENT_TARGET -u XROS_DEPLOYMENT_TARGET \
+              ../../target/tools/bin/boltffi --cargo-arg=--locked --cargo-arg="--profile=$PROFILE" \
+              --overlay "$OVERLAY" build apple
+          )
           mkdir -p "$BUILT_PRODUCTS_DIR/rust"
           if [ "$#" -eq 1 ]; then
             cp "$1" "$BUILT_PRODUCTS_DIR/rust/libflare_ffi.a"
@@ -222,6 +233,7 @@ targets:
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - target: FlareRust
+      - package: FlareCounterTypes
       - package: Kingfisher
       - package: LazyPager
       - package: SwiftUI-Flow
@@ -307,6 +319,7 @@ targets:
         product: FirebaseCrashlytics
     sources:
       - path: iosTests
+      - path: ios/Common/CruxModel.swift
       - path: ios/UI/Component/IPadCompactTabBarModifier.swift
       - path: ios/UI/Component/MediaViewerDismissEffect.swift
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift

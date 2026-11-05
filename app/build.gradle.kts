@@ -4,6 +4,7 @@ import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 // END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
 import dev.dimension.flare.buildlogic.flare
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -25,56 +26,59 @@ val rustAndroidAbis = providers.gradleProperty("rustAndroidAbis")
 val rustRoot = rootProject.layout.projectDirectory.dir("rust")
 val rustCargo = providers.environmentVariable("CARGO")
     .orElse("${System.getProperty("user.home")}/.cargo/bin/cargo")
+val rustJust = providers.environmentVariable("JUST").orElse("just")
 val rustSources = fileTree(rustRoot) {
     include("Cargo.toml", "Cargo.lock", ".cargo/*.toml", "crates/**/*.toml", "crates/**/*.rs")
+    exclude("**/target/**")
 }
-val rustJniLibs = layout.buildDirectory.dir("generated/rust/jniLibs")
-val generateRustBindings = tasks.register<Exec>("generateRustBindings") {
-    inputs.files(rustSources, fileTree(rustRoot.dir("xtask")) { include("**/*.toml", "**/*.rs") })
-    outputs.dir(rustRoot.dir("bindings"))
-    outputs.file(layout.projectDirectory.file("src/main/java/dev/dimension/flare/common/RustPresenterBindings.kt"))
-    outputs.file(rootProject.layout.projectDirectory.file("appleApp/ios/Common/RustPresenterBindings.swift"))
+val rustJniLibs = rustRoot.dir("target/android/jniLibs")
+val boltffiExecutable = rustRoot.file("target/tools/bin/" + if (System.getProperty("os.name").startsWith("Windows")) "boltffi.exe" else "boltffi")
+extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    filter {
+        exclude { element -> element.file.invariantSeparatorsPath.contains("/rust/bindings/") }
+    }
+}
+val generateCruxTypes = tasks.register<Exec>("generateCruxTypes") {
+    inputs.files(rustSources, rustRoot.file("Justfile"))
+    outputs.dir(rustRoot.dir("bindings/types/kotlin"))
+    outputs.file(boltffiExecutable)
     workingDir(rustRoot)
-    commandLine(
-        rustCargo.get(), "run", "--locked", "--package", "xtask", "--", "bindings",
-    )
+    environment("CARGO", rustCargo.get())
+    commandLine(rustJust.get(), "--justfile", rustRoot.file("Justfile").asFile.absolutePath, "android-types")
 }
 val rustNdkDirectory = androidComponents.sdkComponents.ndkDirectory
-val rustNativeLibraries = rustAndroidAbis.get().split(",").associateWith { abi ->
-    val target = when (abi) {
-        "arm64-v8a" -> "aarch64-linux-android"
-        "armeabi-v7a" -> "armv7-linux-androideabi"
-        "x86" -> "i686-linux-android"
-        "x86_64" -> "x86_64-linux-android"
-        else -> error("Unsupported Rust Android ABI: $abi")
-    }
-    val clang = if (abi == "armeabi-v7a") "armv7a-linux-androideabi" else target
-    val host = if (System.getProperty("os.name").startsWith("Mac")) "darwin-x86_64" else "linux-x86_64"
-    val linker = rustNdkDirectory.map { it.file("toolchains/llvm/prebuilt/$host/bin/${clang}24-clang") }
-    val targetKey = target.uppercase().replace('-', '_')
-    val rustFlagsKey = "CARGO_TARGET_${targetKey}_RUSTFLAGS"
-    val rustFlags = providers.environmentVariable(rustFlagsKey).orElse("").map {
-        "$it -Clink-arg=-Wl,-z,max-page-size=16384 -Clink-arg=-Wl,-z,common-page-size=16384"
-    }
-    tasks.register<Exec>("compileRust_$abi") {
-        dependsOn(generateRustBindings)
-        inputs.files(rustSources, linker, rustNdkDirectory.map { it.file("source.properties") })
-        inputs.property("rustFlags", rustFlags)
-        outputs.file(rustRoot.file("target/$target/release/libflare_ffi.so"))
-        workingDir(rustRoot)
-        commandLine(
-            rustCargo.get(), "build", "--locked", "-p", "flare-ffi", "--lib", "--release",
-            "--target", target, "--target-dir", rustRoot.dir("target").asFile.absolutePath,
-        )
-        doFirst {
-            environment("CARGO_TARGET_${targetKey}_LINKER", linker.get().asFile.absolutePath)
-            environment(rustFlagsKey, rustFlags.get())
+val rustAndroidOverlay = layout.buildDirectory.file("generated/rust/android.toml")
+val buildRustNative = tasks.register<Exec>("buildRustNative") {
+    dependsOn(generateCruxTypes)
+    inputs.files(rustSources, rustNdkDirectory.map { it.file("source.properties") })
+    inputs.property("abis", rustAndroidAbis)
+    outputs.dir(rustJniLibs)
+    outputs.dir(rustRoot.dir("bindings/kotlin"))
+    workingDir(rustRoot.dir("crates/flare-ffi"))
+    doFirst {
+        val architectures = rustAndroidAbis.get().split(",").map { abi ->
+            when (abi) {
+                "arm64-v8a" -> "arm64"
+                "armeabi-v7a" -> "armv7"
+                "x86" -> "x86"
+                "x86_64" -> "x86_64"
+                else -> error("Unsupported Rust Android ABI: $abi")
+            }
         }
+        val overlay = rustAndroidOverlay.get().asFile
+        overlay.parentFile.mkdirs()
+        overlay.writeText("[targets.android]\narchitectures = [" + architectures.joinToString(",") { "\"$it\"" } + "]\n")
+        environment("ANDROID_NDK_HOME", rustNdkDirectory.get().asFile.absolutePath)
+        environment("PATH", file(rustCargo.get()).parent + File.pathSeparator + System.getenv("PATH").orEmpty())
+        commandLine(
+            boltffiExecutable.asFile.absolutePath,
+            "--cargo-arg=--locked", "--overlay", overlay.absolutePath,
+            "pack", "android", "--release",
+        )
     }
 }
-val buildRustNative = tasks.register<Sync>("buildRustNative") {
-    rustNativeLibraries.forEach { (abi, compile) -> from(compile) { into(abi) } }
-    into(rustJniLibs)
+tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
+    mustRunAfter(generateCruxTypes, buildRustNative)
 }
 
 flare {
@@ -112,7 +116,9 @@ android {
 
     sourceSets.getByName("main") {
         kotlin.directories.add(rootProject.file("rust/bindings/kotlin").absolutePath)
-        jniLibs.srcDir(rustJniLibs.get().asFile)
+        kotlin.directories.add(rootProject.file("rust/bindings/types/kotlin/dev").absolutePath)
+        kotlin.directories.add(rootProject.file("rust/bindings/types/kotlin/com").absolutePath)
+        jniLibs.srcDir(rustJniLibs.asFile)
     }
 
     val file = rootProject.file("signing.properties")
@@ -226,7 +232,6 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.richtext.ui.material3)
     implementation(libs.androidx.browser)
-    implementation("net.java.dev.jna:jna:${libs.versions.jna.get()}@aar")
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

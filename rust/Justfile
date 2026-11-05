@@ -1,0 +1,34 @@
+export CARGO := env("CARGO", "cargo")
+export FLARE_BOLTFFI := justfile_directory() / "target/tools/bin/boltffi" + if os() == "windows" { ".exe" } else { "" }
+
+default:
+    @just --list
+
+# Install the CLI version matching Cargo.toml into this workspace.
+tools:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET MACOSX_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET
+    if [[ "$("$FLARE_BOLTFFI" --version 2>/dev/null || true)" != "boltffi 0.29.3" ]]; then
+        "$CARGO" install boltffi_cli --version 0.29.3 --locked --force --root target/tools
+    fi
+
+# Each shell generates only its own types and serialization runtime.
+typegen language:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET MACOSX_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET
+    host=$("$CARGO" -vV | sed -n 's/^host: //p')
+    test -n "$host"
+    "$CARGO" run --locked --package flare-core --bin codegen --features codegen --target "$host" -- "{{ language }}" "bindings/types/{{ language }}"
+
+# The Swift wrapper is compiled by the Xcode framework target.
+swift-bindings: tools (typegen "swift")
+    #!/usr/bin/env bash
+    set -euo pipefail
+    unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET MACOSX_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET
+    cd crates/flare-ffi
+    "$FLARE_BOLTFFI" --cargo-arg=--locked generate swift --output ../../bindings/swift
+
+# Android's BoltFFI pack step generates Kotlin/JNI bindings and native libraries.
+android-types: tools (typegen "kotlin")

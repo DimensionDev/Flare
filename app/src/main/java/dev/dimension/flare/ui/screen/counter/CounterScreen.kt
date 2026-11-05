@@ -21,10 +21,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.common.counterPresenterBinding
-import dev.dimension.flare.common.rememberRustPresenter
-import dev.dimension.flare.rust.CounterPresenter
-import dev.dimension.flare.rust.UiStateOfCounterState
+import dev.dimension.flare.common.cruxViewModel
+import dev.dimension.flare.counter.CounterEvent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 
@@ -34,10 +32,10 @@ internal fun CounterScreen(
     onBack: () -> Unit,
     initialValue: Long = 0,
 ) {
-    val presenter = rememberRustPresenter(counterPresenterBinding) { CounterPresenter(initialValue = initialValue) }
-    val state: UiStateOfCounterState? by presenter.state.collectAsState()
-    val error by presenter.error.collectAsState()
-    val data = (state as? UiStateOfCounterState.Success)?.data
+    val presenter = cruxViewModel(key = "counter") { counterBinding(initialValue) }
+    val state by presenter.state.collectAsState()
+    val nativeError by presenter.error.collectAsState()
+    val error = nativeError ?: state?.error?.message
     FlareScaffold(
         topBar = {
             TopAppBar(
@@ -51,13 +49,8 @@ internal fun CounterScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
-            when (val current = state) {
-                null -> if (error == null) CircularProgressIndicator()
-                is UiStateOfCounterState.Loading -> CircularProgressIndicator()
-                is UiStateOfCounterState.Error -> Text(current.error.message, color = MaterialTheme.colorScheme.error)
-                is UiStateOfCounterState.Success -> Unit
-            }
-            data?.let {
+            if (state == null && error == null) CircularProgressIndicator()
+            state?.let {
                 Text(
                     it.value.toString(),
                     modifier = Modifier.testTag("counter-value"),
@@ -66,28 +59,28 @@ internal fun CounterScreen(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(
-                    onClick = { presenter.perform { decrement() } },
-                    enabled = data != null,
+                    onClick = { presenter.send(CounterEvent.DECREMENT) },
+                    enabled = state != null,
                     modifier = Modifier.testTag("counter-decrement"),
                 ) {
                     Text(stringResource(R.string.counter_decrement))
                 }
                 Button(
-                    onClick = { presenter.perform { increment() } },
-                    enabled = data != null,
+                    onClick = { presenter.send(CounterEvent.INCREMENT) },
+                    enabled = state != null,
                     modifier = Modifier.testTag("counter-increment"),
                 ) {
                     Text(stringResource(R.string.counter_increment))
                 }
             }
             OutlinedButton(
-                onClick = { presenter.perform { reset() } },
-                enabled = data != null,
+                onClick = { presenter.send(CounterEvent.RESET) },
+                enabled = state != null,
                 modifier = Modifier.testTag("counter-reset"),
             ) {
                 Text(stringResource(R.string.counter_reset))
             }
-            error?.let { Text(it.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("counter-error")) }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("counter-error")) }
         }
     }
 }

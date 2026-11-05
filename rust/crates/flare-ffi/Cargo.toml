@@ -8,33 +8,15 @@ publish.workspace = true
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]
 
-[features]
-bindgen = ["uniffi/cli"]
-
-[[bin]]
-name = "uniffi-bindgen"
-path = "src/bin/uniffi-bindgen.rs"
-required-features = ["bindgen"]
-
-[[bin]]
-name = "presenter-bindings"
-path = "src/bin/presenter-bindings.rs"
-required-features = ["bindgen"]
-
 [dependencies]
 flare-core = { path = "../flare-core" }
-tokio = { workspace = true, features = ["rt-multi-thread"] }
-uniffi = "=0.32.2"
-
-[build-dependencies]
-flare-core = { path = "../flare-core", features = ["test-fixtures"] }
-flare-presenter-schema = { path = "../flare-presenter-schema", features = ["codegen"] }
+crux_core.workspace = true
+boltffi.workspace = true
 
 [dev-dependencies]
-flare-core = { path = "../flare-core", features = ["test-fixtures"] }
-tokio = { workspace = true, features = ["time"] }
+serde.workspace = true
 
-# UniFFI generates the unsafe ABI boundary; handwritten implementation is safe Rust.
+# BoltFFI generates the unsafe ABI boundary; handwritten implementation is safe Rust.
 [lints.clippy]
 all = "warn"
 pedantic = "warn"

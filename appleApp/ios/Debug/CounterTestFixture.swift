@@ -1,12 +1,10 @@
 #if DEBUG
-import FlareRust
 import SwiftUI
 
-/// Hosts the production route; diagnostics are only visible in this test fixture.
+/// Hosts the production route for navigation and overflow tests.
 struct CounterTestFixture: View {
     private enum Destination: Hashable { case counter, detail }
     @State private var path: [Destination] = []
-    @State private var resources = counterResources()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -32,16 +30,6 @@ struct CounterTestFixture: View {
                 case .detail:
                     Text("Child page").navigationTitle("Detail")
                 }
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            Text("\(resources.presenters),\(resources.subscriptions),\(resources.tasks)")
-                .accessibilityIdentifier("counter-resources")
-        }
-        .task {
-            while !Task.isCancelled {
-                resources = counterResources()
-                do { try await Task.sleep(for: .milliseconds(20)) } catch { break }
             }
         }
     }

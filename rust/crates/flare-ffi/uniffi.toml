@@ -1,7 +1,0 @@
-[bindings.kotlin]
-package_name = "dev.dimension.flare.rust"
-cdylib_name = "flare_ffi"
-
-[bindings.swift]
-module_name = "FlareRust"
-ffi_module_name = "FlareRustFFI"

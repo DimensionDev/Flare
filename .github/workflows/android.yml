@@ -84,6 +84,9 @@ jobs:
       - *checkout
       - *setup-java
       - *setup-android
+      - &install-just
+        name: Install Just
+        run: cargo install just --version 1.59.0 --locked
       - name: Apply Signing
         env:
           ALIAS: ${{ secrets.ALIAS }}
@@ -198,6 +201,7 @@ jobs:
           java-version: 25
           cache: gradle
       - *setup-android
+      - *install-just
       - name: F-Droid prebuild
         run: |
           rm -f gradle/gradle-daemon-jvm.properties
@@ -225,6 +229,7 @@ jobs:
       - *clean-workspace
       - *checkout
       - *setup-java
+      - *install-just
       - &setup-xcode
         name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -628,6 +633,7 @@ jobs:
       - *checkout
       - *setup-java
       - *setup-android
+      - *install-just
       - name: Check Google Play credentials and apply signing
         env:
           ALIAS: ${{ secrets.ALIAS }}

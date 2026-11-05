@@ -1,64 +1,116 @@
-//! Native ABI and runtime ownership. Business state remains in `flare-core`.
+//! Crux message bridge used by the native platform shells.
 
-mod native;
-mod presenters;
-#[cfg(feature = "bindgen")]
-pub use presenters::PresenterBinding;
+// BoltFFI's generated exports use underscore-prefixed ABI helpers.
+#![allow(clippy::used_underscore_items)]
 
-uniffi::setup_scaffolding!();
+use crux_core::{Core, bridge::Bridge};
+use flare_core::counter::{CounterApp, Model};
 
-include!(concat!(env!("OUT_DIR"), "/exports.rs"));
+pub struct CounterCore {
+    core: Bridge<CounterApp>,
+}
+
+// shortcut: BoltFFI 0.29.3's i64 constructor collides with Kotlin's handle constructor; use a free factory until fixed upstream.
+#[boltffi::export]
+#[must_use]
+pub fn create_counter_core(initial_value: i64) -> CounterCore {
+    CounterCore {
+        core: Bridge::new(Core::new_with(CounterApp, Model::new(initial_value))),
+    }
+}
+
+#[boltffi::export]
+impl CounterCore {
+    /// # Errors
+    /// Rejects malformed events without changing the counter.
+    pub fn update(&self, event: &[u8]) -> Result<Vec<u8>, String> {
+        let mut requests = Vec::new();
+        self.core
+            .update(event, &mut requests)
+            .map_err(|error| error.to_string())?;
+        Ok(requests)
+    }
+
+    /// # Errors
+    /// Reports serialization failures to the platform shell.
+    pub fn view(&self) -> Result<Vec<u8>, String> {
+        let mut state = Vec::new();
+        self.core
+            .view(&mut state)
+            .map_err(|error| error.to_string())?;
+        Ok(state)
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::Duration;
+    use crux_core::bridge::{BincodeFfiFormat, FfiFormat};
+    use flare_core::counter::{CounterEvent, CounterState};
+    use flare_core::ui::UiError;
+    use serde::Serialize;
 
-    #[tokio::test]
-    async fn closing_or_dropping_native_owners_releases_handles_and_pending_tasks() {
-        tokio::time::timeout(Duration::from_secs(5), async {
-            for iteration in 0..20 {
-                let initial = if iteration == 0 { i64::MAX } else { 0 };
-                let presenter = CounterPresenter::new(initial).unwrap();
-                let subscription = presenter.subscribe();
-                if iteration == 0 {
-                    let error = presenter.increment().await.unwrap_err();
-                    assert!(matches!(&error, PresenterError::Failed { error } if error.code == "counter_overflow"));
-                    assert_eq!(
-                        error.to_string(),
-                        "counter value or state revision would overflow"
-                    );
-                    assert!(matches!(subscription.next_state().await, Some(UiStateOfCounterState::Success { data }) if data.value == i64::MAX));
-                } else {
-                    presenter.increment().await.unwrap();
-                    assert!(matches!(subscription.next_state().await, Some(UiStateOfCounterState::Success { data }) if data.value == 1));
-                }
-                assert_eq!(
-                    counter_resources(),
-                    CounterResources {
-                        presenters: 1,
-                        subscriptions: 1,
-                        tasks: 1
-                    }
-                );
-                let read = tokio::spawn(async move { subscription.next_state().await });
-                if iteration % 2 == 0 {
-                    presenter.shutdown();
-                }
-                drop(presenter);
-                assert!(read.await.unwrap().is_none());
-                while counter_resources()
-                    != (CounterResources {
-                        presenters: 0,
-                        subscriptions: 0,
-                        tasks: 0,
-                    })
-                {
-                    tokio::task::yield_now().await;
-                }
-            }
-        })
-        .await
-        .expect("native objects and actor tasks must not leak");
+    fn encoded(value: &impl Serialize) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        BincodeFfiFormat::serialize(&mut bytes, value).unwrap();
+        bytes
+    }
+
+    fn send(core: &CounterCore, event: CounterEvent) -> Vec<u8> {
+        core.update(&encoded(&event)).unwrap()
+    }
+
+    #[test]
+    fn messages_roundtrip_errors_recover_and_instances_stay_independent() {
+        let first = create_counter_core(i64::MAX);
+        let second = create_counter_core(5);
+        assert!(!send(&first, CounterEvent::Increment).is_empty());
+        assert_eq!(
+            first.view().unwrap(),
+            encoded(&CounterState {
+                value: i64::MAX,
+                revision: 0,
+                error: Some(UiError {
+                    code: "counter_overflow".into(),
+                    message: "counter value or state revision would overflow".into()
+                }),
+            })
+        );
+        send(&first, CounterEvent::Reset);
+        assert_eq!(
+            first.view().unwrap(),
+            encoded(&CounterState {
+                value: 0,
+                revision: 1,
+                error: None
+            })
+        );
+        assert_eq!(
+            second.view().unwrap(),
+            encoded(&CounterState {
+                value: 5,
+                revision: 0,
+                error: None
+            })
+        );
+    }
+
+    #[test]
+    fn malformed_messages_preserve_state_and_do_not_poison_the_core() {
+        let core = create_counter_core(7);
+        let initial = core.view().unwrap();
+        for event in [vec![], vec![255; 4]] {
+            assert!(core.update(&event).is_err());
+            assert_eq!(core.view().unwrap(), initial);
+        }
+        send(&core, CounterEvent::Increment);
+        assert_eq!(
+            core.view().unwrap(),
+            encoded(&CounterState {
+                value: 8,
+                revision: 1,
+                error: None
+            })
+        );
     }
 }

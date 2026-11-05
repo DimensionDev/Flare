@@ -41,7 +41,7 @@ interface PluginDefinitionV1 {
     profile?: Partial<ProfileServiceV1>;
     post?: Partial<PostServiceV1>;
     relation?: Partial<RelationServiceV1>;
-    compose?: { publish(request: ComposeRequestV1, context: PluginInvocationContextV1): MaybePromise<ComposeResultV1> };
+    compose?: { publish(request: ComposeRequestV2, context: PluginInvocationContextV1): MaybePromise<ComposeResultV1> };
     notification?: Partial<NotificationServiceV1>;
     list?: Partial<ListServiceV1>;
     directMessage?: Partial<DirectMessageServiceV1>;
@@ -206,7 +206,7 @@ interface LoginSuccessV1 {
   credential: JsonValue;
   profile: ProfileV1;
   capabilities: Record<string, string[]>;
-  composeConfig?: ComposeConfigV1;
+  composeConfig?: ComposeConfigV2;
 }
 
 /** Stable ID in the selected API namespace; host is an HTTPS authority without scheme/path. */
@@ -252,7 +252,7 @@ interface MediaV1 {
 type VisibilityV1 = "public" | "unlisted" | "followers" | "direct" | "channel";
 type SemanticActionV1 =
   | "Favourite" | "Unfavourite" | "Repost" | "Unrepost" | "Bookmark" | "Unbookmark"
-  | "Delete" | "Reply" | "Follow" | "Unfollow" | "Block" | "Unblock" | "Mute" | "Unmute"
+  | "Delete" | "Reply" | "Quote" | "Follow" | "Unfollow" | "Block" | "Unblock" | "Mute" | "Unmute"
   | "Vote" | "React" | "Unreact" | "AcceptFollowRequest" | "RejectFollowRequest";
 /** Semantic Host control. enabled defaults true; active/count remain meaningful when disabled.
  * actionToken is bounded opaque mutation data, not a page cursor or credential store.
@@ -520,11 +520,13 @@ interface DirectMessageDeleteRequestV1 {
 interface CountResultV1 { value: number }
 interface BooleanResultV1 { value: boolean }
 
-/** Manifest defaults are required for compose.publish. Login config is merged by section:
- * shared limits are narrowed; a section present on only one side is retained.
+/** compose/v2 defaults require supportedTypes. Login intersects modes and shared limits;
+ * an optional section present on only one side is retained. compose/v1 is rejected.
  * @see references/manifest.md#compose-defaults
  */
-interface ComposeConfigV1 {
+type ComposeTypeV2 = "new" | "reply" | "quote";
+interface ComposeConfigV2 {
+  supportedTypes: ComposeTypeV2[];
   text?: { maxLength: number };
   media?: {
     minCountForNew?: number;
@@ -542,14 +544,14 @@ interface ComposeConfigV1 {
 /** Host-owned per-invocation upload handle. Forward via multipart; bytes never enter JS. */
 interface ComposeAssetV1 { handle: string; fileName?: string; mimeType?: string; description?: string }
 interface ComposePollV1 { options: string[]; expiresInSeconds: number; multiple?: boolean }
-interface ComposeRequestV1 {
+interface ComposeRequestV2 {
   text: string;
   visibility: VisibilityV1;
   languages: string[];
   assets: ComposeAssetV1[];
   sensitive: boolean;
   spoilerText?: string;
-  replyTo?: EntityKeyV1;
+  reference?: { type: "reply" | "quote"; key: EntityKeyV1 };
   poll?: ComposePollV1;
 }
 interface ComposeResultV1 { post: PostV1 }

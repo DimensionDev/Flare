@@ -10,6 +10,11 @@ public object PluginAbiV1 {
     public const val ENTRY_PATH: String = "plugin.js"
     public const val MANIFEST_PATH: String = "manifest.json"
     public const val ACCOUNT_ORIGIN: String = "\$accountOrigin"
+    internal const val RETIRED_COMPOSE: String = "flare.datasource.compose/v1"
+
+    internal fun requireCurrentComposeContract(capabilities: Set<String>) {
+        require(RETIRED_COMPOSE !in capabilities) { "compose/v1 is retired; update the plugin to compose/v2" }
+    }
 
     internal val capabilityIdPattern = Regex("[a-z0-9.-]+/[a-z0-9.-]+")
 
@@ -19,7 +24,7 @@ public object PluginAbiV1 {
         public const val PROFILE: String = "flare.datasource.profile/v1"
         public const val POST: String = "flare.datasource.post/v1"
         public const val RELATION: String = "flare.datasource.relation/v1"
-        public const val COMPOSE: String = "flare.datasource.compose/v1"
+        public const val COMPOSE: String = "flare.datasource.compose/v2"
         public const val NOTIFICATION: String = "flare.datasource.notification/v1"
         public const val LIST: String = "flare.datasource.list/v1"
         public const val DIRECT_MESSAGE: String = "flare.datasource.direct-message/v1"
@@ -28,7 +33,7 @@ public object PluginAbiV1 {
         public const val TAB_CATALOG: String = "flare.datasource.tab-catalog/v1"
     }
 
-    /** Exact operation names supported by API v1. */
+    /** Capability versions are independent of the runtime API version. */
     public val knownCapabilityOperations: Map<String, Set<String>> =
         mapOf(
             Capabilities.TIMELINE to setOf("page"),
@@ -92,13 +97,15 @@ public object PluginAbiV1 {
         operations: Set<String>,
     ): Boolean = requiredCapabilityOperations[capabilityId]?.let(operations::containsAll) == true && operations.isNotEmpty()
 
-    internal fun knownCapabilities(capabilities: Map<String, Set<String>>): Map<String, Set<String>> =
-        capabilities
+    internal fun knownCapabilities(capabilities: Map<String, Set<String>>): Map<String, Set<String>> {
+        requireCurrentComposeContract(capabilities.keys)
+        return capabilities
             .mapNotNull { (id, operations) ->
                 val known = knownCapabilityOperations[id] ?: return@mapNotNull null
                 val supported = operations.intersect(known)
                 if (operations.isNotEmpty() && supported.isEmpty()) null else id to supported
             }.toMap()
+    }
 
     public fun isDisplayableCapability(
         capabilityId: String,

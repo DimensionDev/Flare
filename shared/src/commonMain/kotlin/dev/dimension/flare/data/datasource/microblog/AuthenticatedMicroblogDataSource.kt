@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.microblog
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.flow.first
 import kotlin.native.HiddenFromObjC
 
@@ -25,14 +24,9 @@ public interface ComposeDataSource : AuthenticatedMicroblogDataSource {
         data: ComposeData,
         progress: () -> Unit,
     ) {
-        val type =
-            when (data.referenceStatus?.composeStatus) {
-                is ComposeStatus.Quote -> ComposeType.Quote
-                is ComposeStatus.Reply -> ComposeType.Reply
-                null -> ComposeType.New
-            }
         // ponytail: Use cached/default limits like the editor; add provider expiry if stale limits cause failures.
-        val config = composeConfig(type)
+        val config = composeConfig(data.type)
+        require(data.type in config.supportedTypes) { "This account does not support ${data.type.name.lowercase()} posts." }
         val visibility = data.visibility ?: config.visibility?.defaultVisibility ?: UiTimelineV2.Post.Visibility.Public
         require(
             config.visibility?.allVisibilities?.contains(visibility)

@@ -1,7 +1,7 @@
 package dev.dimension.flare.feature.plugin.manifest
 
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
-import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
+import dev.dimension.flare.feature.plugin.wire.ComposeConfigV2
 import dev.dimension.flare.feature.plugin.wire.HostIconV1
 import dev.dimension.flare.feature.plugin.wire.PageDirectionV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
@@ -43,7 +43,7 @@ public data class PluginPlatformManifestV1(
     val timelines: List<TimelineManifestV1> = emptyList(),
     val profileTabs: List<ProfileTabManifestV1> = emptyList(),
     val deepLinks: List<DeepLinkManifestV1> = emptyList(),
-    val composeDefaults: ComposeConfigV1? = null,
+    val composeDefaults: ComposeConfigV2? = null,
     val guest: GuestManifestV1? = null,
     val credentialSchemaVersion: Int = 1,
     val timelineSchemaVersion: Int = 1,

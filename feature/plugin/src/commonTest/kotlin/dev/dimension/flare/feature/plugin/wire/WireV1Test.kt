@@ -162,9 +162,10 @@ class WireV1Test {
     @Test
     fun rejectsDefaultVisibilityOutsideAllowedSet() {
         assertFailsWith<IllegalArgumentException> {
-            ComposeConfigV1(
+            ComposeConfigV2(
+                supportedTypes = setOf(dev.dimension.flare.data.datasource.microblog.ComposeType.New),
                 visibility =
-                    ComposeConfigV1.VisibilityConfigV1(
+                    ComposeConfigV2.VisibilityConfigV1(
                         allowed = setOf(VisibilityV1.Followers),
                         default = VisibilityV1.Public,
                     ),

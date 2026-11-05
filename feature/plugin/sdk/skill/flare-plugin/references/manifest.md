@@ -215,8 +215,12 @@ See the [complete login recipes](authentication.md).
 
 ### Compose defaults
 
+Declare `flare.datasource.compose/v2` for `compose.publish`. The retired
+`compose/v1` capability is rejected, not treated as an unknown optional extension.
+
 | Field | Shape and defaults |
 | --- | --- |
+| `supportedTypes` | Required nonempty set of `new`, `reply`, `quote`; declare only modes the handler implements |
 | `text` | Optional `{ "maxLength": 500 }`; limit 1..1000000 |
 | `media` | Optional object; required `maxCount` (0..100), `maxBytes` (1..1073741824) |
 | `media.minCountForNew` | Default 0, between 0 and maxCount |
@@ -235,6 +239,11 @@ empty intersections. When only one side defines an optional section, that sectio
 is retained; omission is not a prohibition. Content-warning support requires
 both sides when both configs exist. Implement every resulting enabled field in
 `compose.publish`; see [compose](recipes.md#compose).
+
+Login must also include supportedTypes when returning a compose config. Its
+intersection with manifest supportedTypes must be nonempty; login cannot enable
+an undeclared mode. `media.minCountForNew` also applies to quotes. Only replies
+are exempt from the minimum attachment count.
 
 ## Frequent invalid combinations
 

@@ -36,7 +36,7 @@ import dev.dimension.flare.feature.plugin.runtime.PluginCallException
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeKeyV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.feature.plugin.wire.ComposeAssetV1
-import dev.dimension.flare.feature.plugin.wire.ComposeRequestV1
+import dev.dimension.flare.feature.plugin.wire.ComposeRequestV2
 import dev.dimension.flare.feature.plugin.wire.ComposeResultV1
 import dev.dimension.flare.feature.plugin.wire.DetectorMatchV1
 import dev.dimension.flare.feature.plugin.wire.DetectorRequestV1
@@ -354,12 +354,12 @@ class PixelfedSampleTest {
                         context = composeContext,
                         method = "capabilities.compose.publish",
                         request =
-                            ComposeRequestV1(
+                            ComposeRequestV2(
                                 text = "A sample photo",
                                 visibility = VisibilityV1.Public,
                                 assets = listOf(ComposeAssetV1("photo", "photo.jpg", "image/jpeg", "Alt text")),
                             ),
-                        requestSerializer = ComposeRequestV1.serializer(),
+                        requestSerializer = ComposeRequestV2.serializer(),
                         responseSerializer = ComposeResultV1.serializer(),
                         timeout = PluginCallTimeoutV1.Extended,
                     )
@@ -638,8 +638,8 @@ class PixelfedSampleTest {
                             key,
                             context,
                             "capabilities.compose.publish",
-                            ComposeRequestV1(text = "media required", visibility = VisibilityV1.Public),
-                            ComposeRequestV1.serializer(),
+                            ComposeRequestV2(text = "media required", visibility = VisibilityV1.Public),
+                            ComposeRequestV2.serializer(),
                             ComposeResultV1.serializer(),
                         )
                     }
@@ -859,12 +859,12 @@ class PixelfedSampleTest {
                             context = writeContext,
                             method = "capabilities.compose.publish",
                             request =
-                                ComposeRequestV1(
+                                ComposeRequestV2(
                                     text = "Flare Social Plugin API automated smoke test",
                                     visibility = VisibilityV1.Unlisted,
                                     assets = listOf(ComposeAssetV1("smoke-image", "flare-plugin-smoke.png", "image/png")),
                                 ),
-                            requestSerializer = ComposeRequestV1.serializer(),
+                            requestSerializer = ComposeRequestV2.serializer(),
                             responseSerializer = ComposeResultV1.serializer(),
                             timeout = PluginCallTimeoutV1.Extended,
                         )

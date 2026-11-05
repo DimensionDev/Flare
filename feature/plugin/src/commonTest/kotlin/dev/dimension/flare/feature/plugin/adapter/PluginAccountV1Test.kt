@@ -12,7 +12,7 @@ import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginPlatformManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
 import dev.dimension.flare.feature.plugin.wire.AccountPluginSnapshotV1
-import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
+import dev.dimension.flare.feature.plugin.wire.ComposeConfigV2
 import dev.dimension.flare.feature.plugin.wire.LoginSuccessV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
 import dev.dimension.flare.feature.plugin.wire.VisibilityV1
@@ -404,9 +404,26 @@ class PluginAccountV1Test {
         }
 
     @Test
+    fun composeModesAreIntersectedAndMustOverlap() {
+        val all =
+            dev.dimension.flare.data.datasource.microblog.ComposeType.entries
+                .toSet()
+        val replyOnly = setOf(dev.dimension.flare.data.datasource.microblog.ComposeType.Reply)
+        val merged =
+            mergePluginComposeConfigV2(composeConfig().copy(supportedTypes = all), composeConfig().copy(supportedTypes = replyOnly))
+        assertEquals(replyOnly, merged?.supportedTypes)
+        assertFailsWith<IllegalArgumentException> {
+            mergePluginComposeConfigV2(
+                composeConfig().copy(supportedTypes = replyOnly),
+                composeConfig().copy(supportedTypes = setOf(dev.dimension.flare.data.datasource.microblog.ComposeType.New)),
+            )
+        }
+    }
+
+    @Test
     fun composeConstraintsUseStrictIntersection() {
         val merged =
-            mergePluginComposeConfigV1(
+            mergePluginComposeConfigV2(
                 composeConfig(
                     minMedia = 1,
                     maxMedia = 4,
@@ -431,19 +448,19 @@ class PluginAccountV1Test {
     @Test
     fun composeConstraintConflictsAreRejectedBeforeDatasourceCreation() {
         assertFailsWith<IllegalArgumentException> {
-            mergePluginComposeConfigV1(
+            mergePluginComposeConfigV2(
                 composeConfig(mimeTypes = setOf("image/jpeg")),
                 composeConfig(mimeTypes = setOf("video/mp4")),
             )
         }
         assertFailsWith<IllegalArgumentException> {
-            mergePluginComposeConfigV1(
+            mergePluginComposeConfigV2(
                 composeConfig(visibility = setOf(VisibilityV1.Public)),
                 composeConfig(visibility = setOf(VisibilityV1.Followers)),
             )
         }
         assertFailsWith<IllegalArgumentException> {
-            mergePluginComposeConfigV1(
+            mergePluginComposeConfigV2(
                 composeConfig(minMedia = 3, maxMedia = 4),
                 composeConfig(minMedia = 0, maxMedia = 2),
             )
@@ -562,15 +579,18 @@ class PluginAccountV1Test {
         maxMedia: Int = 4,
         mimeTypes: Set<String> = emptySet(),
         visibility: Set<VisibilityV1> = setOf(VisibilityV1.Public),
-    ): ComposeConfigV1 =
-        ComposeConfigV1(
+    ): ComposeConfigV2 =
+        ComposeConfigV2(
+            supportedTypes =
+                dev.dimension.flare.data.datasource.microblog.ComposeType.entries
+                    .toSet(),
             media =
-                ComposeConfigV1.MediaConfigV1(
+                ComposeConfigV2.MediaConfigV1(
                     minCountForNew = minMedia,
                     maxCount = maxMedia,
                     maxBytes = 10_000_000,
                     supportedMimeTypes = mimeTypes,
                 ),
-            visibility = ComposeConfigV1.VisibilityConfigV1(visibility, visibility.first()),
+            visibility = ComposeConfigV2.VisibilityConfigV1(visibility, visibility.first()),
         )
 }

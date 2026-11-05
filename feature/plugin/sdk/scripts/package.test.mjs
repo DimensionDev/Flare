@@ -110,6 +110,14 @@ flare.http.request({ url: "https://example.org", redirect: "unsafe" });
 // @ts-expect-error Revision must be an opaque string.
 flare.credential.replace({}, { expectedRevision: 1 });
 const profile: ProfileV1 = { key: { id: "1", host: "example.org" }, handle: "alice", displayName: "Alice" };
+const compose: ComposeRequestV2 = { text: "caption", visibility: "public", languages: [], assets: [], sensitive: false, reference: { type: "quote", key: profile.key } };
+const composeConfig: ComposeConfigV2 = { supportedTypes: ["new", "reply", "quote"] };
+// @ts-expect-error The old replyTo field is not part of compose/v2.
+const legacyCompose: ComposeRequestV2 = { ...compose, replyTo: profile.key };
+// @ts-expect-error References cannot represent ordinary reposts.
+const invalidReference: ComposeRequestV2 = { ...compose, reference: { type: "repost", key: profile.key } };
+// @ts-expect-error supportedTypes is required.
+const legacyComposeConfig: ComposeConfigV2 = { text: { maxLength: 100 } };
 const media: MediaV1 = { id: "image", type: "image", url: "https://cdn.example.org/image", customHeaders: { Referer: "https://example.org/", Cookie: "session=fixture", "X-Media-Token": "fixture" } };
 // @ts-expect-error Header values must be strings.
 const invalidMedia: MediaV1 = { ...media, customHeaders: { "X-Media-Token": 1 } };

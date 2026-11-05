@@ -903,6 +903,13 @@ internal fun isComposeContentValid(
     composeConfig: ComposeConfig,
     composeStatus: ComposeStatus?,
 ): Boolean {
+    val type =
+        when (composeStatus) {
+            is ComposeStatus.Reply -> ComposeType.Reply
+            is ComposeStatus.Quote -> ComposeType.Quote
+            null -> ComposeType.New
+        }
+    if (type !in composeConfig.supportedTypes) return false
     val media = composeConfig.media
     val mediaSize = mediaMimeTypes.size
     val minimumMediaCount = if (composeStatus !is ComposeStatus.Reply) media?.minCountForNew ?: 0 else 0

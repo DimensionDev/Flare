@@ -14,6 +14,23 @@ import kotlin.test.assertFalse
 
 class ComposeTextValidationTest {
     @Test
+    fun unsupportedModesNeverReachThePlatformPublishHook() =
+        runTest {
+            val source = TestComposeSource(ComposeConfig.Text(100), supportedTypes = setOf(ComposeType.New, ComposeType.Reply))
+            val data =
+                ComposeData(
+                    "caption",
+                    referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Quote(MicroBlogKey("target", "example.com"))),
+                )
+            assertFailsWith<IllegalArgumentException> { source.compose(data) {} }
+            assertEquals(0, source.published)
+            source.compose(
+                data.copy(referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Reply(MicroBlogKey("target", "example.com")))),
+            ) {}
+            assertEquals(1, source.published)
+        }
+
+    @Test
     fun publishingResolvesAnUnspecifiedAudienceToThePlatformDefault() =
         runTest {
             val config = ComposeConfig.Visibility(defaultVisibility = UiTimelineV2.Post.Visibility.Followers)
@@ -95,6 +112,7 @@ class ComposeTextValidationTest {
 private class TestComposeSource(
     private val rule: ComposeConfig.Text,
     private val visibility: ComposeConfig.Visibility? = null,
+    private val supportedTypes: Set<ComposeType> = ComposeType.entries.toSet(),
 ) : ComposeDataSource {
     override val accountKey = MicroBlogKey("test", "example.com")
     var published = 0
@@ -109,7 +127,7 @@ private class TestComposeSource(
     }
 
     override fun composeConfig(type: ComposeType) =
-        ComposeConfig(text = rule, visibility = visibility.takeUnless { type == ComposeType.Reply })
+        ComposeConfig(text = rule, visibility = visibility.takeUnless { type == ComposeType.Reply }, supportedTypes = supportedTypes)
 
     override fun homeTimeline(): Nothing = error("unused")
 

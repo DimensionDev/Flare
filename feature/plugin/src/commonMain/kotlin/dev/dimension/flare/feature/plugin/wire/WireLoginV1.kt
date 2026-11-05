@@ -133,7 +133,7 @@ public data class LoginSuccessV1(
     val profile: ProfileV1,
     @Serializable(with = KnownCapabilitySetsV1Serializer::class)
     val capabilities: Map<String, Set<String>>,
-    val composeConfig: ComposeConfigV1? = null,
+    val composeConfig: ComposeConfigV2? = null,
 )
 
 @Serializable
@@ -148,7 +148,7 @@ public data class AccountPluginSnapshotV1(
     val manifestCapabilities: Map<String, Set<String>>,
     @Serializable(with = KnownCapabilitySetsV1Serializer::class)
     val negotiatedCapabilities: Map<String, Set<String>>,
-    val composeConfig: ComposeConfigV1? = null,
+    val composeConfig: ComposeConfigV2? = null,
     val credentialSchemaVersion: Int,
 )
 

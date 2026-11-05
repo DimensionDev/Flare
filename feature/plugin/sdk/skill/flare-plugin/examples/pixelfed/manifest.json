@@ -96,7 +96,7 @@
           "mutate": {}
         }
       },
-      "flare.datasource.compose/v1": {
+      "flare.datasource.compose/v2": {
         "operations": {
           "publish": {}
         }
@@ -183,6 +183,7 @@
       }
     ],
     "composeDefaults": {
+      "supportedTypes": ["new", "reply"],
       "text": {
         "maxLength": 500
       },

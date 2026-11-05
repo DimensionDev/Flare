@@ -167,6 +167,7 @@ public enum class SemanticActionV1 {
     Unbookmark,
     Delete,
     Reply,
+    Quote,
     Follow,
     Unfollow,
     Block,

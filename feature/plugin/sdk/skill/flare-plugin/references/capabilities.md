@@ -1,6 +1,7 @@
 # Capability and UI contract
 
-Each ID below has prefix `flare.datasource.` and suffix `/v1`; use the full ID
+Each ID below has prefix `flare.datasource.` and suffix `/v1`, except compose
+which uses `/v2`; use the full ID
 in the manifest and negotiated login result. JavaScript methods live under
 `defineFlareSocialPlugin({ capabilities: { <service>: ... } })`.
 
@@ -11,7 +12,7 @@ in the manifest and negotiated login result. JavaScript methods live under
 | `profile` | `profile` | `byId`, `byHandle` | `timeline`, `following`, `followers` | Profile lookup; tabs additionally require `timeline` and profileTabs |
 | `post` | `post` | `detail` | `context`, `delete`, `mutate` | Internal post detail, thread context, and supported actions |
 | `relation` | `relation` | `state`, `mutate` | None | Follow/block/mute controls; nonempty static relationActions |
-| `compose` | `compose` | `publish` | None | Composer; requires composeDefaults and an account |
+| `compose` | `compose` | `publish` | None | Composer; requires composeDefaults.supportedTypes and an account; Reply/Quote actions and editor send honour the supported modes |
 | `notification` | `notification` | At least one of `page`, `badge` | Both may be declared | `page` supplies the list and requires notificationFilters; badge alone is not a displayable login capability |
 | `list` | `list` | `page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` | None | List browsing and management |
 | `direct-message` | `directMessage` | `rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` | None | DM rooms, conversation, and related account controls |

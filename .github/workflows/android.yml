@@ -20,9 +20,21 @@ on:
           - fdroid
           - google-play
   push:
+    branches:
+      - master
+      - release
+      - develop
     tags:
       - "**"
       - "!plugin-sdk-v*"
+    paths-ignore:
+      - "**.md"
+      - "**.yml"
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
 
 permissions:
   contents: read
@@ -68,7 +80,7 @@ jobs:
   build-linux:
     name: Linux (Android, Desktop)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'android-desktop'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'android-desktop'
     runs-on: [ubuntu-latest]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-job-linux
@@ -178,7 +190,7 @@ jobs:
   build-fdroid:
     name: F-Droid
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'fdroid'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || inputs.target == 'all' || inputs.target == 'linux' || inputs.target == 'fdroid'
     runs-on: [ubuntu-latest]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-job-fdroid
@@ -209,7 +221,7 @@ jobs:
   build-ios:
     name: iOS (build, native and UI regressions)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple' || inputs.target == 'ios'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || inputs.target == 'all' || inputs.target == 'apple' || inputs.target == 'ios'
     runs-on: [xcode-27]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-job-ios
@@ -325,7 +337,7 @@ jobs:
   build-macos:
     name: macOS (Release)
     needs: lint
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'apple' || inputs.target == 'macos'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || inputs.target == 'all' || inputs.target == 'apple' || inputs.target == 'macos'
     runs-on: [xcode-27]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-job-macos
@@ -488,7 +500,7 @@ jobs:
 
   build-windows:
     name: Windows
-    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'windows'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || inputs.target == 'all' || inputs.target == 'windows'
     needs: lint
     runs-on: [windows-latest]
     concurrency:

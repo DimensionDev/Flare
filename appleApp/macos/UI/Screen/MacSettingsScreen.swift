@@ -1332,9 +1332,9 @@ private struct MacAboutLink: Identifiable {
         MacAboutLink(
             id: "source-code",
             titleKey: "settings_about_source_code",
-            subtitle: "https://github.com/DimensionDev/Flare",
+            subtitle: "https://github.com/flaresocialapp/Flare",
             icon: .github,
-            url: URL(string: "https://github.com/DimensionDev/Flare")!
+            url: URL(string: "https://github.com/flaresocialapp/Flare")!
         ),
         MacAboutLink(
             id: "telegram",

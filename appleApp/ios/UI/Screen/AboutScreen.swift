@@ -128,9 +128,9 @@ private extension AboutLink {
         AboutLink(
             id: "source-code",
             titleKey: "settings_about_source_code",
-            subtitleKey: "https://github.com/DimensionDev/Flare",
+            subtitleKey: "https://github.com/flaresocialapp/Flare",
             icon: .github,
-            url: URL(string: "https://github.com/DimensionDev/Flare")!
+            url: URL(string: "https://github.com/flaresocialapp/Flare")!
         ),
         AboutLink(
             id: "telegram",

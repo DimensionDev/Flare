@@ -56,7 +56,7 @@ as generated output; edit the TS source and rebuild instead of editing both copi
 
 For manual template copies, replace the example IDs and names before use. For
 `npx` projects, keep the generated IDs. Read the
-[complete developer guide](https://github.com/DimensionDev/Flare/tree/feature/plugin/feature/plugin/sdk/skill/flare-plugin)
+[complete developer guide](https://github.com/flaresocialapp/Flare/tree/master/feature/plugin/sdk/skill/flare-plugin)
 for authentication, Host APIs, capabilities, and Wire data mapping.
 
 ## Develop and debug in Flare
@@ -96,7 +96,7 @@ for authentication, Host APIs, capabilities, and Wire data mapping.
 Finish active writes before reloading; credential-schema changes may require
 logging in again. Keep Flare pointed at the project root, where the build writes
 `plugin.js`. Flare loads that classic script and does not execute TS or build tools.
-See [development and testing details](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/testing.md#develop-locally-in-desktop).
+See [development and testing details](https://github.com/flaresocialapp/Flare/blob/master/feature/plugin/sdk/skill/flare-plugin/references/testing.md#develop-locally-in-desktop).
 
 ## Publish and install through GitHub (recommended)
 
@@ -144,7 +144,7 @@ See [development and testing details](https://github.com/DimensionDev/Flare/blob
    matching stable tag. Keep plugin/platform IDs unchanged. In Flare, check for
    updates and review/confirm the offered version; app restart is unnecessary.
 
-See [GitHub publication and update rules](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/publishing.md).
+See [GitHub publication and update rules](https://github.com/flaresocialapp/Flare/blob/master/feature/plugin/sdk/skill/flare-plugin/references/publishing.md).
 
 ## Optional: package and install a local file
 
@@ -182,7 +182,7 @@ Keep these development files outside the optional `.fpp` staging directory.
 Flare treats `$schema` as editor metadata and never downloads it. With an older
 Flare build that rejects this field, remove it and use a VS Code `json.schemas`
 association in workspace settings instead. See the
-[manifest editor guide](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/references/manifest.md#json-schema-and-editor-support)
+[manifest editor guide](https://github.com/flaresocialapp/Flare/blob/master/feature/plugin/sdk/skill/flare-plugin/references/manifest.md#json-schema-and-editor-support)
 and [VS Code schema settings](https://code.visualstudio.com/docs/languages/json#_json-schemas-and-settings).
 
 For an existing project, install editor types:
@@ -211,7 +211,7 @@ scripts must bundle their own runtime dependencies without Node or browser APIs.
 The self-contained skill is in `skill/flare-plugin/` in both the source and npm
 package. Copy that **entire directory** into your agent's skill directory; copying
 only `SKILL.md` loses its types, references, templates, and examples. Follow the
-[skill installation guide](https://github.com/DimensionDev/Flare/blob/feature/plugin/feature/plugin/sdk/skill/flare-plugin/README.md#install-the-skill)
+[skill installation guide](https://github.com/flaresocialapp/Flare/blob/master/feature/plugin/sdk/skill/flare-plugin/README.md#install-the-skill)
 for Codex or Claude Code, including project scope, verification, and updates.
 All documentation is in English. The complete Pixelfed adapter is bundled at
 `skill/flare-plugin/examples/pixelfed/`. The offline
@@ -267,7 +267,7 @@ Only run that last command when publication is intended. The GitHub workflow doe
 not bootstrap a new npm package or configure npm account permissions.
 
 After the package exists, configure [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/)
-in its npm Settings with GitHub owner `DimensionDev`, repository `Flare`, workflow
+in its npm Settings with GitHub owner `flaresocialapp`, repository `Flare`, workflow
 filename `plugin-sdk.yml`, no environment, and permission to publish directly with
 `npm publish`. Use a GitHub-hosted runner. The workflow uses Node 24 and npm's OIDC
 authentication; no long-lived npm token or `NPM_TOKEN` secret is required. npm
@@ -284,6 +284,6 @@ For subsequent releases:
 3. The workflow validates the tarball first, then publishes prereleases to `next`
    and stable versions to `latest`. Existing app workflows exclude SDK tags.
 
-Run the **Plugin SDK** workflow manually to validate a branch or tag; this does not
-publish, even when a tag is selected. Publishing requires a push of a matching
-`plugin-sdk-v*` tag. Branch pushes and pull requests do not start this workflow.
+The **Plugin SDK** workflow runs validation on relevant pull requests. Its manual
+**Run workflow** action also validates only, even when a tag is selected; publishing
+requires a push of a matching `plugin-sdk-v*` tag. Updating a PR never publishes npm.

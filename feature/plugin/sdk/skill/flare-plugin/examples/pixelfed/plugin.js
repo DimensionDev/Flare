@@ -43,7 +43,7 @@ defineFlareSocialPlugin({
               client_name: "Flare",
               redirect_uris: requiredString(request.redirectUri, "OAuth redirect URI is missing"),
               scopes: "read write",
-              website: "https://github.com/DimensionDev/Flare",
+              website: "https://github.com/flaresocialapp/Flare",
             },
           },
         });

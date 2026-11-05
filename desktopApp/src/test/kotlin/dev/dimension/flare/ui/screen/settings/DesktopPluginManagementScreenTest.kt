@@ -237,7 +237,7 @@ class DesktopPluginManagementScreenTest {
             .onNodeWithText(
                 "Plugins are still in beta and may be incomplete. If you run into problems, report them on GitHub Issues.",
             ).performFirstLinkClick()
-        compose.runOnIdle { assertEquals("https://github.com/DimensionDev/Flare/issues", openedUrl) }
+        compose.runOnIdle { assertEquals("https://github.com/flaresocialapp/Flare/issues", openedUrl) }
         compose.onNodeWithText("GitHub Issues").assertDoesNotExist()
         val addBounds = compose.onNodeWithContentDescription("Add plugin").fetchSemanticsNode().boundsInRoot
         val moreBounds = compose.onNodeWithContentDescription("More").fetchSemanticsNode().boundsInRoot

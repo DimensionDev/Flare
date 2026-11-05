@@ -24,7 +24,7 @@ function post(id, context) {
     content: { value: id === "poll" ? "Which timeline item do you prefer?" : "A related post" },
     url: context.origin + "/posts/" + id, visibility: "public", sourceLanguages: ["en"],
     ...(id === "poll" ? {
-      card: { title: "Flare", description: "Existing native UI, supplied by a plugin", url: "https://github.com/DimensionDev/Flare" },
+      card: { title: "Flare", description: "Existing native UI, supplied by a plugin", url: "https://github.com/flaresocialapp/Flare" },
       poll: { id: "demo-poll", options: [{ title: "Posts", votesCount: 2 + (ownVotes.includes(0) ? 1 : 0) },
         { title: "Mixed items", votesCount: 3 + (ownVotes.includes(1) ? 1 : 0) }],
         ownVotes, actionToken: token("Vote") },
@@ -40,7 +40,7 @@ function page(context) {
     { type: "post", post: post("poll", context), presentation: {
       quotes: [post("quote", context)], inlineParents: [{ post: post("parent", context) }]
     } },
-    { type: "feed", feed: { url: "https://github.com/DimensionDev/Flare", createdAt, title: "Flare development",
+    { type: "feed", feed: { url: "https://github.com/flaresocialapp/Flare", createdAt, title: "Flare development",
       source: { name: "Project feed" }, description: { value: "A feed row opens its URL." } } },
     { type: "user", user: { key: key("suggested-alice", context), createdAt, profile: profile("alice", context),
       buttons: [button(following ? "Unfollow" : "Follow", following ? "Unfollow" : "Follow")] } },

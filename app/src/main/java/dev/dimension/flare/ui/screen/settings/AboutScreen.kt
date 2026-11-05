@@ -116,11 +116,11 @@ internal fun AboutScreen(onBack: () -> Unit) {
                     },
                     supportingContent = {
                         Text(
-                            text = "https://github.com/DimensionDev/Flare",
+                            text = "https://github.com/flaresocialapp/Flare",
                         )
                     },
                     onClick = {
-                        uriHandler.openUri("https://github.com/DimensionDev/Flare")
+                        uriHandler.openUri("https://github.com/flaresocialapp/Flare")
                     },
                     shapes = ListItemDefaults.segmentedShapes2(0, 5),
                     leadingContent = {

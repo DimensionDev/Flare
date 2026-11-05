@@ -23,22 +23,22 @@ your plugin project; Node is needed for the documented syntax and package checks
 
 ### Install from GitHub with Codex
 
-The [development source](https://github.com/DimensionDev/Flare/tree/feature/plugin/feature/plugin/sdk/skill/flare-plugin)
-is on the `feature/plugin` branch of `DimensionDev/Flare`. It is a development
+The [development source](https://github.com/flaresocialapp/Flare/tree/master/feature/plugin/sdk/skill/flare-plugin)
+is on the `master` branch of `flaresocialapp/Flare`. It is a development
 branch, not a released SDK version. For reproducible installation, select the
 full commit SHA containing the skill in GitHub and use it in place of the branch.
 
 Ask Codex's built-in installer:
 
 ```text
-$skill-installer Install the flare-plugin skill from repository DimensionDev/Flare,
-ref feature/plugin, path feature/plugin/sdk/skill/flare-plugin.
+$skill-installer Install the flare-plugin skill from repository flaresocialapp/Flare,
+ref master, path feature/plugin/sdk/skill/flare-plugin.
 Copy the complete skill directory, including its supporting files.
 ```
 
-Give the repository, ref, and path separately: this ref contains a slash. If you
-use the installer's Python CLI directly, the equivalent arguments are
-`--repo DimensionDev/Flare --ref feature/plugin --path feature/plugin/sdk/skill/flare-plugin`.
+Give the repository, ref, and path separately. If you use the installer's Python
+CLI directly, the equivalent arguments are
+`--repo flaresocialapp/Flare --ref master --path feature/plugin/sdk/skill/flare-plugin`.
 Record the resolved commit SHA when you need to reproduce an installation. If a
 skill already exists, follow [Update or remove](#update-or-remove) first.
 
@@ -48,7 +48,7 @@ Check out a revision that contains this directory. For example, clone the
 development branch into a new directory, then enter its repository root:
 
 ```sh
-git clone --branch feature/plugin --single-branch https://github.com/DimensionDev/Flare.git
+git clone --branch master --single-branch https://github.com/flaresocialapp/Flare.git
 cd Flare
 ```
 

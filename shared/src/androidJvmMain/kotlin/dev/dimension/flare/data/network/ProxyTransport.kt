@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.Authenticator
 import okhttp3.Call
+import okhttp3.CookieJar
 import okhttp3.Dns
 import okhttp3.EventListener
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -107,8 +108,25 @@ public fun proxyCallFactory(media: dev.dimension.flare.ui.model.UiMedia): Call.F
 internal actual val platformEngineCapabilities: Set<HttpClientEngineCapability<*>> =
     setOf(HttpTimeoutCapability, WebSocketCapability, SSECapability)
 
-internal actual fun createPlatformHttpClientEngine(connection: ProxyConnection): HttpClientEngine =
-    OkHttp.create { config { configureProxy(connection) } }
+internal actual fun createPlatformHttpClientEngine(
+    connection: ProxyConnection,
+    plugin: Boolean,
+): HttpClientEngine =
+    OkHttp.create {
+        config {
+            configureProxy(connection)
+            if (plugin) {
+                // A recovered pooled connection must not replay a plugin's refresh or publishing request.
+                retryOnConnectionFailure(false)
+                followRedirects(false)
+                followSslRedirects(false)
+                authenticator(Authenticator.NONE)
+                proxyAuthenticator(Authenticator.NONE)
+                cookieJar(CookieJar.NO_COOKIES)
+                cache(null)
+            }
+        }
+    }
 
 public fun okhttp3.OkHttpClient.Builder.configureProxy(connection: ProxyConnection): okhttp3.OkHttpClient.Builder =
     apply {

@@ -81,19 +81,24 @@ internal class PluginAccountInvokerV1(
         validate: (Response) -> Unit = {},
     ): Response =
         plugin.session.invoke(requireNotNull(PluginAbiV1.capabilityMethod(capabilityId, operation))) {
+            val invocationContext = context(Locale.language, assets)
             try {
-                runtimePool.invoke(
-                    plugin = plugin,
-                    key = runtimeKey,
-                    context = context(Locale.language, assets),
-                    method = requireNotNull(PluginAbiV1.capabilityMethod(capabilityId, operation)),
-                    request = request,
-                    requestSerializer = requestSerializer,
-                    responseSerializer = responseSerializer,
-                    timeout = timeout,
-                    validate = validate,
-                )
+                runtimePool
+                    .invoke(
+                        plugin = plugin,
+                        key = runtimeKey,
+                        context = invocationContext,
+                        method = requireNotNull(PluginAbiV1.capabilityMethod(capabilityId, operation)),
+                        request = request,
+                        requestSerializer = requestSerializer,
+                        responseSerializer = responseSerializer,
+                        timeout = timeout,
+                        validate = validate,
+                    ).also {
+                        if (plugin.installed.manifest.apiVersion >= 2) invocationContext.credential?.ensureActive()
+                    }
             } catch (error: PluginCallException) {
+                if (plugin.installed.manifest.apiVersion >= 2) invocationContext.credential?.ensureActive()
                 if (error.error.code == PluginErrorCodeV1.AuthenticationRequired && accountKey != null) {
                     throw RequireReLoginException(accountKey, plugin.installed.manifest.platform.id)
                 }

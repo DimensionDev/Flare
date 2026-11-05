@@ -82,17 +82,12 @@ private fun normalizePath(value: String): String {
     val segments = mutableListOf<String>()
     value.split('/').forEach { segment ->
         when (segment) {
-            "", "." -> Unit
-            ".." -> if (segments.isNotEmpty()) segments.removeAt(segments.lastIndex)
+            "." -> Unit
+            ".." -> if (segments.size > 1) segments.removeAt(segments.lastIndex)
             else -> segments += segment
         }
     }
-    val trailingSlash = value.endsWith('/') || value.endsWith("/.") || value.endsWith("/..")
-    return buildString {
-        append('/')
-        append(segments.joinToString("/"))
-        if (trailingSlash && segments.isNotEmpty()) append('/')
-    }
+    return segments.joinToString("/") + if (value.endsWith("/.") || value.endsWith("/..")) "/" else ""
 }
 
 private const val MAX_URL_LENGTH = 8_192

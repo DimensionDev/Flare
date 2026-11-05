@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Flare plugin manifest — API v1",
+  "title": "Flare plugin manifest — API v1/v2",
   "description": "Editor assistance for manifest structure and static rules. Flare remains authoritative for registration, unique IDs, origin approval, locale catalogs, cross-field values and runtime behavior. The Host never fetches the $schema URL.",
   "type": "object",
   "additionalProperties": false,
@@ -20,7 +20,7 @@
     },
     "apiVersion": {
       "type": "integer",
-      "const": 1,
+      "enum": [1, 2],
       "description": "Plugin Host API version."
     },
     "id": {

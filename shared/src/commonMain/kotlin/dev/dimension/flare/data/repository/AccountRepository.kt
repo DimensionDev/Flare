@@ -180,7 +180,27 @@ internal class AccountRepository internal constructor(
         block: suspend () -> T,
     ): T =
         withAccountChanges {
-            restoreAccountsLocked(keys, block)
+            restoreAccountsLocked(keys) {
+                block().also {
+                    keys.forEach { key ->
+                        appDatabase.accountDao().getAccount(key)?.let { account ->
+                            val restored = platformRegistry.get(account.platformId)?.restoreCredential(account.credential_json)
+                            if (restored != null &&
+                                restored != account.credential_json
+                            ) {
+                                appDatabase.accountDao().setCredential(key, restored)
+                            }
+                        }
+                    }
+                }
+            }.also {
+                dataSourceCacheMutex.withLock {
+                    keys.forEach { key ->
+                        (dataSourceCache.remove(key)?.second as? AutoCloseable)?.close()
+                        dataSourceRevisions.update { it + (key to (it[key] ?: 0) + 1) }
+                    }
+                }
+            }
         }
 
     private suspend fun <T> restoreAccountsLocked(
@@ -210,6 +230,7 @@ internal class AccountRepository internal constructor(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
+        beforeCommit: () -> Unit = {},
     ) {
         withAccountChanges {
             val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
@@ -230,6 +251,7 @@ internal class AccountRepository internal constructor(
                         last_active = Clock.System.now().toEpochMilliseconds(),
                         sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
                     )
+                beforeCommit()
                 appDatabase.accountDao().insert(dbAccount)
             }
             if (existingAccount == null) {
@@ -481,6 +503,18 @@ internal class AccountRepository internal constructor(
                 credential.encodeJson(serializer),
             )
         }
+
+        override suspend fun <T : Any> mutateCredential(
+            serializer: KSerializer<T>,
+            update: (T) -> T?,
+        ): T? =
+            appDatabase.connect {
+                val account = appDatabase.accountDao().getAccount(accountKey) ?: throw CancellationException("Account was removed")
+                val current = account.credential_json.decodeJson(serializer)
+                val next = update(current) ?: return@connect null
+                if (next != current) appDatabase.accountDao().setCredential(accountKey, next.encodeJson(serializer))
+                next
+            }
 
         override suspend fun invalidateCachedContent() {
             this@AccountRepository.invalidateCachedContent(accountKey)

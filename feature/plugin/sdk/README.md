@@ -1,7 +1,7 @@
 # Flare Plugin SDK
 
 `flare-plugin-sdk` contains a project initializer, editor types, a local package command,
-templates, examples, and a portable AI authoring skill for Social Plugin API v1.
+templates, examples, and a portable AI authoring skill for Social Plugin API v1/v2.
 Flare provides the plugin runtime. Supported targets are Android, JVM Desktop,
 iOS, and native macOS, not Web. Use a Flare build that includes Plugins in Settings;
 this SDK does not promise a minimum public app release.

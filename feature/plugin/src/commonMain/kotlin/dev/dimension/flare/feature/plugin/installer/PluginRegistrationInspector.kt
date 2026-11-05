@@ -16,7 +16,10 @@ internal class PluginRegistrationInspector(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val engineFactory: suspend (PluginHostCall) -> PluginJavaScriptEngine = { createPluginJavaScriptEngine(dispatcher, it) },
 ) {
-    suspend fun inspect(source: String): PluginMethodTableV1 =
+    suspend fun inspect(
+        source: String,
+        apiVersion: Int = 1,
+    ): PluginMethodTableV1 =
         withContext(dispatcher) {
             require(!containsDynamicImport(source)) { "Dynamic import is not supported" }
             val engine = engineFactory { _, _, _ -> error("Host API is unavailable during installation") }
@@ -25,7 +28,7 @@ internal class PluginRegistrationInspector(
                     withTimeout(VALIDATION_TIMEOUT_MILLIS) {
                         engine.evaluate(registrationPrelude + DISABLE_DYNAMIC_CODE_PRELUDE + source + registrationResult, "plugin.js")
                     }
-                PluginJsonV1.decodeFromString(result)
+                PluginJsonV1.decodeFromString<PluginMethodTableV1>(result).copy(apiVersion = apiVersion)
             } finally {
                 engine.close()
             }

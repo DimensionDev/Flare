@@ -230,6 +230,30 @@ network failures, and malformed responses to their actual typed errors instead
 of silently polling forever. The Host prevents overlapping checks and owns the
 session's disposal; the plugin supplies no lifecycle hook.
 
+### API v2 Cookie state
+
+Declare `apiVersion: 2`. Each Cookie entry may include `attributes` with domain,
+hostOnly, path, expiresAt (epoch milliseconds), session, secure, httpOnly, and
+sameSite (`strict`/`lax`/`none`). Only reliable native fields are supplied. Android
+CookieManager exposes values without these attributes; Apple/Desktop expose
+some metadata but do not reliably know hostOnly. Missing expiry does not imply
+a session Cookie. Same-name values remain separate and more specific native
+Apple values are listed first; do not reduce them to a name-keyed map. API v1
+keeps its original first-value selection.
+
+`check` can return `{type:"pending", pendingPayload: state}` with up to 64 KiB
+opaque JSON. The next check receives `request.pendingPayload`, surviving JS
+runtime eviction. Return the full payload every time it must survive: omission
+or null clears it. Prefer the plugin's rotated state over a repeated stale
+browser snapshot, and explicitly merge genuinely new login candidates.
+
+The flow has a fixed 15-minute lifetime from begin. Pending state is memory-only;
+close, expiry, or package retirement clears it. A verified success remains
+available for retrying a failed local account save within this lifetime. The
+Host does not repeat the remote exchange for that retry. It clears the result
+once the account is saved. Return final state explicitly in `success.credential`;
+the Host never merges pending state into the account for you.
+
 ## Refresh and relogin
 
 Refresh access tokens within an account method using the website's documented
@@ -240,3 +264,8 @@ An invalid/expired credential that cannot be refreshed should raise
 AuthenticationRequired, which the account adapter routes to relogin. The Host
 requires the same account identity on relogin; schema changes are described in
 [publishing](publishing.md#updates-and-compatibility).
+
+API v2 supports [revision-checked credential replacement](runtime-http.md#credentials-crypto-and-locale).
+It protects local state, not remote single-flight or request idempotency. See
+[native retry limits](runtime-http.md#http-request-and-response) before designing
+one-time login exchanges or writes.

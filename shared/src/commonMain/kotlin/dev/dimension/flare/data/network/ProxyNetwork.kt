@@ -29,6 +29,7 @@ import kotlin.uuid.Uuid
 @OptIn(InternalAPI::class)
 internal class ProxyRoutingEngine(
     private val proxy: ProxyRef,
+    private val plugin: Boolean = false,
 ) : HttpClientEngineBase("flare-proxy") {
     override val config = HttpClientEngineConfig()
     override val supportedCapabilities get() = platformEngineCapabilities
@@ -61,7 +62,7 @@ internal class ProxyRoutingEngine(
                     data.attributes,
                 )
             }
-        return ProxyNetwork.execute(data.attributes.getOrNull(requestProxy) ?: proxy, request)
+        return ProxyNetwork.execute(data.attributes.getOrNull(requestProxy) ?: proxy, request, plugin)
     }
 }
 
@@ -86,14 +87,21 @@ public data class ProxySnapshot internal constructor(
 @OptIn(InternalAPI::class)
 public object ProxyNetwork {
     private val mutex = Mutex()
-    private val routes = mutableMapOf<ProxyRef, Route>()
+
+    private data class RouteKey(
+        val proxy: ProxyRef,
+        val plugin: Boolean,
+    )
+
+    private val routes = mutableMapOf<RouteKey, Route>()
     private val revision = MutableStateFlow(0L)
     public val changes: StateFlow<Long> get() = revision
 
     private class Route(
         val snapshot: ProxySnapshot,
+        plugin: Boolean,
     ) {
-        private val engineDelegate = lazy { createPlatformHttpClientEngine(snapshot.connection) }
+        private val engineDelegate = lazy { createPlatformHttpClientEngine(snapshot.connection, plugin) }
         val engine by engineDelegate
         val calls = mutableSetOf<Job>()
 
@@ -111,14 +119,16 @@ public object ProxyNetwork {
     private suspend fun route(
         ref: ProxyRef,
         call: Job? = null,
+        plugin: Boolean = false,
     ): Route =
         koinGet<ProxyRepository>().withSettings { settings ->
             mutex.withLock {
                 val connection = settings.resolve(ref)
+                val key = RouteKey(ref, plugin)
                 val route =
-                    routes[ref]?.takeIf { it.snapshot.connection == connection } ?: run {
-                        routes.remove(ref)?.cancel()
-                        Route(ProxySnapshot(connection, Uuid.random().toString())).also { routes[ref] = it }
+                    routes[key]?.takeIf { it.snapshot.connection == connection } ?: run {
+                        routes.remove(key)?.cancel()
+                        Route(ProxySnapshot(connection, Uuid.random().toString()), plugin).also { routes[key] = it }
                     }
                 if (call != null) {
                     call.ensureActive()
@@ -137,8 +147,9 @@ public object ProxyNetwork {
     internal suspend fun execute(
         ref: ProxyRef,
         data: HttpRequestData,
+        plugin: Boolean = false,
     ): HttpResponseData {
-        val selected = route(ref, callContext().job)
+        val selected = route(ref, callContext().job, plugin)
         currentCoroutineContext().ensureActive()
         return selected.engine.execute(data)
     }
@@ -148,8 +159,8 @@ public object ProxyNetwork {
             val iterator = routes.iterator()
             var changed = false
             while (iterator.hasNext()) {
-                val (ref, route) = iterator.next()
-                if (runCatching { settings.resolve(ref) }.getOrNull() != route.snapshot.connection) {
+                val (key, route) = iterator.next()
+                if (runCatching { settings.resolve(key.proxy) }.getOrNull() != route.snapshot.connection) {
                     route.cancel()
                     iterator.remove()
                     changed = true
@@ -160,12 +171,18 @@ public object ProxyNetwork {
     }
 }
 
-internal expect fun createPlatformHttpClientEngine(connection: ProxyConnection): HttpClientEngine
+internal expect fun createPlatformHttpClientEngine(
+    connection: ProxyConnection,
+    plugin: Boolean = false,
+): HttpClientEngine
 
 internal expect val platformEngineCapabilities: Set<HttpClientEngineCapability<*>>
 
 @kotlin.native.HiddenFromObjC
-public fun proxyHttpClientEngine(proxy: ProxyRef): HttpClientEngine = ProxyRoutingEngine(proxy)
+public fun proxyHttpClientEngine(
+    proxy: ProxyRef,
+    plugin: Boolean = false,
+): HttpClientEngine = ProxyRoutingEngine(proxy, plugin)
 
 @kotlin.native.HiddenFromObjC
 public fun mediaHttpClient(proxy: ProxyRef): io.ktor.client.HttpClient =

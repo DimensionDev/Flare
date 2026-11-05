@@ -332,3 +332,30 @@ declared static timeline ID; Browser takes no value. No wildcard/regex/callback
 field is available. Target capability and account/guest availability still
 matter. Test matching/nonmatching paths and URI encoding with the actual Host;
 detailType link explicitly bypasses this internal matching path.
+
+## API v2 HTTP session state
+
+Declare `apiVersion: 2` to inspect application headers and handle each redirect.
+Inside an account method, a single-hop sketch is:
+
+```js
+const { value: state, revision } = await flare.credential.read({ withRevision: true });
+const response = await flare.http.request({
+  url: context.origin + "/session",
+  redirect: "manual",
+  cookies: state.cookies,
+  headers: { Referer: context.origin + "/", "X-Csrf-Token": state.csrf },
+});
+const cookieUpdates = response.headers["set-cookie"] || [];
+const nextUrl = response.redirectUrl;
+// Interpret cookieUpdates against response.url using the platform's Cookie rules.
+// Extract body tokens with JSON.parse(response.body), then construct the next
+// request's explicit headers/form. Do not replay all response headers.
+// After verification, replace the complete JSON using expectedRevision.
+```
+
+This sketch omits the platform-specific Cookie parser, expiry/deletion rules,
+refresh coordination, and next-hop loop. The Host supplies no Cookie jar and no
+timer/sleep API. Bound every chain by the invocation deadline. CAS failure means
+reread local state; it does not justify repeating an already consumed remote
+exchange or write. See [HTTP limits](runtime-http.md#http-request-and-response).

@@ -1,4 +1,4 @@
-/** Flare Social Plugin API v1. Ambient editor types; do not import at runtime.
+/** Flare Social Plugin API v1/v2. Ambient editor types; do not import at runtime.
  * See ABI.md and references/ for validation, defaults, and operation dependencies.
  * Optional service members do not relax a declared capability's required method set.
  * Compatible Hosts ignore additive fields, unsupported capabilities/operations,
@@ -169,11 +169,30 @@ interface CookieCheckRequestV1 {
   origin: string;
   flowId: string;
   cookies: { cookies: CookieValueV1[] };
+  /** API v2: latest Pending payload for this flow; survives runtime eviction, not app restart. */
+  pendingPayload?: JsonValue;
 }
 /** sourceUrl is the declared probe URL; do not merge Cookies across probes/origins blindly. */
-interface CookieValueV1 { sourceUrl: string; name: string; value: string }
+interface CookieValueV1 {
+  sourceUrl: string;
+  name: string;
+  value: string;
+  /** API v2: only fields reliably available on this platform; duplicate names are preserved. */
+  attributes?: CookieAttributesV2;
+}
+interface CookieAttributesV2 {
+  domain?: string;
+  hostOnly?: boolean;
+  path?: string;
+  /** Unix epoch milliseconds; absent does not imply a session cookie. */
+  expiresAt?: number;
+  session?: boolean;
+  secure?: boolean;
+  httpOnly?: boolean;
+  sameSite?: "strict" | "lax" | "none";
+}
 type LoginTransitionV1 =
-  | { type: "pending" }
+  | { type: "pending"; /** API v2: whole replacement, omitted/null clears; at most 64 KiB JSON. */ pendingPayload?: JsonValue }
   | { type: "externalBrowser"; url: string; pendingPayload: JsonValue }
   | { type: "webCookie"; startUrl: string }
   | { type: "success"; value: LoginSuccessV1 };
@@ -556,11 +575,23 @@ interface HttpRequestV1 {
   cookies?: { name: string; value: string }[];
   body?: HttpBodyV1;
   timeoutMillis?: number;
+  /** API v2 only; manual returns the current hop, follow (default) permits same-origin GET/HEAD redirects. */
+  redirect?: "manual" | "follow";
 }
 /** body is text; parse JSON explicitly after checking status. Headers contain string arrays.
  * HTTP failure statuses are returned normally; this is not a browser Response.
  */
-interface HttpResponseV1 { status: number; headers: Record<string, string[]>; body: string }
+interface HttpResponseV1 {
+  status: number;
+  /** API v2 includes source application headers, including normalized Set-Cookie values. */
+  headers: Record<string, string[]>;
+  body: string;
+  /** Always present for API v2: actual canonical response URL. */
+  url?: string;
+  /** API v2: one valid, authorized HTTPS Location resolved against url, with fragment removed. */
+  redirectUrl?: string;
+}
+interface CredentialSnapshotV2 { value: JsonValue; revision: string }
 
 type PluginErrorCodeV1 =
   | "AuthenticationRequired" | "NotFound" | "Validation" | "RateLimited" | "Network"
@@ -583,7 +614,10 @@ interface FlareHostV1 {
   /** Available only in account scope. replace atomically replaces the whole JSON payload. */
   readonly credential: {
     read(): Promise<JsonValue>;
-    replace(value: JsonValue): Promise<boolean>;
+    /** API v2: revision is opaque; it changes after every successful replacement. */
+    read(options: { withRevision: true }): Promise<CredentialSnapshotV2>;
+    /** API v2: false means a local revision conflict; reread, do not replay a remote refresh. */
+    replace(value: JsonValue, options?: { expectedRevision: string }): Promise<boolean>;
   };
   readonly crypto: {
     /** size counts random bytes (1..1024), producing twice as many hex characters. */

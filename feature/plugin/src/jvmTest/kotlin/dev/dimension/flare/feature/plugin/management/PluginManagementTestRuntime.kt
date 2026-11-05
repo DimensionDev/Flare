@@ -69,7 +69,9 @@ internal class PluginTestAccounts : AccountService {
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
+        beforeCommit: () -> Unit,
     ) {
+        beforeCommit()
         accounts[account.accountKey] = account to PluginJsonV1.encodeToString(serializer, credential)
     }
 

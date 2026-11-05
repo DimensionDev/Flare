@@ -125,6 +125,18 @@ public data class LoginCookieValue(
     val sourceUrl: String,
     val name: String,
     val value: String,
+    val attributes: LoginCookieAttributes? = null,
+)
+
+public data class LoginCookieAttributes(
+    val domain: String? = null,
+    val hostOnly: Boolean? = null,
+    val path: String? = null,
+    val expiresAt: Long? = null,
+    val session: Boolean? = null,
+    val secure: Boolean? = null,
+    val httpOnly: Boolean? = null,
+    val sameSite: String? = null,
 )
 
 public data class LoginCookieSnapshot(

@@ -379,6 +379,14 @@ private fun buildWarnings(
 ): List<PluginInstallWarningV1> =
     buildList {
         if (source == PluginInstallSourceV1.Local) add(PluginInstallWarningV1(PluginInstallWarningTypeV1.UnverifiedLocal))
+        if (manifest.apiVersion >= 2 && (existing == null || existing.manifest.apiVersion < 2)) {
+            add(
+                PluginInstallWarningV1(
+                    PluginInstallWarningTypeV1.Compatibility,
+                    "API v2 can read application response headers, including Set-Cookie, from its approved HTTP origins. Existing v1 accounts need to log in again.",
+                ),
+            )
+        }
         if (existing != null) {
             val sourceChanged =
                 when (val previous = existing.source) {

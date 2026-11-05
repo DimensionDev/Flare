@@ -1,13 +1,13 @@
-# Flare Social Plugin API v1
+# Flare Social Plugin API v1/v2
 
-This directory is the authoring contract for Social Plugin API v1. Prefer
+This directory is the authoring contract for Social Plugin API v1 and v2. Prefer
 [GitHub distribution](references/publishing.md); local `.fpp` installation is
 also supported. Start with the [authoring guide](README.md) or [agent skill](SKILL.md).
 The Host implementation remains authoritative when this document and code disagree.
 
 ## Package
 
-An API v1 package is a ZIP with a `.fpp` extension and exactly these files:
+An API v1/v2 package is a ZIP with a `.fpp` extension and exactly these files:
 
 ```text
 manifest.json
@@ -216,6 +216,21 @@ required methods, or semantics needs a new API/schema contract rather than an
 additive extension. Previously released Hosts without this handling must be
 upgraded; a newer plugin cannot retrofit compatibility into them.
 
+## API v2 sessions
+
+Declare `apiVersion: 2` for application response headers (including Set-Cookie),
+manual redirects, versioned credential updates, and WebCookie pending state and
+Cookie metadata. New Hosts keep API v1 behavior; older Hosts reject API v2.
+The manifest schema and existing capability IDs remain v1. Shared `V1` type names
+continue to describe both APIs; fields marked v2 require the v2 manifest.
+
+API v2 exposes headers only from requests the plugin explicitly makes to approved
+origins. It does not read browser traffic or maintain a Cookie jar. The plugin
+owns Cookie scope/deletion/expiry and any custom header/body token protocol.
+Native Apple can fold repeated headers; Set-Cookie is normalized into separate
+cookie-pair values, but raw header-line fidelity is unavailable. Native retries
+are platform dependent; see [HTTP behavior](references/runtime-http.md#http-request-and-response).
+
 ## Host API
 
 The frozen `flare` object exposes:
@@ -255,7 +270,21 @@ Account and guest calls may use their selected origin and `permissions.httpOrigi
 Additional HTTP origins do not grant authorization-page, Cookie-probe, or Deep Link
 access. Credentials are sent only when explicitly supplied in the request;
 extra destinations do not change account identity or proxy routing.
-Redirects stay on the current origin, even when both origins are approved.
+Automatic redirects stay on the current origin, even when both origins are approved.
+API v2 `redirect: "manual"` returns the current hop, including POST 3xx and raw
+Location. `response.url` identifies that response and optional `redirectUrl` is
+an approved HTTPS target resolved without a fragment. A subsequent explicit
+request rechecks permissions, account session, and proxy. Response names are
+lowercase and values are arrays. V1 hides sensitive headers; v2 exposes source
+application headers while filtering proxy and hop-by-hop fields.
+
+In account scope, API v2 `credential.read({withRevision:true})` returns
+`{value, revision}` and `replace(next, {expectedRevision})` returns false on a
+local conflict. Unconditional replace remains available. Revisions are opaque;
+every successful replacement changes one. A new login or account restore changes
+the private session epoch and rejects old calls. Existing v1 accounts require
+one relogin when their plugin upgrades to v2. Never replay a remote refresh or
+business write simply because local persistence conflicted or failed.
 
 Automatic media loading is a separate permission, disabled by default. A plugin
 that returns avatars, images, audio, video, covers, or HTML images must declare
@@ -364,6 +393,15 @@ The Host reuses its current timeline UI and cache, supplies viewer identity and
 navigation, and owns pagination gaps. Poll/reaction mutations use post.mutate;
 user-card buttons use relation.mutate. See [wire data](references/wire-data.md#timeline-items-and-interactions)
 for all fields, limits, permission checks and mutation parameters/results.
+
+API v2 WebCookie `pending` may carry at most 64 KiB `pendingPayload`; the next
+check receives it even after runtime eviction. Each pending result replaces the
+whole payload; omission/null clears it. The flow lasts at most 15 minutes and
+is kept in memory, not restored after app restart. Cookie `attributes` are
+optional and duplicate names are preserved; unknown fields remain absent.
+After a verified success, local save retries reuse that result until the flow
+expires or closes rather than repeating a remote exchange. V1 Cookie checks
+keep their original selection and completion behavior.
 
 ## Lifecycle and trust
 

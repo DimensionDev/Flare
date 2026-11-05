@@ -320,6 +320,20 @@ public fun CookieSnapshotV1.requireValid() {
                 cookie.value.length <= MAX_COOKIE_VALUE_LENGTH
         },
     ) { "Invalid Cookie snapshot" }
+    cookies.forEach { cookie ->
+        cookie.attributes?.let { attributes ->
+            require(attributes.domain == null || (attributes.domain.length <= 253 && attributes.domain.none(Char::isISOControl))) {
+                "Invalid Cookie domain"
+            }
+            require(
+                attributes.path == null ||
+                    (attributes.path.length <= 8_192 && attributes.path.startsWith('/') && attributes.path.none(Char::isISOControl)),
+            ) {
+                "Invalid Cookie path"
+            }
+            require(attributes.sameSite == null || attributes.sameSite in setOf("strict", "lax", "none")) { "Invalid Cookie SameSite" }
+        }
+    }
     require(encodedSize(this, CookieSnapshotV1.serializer()) <= WireLimitsV1.MAX_PENDING_PAYLOAD_BYTES) {
         "Cookie snapshot is too large"
     }
@@ -327,8 +341,10 @@ public fun CookieSnapshotV1.requireValid() {
 
 public fun LoginTransitionV1.requireValid() {
     when (this) {
-        LoginTransitionV1.Pending -> {
-            return
+        is LoginTransitionV1.Pending -> {
+            require(pendingPayload == null || encodedJsonSize(pendingPayload) <= WireLimitsV1.MAX_PENDING_PAYLOAD_BYTES) {
+                "Login pending payload is too large"
+            }
         }
 
         is LoginTransitionV1.ExternalBrowser -> {

@@ -57,7 +57,7 @@ length in the Host rather than JSON Schema's Unicode code point count.
 | --- | --- | --- |
 | `$schema` | Omitted | Editor schema URL/path only; never loaded by Flare |
 | `schemaVersion` | `1` | Manifest schema, currently exactly 1 |
-| `apiVersion` | Required | Runtime ABI, currently exactly 1 |
+| `apiVersion` | Required | Runtime ABI, 1 or 2; v2 is required for header/session extensions |
 | `id` | Required | Stable reverse-domain plugin ID; `[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+` |
 | `version` | Required | SemVer; use stable `major.minor.patch` for GitHub distribution |
 | `defaultLocale` | `"en"` | BCP-47 locale tag |
@@ -245,4 +245,4 @@ both sides when both configs exist. Implement every resulting enabled field in
 - A login method ID that differs from the corresponding `login` object key.
 - Localized manifest keys absent from the default catalog.
 - Extra root properties such as `author`, `homepage`, `entry`, or a trust badge:
-  API v1 defines no such manifest fields; put human-facing information in README.
+  API v1/v2 define no such manifest fields; put human-facing information in README.

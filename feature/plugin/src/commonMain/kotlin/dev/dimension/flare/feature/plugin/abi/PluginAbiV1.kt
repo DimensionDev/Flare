@@ -2,6 +2,7 @@ package dev.dimension.flare.feature.plugin.abi
 
 public object PluginAbiV1 {
     public const val API_VERSION: Int = 1
+    public val supportedApiVersions: Set<Int> = setOf(1, 2)
     public const val MANIFEST_SCHEMA_VERSION: Int = 1
 
     /** Default template asset; packages may instead include one supported raster icon extension. */

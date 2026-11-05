@@ -59,7 +59,8 @@ test("npm tarball preserves the SDK and creates a typed, buildable plugin projec
     env: { ...process.env, npm_config_cache: join(directory, "cache"), npm_config_update_notifier: "false" },
   });
   assert.equal(JSON.parse(readFileSync(join(generated, "manifest.json"), "utf8")).name, projectName);
-  const generatedManifest = JSON.parse(readFileSync(join(generated, "manifest.json"), "utf8"));
+  const generatedManifestText = readFileSync(join(generated, "manifest.json"), "utf8");
+  const generatedManifest = JSON.parse(generatedManifestText);
   assert.equal(generatedManifest.$schema, `https://unpkg.com/flare-plugin-sdk@${metadata.version}/skill/flare-plugin/manifest.schema.json`);
   const validate = new Ajv({ strict: true }).compile(JSON.parse(readFileSync(join(installed, "skill/flare-plugin/manifest.schema.json"), "utf8")));
   assert.equal(validate(generatedManifest), true, JSON.stringify(validate.errors));
@@ -89,10 +90,25 @@ test("npm tarball preserves the SDK and creates a typed, buildable plugin projec
   writeFileSync(join(generated, "locales/README.md"), "Not a locale catalog\n");
   writeFileSync(join(generated, "assets/README.md"), "Not an icon\n");
   npm(["run", "package"], generated);
+  const v2Manifest = { ...generatedManifest, apiVersion: 2 };
+  assert.equal(validate(v2Manifest), true);
   const generatedPackage = join(generated, "plugin.fpp");
   assert(readFileSync(generatedPackage).length > 0);
 
   writeFileSync(join(generated, "src/type-check.ts"), `
+async function v2Contract(context: PluginInvocationContextV1) {
+  const current: CredentialSnapshotV2 = await flare.credential.read({ withRevision: true });
+  const response = await flare.http.request({ url: context.origin, redirect: "manual", headers: { "X-Csrf-Token": "token" } });
+  const target: string | undefined = response.redirectUrl;
+  const replaced: boolean = await flare.credential.replace({ nonce: response.headers["x-nonce"]?.[0] || null }, { expectedRevision: current.revision });
+  const cookie: CookieValueV1 = { sourceUrl: context.origin, name: "session", value: "one", attributes: { path: "/", session: true } };
+  const pending: LoginTransitionV1 = { type: "pending", pendingPayload: { cookie: { name: cookie.name, value: cookie.value }, target: target || null, replaced } };
+  return pending;
+}
+// @ts-expect-error Unknown redirect mode.
+flare.http.request({ url: "https://example.org", redirect: "unsafe" });
+// @ts-expect-error Revision must be an opaque string.
+flare.credential.replace({}, { expectedRevision: 1 });
 const profile: ProfileV1 = { key: { id: "1", host: "example.org" }, handle: "alice", displayName: "Alice" };
 const page: PageV1<TimelineItemV1> = { items: [{ type: "post", post: { key: profile.key, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Text" } } }] };
 // @ts-expect-error Unsupported Host method.
@@ -185,5 +201,9 @@ flare.fetch("https://example.org");
   const direct = join(directory, "direct.fpp");
   execFileSync(process.execPath, [join(sdk, metadata.bin["flare-plugin-pack"]), runtime, direct]);
   assert.deepEqual(readFileSync(generatedPackage), readFileSync(direct));
+  writeFileSync(join(runtime, "manifest.json"), JSON.stringify(v2Manifest));
+  const v2Package = join(directory, "v2.fpp");
+  execFileSync(process.execPath, [join(sdk, metadata.bin["flare-plugin-pack"]), runtime, v2Package]);
+  assert(readFileSync(v2Package).length > 0);
   t.diagnostic(`Verified ${archive.files.length} files, offline SDK install, typed project build, stale-output guard, SDK types, module bundling, watch recovery, and packaging`);
 });

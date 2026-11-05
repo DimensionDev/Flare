@@ -16,10 +16,15 @@ import dev.dimension.flare.feature.plugin.wire.LoginTransitionV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
 import io.ktor.http.URLProtocol
 import io.ktor.http.parseUrl
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlin.time.Clock
 
 public data class PluginWebCookieRequestV1(
     val startUrl: String,
@@ -66,6 +71,7 @@ public object PluginWebCookieNavigationPolicyV1 {
 public class PluginWebCookieLoginCoordinatorV1(
     private val runtimePool: PluginRuntimePool,
     private val entropy: PluginLoginEntropyV1 = PlatformPluginLoginEntropyV1,
+    private val nowEpochMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) {
     public suspend fun begin(
         plugin: RunningPluginV1,
@@ -90,6 +96,7 @@ public class PluginWebCookieLoginCoordinatorV1(
                         )
                     },
             )
+        val createdAt = nowEpochMillis()
         val flowId = entropy.newFlowId()
         val key = plugin.loginKey(flowId)
         try {
@@ -123,6 +130,8 @@ public class PluginWebCookieLoginCoordinatorV1(
                 key = key,
                 request = request,
                 expectedAccountId = expectedAccountId,
+                nowEpochMillis = nowEpochMillis,
+                createdAt = createdAt,
             )
         } catch (error: Throwable) {
             withContext(NonCancellable) { runtimePool.close(key) }
@@ -140,16 +149,23 @@ public class PluginWebCookieSessionV1 internal constructor(
     private val key: PluginRuntimeKeyV1,
     public val request: PluginWebCookieRequestV1,
     private val expectedAccountId: String?,
+    private val nowEpochMillis: () -> Long,
+    private val createdAt: Long,
 ) {
     private val checkMutex = Mutex()
-    private var closed = false
+    private val closed = MutableStateFlow(false)
+    private var pendingPayload: JsonElement? = null
+    private var verifiedSuccess: LoginSuccessV1? = null
     private val releaseInteraction = plugin.session.holdInteraction()
 
     /** Returns [PluginCookieCheckResultV1.Busy] instead of queuing overlapping poll ticks. */
     public suspend fun check(snapshot: CookieSnapshotV1): PluginCookieCheckResultV1 {
         if (!checkMutex.tryLock()) return PluginCookieCheckResultV1.Busy
         try {
-            check(!closed) { "Cookie login session is closed" }
+            check(!closed.value) { "Cookie login session is closed" }
+            plugin.session.ensureActive()
+            requireUnexpired()
+            verifiedSuccess?.let { return PluginCookieCheckResultV1.Success(it) }
             snapshot.requireValid()
             val filtered = filter(snapshot)
             val present = filtered.cookies.associateBy { it.sourceUrl to it.name }
@@ -173,20 +189,32 @@ public class PluginWebCookieSessionV1 internal constructor(
                             origin = context.metadata.origin,
                             flowId = flowId,
                             cookies = filtered,
+                            pendingPayload = pendingPayload,
                         ),
                     requestSerializer = CookieCheckRequestV1.serializer(),
                     responseSerializer = LoginTransitionV1.serializer(),
                     validate = LoginTransitionV1::requireValid,
                 )
+            if (closed.value) throw CancellationException("Cookie login session was closed")
+            plugin.session.ensureActive()
+            requireUnexpired()
             return when (transition) {
-                LoginTransitionV1.Pending -> {
+                is LoginTransitionV1.Pending -> {
+                    require(
+                        plugin.installed.manifest.apiVersion >= 2 || transition.pendingPayload == null,
+                    ) { "Pending state requires API v2" }
+                    pendingPayload = transition.pendingPayload?.takeUnless { it is JsonNull }
                     PluginCookieCheckResultV1.Pending
                 }
 
                 is LoginTransitionV1.Success -> {
                     val success = plugin.requireLoginSuccess(transition.value, context.metadata.origin, expectedAccountId)
-                    closed = true
-                    releaseInteraction()
+                    if (plugin.installed.manifest.apiVersion >= 2) {
+                        verifiedSuccess = success
+                    } else {
+                        closed.value = true
+                        releaseInteraction()
+                    }
                     withContext(NonCancellable) { runtimePool.close(key) }
                     PluginCookieCheckResultV1.Success(success)
                 }
@@ -203,11 +231,33 @@ public class PluginWebCookieSessionV1 internal constructor(
     }
 
     public suspend fun close() {
+        closed.value = true
         checkMutex.withLock {
-            if (closed) return
-            closed = true
+            pendingPayload = null
+            verifiedSuccess = null
             releaseInteraction()
             withContext(NonCancellable) { runtimePool.close(key) }
+        }
+    }
+
+    private suspend fun requireUnexpired() {
+        try {
+            requireActive()
+        } catch (error: PluginLoginException) {
+            withContext(NonCancellable) { runtimePool.close(key) }
+            throw error
+        }
+    }
+
+    internal fun requireActive() {
+        if (closed.value) throw CancellationException("Cookie login session was closed")
+        plugin.session.ensureActive()
+        if (plugin.installed.manifest.apiVersion >= 2 && nowEpochMillis() - createdAt !in 0..15 * 60 * 1_000L) {
+            closed.value = true
+            pendingPayload = null
+            verifiedSuccess = null
+            releaseInteraction()
+            throw PluginLoginException("login.expired", "Cookie login flow has expired")
         }
     }
 
@@ -225,10 +275,15 @@ public class PluginWebCookieSessionV1 internal constructor(
                 if (cookie.name !in allowed[canonicalUrl].orEmpty()) {
                     null
                 } else {
-                    cookie.copy(sourceUrl = canonicalUrl)
+                    cookie.copy(
+                        sourceUrl = canonicalUrl,
+                        attributes = cookie.attributes.takeIf { plugin.installed.manifest.apiVersion >= 2 },
+                    )
                 }
             }
-        require(cookies.distinctBy { it.sourceUrl to it.name }.size == cookies.size) { "Duplicate Cookie value" }
+        if (plugin.installed.manifest.apiVersion == 1) {
+            require(cookies.distinctBy { it.sourceUrl to it.name }.size == cookies.size) { "Duplicate Cookie value" }
+        }
         return CookieSnapshotV1(cookies.sortedWith(compareBy(CookieValueV1::sourceUrl, CookieValueV1::name))).also {
             it.requireValid()
         }

@@ -2466,10 +2466,10 @@ internal fun SettingsScreen(
                     },
                     trailing = {
                         HyperlinkButton(
-                            "https://github.com/DimensionDev/Flare",
+                            "https://github.com/flaresocialapp/Flare",
                         ) {
                             Text(
-                                text = "https://github.com/DimensionDev/Flare",
+                                text = "https://github.com/flaresocialapp/Flare",
                                 maxLines = 1,
                             )
                         }

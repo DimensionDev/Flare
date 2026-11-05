@@ -138,7 +138,7 @@ nucleus.application {
         cleanupNativeLibs = true
         enableAotCache = false
         modules("jdk.localedata", "java.management")
-        homepage = "https://github.com/DimensionDev/Flare"
+        homepage = "https://github.com/flaresocialapp/Flare"
         // Higher compression level can cause laggy for linux AppImage
         compressionLevel = CompressionLevel.Store
         targetFormats(

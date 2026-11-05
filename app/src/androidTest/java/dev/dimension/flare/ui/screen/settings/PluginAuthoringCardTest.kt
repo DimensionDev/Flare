@@ -186,7 +186,7 @@ class PluginAuthoringCardTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val linkText = context.getString(R.string.plugin_report_issue)
         compose.onNodeWithText(context.getString(R.string.plugin_beta_description, linkText)).performFirstLinkClick()
-        compose.runOnIdle { assertEquals("https://github.com/DimensionDev/Flare/issues", openedUrl) }
+        compose.runOnIdle { assertEquals("https://github.com/flaresocialapp/Flare/issues", openedUrl) }
         compose.onNodeWithText(linkText).assertDoesNotExist()
         screenshot("flare-plugins-android.png")
         compose.onNodeWithContentDescription("${context.getString(R.string.more)}: Pixelfed").performClick()

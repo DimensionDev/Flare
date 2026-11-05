@@ -573,7 +573,7 @@ internal fun PluginManagementList(
                                 if (start >= 0) {
                                     addLink(
                                         LinkAnnotation.Url(
-                                            "https://github.com/DimensionDev/Flare/issues",
+                                            "https://github.com/flaresocialapp/Flare/issues",
                                             TextLinkStyles(
                                                 SpanStyle(
                                                     color = FluentTheme.colors.text.accent.primary,

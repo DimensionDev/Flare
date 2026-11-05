@@ -23,7 +23,9 @@ builds = linux + apple + %w[build-windows]
 check(jobs.keys.to_set == (builds + %w[lint upload publish-google-play]).to_set, 'CI jobs changed without preserving the validation graph')
 builds.each do |id|
   check(Array(jobs.fetch(id).fetch('needs')) == ['lint'], "#{id} must start after the fast lint gate")
-  check(jobs.fetch(id).fetch('if').include?("github.event_name == 'push'"), "Tag builds must include #{id}")
+  %w[push pull_request].each do |event|
+    check(jobs.fetch(id).fetch('if').include?("github.event_name == '#{event}'"), "Automatic #{event} builds must include #{id}")
+  end
 end
 dispatches = {
   'all' => builds,
@@ -38,6 +40,11 @@ dispatches = {
   'google-play' => [],
 }
 triggers = workflow['on'] || workflow[true]
+%w[push pull_request].each do |event|
+  check(triggers.dig(event, 'branches') == %w[master release develop], "#{event} must automatically validate the maintained branches")
+end
+check(triggers.dig('push', 'tags') == ['**', '!plugin-sdk-v*'], 'App releases must retain tag builds without handling SDK tags')
+check(triggers.dig('push', 'paths-ignore') == ['**.md', '**.yml'], 'Branch pushes must retain the existing documentation and YAML exclusions')
 check(triggers.dig('workflow_dispatch', 'inputs', 'target', 'options').to_set == dispatches.keys.to_set, 'Every supported dispatch target must be selectable')
 dispatches.each do |target, expected|
   selected = builds.select { |id| jobs.fetch(id).fetch('if').scan(/inputs\.target == '([^']+)'/).flatten.include?(target) }
@@ -51,6 +58,24 @@ groups = builds.map do |id|
   group
 end
 check(groups.uniq.size == builds.size, 'Independent platforms must not cancel each other')
+
+other_workflows = %w[static crowdin-upload crowdin-download plugin-sdk dependabot].to_h do |name|
+  [name, load_yaml.call(File.join(root, ".github/workflows/#{name}.yml"))]
+end
+other_triggers = other_workflows.transform_values { |config| config['on'] || config[true] }
+%w[static crowdin-upload].each do |name|
+  check(other_triggers.dig(name, 'push', 'branches') == ['master'], "#{name} must automatically run on master")
+end
+check(other_triggers.dig('crowdin-upload', 'push', 'paths') == ['**/values/strings.xml', 'crowdin.yml', 'appleApp/Shared/FlareAppleResource/Resources/Localizable.xcstrings'], 'Crowdin uploads must retain their source string filters')
+check(other_triggers.dig('crowdin-download', 'schedule') == [{ 'cron' => '0 0 * * *' }], 'Crowdin downloads must automatically run daily')
+check(other_triggers.dig('plugin-sdk', 'pull_request', 'paths') == ['feature/plugin/sdk/**', 'README.md', 'LICENSE', '.github/workflows/plugin-sdk.yml'], 'SDK changes must automatically validate on pull requests')
+check(other_triggers.dig('plugin-sdk', 'push', 'tags') == ['plugin-sdk-v*'], 'SDK releases must retain their own tag trigger')
+check(other_workflows.dig('plugin-sdk', 'jobs', 'publish', 'if') == "github.event_name == 'push' && startsWith(github.ref, 'refs/tags/plugin-sdk-v')", 'SDK PRs and manual validations must not publish to npm')
+%w[static crowdin-upload crowdin-download plugin-sdk].each do |name|
+  check(other_triggers.fetch(name).key?('workflow_dispatch'), "#{name} must retain manual dispatch")
+end
+check(other_workflows.dig('dependabot', 'jobs', 'dependabot', 'if') == "github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'flaresocialapp/Flare'", 'Dependabot automation must target the migrated repository')
+
 check(jobs.fetch('upload').fetch('needs').to_set == (builds + ['lint']).to_set, 'Publishing must wait for every validation job')
 check(jobs.fetch('upload').fetch('if') == "startsWith(github.ref, 'refs/tags/')", 'Publishing must remain tag-only')
 publishers = jobs.select { |_, job| job.fetch('steps').any? { |step| step.fetch('uses', '').start_with?('r0adkll/upload-google-play@') } }
@@ -178,4 +203,4 @@ check(schemes.dig('CI-iOS', 'test', 'targets').to_set == (schemes.dig('iOS', 'te
 check(!File.read(File.join(root, '.github/workflows/android.yml')).include?('enableReleaseBinaryCache=true'), 'Release binary caching must stay disabled')
 check(!File.read(File.join(root, 'apple-shared/build.gradle.kts')).include?('-Xauto-cache-from'), 'Release project auto-caching must stay disabled')
 
-puts 'CI contracts passed: dispatch targets, release gates, regression coverage, and one Kotlin framework owner'
+puts 'CI contracts passed: automatic triggers, dispatch targets, release gates, regression coverage, and one Kotlin framework owner'

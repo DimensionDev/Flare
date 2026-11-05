@@ -1831,13 +1831,13 @@
       "en": {
         "stringUnit": {
           "state": "translated",
-          "value": "Plugins are still in beta and may be incomplete. If you run into problems, report them on [GitHub Issues](https://github.com/DimensionDev/Flare/issues)."
+          "value": "Plugins are still in beta and may be incomplete. If you run into problems, report them on [GitHub Issues](https://github.com/flaresocialapp/Flare/issues)."
         }
       },
       "zh-Hans": {
         "stringUnit": {
           "state": "translated",
-          "value": "插件仍处于 Beta 阶段，功能尚不完善。遇到问题可前往 [GitHub Issues](https://github.com/DimensionDev/Flare/issues) 提交反馈。"
+          "value": "插件仍处于 Beta 阶段，功能尚不完善。遇到问题可前往 [GitHub Issues](https://github.com/flaresocialapp/Flare/issues) 提交反馈。"
         }
       }
     }
@@ -54523,187 +54523,187 @@
         }
       }
     },
-    "https://github.com/DimensionDev/Flare" : {
+    "https://github.com/flaresocialapp/Flare" : {
       "comment" : "A link to the repository of the Flare app.",
       "localizations" : {
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "https://github.com/DimensionDev/Flare"
+            "value" : "https://github.com/flaresocialapp/Flare"
           }
         }
       }

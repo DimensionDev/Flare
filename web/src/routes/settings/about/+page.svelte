@@ -21,9 +21,9 @@
 	const links = $derived<AboutLink[]>([
 		{
 			title: m.settingsAboutSourceCode(),
-			subtitle: 'https://github.com/DimensionDev/Flare',
+			subtitle: 'https://github.com/flaresocialapp/Flare',
 			icon: 'Github',
-			href: 'https://github.com/DimensionDev/Flare',
+			href: 'https://github.com/flaresocialapp/Flare',
 		},
 		{
 			title: m.settingsAboutTelegram(),

@@ -40,7 +40,7 @@ async function verifySplitEdits(order) {
   const issue = {
     id: 1,
     number: 2444,
-    html_url: 'https://github.com/DimensionDev/Flare/issues/2444',
+    html_url: 'https://github.com/flaresocialapp/Flare/issues/2444',
     title: '.',
     body: '.',
   };
@@ -51,7 +51,7 @@ async function verifySplitEdits(order) {
 
   for (const event of order) {
     await action(github, {
-      repo: { owner: 'DimensionDev', repo: 'Flare' },
+      repo: { owner: 'flaresocialapp', repo: 'Flare' },
       payload: events[event],
     });
   }
@@ -69,7 +69,7 @@ await verifySplitEdits(['body', 'title']);
 
 const ignored = createHarness();
 await action(ignored.github, {
-  repo: { owner: 'DimensionDev', repo: 'Flare' },
+  repo: { owner: 'flaresocialapp', repo: 'Flare' },
   payload: {
     issue: { id: 2, number: 2, title: 'Updated title', body: 'Updated body' },
     changes: { title: { from: 'Original title' }, body: { from: 'Original body' } },

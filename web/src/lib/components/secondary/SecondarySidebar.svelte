@@ -28,7 +28,7 @@
 	const projectFooterLinks = $derived([
 		{
 			label: m.settingsAboutSourceCode(),
-			href: 'https://github.com/DimensionDev/Flare',
+			href: 'https://github.com/flaresocialapp/Flare',
 			icon: 'Github',
 		},
 		{
@@ -65,7 +65,7 @@
 		},
 		{
 			label: 'AppImage',
-			href: 'https://github.com/DimensionDev/Flare/releases/latest',
+			href: 'https://github.com/flaresocialapp/Flare/releases/latest',
 			icon: 'Github',
 		},
 	]);

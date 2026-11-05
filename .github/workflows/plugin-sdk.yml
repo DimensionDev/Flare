@@ -1,6 +1,12 @@
 name: Plugin SDK
 
 on:
+  pull_request:
+    paths:
+      - "feature/plugin/sdk/**"
+      - "README.md"
+      - "LICENSE"
+      - ".github/workflows/plugin-sdk.yml"
   push:
     tags:
       - "plugin-sdk-v*"

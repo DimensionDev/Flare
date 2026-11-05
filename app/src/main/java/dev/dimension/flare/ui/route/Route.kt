@@ -18,6 +18,7 @@ import dev.dimension.flare.ui.presenter.login.ReloginTarget
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @Immutable
 internal sealed interface Route : NavKey {
@@ -227,7 +228,12 @@ internal sealed interface Route : NavKey {
         data class WebCookieLogin(
             val request: LoginEffect.OpenWebCookieLogin,
             val callback: suspend (LoginCookieSnapshot) -> Boolean,
-        ) : ServiceSelect
+        ) : ServiceSelect {
+            private val sessionId = Uuid.random().toString()
+
+            // Navigation3 stringifies keys; function references can fail under R8.
+            override fun toString(): String = "WebCookieLogin($sessionId)"
+        }
     }
 
     @Serializable

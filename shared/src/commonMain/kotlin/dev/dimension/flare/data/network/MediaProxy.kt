@@ -12,7 +12,10 @@ public data class MediaPlaybackSource(
 // Only native players without a per-request network adapter use this loopback relay.
 public expect object MediaProxy {
     @Throws(Exception::class)
-    public suspend fun playbackSource(media: UiMedia): MediaPlaybackSource
+    public suspend fun playbackSource(
+        media: UiMedia,
+        forceRelay: Boolean = false,
+    ): MediaPlaybackSource
 
     public fun retain(source: MediaPlaybackSource)
 

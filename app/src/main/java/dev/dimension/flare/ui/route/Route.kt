@@ -208,6 +208,9 @@ internal sealed interface Route : NavKey {
     @Serializable
     data object Home : Route
 
+    @Serializable
+    data object Counter : Route
+
     data class Timeline(
         val tabItem: UiTimelineTabItem,
     ) : Route

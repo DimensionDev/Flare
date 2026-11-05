@@ -1,0 +1,27 @@
+[package]
+name = "flare-core"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+test-fixtures = []
+
+[dependencies]
+flare-presenter-macros = { path = "../flare-presenter-macros" }
+flare-presenter-schema = { path = "../flare-presenter-schema" }
+tokio.workspace = true
+
+[build-dependencies]
+flare-presenter-schema = { path = "../flare-presenter-schema", features = ["codegen"] }
+
+[dev-dependencies]
+flare-presenter-schema = { path = "../flare-presenter-schema", features = ["codegen"] }
+quote = "1"
+syn = { version = "2", features = ["full"] }
+tempfile = "3"
+tokio = { workspace = true, features = ["rt-multi-thread", "time"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,13 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition.workspace = true
+rust-version = "1.91"
+publish.workspace = true
+
+[dependencies]
+anyhow = "1"
+tempfile = "3"
+
+[lints]
+workspace = true

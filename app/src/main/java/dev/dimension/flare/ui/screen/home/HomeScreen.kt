@@ -151,7 +151,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         state.canComposeState.takeSuccess() == true &&
                             state.topLevelBackStack.takeSuccess()?.currentKey is Route.Home,
                     onFabClicked = {
-                        state.navigate(Route.Compose.New)
+                        state.navigate(Route.Counter)
                     },
                     navigationSuiteColors =
                         NavigationSuiteDefaults.colors(
@@ -187,7 +187,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             WideNavigationRailValue.Collapsed -> {
                                                 FloatingActionButton(
                                                     onClick = {
-                                                        state.navigate(Route.Compose.New)
+                                                        state.navigate(Route.Counter)
                                                     },
                                                     elevation =
                                                         FloatingActionButtonDefaults.elevation(
@@ -210,7 +210,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             WideNavigationRailValue.Expanded -> {
                                                 ExtendedFloatingActionButton(
                                                     onClick = {
-                                                        state.navigate(Route.Compose.New)
+                                                        state.navigate(Route.Counter)
                                                     },
                                                     icon = {
                                                         FAIcon(

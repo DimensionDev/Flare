@@ -20,6 +20,63 @@ plugins {
     id("kotlin-parcelize")
 }
 
+val rustAndroidAbis = providers.gradleProperty("rustAndroidAbis")
+    .orElse("arm64-v8a,armeabi-v7a,x86,x86_64")
+val rustRoot = rootProject.layout.projectDirectory.dir("rust")
+val rustCargo = providers.environmentVariable("CARGO")
+    .orElse("${System.getProperty("user.home")}/.cargo/bin/cargo")
+val rustSources = fileTree(rustRoot) {
+    include("Cargo.toml", "Cargo.lock", ".cargo/*.toml", "crates/**/*.toml", "crates/**/*.rs")
+}
+val rustJniLibs = layout.buildDirectory.dir("generated/rust/jniLibs")
+val generateRustBindings = tasks.register<Exec>("generateRustBindings") {
+    inputs.files(rustSources, fileTree(rustRoot.dir("xtask")) { include("**/*.toml", "**/*.rs") })
+    outputs.dir(rustRoot.dir("bindings"))
+    outputs.file(layout.projectDirectory.file("src/main/java/dev/dimension/flare/common/RustPresenterBindings.kt"))
+    outputs.file(rootProject.layout.projectDirectory.file("appleApp/ios/Common/RustPresenterBindings.swift"))
+    workingDir(rustRoot)
+    commandLine(
+        rustCargo.get(), "run", "--locked", "--package", "xtask", "--", "bindings",
+    )
+}
+val rustNdkDirectory = androidComponents.sdkComponents.ndkDirectory
+val rustNativeLibraries = rustAndroidAbis.get().split(",").associateWith { abi ->
+    val target = when (abi) {
+        "arm64-v8a" -> "aarch64-linux-android"
+        "armeabi-v7a" -> "armv7-linux-androideabi"
+        "x86" -> "i686-linux-android"
+        "x86_64" -> "x86_64-linux-android"
+        else -> error("Unsupported Rust Android ABI: $abi")
+    }
+    val clang = if (abi == "armeabi-v7a") "armv7a-linux-androideabi" else target
+    val host = if (System.getProperty("os.name").startsWith("Mac")) "darwin-x86_64" else "linux-x86_64"
+    val linker = rustNdkDirectory.map { it.file("toolchains/llvm/prebuilt/$host/bin/${clang}24-clang") }
+    val targetKey = target.uppercase().replace('-', '_')
+    val rustFlagsKey = "CARGO_TARGET_${targetKey}_RUSTFLAGS"
+    val rustFlags = providers.environmentVariable(rustFlagsKey).orElse("").map {
+        "$it -Clink-arg=-Wl,-z,max-page-size=16384 -Clink-arg=-Wl,-z,common-page-size=16384"
+    }
+    tasks.register<Exec>("compileRust_$abi") {
+        dependsOn(generateRustBindings)
+        inputs.files(rustSources, linker, rustNdkDirectory.map { it.file("source.properties") })
+        inputs.property("rustFlags", rustFlags)
+        outputs.file(rustRoot.file("target/$target/release/libflare_ffi.so"))
+        workingDir(rustRoot)
+        commandLine(
+            rustCargo.get(), "build", "--locked", "-p", "flare-ffi", "--lib", "--release",
+            "--target", target, "--target-dir", rustRoot.dir("target").asFile.absolutePath,
+        )
+        doFirst {
+            environment("CARGO_TARGET_${targetKey}_LINKER", linker.get().asFile.absolutePath)
+            environment(rustFlagsKey, rustFlags.get())
+        }
+    }
+}
+val buildRustNative = tasks.register<Sync>("buildRustNative") {
+    rustNativeLibraries.forEach { (abi, compile) -> from(compile) { into(abi) } }
+    into(rustJniLibs)
+}
+
 flare {
     namespace = "dev.dimension.flare"
     applicationId = "dev.dimension.flare"
@@ -39,16 +96,23 @@ kotlin {
 }
 
 android {
+    ndkVersion = "28.2.13676358"
     val fdroid = rootProject.file("fdroid.properties")
     val fdroidProp = Properties()
     fdroidProp.load(fdroid.inputStream())
 
     defaultConfig {
+        ndk { abiFilters.addAll(rustAndroidAbis.get().split(",")) }
         versionCode =
             System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")
                 ?.toIntOrNull() ?: 1
         versionName =
             System.getenv("BUILD_VERSION") ?: fdroidProp.getProperty("versionName") ?: "0.0.0"
+    }
+
+    sourceSets.getByName("main") {
+        kotlin.directories.add(rootProject.file("rust/bindings/kotlin").absolutePath)
+        jniLibs.srcDir(rustJniLibs.get().asFile)
     }
 
     val file = rootProject.file("signing.properties")
@@ -76,6 +140,9 @@ android {
         release {
             optimization {
                 enable = true
+                keepRules {
+                    files.add(project.file("rust-proguard-rules.pro"))
+                }
             }
             // START Non-FOSS component
             if (project.file("google-services.json").exists()) {
@@ -102,6 +169,8 @@ android {
         sourceSets.getByName("main").kotlin.directories.add("src/foss/java")
     }
 }
+
+tasks.named("preBuild") { dependsOn(buildRustNative) }
 
 dependencies {
     implementation(libs.core.ktx)

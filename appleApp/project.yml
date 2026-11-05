@@ -142,6 +142,70 @@ targetTemplates:
           "$RUN_SCRIPT"
 
 targets:
+  FlareRust:
+    type: framework.static
+    platform: iOS
+    sources:
+      - path: ../rust/bindings/swift/FlareRust.swift
+    preBuildScripts:
+      - name: Generate Bindings and Compile Rust
+        basedOnDependencyAnalysis: false
+        inputFiles:
+          - "$(SRCROOT)/../rust/Cargo.toml"
+          - "$(SRCROOT)/../rust/Cargo.lock"
+          - "$(SRCROOT)/../rust/xtask/Cargo.toml"
+          - "$(SRCROOT)/../rust/xtask/src/main.rs"
+        outputFiles:
+          - "$(SRCROOT)/../rust/bindings/swift/FlareRust.swift"
+          - "$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.h"
+          - "$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
+          - "$(SRCROOT)/ios/Common/RustPresenterBindings.swift"
+          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
+        script: |
+          set -eu
+          cd "$SRCROOT/../rust"
+          CARGO="${CARGO:-$HOME/.cargo/bin/cargo}"
+          HOST="$("$CARGO" -vV | sed -n 's/^host: //p')"
+          # Keep Xcode's SDK settings out of the host generator only.
+          env -u SDKROOT -u IPHONEOS_DEPLOYMENT_TARGET -u MACOSX_DEPLOYMENT_TARGET \
+            -u TVOS_DEPLOYMENT_TARGET -u WATCHOS_DEPLOYMENT_TARGET -u XROS_DEPLOYMENT_TARGET \
+            "$CARGO" run --locked --package xtask --target "$HOST" --target-dir target -- bindings
+          PROFILE=dev
+          ARTIFACT_PROFILE=debug
+          if [ "$CONFIGURATION" = Release ]; then
+            PROFILE=release
+            ARTIFACT_PROFILE=release
+          fi
+          set --
+          for ARCH in $ARCHS; do
+            case "$PLATFORM_NAME/$ARCH" in
+              iphoneos/arm64) TARGET=aarch64-apple-ios ;;
+              iphonesimulator/arm64) TARGET=aarch64-apple-ios-sim ;;
+              iphonesimulator/x86_64) TARGET=x86_64-apple-ios ;;
+              *) echo "Unsupported Rust Apple target: $PLATFORM_NAME/$ARCH" >&2; exit 1 ;;
+            esac
+            "$CARGO" build --locked -p flare-ffi --lib --target "$TARGET" \
+              --profile "$PROFILE" --target-dir target
+            set -- "$@" "$PWD/target/$TARGET/$ARTIFACT_PROFILE/libflare_ffi.a"
+          done
+          if [ "$#" -eq 0 ]; then
+            echo "ARCHS must contain at least one Apple architecture" >&2
+            exit 1
+          fi
+          mkdir -p "$BUILT_PRODUCTS_DIR/rust"
+          if [ "$#" -eq 1 ]; then
+            cp "$1" "$BUILT_PRODUCTS_DIR/rust/libflare_ffi.a"
+          else
+            xcrun lipo -create "$@" -output "$BUILT_PRODUCTS_DIR/rust/libflare_ffi.a"
+          fi
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        SWIFT_INCLUDE_PATHS: "$(SRCROOT)/../rust/bindings/swift"
+        OTHER_SWIFT_FLAGS: "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust
+
   iOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -157,6 +221,7 @@ targets:
           - SafariOpenInFlare/**
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
+      - target: FlareRust
       - package: Kingfisher
       - package: LazyPager
       - package: SwiftUI-Flow
@@ -191,7 +256,10 @@ targets:
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
         DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
         INFOPLIST_FILE: ios/Info.plist
-        OTHER_LDFLAGS: "$(inherited) -ObjC"
+        OTHER_LDFLAGS: "$(inherited) -ObjC -lflare_ffi"
+        LIBRARY_SEARCH_PATHS: "$(inherited) $(BUILT_PRODUCTS_DIR)/rust"
+        SWIFT_INCLUDE_PATHS: "$(SRCROOT)/../rust/bindings/swift"
+        OTHER_SWIFT_FLAGS: "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
 
   OpenInFlare:
     type: app-extension
@@ -360,6 +428,20 @@ targets:
         TEST_TARGET_NAME: iOS
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
+  CounterInteractionTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: iosCounterUITests
+    dependencies:
+      - target: iOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.counter-tests
+        TEST_TARGET_NAME: iOS
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   macOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -490,6 +572,15 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.appleui
 
 schemes:
+  CounterInteractionTests:
+    build:
+      targets:
+        CounterInteractionTests: all
+    test:
+      config: Debug
+      targets:
+        - CounterInteractionTests
+
   CI-iOS:
     build:
       targets:

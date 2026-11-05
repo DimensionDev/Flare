@@ -1,0 +1,18 @@
+[workspace]
+members = ["crates/flare-core", "crates/flare-ffi", "crates/flare-presenter-macros", "crates/flare-presenter-schema", "xtask"]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[workspace.dependencies]
+tokio = { version = "1.54.1", default-features = false, features = ["macros", "sync"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"

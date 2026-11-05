@@ -28,7 +28,6 @@ public sealed interface UiMedia {
 
     public fun cacheKeyFor(url: String): String {
         val headers = customHeaders.orEmpty().entries.sortedBy { it.key.lowercase() }
-        val authenticated = headers.any { it.key.equals("Authorization", true) || it.key.equals("Cookie", true) }
         return buildString {
             append(url)
             if (headers.isNotEmpty()) {
@@ -41,7 +40,7 @@ public sealed interface UiMedia {
                             .hex(),
                 )
             }
-            if (authenticated) append("|$proxy")
+            if (headers.isNotEmpty()) append("|$proxy")
         }
     }
 

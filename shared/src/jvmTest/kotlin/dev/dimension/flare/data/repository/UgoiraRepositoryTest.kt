@@ -19,6 +19,7 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.ByteChannel
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -46,6 +47,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -234,6 +236,57 @@ class UgoiraRepositoryTest {
         }
 
     @Test
+    fun customHeadersReachFramesAndChangingTokensDoesNotReuseThePreviousCache(): Unit =
+        runTest {
+            val directory = Files.createTempDirectory("ugoira-headers-test").toString().toPath()
+            val tokens = mutableListOf<String?>()
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        tokens += request.headers["X-Media-Token"]
+                        assertEquals("https://provider.example/", request.headers["Referer"])
+                        respond("frame")
+                    },
+                )
+            try {
+                val cache =
+                    UgoiraRepository(
+                        OkioFileStorage(FileSystem.SYSTEM, directory),
+                        backgroundScope,
+                        UgoiraDownloader(FileSystem.SYSTEM, client),
+                    ) { info }
+                val first =
+                    cache.load(
+                        media.copy(
+                            customHeaders =
+                                persistentMapOf(
+                                    "X-Media-Token" to "one",
+                                    "referer" to "https://provider.example/",
+                                ),
+                        ),
+                    ) {}
+                cache.release(first)
+                val second =
+                    cache.load(
+                        media.copy(
+                            customHeaders =
+                                persistentMapOf(
+                                    "X-Media-Token" to "two",
+                                    "referer" to "https://provider.example/",
+                                ),
+                        ),
+                    ) {}
+                cache.release(second)
+                assertNotEquals(first.key, second.key)
+                assertEquals<List<String?>>(listOf("one", "one", "two", "two"), tokens)
+            } finally {
+                backgroundScope.coroutineContext[Job]?.cancelAndJoin()
+                client.close()
+                FileSystem.SYSTEM.deleteRecursively(directory)
+            }
+        }
+
+    @Test
     fun unavailableOriginalDiscardsEntireSequenceAndUsesLargeZipInMetadataOrder(): Unit =
         runTest {
             val zip =
@@ -254,6 +307,8 @@ class UgoiraRepositoryTest {
                 HttpClient(
                     MockEngine { request ->
                         requests += request.url.toString()
+                        assertEquals("ugoira-fixture", request.headers["X-Media-Token"])
+                        assertEquals("https://www.pixiv.net/", request.headers["Referer"])
                         when {
                             request.url.toString().endsWith("0.png") -> respond("original")
                             request.url.toString().endsWith("1.png") -> respond("", HttpStatusCode.NotFound)
@@ -269,7 +324,7 @@ class UgoiraRepositoryTest {
                         backgroundScope,
                         UgoiraDownloader(FileSystem.SYSTEM, client),
                     ) { info }
-                val animation = cache.load(media) {}
+                val animation = cache.load(media.copy(customHeaders = persistentMapOf("X-Media-Token" to "ugoira-fixture"))) {}
                 assertEquals("large", animation.quality)
                 assertEquals(listOf("zip-0", "zip-1"), animation.frames.map { FileSystem.SYSTEM.read(it.file.toPath()) { readUtf8() } })
                 assertEquals(3, requests.size)

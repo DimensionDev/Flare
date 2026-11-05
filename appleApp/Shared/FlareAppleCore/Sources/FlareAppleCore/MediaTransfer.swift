@@ -29,7 +29,8 @@ public enum MediaTransfer {
         configuration.urlCredentialStorage = nil
         configuration.httpCookieStorage = nil
         ProxySessionConfigurator().configure(configuration: configuration, connection: snapshot.connection)
-        let session = URLSession(configuration: configuration, delegate: MediaRedirectDelegate(origin: url), delegateQueue: nil)
+        let headerNames = Array(media.customHeaders?.keys ?? Dictionary<String, String>().keys)
+        let session = URLSession(configuration: configuration, delegate: MediaRedirectDelegate(origin: url, headerNames: headerNames), delegateQueue: nil)
         defer { session.invalidateAndCancel() }
         var request = URLRequest(url: url)
         media.customHeaders?.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
@@ -59,23 +60,31 @@ public enum MediaTransfer {
         }
     }
 
-    nonisolated public static func redirectedRequest(_ request: URLRequest, origin: URL) -> URLRequest {
+    nonisolated public static func redirectedRequest(_ request: URLRequest, origin: URL, headerNames: [String] = []) -> URLRequest {
         guard let target = request.url else { return request }
-        let port: (URL) -> Int = { $0.port ?? ($0.scheme == "https" ? 443 : 80) }
-        if target.scheme == origin.scheme, target.host == origin.host, port(target) == port(origin) { return request }
+        let port: (URL) -> Int = { $0.port ?? ($0.scheme?.lowercased() == "https" ? 443 : 80) }
+        if target.scheme?.lowercased() == origin.scheme?.lowercased(),
+           target.host?.lowercased() == origin.host?.lowercased(), port(target) == port(origin) { return request }
         var request = request
-        request.setValue(nil, forHTTPHeaderField: "Authorization")
-        request.setValue(nil, forHTTPHeaderField: "Cookie")
+        for name in headerNames + ["Authorization", "Cookie"] {
+            if !MediaRequestHeaders.shared.mayForwardAcrossOrigins(name: name) {
+                request.setValue(nil, forHTTPHeaderField: name)
+            }
+        }
         return request
     }
 }
 
 private final class MediaRedirectDelegate: NSObject, URLSessionTaskDelegate {
     let origin: URL
-    init(origin: URL) { self.origin = origin }
+    let headerNames: [String]
+    init(origin: URL, headerNames: [String]) {
+        self.origin = origin
+        self.headerNames = headerNames
+    }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        completionHandler(MediaTransfer.redirectedRequest(request, origin: origin))
+        completionHandler(MediaTransfer.redirectedRequest(request, origin: origin, headerNames: headerNames))
     }
 }

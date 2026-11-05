@@ -30,6 +30,7 @@ import kotlin.uuid.Uuid
 internal class ProxyRoutingEngine(
     private val proxy: ProxyRef,
     private val plugin: Boolean = false,
+    private val media: Boolean = false,
 ) : HttpClientEngineBase("flare-proxy") {
     override val config = HttpClientEngineConfig()
     override val supportedCapabilities get() = platformEngineCapabilities
@@ -38,6 +39,22 @@ internal class ProxyRoutingEngine(
         client.sendPipeline.intercept(io.ktor.client.request.HttpSendPipeline.Before) {
             // Redirects copy the builder; engine request data is already a separate copy.
             if (!context.attributes.contains(requestOrigin)) context.attributes.put(requestOrigin, context.url.build())
+            val origin = context.attributes[requestOrigin]
+            val target = context.url.build()
+            if ((media || context.attributes.contains(requestMediaHeaders)) &&
+                (origin.protocol != target.protocol || origin.host != target.host || origin.port != target.port)
+            ) {
+                context.attributes.put(requestCrossedOrigin, true)
+            }
+            if (media && !context.attributes.contains(requestMediaHeaders)) {
+                context.attributes.put(
+                    requestMediaHeaders,
+                    context.headers
+                        .names()
+                        .map(String::lowercase)
+                        .toSet(),
+                )
+            }
         }
         super.install(client)
     }
@@ -45,8 +62,10 @@ internal class ProxyRoutingEngine(
     override suspend fun execute(data: HttpRequestData): HttpResponseData {
         val origin = data.attributes.getOrNull(requestOrigin) ?: data.url.also { data.attributes.put(requestOrigin, it) }
         val sameOrigin = origin.protocol == data.url.protocol && origin.host == data.url.host && origin.port == data.url.port
+        if (!sameOrigin && data.attributes.contains(requestMediaHeaders)) data.attributes.put(requestCrossedOrigin, true)
+        val mediaHeaders = data.attributes.getOrNull(requestMediaHeaders).orEmpty()
         val request =
-            if (sameOrigin) {
+            if (sameOrigin && data.attributes.getOrNull(requestCrossedOrigin) != true) {
                 data
             } else {
                 HttpRequestData(
@@ -54,7 +73,11 @@ internal class ProxyRoutingEngine(
                     data.method,
                     io.ktor.http.Headers.build {
                         data.headers.forEach { key, values ->
-                            if (!key.equals("Authorization", true) && !key.equals("Cookie", true)) appendAll(key, values)
+                            if (!key.equals("Authorization", true) && !key.equals("Cookie", true) &&
+                                (key.lowercase() !in mediaHeaders || MediaRequestHeaders.mayForwardAcrossOrigins(key))
+                            ) {
+                                appendAll(key, values)
+                            }
                         }
                     },
                     data.body,
@@ -186,7 +209,7 @@ public fun proxyHttpClientEngine(
 
 @kotlin.native.HiddenFromObjC
 public fun mediaHttpClient(proxy: ProxyRef): io.ktor.client.HttpClient =
-    io.ktor.client.HttpClient(ProxyRoutingEngine(proxy)) {
+    io.ktor.client.HttpClient(ProxyRoutingEngine(proxy, media = true)) {
         useDefaultTransformers = false
         install(io.ktor.client.plugins.HttpTimeout) {
             connectTimeoutMillis = 30_000
@@ -197,6 +220,8 @@ public fun mediaHttpClient(proxy: ProxyRef): io.ktor.client.HttpClient =
 internal val requestProxy = io.ktor.util.AttributeKey<ProxyRef>("flare-request-proxy")
 
 private val requestOrigin = io.ktor.util.AttributeKey<io.ktor.http.Url>("flare-request-origin")
+private val requestCrossedOrigin = io.ktor.util.AttributeKey<Boolean>("flare-request-crossed-origin")
+private val requestMediaHeaders = io.ktor.util.AttributeKey<Set<String>>("flare-media-header-names")
 
 @kotlin.native.HiddenFromObjC
 public fun io.ktor.client.request.HttpRequestBuilder.applyProxy(proxy: ProxyRef) {
@@ -206,5 +231,13 @@ public fun io.ktor.client.request.HttpRequestBuilder.applyProxy(proxy: ProxyRef)
 @kotlin.native.HiddenFromObjC
 public fun io.ktor.client.request.HttpRequestBuilder.applyMedia(media: dev.dimension.flare.ui.model.UiMedia) {
     attributes.put(requestProxy, media.proxy)
+    attributes.put(
+        requestMediaHeaders,
+        media.customHeaders
+            .orEmpty()
+            .keys
+            .map(String::lowercase)
+            .toSet(),
+    )
     media.customHeaders?.forEach { (key, value) -> headers.append(key, value) }
 }

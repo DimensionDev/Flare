@@ -30,6 +30,9 @@ do not replace Host validation, and parsing JSON does not validate the manifest.
   invalid JSON, HTTP errors, pagination continuation, and stable identities.
 - Auth/cursor/action data is not accidentally inserted into public content or
   media URLs. No real secrets enter checked-in fixtures.
+- Media headers reach previews/downloads; test same-origin and cross-origin
+  redirects, HLS children, account cache isolation and media permission denial.
+  Use dummy short-lived tokens: media headers follow ordinary cache/navigation persistence.
 
 The generated tsconfig loads the SDK's ambient types with strict checking and no
 browser/Node globals. Keep manifest/Host validation even when the

@@ -7,6 +7,28 @@ import FlareAppleCore
 
 @MainActor
 final class ProxyPlaybackLifecycleTests: XCTestCase {
+    func testMediaRedirectDropsCustomTokensAndPreservesPublicHeadersAndRanges() throws {
+        let origin = try XCTUnwrap(URL(string: "https://media.example/video"))
+        var request = URLRequest(url: origin)
+        let headers = ["X-Media-Token": "private", "Authorization": "Bearer private", "Cookie": "session=private",
+                       "Referer": "https://www.bilibili.com/", "User-Agent": "Fixture/1.0"]
+        headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
+        request.setValue("bytes=2-5", forHTTPHeaderField: "Range")
+        XCTAssertEqual(MediaTransfer.redirectedRequest(request, origin: origin, headerNames: Array(headers.keys))
+            .value(forHTTPHeaderField: "X-Media-Token"), "private")
+        request.url = try XCTUnwrap(URL(string: "https://MEDIA.example:443/other"))
+        XCTAssertEqual(MediaTransfer.redirectedRequest(request, origin: origin, headerNames: Array(headers.keys))
+            .value(forHTTPHeaderField: "X-Media-Token"), "private")
+        request.url = try XCTUnwrap(URL(string: "https://cdn.example/video"))
+        let redirected = MediaTransfer.redirectedRequest(request, origin: origin, headerNames: Array(headers.keys))
+        for name in ["X-Media-Token", "Authorization", "Cookie"] {
+            XCTAssertNil(redirected.value(forHTTPHeaderField: name))
+        }
+        XCTAssertEqual(redirected.value(forHTTPHeaderField: "Referer"), headers["Referer"])
+        XCTAssertEqual(redirected.value(forHTTPHeaderField: "User-Agent"), headers["User-Agent"])
+        XCTAssertEqual(redirected.value(forHTTPHeaderField: "Range"), "bytes=2-5")
+    }
+
     func testRemoteVideoKeepsDecodingAcrossLoopsAfterServerStops() async throws {
         try await checkOfflineVideoLoops()
     }

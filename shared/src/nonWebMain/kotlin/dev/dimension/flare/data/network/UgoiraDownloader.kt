@@ -44,7 +44,7 @@ internal class UgoiraDownloader(
                 val frames =
                     metadata.frames.mapIndexed { index, frame ->
                         val name = "$index.$extension"
-                        bytes += downloadFile("$base$index.$extension", directory / name, FRAME_LIMIT, media.proxy)
+                        bytes += downloadFile("$base$index.$extension", directory / name, FRAME_LIMIT, media)
                         require(bytes <= SEQUENCE_LIMIT) { "Ugoira exceeds the size limit" }
                         onProgress((index + 1f) / metadata.frames.size)
                         UgoiraFrame(name, frame.delayMillis)
@@ -58,7 +58,7 @@ internal class UgoiraDownloader(
         for (url in listOf(largeZip, metadata.zipUrl).distinct()) {
             try {
                 val zip = directory / "frames.zip"
-                downloadFile(url, zip, SEQUENCE_LIMIT, media.proxy)
+                downloadFile(url, zip, SEQUENCE_LIMIT, media)
                 val frames = extractFrames(zip, metadata.frames, directory, onProgress)
                 fileSystem.delete(zip)
                 return UgoiraDownload(frames, if (url != metadata.zipUrl) "large" else "medium")
@@ -103,7 +103,7 @@ internal class UgoiraDownloader(
         url: String,
         destination: Path,
         maximumBytes: Long,
-        proxy: dev.dimension.flare.data.model.ProxyRef,
+        media: UiMedia.Ugoira,
     ): Long {
         validateUrl(url)
         return flow {
@@ -111,8 +111,14 @@ internal class UgoiraDownloader(
                 try {
                     client
                         .prepareGet(url) {
-                            attributes.put(requestProxy, proxy)
-                            header("Referer", "https://www.pixiv.net/")
+                            applyMedia(media)
+                            if (media.customHeaders
+                                    .orEmpty()
+                                    .keys
+                                    .none { it.equals("Referer", true) }
+                            ) {
+                                header("Referer", "https://www.pixiv.net/")
+                            }
                         }.execute { response ->
                             when (response.status.value) {
                                 200 -> Unit

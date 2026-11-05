@@ -299,6 +299,12 @@ Permission removal and uninstall take effect immediately, like the
 package change itself; absent plugins cannot restore media.
 Development caches predating ownership metadata are rebuilt on upgrade.
 
+`MediaV1.customHeaders` optionally supplies explicit headers to native media
+loaders; it does not change HTTP origin permissions or attach credentials
+automatically. It shares the existing media cache/navigation persistence and
+applies to all URLs in that media item. See [media headers](references/wire-data.md#text-and-media)
+for validation, redirect rules and credential lifetime constraints.
+
 Flare owns HTTP routing: detector, guest, and new-login requests follow the
 global proxy policy; account requests and relogin requests follow that account's
 policy, including OAuth resumed after restart. Plugins cannot select a proxy.

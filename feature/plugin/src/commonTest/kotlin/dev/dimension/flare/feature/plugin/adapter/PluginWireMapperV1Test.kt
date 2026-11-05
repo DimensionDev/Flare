@@ -28,6 +28,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -237,6 +238,47 @@ class PluginWireMapperV1Test {
             false,
             dev.dimension.flare.ui.model.PluginMediaPermissions
                 .isAllowed(profile.pluginId!!),
+        )
+    }
+
+    @Test
+    fun mediaHeadersReachAllNativeVariantsAndTheirPreviews() {
+        val headers = mapOf("Referer" to "https://local.example/", "X-Media-Token" to "fixture-token")
+        MediaTypeV1.entries.filterNot { it == MediaTypeV1.Unknown }.forEach { type ->
+            val media =
+                MediaV1(
+                    "media",
+                    type,
+                    "https://cdn.example/media",
+                    previewUrl = "https://preview.example/image.jpg",
+                    ugoiraKey = post.key.takeIf { type == MediaTypeV1.Ugoira },
+                    customHeaders = headers,
+                )
+            val mapped =
+                mapper
+                    .post(post.copy(media = listOf(media)))
+                    .post.images
+                    .single()
+            assertEquals<Map<String, String>?>(headers, mapped.customHeaders)
+            assertEquals<Map<String, String>?>(headers, assertNotNull(mapped.preview).customHeaders)
+            assertEquals(ProxyRef.Account(MicroBlogKey("me", "local.example")), mapped.proxy)
+            val cached = PluginJsonV1.decodeFromString<UiMedia>(PluginJsonV1.encodeToString(UiMedia.serializer(), mapped))
+            assertEquals<Map<String, String>?>(headers, cached.customHeaders)
+            assertEquals<Map<String, String>?>(headers, cached.preview?.customHeaders)
+        }
+        val denied = createMapper(null, mediaNetwork = false)
+        assertFailsWith<IllegalArgumentException> {
+            denied.post(
+                post.copy(media = listOf(MediaV1("media", MediaTypeV1.Image, "https://cdn.example/image", customHeaders = headers))),
+            )
+        }
+        assertNull(
+            mapper
+                .post(
+                    post.copy(media = listOf(MediaV1("media", MediaTypeV1.Image, "https://cdn.example/image"))),
+                ).post.images
+                .single()
+                .customHeaders,
         )
     }
 

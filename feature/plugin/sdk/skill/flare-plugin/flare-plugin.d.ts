@@ -246,6 +246,8 @@ interface MediaV1 {
   /** Ugoira requires an authenticated account and gallery.ugoiraMetadata. */
   ugoiraKey?: EntityKeyV1;
   originalFrameUrl?: string;
+  /** Explicit media headers, shared by the main URL, preview and download. See wire-data.md. */
+  customHeaders?: Record<string, string>;
 }
 type VisibilityV1 = "public" | "unlisted" | "followers" | "direct" | "channel";
 type SemanticActionV1 =

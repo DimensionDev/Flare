@@ -37,6 +37,7 @@ import javax.net.ssl.SSLSocketFactory
 
 private data class MediaOrigin(
     val url: okhttp3.HttpUrl,
+    val headers: Set<String>,
 )
 
 private val mediaClientsMutex = Mutex()
@@ -80,7 +81,8 @@ public fun proxyCallFactory(media: dev.dimension.flare.ui.model.UiMedia): Call.F
                                 }
                             }.addNetworkInterceptor { chain ->
                                 val current = chain.request()
-                                val origin = current.tag(MediaOrigin::class.java)?.url
+                                val tagged = current.tag(MediaOrigin::class.java)
+                                val origin = tagged?.url
                                 val sameOrigin =
                                     origin != null && origin.scheme == current.url.scheme && origin.host == current.url.host &&
                                         origin.port == current.url.port
@@ -90,9 +92,15 @@ public fun proxyCallFactory(media: dev.dimension.flare.ui.model.UiMedia): Call.F
                                     } else {
                                         current
                                             .newBuilder()
-                                            .removeHeader("Authorization")
-                                            .removeHeader("Cookie")
-                                            .build()
+                                            .apply {
+                                                removeHeader("Authorization")
+                                                removeHeader("Cookie")
+                                                tagged
+                                                    ?.headers
+                                                    ?.filterNot(
+                                                        MediaRequestHeaders::mayForwardAcrossOrigins,
+                                                    )?.forEach { removeHeader(it) }
+                                            }.build()
                                     },
                                 )
                             }.build()
@@ -100,7 +108,17 @@ public fun proxyCallFactory(media: dev.dimension.flare.ui.model.UiMedia): Call.F
                                 mediaClients[proxy] = snapshot to it
                             }
                     }
-                client.newCall(request.newBuilder().tag(MediaOrigin::class.java, MediaOrigin(media.url.toHttpUrl())).build())
+                client.newCall(
+                    request
+                        .newBuilder()
+                        .tag(
+                            MediaOrigin::class.java,
+                            MediaOrigin(
+                                if (request.url == media.urlForDownload.toHttpUrl()) request.url else media.url.toHttpUrl(),
+                                media.customHeaders.orEmpty().keys,
+                            ),
+                        ).build(),
+                )
             }
         }
     }

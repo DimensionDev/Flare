@@ -20,6 +20,9 @@ public object WireLimitsV1 {
     public const val MAX_CREDENTIAL_BYTES: Int = 64 * 1_024
     public const val MAX_ERROR_TEXT_LENGTH: Int = 4_096
     public const val MAX_RICH_TEXT_LENGTH: Int = 1_000_000
+    public const val MAX_MEDIA_HEADERS: Int = 32
+    public const val MAX_MEDIA_HEADER_VALUE_LENGTH: Int = 8_192
+    public const val MAX_MEDIA_HEADER_BYTES: Int = 64 * 1_024
 }
 
 public fun PageRequestV1.requireValid() {
@@ -408,6 +411,7 @@ internal fun RichTextV1.requireValid() {
 
 internal fun MediaV1.requireValid() {
     if (type == MediaTypeV1.Unknown) return
+    customHeaders.requireValidMediaHeaders()
     require(id.isNotBlank() && id.length <= WireLimitsV1.MAX_ID_LENGTH) { "Invalid media ID" }
     url.requireHttpsUrl(required = true)
     previewUrl.requireHttpsUrl()
@@ -424,6 +428,42 @@ internal fun MediaV1.requireValid() {
     require(height == null || height in 1..100_000) { "Invalid media height" }
     require(durationMillis == null || durationMillis in 0..604_800_000) { "Invalid media duration" }
 }
+
+private fun Map<String, String>.requireValidMediaHeaders() {
+    require(size <= WireLimitsV1.MAX_MEDIA_HEADERS) { "Too many media headers" }
+    require(keys.map(String::lowercase).distinct().size == size) { "Duplicate media header" }
+    var bytes = 0
+    forEach { (name, value) ->
+        val lower = name.lowercase()
+        require(
+            MEDIA_HEADER_NAME.matches(name) && lower !in RESERVED_MEDIA_HEADERS && !lower.startsWith("proxy-") &&
+                !lower.startsWith("sec-"),
+        ) { "Media header is not allowed" }
+        require(value.length <= WireLimitsV1.MAX_MEDIA_HEADER_VALUE_LENGTH && value.none(Char::isISOControl)) {
+            "Invalid media header value"
+        }
+        bytes += name.encodeToByteArray().size + value.encodeToByteArray().size
+    }
+    require(bytes <= WireLimitsV1.MAX_MEDIA_HEADER_BYTES) { "Media headers are too large" }
+}
+
+private val MEDIA_HEADER_NAME = Regex("[!#$%&'*+.^_`|~0-9A-Za-z-]{1,128}")
+private val RESERVED_MEDIA_HEADERS =
+    setOf(
+        "host",
+        "connection",
+        "content-length",
+        "keep-alive",
+        "te",
+        "trailer",
+        "transfer-encoding",
+        "upgrade",
+        "accept-encoding",
+        "range",
+        "if-range",
+        "if-none-match",
+        "if-modified-since",
+    )
 
 internal fun List<ActionDescriptorV1>.requireValid() {
     require(size <= SemanticActionV1.entries.size) { "Too many actions" }

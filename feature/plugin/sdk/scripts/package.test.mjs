@@ -110,6 +110,9 @@ flare.http.request({ url: "https://example.org", redirect: "unsafe" });
 // @ts-expect-error Revision must be an opaque string.
 flare.credential.replace({}, { expectedRevision: 1 });
 const profile: ProfileV1 = { key: { id: "1", host: "example.org" }, handle: "alice", displayName: "Alice" };
+const media: MediaV1 = { id: "image", type: "image", url: "https://cdn.example.org/image", customHeaders: { Referer: "https://example.org/", Cookie: "session=fixture", "X-Media-Token": "fixture" } };
+// @ts-expect-error Header values must be strings.
+const invalidMedia: MediaV1 = { ...media, customHeaders: { "X-Media-Token": 1 } };
 const page: PageV1<TimelineItemV1> = { items: [{ type: "post", post: { key: profile.key, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Text" } } }] };
 // @ts-expect-error Unsupported Host method.
 flare.fetch("https://example.org");

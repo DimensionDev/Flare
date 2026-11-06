@@ -463,6 +463,8 @@
     <string name="users">Users</string>
     <string name="hashtags">Hashtags</string>
     <string name="statues">Posts</string>
+    <string name="search_unavailable">Search is unavailable for this account</string>
+    <string name="search_empty">No search results</string>
 
 
     <string name="compose_title">Compose</string>

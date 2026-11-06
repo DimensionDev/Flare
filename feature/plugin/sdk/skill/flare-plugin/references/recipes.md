@@ -36,12 +36,20 @@ All five methods receive `SearchRequestV1 { query, page }`:
 | discoverProfiles | PageV1<ProfileV1> |
 | discoverHashtags | PageV1<HashtagV1> |
 
-Declare and implement all five to expose the current search interface. Map the
-website's different search/discovery endpoints rather than forwarding a search
-result envelope. Encode queries as URL parameters, and keep paging cursors
-specific to the query and result type. Discovery may use an empty query; do not
-invent a hidden required query that the Host cannot provide. See Pixelfed's
-search service for complete examples. Test non-ASCII queries and empty results.
+Declare at least one of these operations in `flare.datasource.search/v1` and
+register the matching methods under `capabilities.search`. Login can negotiate
+any supported nonempty subset. Omit the search capability from the login result
+when that account supports none. An empty page is valid for an enabled operation
+with no results.
+
+The Host sends a search query to `posts` and `profiles` and an empty query to the
+three Discover operations. Trending tags can appear independently. Selecting a
+tag to search for posts requires `posts`. Profile results can appear independently
+of `profile` lookup and open a native profile when lookup is available.
+
+Use `["refresh"]` for a single page or `["refresh", "older"]` to allow more pages.
+Encode queries as URL parameters and keep cursors specific to the query and
+operation. Test non-ASCII queries and empty results.
 
 ## Profile
 

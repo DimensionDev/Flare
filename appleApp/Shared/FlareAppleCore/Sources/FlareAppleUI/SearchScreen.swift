@@ -5,7 +5,6 @@ import FlareAppleCore
 public struct SearchScreen: View {
     @Environment(\.timelineListRenderer) private var listRenderer
     @State private var searchAccountType: AccountType
-    @Environment(\.openURL) private var openURL
     @Environment(\.timelineAppearance.aiConfig.agent) private var agentEnabled
     private let onAskAi: (String?) -> Void
     @State private var searchPresenter: KotlinPresenter<SearchState>
@@ -47,6 +46,15 @@ public struct SearchScreen: View {
 
     private var content: some View {
         scrollingContent
+        .overlay {
+            if searchPresenter.state.isSearchUnavailable || searchPresenter.state.hasNoResults {
+                ListEmptyView(
+                    searchPresenter.state.isSearchUnavailable ? "search_unavailable_title" : "search_empty_title",
+                    icon: .magnifyingGlass
+                )
+                .allowsHitTesting(false)
+            }
+        }
         .scrollContentBackground(.hidden)
         .searchListRowSpacing(2)
         .listStyle(.plain)
@@ -138,14 +146,11 @@ public struct SearchScreen: View {
                                 ForEach(0..<usersState.itemCount, id: \.self) { index in
                                     ListCardView {
                                         if let item = usersState.peek(index: index) {
-                                            UserCompatView(data: item)
+                                            SearchResultProfileView(user: item)
                                                 .onAppear {
                                                     _ = usersState.get(index: index)
                                                 }
                                                 .padding()
-                                                .onTapGesture {
-                                                    item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                                                }
                                         } else {
                                             UserLoadingView()
                                                 .padding()
@@ -163,11 +168,17 @@ public struct SearchScreen: View {
                     .listRowSeparator(.hidden)
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .listRowBackground(Color.clear)
+                } else if case .error(let error) = onEnum(of: searchPresenter.state.users) {
+                    ListErrorView(error: error.error) { _ = error.onRetry() }
+                } else if case .loading = onEnum(of: searchPresenter.state.users) {
+                    SearchSectionProgress()
                 }
-                Section {
-                    TimelinePagingListContent(data: searchPresenter.state.status)
-                } header: {
-                    Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
+                if !searchPresenter.state.status.isEmpty {
+                    Section {
+                        TimelinePagingListContent(data: searchPresenter.state.status)
+                    } header: {
+                        Text("local_history_status", bundle: FlareAppleUILocalization.bundle)
+                    }
                 }
             }
         }
@@ -178,11 +189,18 @@ public struct SearchScreen: View {
         if case .success(let users) = onEnum(of: searchPresenter.state.users) {
             headers.append(.title("local_history_user"))
             headers.append(TimelineListHeader(id: "users") { TimelineListUserStrip(users: users) })
+        } else if case .error(let error) = onEnum(of: searchPresenter.state.users) {
+            headers.append(TimelineListHeader(id: "users-error") {
+                ListErrorView(error: error.error) { _ = error.onRetry() }
+            })
+        } else if case .loading = onEnum(of: searchPresenter.state.users) {
+            headers.append(TimelineListHeader(id: "users-loading") { SearchSectionProgress() })
         }
-        headers.append(.title("local_history_status"))
+        let posts = searchPresenter.state.status
+        if !posts.isEmpty { headers.append(.title("local_history_status")) }
         return TimelineListRequest(
             key: searchPresenter.key,
-            content: .posts(searchPresenter.state.status),
+            content: posts.isEmpty ? .none : .posts(posts),
             headers: headers
         )
     }

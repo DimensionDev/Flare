@@ -99,6 +99,10 @@ relogin, without requiring the account list to change.
 | Additive fields, detail types, item/media/action variants, capabilities or operations | Compatible Hosts ignore unsupported extensions; known content keeps its behavior and validation. Unknown detail/navigation types are inert, with no URL fallback |
 | Host predates additive compatibility, or an existing contract changes incompatibly | Require a compatible app release; a plugin update cannot retrofit Host behavior. API/schema version checks remain enforced |
 
+Partial search declarations require a Host release that supports them. Earlier
+Hosts require all five search operations and reject a partial declaration when
+installing or updating from the latest stable tag.
+
 Treat website/credential compatibility deliberately. A version bump alone does
 not convert stored credentials. Document new permissions and user-visible changes.
 The Host's own cache-database migration is separate from a plugin's versioning;

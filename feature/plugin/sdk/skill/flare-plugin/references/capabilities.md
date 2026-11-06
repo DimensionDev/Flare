@@ -7,7 +7,7 @@ in the manifest and negotiated login result. JavaScript methods live under
 | ID middle | Service | Required operations | Additional operations | Host surface / dependency |
 | --- | --- | --- | --- | --- |
 | `timeline` | `timeline` | `page` | None | Static timelines, including at least one default |
-| `search` | `search` | `posts`, `profiles`, `discoverPosts`, `discoverProfiles`, `discoverHashtags` | None | Search/discovery sections |
+| `search` | `search` | At least one search operation | `posts`, `profiles`, `discoverPosts`, `discoverProfiles`, `discoverHashtags` | Each supported operation enables its own section |
 | `profile` | `profile` | `byId`, `byHandle` | `timeline`, `following`, `followers` | Profile lookup; tabs additionally require `timeline` and profileTabs |
 | `post` | `post` | `detail` | `context`, `delete`, `mutate` | Internal post detail, thread context, and supported actions |
 | `relation` | `relation` | `state`, `mutate` | None | Follow/block/mute controls; nonempty static relationActions |

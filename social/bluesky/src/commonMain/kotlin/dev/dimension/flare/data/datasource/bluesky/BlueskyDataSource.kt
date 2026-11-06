@@ -38,6 +38,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
@@ -677,6 +678,9 @@ internal class BlueskyDataSource(
                 rkey = RKey(likedUri.substringAfterLast('/')),
             ),
         )
+
+    override val searchOperations: Set<SearchOperation> =
+        SearchOperation.entries.toSet() - setOf(SearchOperation.DiscoverPosts, SearchOperation.DiscoverHashtags)
 
     override fun searchStatus(query: String) =
         SearchStatusRemoteMediator(

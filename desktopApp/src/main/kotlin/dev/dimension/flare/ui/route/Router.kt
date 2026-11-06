@@ -574,14 +574,6 @@ internal fun Router(
 
                 entry<Route.Discover> { args ->
                     DiscoverScreen(
-                        toUser = { accountType, userKey ->
-                            navigate(
-                                Profile(
-                                    accountType = accountType,
-                                    userKey = userKey,
-                                ),
-                            )
-                        },
                         toSearch = { accountType, keyword ->
                             navigate(
                                 Search(
@@ -598,14 +590,6 @@ internal fun Router(
                     SearchScreen(
                         initialQuery = args.keyword,
                         accountType = args.accountType,
-                        toUser = { accountType, userKey ->
-                            navigate(
-                                Profile(
-                                    accountType = accountType,
-                                    userKey = userKey,
-                                ),
-                            )
-                        },
                         toAskAi = navigateToAgentChat,
                     )
                 }

@@ -938,6 +938,7 @@
     <string name="visibility_self">仅自己可见</string>
     <string name="visibility_self_description">仅你自己可以看到此微博</string>
     <string name="empty_search_results">没有搜索结果</string>
+    <string name="search_unavailable">此账号暂不支持搜索</string>
     <string name="empty_discover">暂无推荐内容</string>
     <string name="empty_following">暂无关注用户</string>
     <string name="empty_followers">暂无粉丝</string>

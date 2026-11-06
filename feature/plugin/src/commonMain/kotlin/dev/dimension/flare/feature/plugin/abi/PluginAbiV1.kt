@@ -80,7 +80,7 @@ public object PluginAbiV1 {
             when (capability) {
                 Capabilities.PROFILE -> setOf("byId", "byHandle")
                 Capabilities.POST -> setOf("detail")
-                Capabilities.NOTIFICATION -> emptySet()
+                Capabilities.NOTIFICATION, Capabilities.SEARCH -> emptySet()
                 Capabilities.GALLERY -> setOf("detail", "comments", "recommendations")
                 else -> operations
             }

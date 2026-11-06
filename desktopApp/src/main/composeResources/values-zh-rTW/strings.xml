@@ -332,6 +332,8 @@
     <string name="users">使用者</string>
     <string name="hashtags">標籤</string>
     <string name="statues">貼文</string>
+    <string name="search_unavailable">此帳號暫不支援搜尋</string>
+    <string name="search_empty">沒有搜尋結果</string>
     <string name="compose_title">發布</string>
     <string name="compose_hint">在想些什麼？</string>
     <string name="compose_poll_option_hint">選項 %1$s</string>

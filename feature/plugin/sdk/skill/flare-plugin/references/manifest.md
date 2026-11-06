@@ -241,7 +241,7 @@ both sides when both configs exist. Implement every resulting enabled field in
 - Timeline capability without a static/default timeline.
 - A profile tab without the profile timeline operation.
 - Compose capability without compose defaults, or defaults without the capability.
-- Only `search.posts` declared when the search Host interface requires all five operations.
+- An empty `operations` object for `flare.datasource.search/v1`.
 - A login method ID that differs from the corresponding `login` object key.
 - Localized manifest keys absent from the default catalog.
 - Extra root properties such as `author`, `homepage`, `entry`, or a trust badge:

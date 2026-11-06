@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.TimelineTabConfigurationDataSource
@@ -282,6 +283,8 @@ internal class NostrDataSource(
             accountKey = accountKey,
             serviceManager = serviceManager,
         )
+
+    override val searchOperations: Set<SearchOperation> = setOf(SearchOperation.Posts, SearchOperation.Profiles)
 
     override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
         object : CacheableRemoteLoader<UiTimelineV2> {

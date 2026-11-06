@@ -5,25 +5,18 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.Pager
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.combineLatestFlowLists
-import dev.dimension.flare.common.emptyFlow
+import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.accountKeyOrNull
 import dev.dimension.flare.data.datasource.microblog.accountProfileFlow
 import dev.dimension.flare.data.datasource.microblog.capabilities
-import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
@@ -40,19 +33,16 @@ import dev.dimension.flare.web.shared.WebPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @WebPresenter("discover")
 public class DiscoverPresenter : PresenterBase<DiscoverState>() {
     private val accountRepository: AccountRepository by koinInject()
     private val appDataStore: AppDataStore by koinInject()
     private val appScope: CoroutineScope by koinInject()
+    private val searchActive = MutableStateFlow(false)
     private val accountSelection by lazy {
         RememberedAccountSelection(appDataStore.discoverPreferences, appScope, accountRepository.accountMutationMutex) {
             accountRepository.find(it) !=
@@ -87,64 +77,19 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             }
     }
 
-    private val selectedAccountTypeFlow: Flow<AccountType> by lazy {
-        accountSelection.selectedAccountType.filterNotNull()
-    }
-
-    private val usersFlow by lazy {
-        selectedAccountTypeFlow.flatMapLatest { accountType ->
-            accountServiceFlow(accountType = accountType, repository = accountRepository)
-                .flatMapLatest { dataSource ->
-                    runCatching {
-                        val search = requireNotNull(dataSource.capabilities.search)
-                        Pager(config = pagingConfig) {
-                            search.discoverUsers().toPagingSource()
-                        }.flow
-                    }.getOrElse { PagingData.emptyFlow(isError = true) }
-                }
-        }
-    }
-
-    private val hashtagsFlow by lazy {
-        selectedAccountTypeFlow.flatMapLatest { accountType ->
-            accountServiceFlow(accountType = accountType, repository = accountRepository)
-                .flatMapLatest { dataSource ->
-                    runCatching {
-                        val search = requireNotNull(dataSource.capabilities.search)
-                        Pager(config = pagingConfig) {
-                            search.discoverHashtags().toPagingSource()
-                        }.flow
-                    }.getOrElse { PagingData.emptyFlow(isError = true) }
-                }
-        }
-    }
-
-    private fun statusFlow(scope: CoroutineScope) =
-        selectedAccountTypeFlow.flatMapLatest { accountType ->
-            DiscoverStatusTimelinePresenter(accountType).createPager(scope)
-        }
-
     @Composable
     override fun body(): DiscoverState {
-        val scope = rememberCoroutineScope()
         val accounts by accountsFlow.collectAsUiState()
         val restoredAccountType by accountSelection.selectedAccountType.collectAsState()
+        val searching by searchActive.collectAsState()
         val selectedAccountKey = (restoredAccountType as? AccountType.Specific)?.accountKey
         val selectedAccount = accounts.takeSuccess()?.firstOrNull { it.key == selectedAccountKey }
-        val users =
-            remember(usersFlow, scope) {
-                usersFlow.cachedIn(scope)
-            }.collectAsLazyPagingItems()
-                .toPagingState()
-        val hashtags =
-            remember(hashtagsFlow, scope) {
-                hashtagsFlow.cachedIn(scope)
-            }.collectAsLazyPagingItems()
-                .toPagingState()
-        val status =
-            remember {
-                statusFlow(scope)
-            }.collectAsLazyPagingItems().toPagingState()
+        val (serviceState, retryService) = rememberSearchAccountService(restoredAccountType, accountRepository)
+        val dataSource = serviceState.takeSuccess()
+        val search = remember(dataSource) { dataSource?.capabilities?.search }
+        val discoverPosts = !searching && search?.supports(SearchOperation.DiscoverPosts) == true
+        val discoverProfiles = !searching && search?.supports(SearchOperation.DiscoverProfiles) == true
+        val discoverHashtags = !searching && search?.supports(SearchOperation.DiscoverHashtags) == true
 
         LaunchedEffect(Unit) {
             accountSelection.restore()
@@ -153,29 +98,57 @@ public class DiscoverPresenter : PresenterBase<DiscoverState>() {
             accountKeysFlow.collect(accountSelection::updateAccounts)
         }
 
-        return object : DiscoverState {
-            override val users = users
-            override val status = status
-            override val hashtags = hashtags
-            override val selectedAccount = selectedAccount
-            override val selectedAccountKey = selectedAccountKey
-            override val accounts = accounts
-            override val selectedAccountType = restoredAccountType ?: AccountType.Guest
-            override val isAccountReady = restoredAccountType != null
-            override val canSwitchAccount = accounts.takeSuccess()?.any { it.key != selectedAccountKey } == true
+        return key(dataSource) {
+            val users =
+                if (search != null && discoverProfiles) {
+                    rememberSearchPaging { search.discoverUsers() }
+                } else {
+                    PagingState.Empty {}
+                }
+            val hashtags =
+                if (search != null && discoverHashtags) {
+                    rememberSearchPaging { search.discoverHashtags() }
+                } else {
+                    PagingState.Empty {}
+                }
+            val status =
+                when {
+                    search != null && discoverPosts -> rememberSearchTimeline { search.discoverStatuses() }
+                    !searching && serviceState is UiState.Error -> PagingState.Error(serviceState.throwable, retryService)
+                    else -> PagingState.Empty {}
+                }
 
-            override suspend fun refreshSuspend() {
-                users.refreshSuspend()
-                status.refreshSuspend()
-                hashtags.refreshSuspend()
-            }
+            object : DiscoverState {
+                override val users = users
+                override val status = status
+                override val hashtags = hashtags
+                override val canSearchPosts = search?.supports(SearchOperation.Posts) == true
+                override val hasNoRecommendations =
+                    (discoverPosts || discoverProfiles || discoverHashtags) && users.isEmpty && status.isEmpty && hashtags.isEmpty
+                override val selectedAccount = selectedAccount
+                override val selectedAccountKey = selectedAccountKey
+                override val accounts = accounts
+                override val selectedAccountType = restoredAccountType ?: AccountType.Guest
+                override val isAccountReady = restoredAccountType != null
+                override val canSwitchAccount = accounts.takeSuccess()?.any { it.key != selectedAccountKey } == true
 
-            override fun setAccount(profile: UiProfile) {
-                setAccountKey(profile.key)
-            }
+                override suspend fun refreshSuspend() {
+                    users.refreshSuspend()
+                    status.refreshSuspend()
+                    hashtags.refreshSuspend()
+                }
 
-            override fun setAccountKey(key: MicroBlogKey) {
-                accountSelection.selectAccount(key)
+                override fun setAccount(profile: UiProfile) {
+                    setAccountKey(profile.key)
+                }
+
+                override fun setAccountKey(key: MicroBlogKey) {
+                    accountSelection.selectAccount(key)
+                }
+
+                override fun setSearchActive(active: Boolean) {
+                    searchActive.value = active
+                }
             }
         }
     }
@@ -186,6 +159,8 @@ public interface DiscoverState {
     public val users: PagingState<UiProfile>
     public val status: PagingState<UiTimelineV2>
     public val hashtags: PagingState<UiHashtag>
+    public val canSearchPosts: Boolean
+    public val hasNoRecommendations: Boolean
     public val accounts: UiState<ImmutableList<UiProfile>>
     public val selectedAccount: UiProfile?
     public val selectedAccountKey: MicroBlogKey?
@@ -199,4 +174,7 @@ public interface DiscoverState {
     public fun setAccount(profile: UiProfile)
 
     public fun setAccountKey(key: MicroBlogKey)
+
+    @WebIgnore
+    public fun setSearchActive(active: Boolean)
 }

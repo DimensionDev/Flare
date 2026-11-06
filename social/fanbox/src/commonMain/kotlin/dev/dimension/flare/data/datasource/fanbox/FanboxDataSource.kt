@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.ArticleDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
@@ -189,6 +190,8 @@ internal class FanboxDataSource(
             accountKey = accountKey,
             statusKey = statusKey,
         )
+
+    override val searchOperations: Set<SearchOperation> = SearchOperation.entries.toSet() - SearchOperation.DiscoverHashtags
 
     override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
         FanboxSearchTimelineLoader(

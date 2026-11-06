@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +29,6 @@ import compose.icons.fontawesomeicons.solid.Robot
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
@@ -44,13 +44,13 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 internal fun SearchScreen(
     initialQuery: String,
     accountType: AccountType,
-    onUserClick: (AccountType, MicroBlogKey) -> Unit,
     onAskAiClick: (String?) -> Unit,
 ) {
     val state by producePresenter("search_${accountType}_$initialQuery") {
@@ -207,15 +207,7 @@ internal fun SearchScreen(
                             }
                         }
                     }
-                    searchContent(
-                        searchUsers = state.searchState.users,
-                        searchStatus = state.searchState.status,
-                        toUser = { key ->
-                            state.searchState.selectedAccount?.let { account ->
-                                onUserClick(AccountType.Specific(account.key), key)
-                            }
-                        },
-                    )
+                    searchContent(state.searchState)
                 }
             },
         )
@@ -227,6 +219,7 @@ private fun presenter(
     accountType: AccountType,
     initialQuery: String,
 ) = run {
+    val scope = rememberCoroutineScope()
     val searchBarState = searchBarPresenter(initialQuery)
     val searchState =
         remember(initialQuery, accountType) {
@@ -241,7 +234,7 @@ private fun presenter(
                 searchState.status.isRefreshing
 
         fun refresh() {
-            searchState.search(queryTextState.text.toString())
+            scope.launch { searchState.refreshSuspend() }
         }
 
         fun commitSearch(new: String) {

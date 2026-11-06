@@ -45,6 +45,28 @@
         }
       }
     },
+    "search_unavailable_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search is unavailable for this account"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此账号暂不支持搜索"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此帳號暫不支援搜尋"
+          }
+        }
+      }
+    },
     "account_management_empty" : {
       "localizations" : {
         "en" : {

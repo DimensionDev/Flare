@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.GalleryDetail
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
@@ -279,6 +280,48 @@ class PluginDetailCapabilityTest {
             ).first { Files.exists(it.resolve("manifest.json")) }
         return install(Files.readString(sample.resolve("manifest.json")), transform(Files.readString(sample.resolve("plugin.js"))))
     }
+
+    @Test
+    fun partialSearchDispatchesOnlyNegotiatedOperationsAndKeepsProfileLookupOptional() =
+        runBlocking {
+            val manifest =
+                MANIFEST.replace(
+                    "\"capabilities\": {",
+                    """
+                    "capabilities": {
+                      "flare.datasource.search/v1": { "operations": { "profiles": {}, "discoverHashtags": {} } },
+                    """.trimIndent(),
+                )
+            val script =
+                SCRIPT.replace(
+                    "capabilities: {",
+                    """
+                    capabilities: {
+                      search: {
+                        profiles(request) {
+                          return { items: [{ key: { id: "alice", host: "plugin.example" }, handle: request.query, displayName: "Alice" }] };
+                        },
+                        discoverHashtags() { return { items: [{ name: "#trend" }] }; }
+                      },
+                    """.trimIndent(),
+                )
+            val plugin = install(manifest, script)
+            val search = PluginAbiV1.Capabilities.SEARCH
+            val profilesOnly = authenticated(plugin, unavailableOperations = mapOf(search to setOf("discoverHashtags")))
+            val profiles = requireNotNull(profilesOnly.capabilitySet.search)
+            assertTrue(profiles.supports(SearchOperation.Profiles))
+            assertFalse(profiles.supports(SearchOperation.DiscoverHashtags))
+            val result = profiles.searchUser("alice").load(20, PagingRequest.Refresh).data.single()
+            assertEquals("alice", result.handle.raw)
+            assertEquals(ClickEvent.Noop, result.clickEvent)
+            assertTrue(profiles.searchStatus("alice").load(20, PagingRequest.Refresh).data.isEmpty())
+            assertTrue(profiles.discoverHashtags().load(20, PagingRequest.Refresh).data.isEmpty())
+
+            val discoverOnly = authenticated(plugin, unavailableOperations = mapOf(search to setOf("profiles")))
+            val discover = requireNotNull(discoverOnly.capabilitySet.search)
+            assertFalse(discover.canSearch)
+            assertEquals("#trend", discover.discoverHashtags().load(20, PagingRequest.Refresh).data.single().hashtag)
+        }
 
     @Test
     fun partialCapabilitiesKeepHostEntrypointsAndMappedRoutesConsistent() =

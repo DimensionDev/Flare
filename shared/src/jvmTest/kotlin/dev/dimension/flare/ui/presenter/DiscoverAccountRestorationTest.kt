@@ -5,6 +5,7 @@ import androidx.room3.Room
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.protobufSerializer
 import dev.dimension.flare.createTestFileSystem
 import dev.dimension.flare.createTestRootPath
@@ -22,10 +23,14 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.SearchCapability
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.DirectMessageHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.datastore.createDataStoreStorage
@@ -77,6 +82,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,12 +96,14 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.JsonObject
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -314,6 +322,164 @@ class DiscoverAccountRestorationTest {
         }
 
     @Test
+    fun searchOnlyAndDiscoverOnlyAccountsUseTheirOwnOperations() =
+        withFixture {
+            profileOptional = true
+            searchOperationsByAccount =
+                mapOf(
+                    firstAccount to setOf(SearchOperation.Posts),
+                    savedAccount to setOf(SearchOperation.DiscoverHashtags),
+                )
+            insertAccounts()
+            val models = MutableStateFlow<SearchPage?>(null)
+            val page = launchSearchPage(models)
+            try {
+                val first = models.filterNotNull().first { it.discover.canSearchPosts }
+                assertFalse(first.discover.hasNoRecommendations)
+                first.search.search("猫")
+                assertEquals(AccountType.Specific(firstAccount) to "searchStatuses", requests.receive())
+                val searched = models.filterNotNull().first { it.search.hasNoResults }
+                assertTrue(requests.tryReceive().isFailure)
+
+                searched.discover.setAccountKey(savedAccount)
+                val discoverOnly =
+                    models.filterNotNull().first {
+                        it.discover.selectedAccountKey == savedAccount &&
+                            it.search.isSearchUnavailable &&
+                            it.search.selectedAccount?.key == savedAccount
+                    }
+                assertFalse(discoverOnly.discover.canSearchPosts)
+                assertFalse(discoverOnly.discover.hasNoRecommendations)
+                assertFalse(discoverOnly.search.hasNoResults)
+                assertEquals(listOf(firstAccount, savedAccount), discoverOnly.search.accounts.takeSuccess()?.map { it.key })
+                assertTrue(requests.tryReceive().isFailure)
+
+                discoverOnly.search.search("")
+                assertEquals(AccountType.Specific(savedAccount) to "hashtags", requests.receive())
+                models.filterNotNull().first { it.discover.hasNoRecommendations && !it.search.searching }
+                assertTrue(requests.tryReceive().isFailure)
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun switchingSearchAccountsCancelsTheOldPageAndReplaysTheQueryForTheSupportedOperation() =
+        withFixture {
+            profileOptional = true
+            searchOperationsByAccount =
+                mapOf(
+                    firstAccount to setOf(SearchOperation.Profiles),
+                    savedAccount to setOf(SearchOperation.Posts),
+                )
+            val started = CompletableDeferred<Unit>()
+            val cancelled = CompletableDeferred<Unit>()
+            beforeSearchUserLoad = {
+                started.complete(Unit)
+                try {
+                    awaitCancellation()
+                } finally {
+                    cancelled.complete(Unit)
+                }
+            }
+            insertAccounts()
+            val states = MutableStateFlow<SearchState?>(null)
+            val page =
+                scope.launch {
+                    val presenter = SearchPresenter(AccountType.Specific(firstAccount), "猫")
+                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { states.value = it }
+                }
+            try {
+                started.await()
+                assertEquals(AccountType.Specific(firstAccount) to "searchUsers", requests.receive())
+                val first = states.filterNotNull().first { it.accounts.takeSuccess()?.size == 2 }
+                first.setAccountKey(savedAccount)
+                cancelled.await()
+                assertEquals(AccountType.Specific(savedAccount) to "searchStatuses", requests.receive())
+                val switched = states.filterNotNull().first { it.selectedAccount?.key == savedAccount && it.hasNoResults }
+                assertEquals(AccountType.Specific(firstAccount) to "猫", searchRequests.receive())
+                assertEquals(AccountType.Specific(savedAccount) to "猫", searchRequests.receive())
+                switched.search("狗")
+                assertEquals(AccountType.Specific(savedAccount) to "狗", searchRequests.receive())
+                assertTrue(searchRequests.tryReceive().isFailure)
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun defaultSearchAccountIsAvailableBeforeItsProfile() =
+        withFixture {
+            insertAccounts()
+            val states = MutableStateFlow<SearchState?>(null)
+            val page =
+                scope.launch {
+                    val presenter = SearchPresenter(AccountType.Guest)
+                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { states.value = it }
+                }
+            try {
+                val state = states.filterNotNull().first { it.defaultAccountType.takeSuccess() != null }
+                assertEquals(AccountType.Specific(firstAccount), state.defaultAccountType.takeSuccess())
+                assertTrue(state.accounts.takeSuccess().orEmpty().isEmpty())
+                assertTrue(requests.tryReceive().isFailure)
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun selectedAccountCanBeSwitchedAwayFromAfterLosingSearch() =
+        withFixture {
+            profileOptional = true
+            searchOperationsByAccount =
+                mapOf(
+                    firstAccount to setOf(SearchOperation.Posts),
+                    savedAccount to setOf(SearchOperation.Profiles),
+                )
+            insertAccounts()
+            val states = MutableStateFlow<SearchState?>(null)
+            val page =
+                scope.launch {
+                    val presenter = SearchPresenter(AccountType.Specific(firstAccount), "cats")
+                    moleculeFlow(RecompositionMode.Immediate) { presenter.body() }.collect { states.value = it }
+                }
+            try {
+                val first = states.filterNotNull().first { it.accounts.takeSuccess()?.size == 2 }
+                first.setAccountKey(savedAccount)
+                states.filterNotNull().first { it.selectedAccount?.key == savedAccount && it.hasNoResults }
+
+                searchOperationsByAccount = searchOperationsByAccount + (savedAccount to setOf(SearchOperation.DiscoverHashtags))
+                repository.addAccount(requireNotNull(repository.find(savedAccount)), JsonObject(emptyMap()))
+                val changed =
+                    states.filterNotNull().first {
+                        it.isSearchUnavailable && it.selectedAccount?.key == savedAccount
+                    }
+                assertEquals(setOf(firstAccount, savedAccount), changed.accounts.takeSuccess()?.map { it.key }?.toSet())
+                changed.setAccountKey(firstAccount)
+                states.filterNotNull().first { it.selectedAccount?.key == firstAccount && it.hasNoResults }
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
+    fun discoveryCanRetryGuestDataSourceInitialization() =
+        withFixture {
+            failGuestDataSource = true
+            val models = MutableStateFlow<DiscoverState?>(null)
+            val page = launchPage(models)
+            try {
+                val failed = models.filterNotNull().first { it.status is PagingState.Error }
+                val error = assertIs<PagingState.Error<UiTimelineV2>>(failed.status)
+                failGuestDataSource = false
+                error.onRetry()
+                assertEquals(listOf(AccountType.Guest), List(3) { requests.receive().first }.distinct())
+            } finally {
+                page.cancelAndJoin()
+            }
+        }
+
+    @Test
     fun searchSubmittedDuringRestorationUsesTheSubmittedQueryAfterInitialization() =
         withFixture {
             insertAccounts()
@@ -341,6 +507,8 @@ class DiscoverAccountRestorationTest {
                 repeat(2) { assertEquals(AccountType.Specific(savedAccount) to "cats", searchRequests.receive()) }
                 val restored = models.filterNotNull().first { it.discover.isAccountReady }
                 assertTrue(restored.search.searching)
+                assertEquals(setOf("searchUsers", "searchStatuses"), List(2) { requests.receive().second }.toSet())
+                assertTrue(requests.tryReceive().isFailure)
             } finally {
                 release.complete(Unit)
                 save.cancelAndJoin()
@@ -424,6 +592,9 @@ class DiscoverAccountRestorationTest {
         val searchRequests = Channel<Pair<AccountType, String>>(Channel.UNLIMITED)
         var loadedProfileKey: MicroBlogKey? = null
         var profileOptional = false
+        var failGuestDataSource = false
+        var searchOperationsByAccount = emptyMap<MicroBlogKey, Set<SearchOperation>>()
+        var beforeSearchUserLoad: (suspend () -> Unit)? = null
         val registry =
             PlatformRegistry(
                 PlatformRuntimeData(
@@ -436,7 +607,10 @@ class DiscoverAccountRestorationTest {
                                 override fun guestDataSource(
                                     host: String,
                                     locale: String,
-                                ): MicroblogDataSource = Source(AccountType.Guest)
+                                ): MicroblogDataSource {
+                                    check(!failGuestDataSource) { "Guest data source unavailable" }
+                                    return Source(AccountType.Guest)
+                                }
                             },
                         ),
                     extraTimelineSpecs = emptyList(),
@@ -552,7 +726,7 @@ class DiscoverAccountRestorationTest {
                 val presenter = DiscoverPresenter()
                 moleculeFlow(RecompositionMode.Immediate) {
                     val state = presenter.body()
-                    SearchPage(state, rememberDiscoverSearchState(state.selectedAccountType, state.isAccountReady))
+                    SearchPage(state, rememberDiscoverSearchState(state))
                 }.collect { models.value = it }
             }
 
@@ -567,6 +741,9 @@ class DiscoverAccountRestorationTest {
         private open inner class Source(
             private val accountType: AccountType,
         ) : MicroblogDataSource {
+            override val searchOperations: Set<SearchOperation>
+                get() = (accountType as? AccountType.Specific)?.accountKey?.let { searchOperationsByAccount[it] } ?: super.searchOperations
+
             override fun homeTimeline() = notSupported<UiTimelineV2>()
 
             override fun userTimeline(
@@ -582,11 +759,20 @@ class DiscoverAccountRestorationTest {
                     searchRequests.trySend(accountType to query)
                 }
 
-            override fun searchUser(query: String) =
-                notSupported<UiProfile>().also {
-                    requests.trySend(accountType to "searchUsers")
-                    searchRequests.trySend(accountType to query)
+            override fun searchUser(query: String): RemoteLoader<UiProfile> {
+                requests.trySend(accountType to "searchUsers")
+                searchRequests.trySend(accountType to query)
+                val beforeLoad = beforeSearchUserLoad ?: return notSupported()
+                return object : RemoteLoader<UiProfile> {
+                    override suspend fun load(
+                        pageSize: Int,
+                        request: PagingRequest,
+                    ): PagingResult<UiProfile> {
+                        beforeLoad()
+                        return PagingResult(endOfPaginationReached = true)
+                    }
                 }
+            }
 
             override fun following(userKey: MicroBlogKey) = notSupported<UiProfile>()
 

@@ -1,7 +1,9 @@
 package dev.dimension.flare.data.platform
 
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.capabilities
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.tab.TimelineCandidate
 import dev.dimension.flare.data.model.tab.TimelineLoaderFactory
@@ -58,7 +60,10 @@ public object CommonTimelineSpecs {
             targetId = { it.accountKey.toString() },
             loaderFactory =
                 accountLoader<MicroblogDataSource, TimelineSpec.AccountBasedData> {
-                    requireNotNull(capabilities.search).discoverStatuses()
+                    capabilities.search
+                        ?.takeIf { it.supports(SearchOperation.DiscoverPosts) }
+                        ?.discoverStatuses()
+                        ?: notSupported()
                 },
         )
 

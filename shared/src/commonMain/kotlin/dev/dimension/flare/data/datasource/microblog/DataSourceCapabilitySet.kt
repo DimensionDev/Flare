@@ -78,9 +78,23 @@ public class TimelineCapability(
 }
 
 @HiddenFromObjC
+public enum class SearchOperation {
+    Posts,
+    Profiles,
+    DiscoverPosts,
+    DiscoverProfiles,
+    DiscoverHashtags,
+}
+
+@HiddenFromObjC
 public class SearchCapability(
     private val delegate: MicroblogDataSource,
 ) {
+    public fun supports(operation: SearchOperation): Boolean = operation in delegate.searchOperations
+
+    public val canSearch: Boolean
+        get() = supports(SearchOperation.Posts) || supports(SearchOperation.Profiles)
+
     public fun searchStatus(query: String): RemoteLoader<UiTimelineV2> = delegate.searchStatus(query)
 
     public fun searchUser(query: String): RemoteLoader<UiProfile> = delegate.searchUser(query)
@@ -136,7 +150,7 @@ private fun MicroblogDataSource.legacyCapabilitySet(): DataSourceCapabilitySet {
     val pinnableTabs = this as? PinnableTimelineTabDataSource
     return DataSourceCapabilitySet(
         timeline = TimelineCapability(this),
-        search = SearchCapability(this),
+        search = if (searchOperations.isNotEmpty()) SearchCapability(this) else null,
         profile = (this as? UserDataSource)?.let { ProfileCapability(this, it) },
         post = (this as? PostDataSource)?.let { PostCapability(this, it) },
         relation = this as? RelationDataSource,

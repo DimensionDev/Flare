@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.NotificationTimelineDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PinnableTimelineTabSection
@@ -32,6 +33,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.ShareRepliesLoader
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.model.IconType
@@ -400,6 +402,8 @@ internal class VVODataSource(
             }
         }
 
+    override val searchOperations: Set<SearchOperation> = SearchOperation.entries.toSet() - SearchOperation.DiscoverProfiles
+
     override fun searchStatus(query: String) =
         SearchStatusRemoteMediator(
             service = service,
@@ -414,16 +418,7 @@ internal class VVODataSource(
             query = query,
         )
 
-    override fun discoverUsers(): RemoteLoader<UiProfile> =
-        object : RemoteLoader<UiProfile> {
-            override suspend fun load(
-                pageSize: Int,
-                request: PagingRequest,
-            ): PagingResult<UiProfile> =
-                PagingResult(
-                    endOfPaginationReached = true,
-                )
-        }
+    override fun discoverUsers(): RemoteLoader<UiProfile> = notSupported()
 
     override fun discoverStatuses() =
         DiscoverStatusRemoteMediator(

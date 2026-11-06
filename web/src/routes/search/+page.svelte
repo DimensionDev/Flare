@@ -22,13 +22,13 @@
 		UiTimelineV2,
 	} from '@flare/web-presenters/timeline.svelte';
 
-	const hasAccountParam = $derived(page.url.searchParams.has('account'));
-	const accountSegment = $derived(initialAccountFromUrl());
+	const requestedAccount = $derived(page.url.searchParams.get('account'));
+	const accountSegment = $derived(requestedAccount ?? '');
 	const searchQuerySegment = $derived(initialQueryFromUrl());
 	const accountType = $derived(parseAccountType(accountSegment));
 	const search = useReactiveRetainedPresenter(
-		() => `search:page:${accountSegment}:${searchQuerySegment}`,
-		() => createSearchPresenterController(accountType, searchQuerySegment),
+		() => `search:page:${JSON.stringify([requestedAccount, searchQuerySegment])}`,
+		() => createSearchPresenterController(accountType, requestedAccount === null ? '' : searchQuerySegment),
 		{ ttlMs: 0 }
 	);
 
@@ -36,38 +36,21 @@
 	let showAccountMenu = $state(false);
 	const accounts = $derived(search.accounts.type === 'Success' ? search.accounts.data : []);
 	const hasMultipleAccounts = $derived(accounts.length > 1);
-	const hasQuery = $derived(query.trim().length > 0);
+	const hasQuery = $derived(searchQuerySegment.trim().length > 0);
 	const refreshing = $derived(
 		(search.users.type === 'Success' && search.users.isRefreshing) ||
 			(search.status.type === 'Success' && search.status.isRefreshing)
 	);
 
 	$effect(() => {
-		const next = searchQuerySegment;
-		if (next === query) return;
-		query = next;
-		search.search(next);
+		query = searchQuerySegment;
 	});
 
 	$effect(() => {
-		if (accountType.type !== 'Specific' || search.accounts.type !== 'Success') return;
-		const selected = search.selectedAccount;
-		if (
-			selected?.key.id === accountType.accountKey.id &&
-			selected?.key.host === accountType.accountKey.host
-		) {
-			return;
-		}
-		search.setAccountKey(accountType.accountKey);
-	});
-
-	$effect(() => {
-		if (hasAccountParam || search.accounts.type !== 'Success') return;
-		const firstAccount = search.accounts.data[0];
-		if (!firstAccount) return;
-
-		search.setAccountKey(firstAccount.key);
-		void goto(searchUrl(query.trim(), accountSegmentFromKey(firstAccount.key)), {
+		if (requestedAccount !== null || search.defaultAccountType.type !== 'Success') return;
+		const account = search.defaultAccountType.data;
+		const segment = account.type === 'Specific' ? accountSegmentFromKey(account.accountKey) : 'guest';
+		void goto(searchUrl(searchQuerySegment, segment), {
 			reset: false,
 			replace: true,
 		});
@@ -77,13 +60,9 @@
 		return page.url.searchParams.get('q') ?? '';
 	}
 
-	function initialAccountFromUrl(): string {
-		return page.url.searchParams.get('account') ?? '';
-	}
-
 	function submitSearch(): void {
 		const next = query.trim();
-		search.search(next);
+		query = next;
 		void goto(searchUrl(next, accountSegment), {
 			reset: false,
 			replace: true,
@@ -91,20 +70,16 @@
 	}
 
 	function selectAccount(profile: SearchUiProfile): void {
-		search.setAccountKey(profile.key);
 		showAccountMenu = false;
-		void goto(searchUrl(query.trim(), accountSegmentFromKey(profile.key)), {
+		void goto(searchUrl(searchQuerySegment, accountSegmentFromKey(profile.key)), {
 			reset: false,
 			replace: true,
 		});
-		if (query.trim()) {
-			search.search(query.trim());
-		}
 	}
 
 	function searchUrl(nextQuery: string, nextAccountSegment: string): string {
 		const params = new URLSearchParams();
-		if (nextAccountSegment && nextAccountSegment !== 'guest') {
+		if (nextAccountSegment) {
 			params.set('account', nextAccountSegment);
 		}
 		if (nextQuery) {
@@ -277,6 +252,19 @@
 		{/if}
 
 		{#if hasQuery}
+			{#if requestedAccount === null && search.defaultAccountType.type === 'Error'}
+				<div class="alert alert-error rounded-box">
+					<span>{search.defaultAccountType.message ?? m.timelineUnableToLoadTimeline()}</span>
+				</div>
+			{:else if requestedAccount === null}
+				<div class="flex justify-center py-8">
+					<span class="loading loading-spinner" aria-label={m.searchTitle()}></span>
+				</div>
+			{:else if search.isSearchUnavailable || search.hasNoResults}
+				<p class="py-8 text-center text-base-content/60">
+					{search.isSearchUnavailable ? m.searchUnavailable() : m.searchNoResults()}
+				</p>
+			{/if}
 			<DiscoverSection title={m.searchUsers()} state={search.users}>
 				<div class="user-row">
 					{#if search.users.type === 'Loading'}

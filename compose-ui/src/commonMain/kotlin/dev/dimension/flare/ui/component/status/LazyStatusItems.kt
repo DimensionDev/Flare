@@ -116,18 +116,7 @@ public fun LazyStaggeredGridScope.status(
             }
             appendStateUI(this@onSuccess)
         }
-        onError {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-            ) {
-                OnError(
-                    modifier = Modifier.fillMaxSize(),
-//                    modifier = Modifier.animateItem(),
-                    error = it,
-                    onRetry = onRetry,
-                )
-            }
-        }
+        pagingError(pagingState)
         onLoading {
             statusLoadingPlaceholders()
         }
@@ -147,6 +136,14 @@ public fun LazyStaggeredGridScope.status(
             }
         }
     }
+
+public fun <T : Any> LazyStaggeredGridScope.pagingError(state: PagingState<T>) {
+    state.onError { error ->
+        item(span = StaggeredGridItemSpan.FullLine) {
+            OnError(modifier = Modifier.fillMaxSize(), error = error, onRetry = onRetry)
+        }
+    }
+}
 
 public fun LazyStaggeredGridScope.statusLoadingPlaceholders() {
     val placeholderCount = 10

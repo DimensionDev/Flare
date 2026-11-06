@@ -860,14 +860,7 @@
                 "discoverHashtags": {
                   "$ref": "#/definitions/operation"
                 }
-              },
-              "required": [
-                "posts",
-                "profiles",
-                "discoverPosts",
-                "discoverProfiles",
-                "discoverHashtags"
-              ]
+              }
             },
             "notificationFilters": {
               "type": "array",

@@ -51,6 +51,8 @@
   "searchTitle": "Search",
   "searchUsers": "Users",
   "searchStatus": "Posts",
+  "searchNoResults": "No search results",
+  "searchUnavailable": "Search is unavailable for this account",
   "notificationFilterAll": "All",
   "notificationFilterMentions": "Mentions",
   "notificationFilterComments": "Comments",

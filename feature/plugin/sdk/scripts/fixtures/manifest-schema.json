@@ -722,6 +722,36 @@
       "hostValid": false
     },
     {
+      "name": "posts-only search capability",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.search/v1": {
+              "operations": {
+                "posts": { "directions": ["refresh", "older"] }
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
+      "name": "empty search capability",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.search/v1": {
+              "operations": {}
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
       "name": "profile capability",
       "patch": {
         "platform": {

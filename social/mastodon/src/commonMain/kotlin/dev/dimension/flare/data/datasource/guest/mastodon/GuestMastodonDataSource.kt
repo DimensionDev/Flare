@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
@@ -16,9 +17,8 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
-import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
-import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.AccountType
@@ -107,6 +107,8 @@ internal class GuestMastodonDataSource(
             statusOnly = false,
         )
 
+    override val searchOperations: Set<SearchOperation> = SearchOperation.entries.toSet() - SearchOperation.DiscoverProfiles
+
     override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
         GuestSearchStatusPagingSource(
             service = service,
@@ -122,17 +124,7 @@ internal class GuestMastodonDataSource(
             query = query,
         )
 
-    override fun discoverUsers(): RemoteLoader<UiProfile> =
-        object : RemoteLoader<UiProfile> {
-            override suspend fun load(
-                pageSize: Int,
-                request: PagingRequest,
-            ): PagingResult<UiProfile> =
-                PagingResult(
-                    endOfPaginationReached = true,
-                    data = emptyList(),
-                )
-        }
+    override fun discoverUsers(): RemoteLoader<UiProfile> = notSupported()
 
     override fun discoverStatuses(): RemoteLoader<UiTimelineV2> =
         GuestDiscoverStatusPagingSource(

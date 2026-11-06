@@ -94,6 +94,24 @@ packages:
     exactVersion: 1.2.5
 
 targetTemplates:
+  RustViewModels:
+    settings:
+      base:
+        LIBRARY_SEARCH_PATHS: "$(inherited) $(BUILT_PRODUCTS_DIR)/rust"
+        SWIFT_INCLUDE_PATHS:
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/modules"
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
+    preBuildScripts:
+      - name: Build Rust ViewModels
+        basedOnDependencyAnalysis: false
+        inputFiles:
+          - "$(SRCROOT)/../rust/scripts/build-apple.sh"
+        outputFiles:
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings"
+          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_viewmodels.a"
+          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
+        script: bash "$SRCROOT/../rust/scripts/build-apple.sh"
+
   FirebaseOptionalApp:
     sources:
       - path: Shared/Firebase
@@ -143,10 +161,11 @@ targetTemplates:
 
 targets:
   iOS:
-    templates: [FirebaseOptionalApp]
+    templates: [FirebaseOptionalApp, RustViewModels]
     type: application
     platform: iOS
     sources:
+      - path: Shared/CounterScreen.swift
       - path: ios
         excludes:
           - .DS_Store
@@ -192,20 +211,6 @@ targets:
         DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
         INFOPLIST_FILE: ios/Info.plist
         OTHER_LDFLAGS: "$(inherited) -ObjC -lflare_viewmodels -lflare_ffi"
-        LIBRARY_SEARCH_PATHS: "$(inherited) $(BUILT_PRODUCTS_DIR)/rust"
-        SWIFT_INCLUDE_PATHS:
-          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/modules"
-          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
-    preBuildScripts:
-      - name: Build Rust ViewModels
-        basedOnDependencyAnalysis: false
-        inputFiles:
-          - "$(SRCROOT)/../rust/scripts/build-ios.sh"
-        outputFiles:
-          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings"
-          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_viewmodels.a"
-          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
-        script: bash "$SRCROOT/../rust/scripts/build-ios.sh"
 
   OpenInFlare:
     type: app-extension
@@ -388,11 +393,26 @@ targets:
         TEST_TARGET_NAME: iOS
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
 
+  MacCounterInteractionTests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: macosCounterUITests
+    dependencies:
+      - target: macOS
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.mac-counter-tests
+        TEST_TARGET_NAME: macOS
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
   macOS:
-    templates: [FirebaseOptionalApp]
+    templates: [FirebaseOptionalApp, RustViewModels]
     type: application
     platform: macOS
     sources:
+      - path: Shared/CounterScreen.swift
       - path: macos
         excludes:
           - Info.plist
@@ -430,7 +450,7 @@ targets:
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
         ENABLE_USER_SELECTED_FILES: readwrite
         INFOPLIST_FILE: macos/Info.plist
-        OTHER_LDFLAGS: "$(inherited) -lsqlite3 -ObjC"
+        OTHER_LDFLAGS: "$(inherited) -lsqlite3 -ObjC -lflare_viewmodels -lflare_ffi"
         PROVISIONING_PROFILE: "$(NATIVE_MACOS_PROVISIONING_PROFILE)"
         PROVISIONING_PROFILE_SPECIFIER: "$(NATIVE_MACOS_PROVISIONING_PROFILE_SPECIFIER)"
         REGISTER_APP_GROUPS: YES
@@ -526,6 +546,15 @@ schemes:
       config: Debug
       targets:
         - CounterInteractionTests
+
+  MacCounterInteractionTests:
+    build:
+      targets:
+        MacCounterInteractionTests: all
+    test:
+      config: Debug
+      targets:
+        - MacCounterInteractionTests
 
   CI-iOS:
     build:

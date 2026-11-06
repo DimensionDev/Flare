@@ -342,6 +342,7 @@ jobs:
       - *checkout
       - *setup-java
       - *setup-xcode
+      - *install-just
       - name: Run macOS Kotlin tests
         run: |
           ./gradlew macosArm64Test --no-daemon --stacktrace \

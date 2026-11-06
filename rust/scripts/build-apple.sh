@@ -16,6 +16,20 @@ if [[ "$CONFIGURATION" == Release ]]; then
     swift_flags=(-O)
 fi
 
+case "$PLATFORM_NAME" in
+    macosx)
+        swift_platform=macos
+        deployment_target="$MACOSX_DEPLOYMENT_TARGET"
+        include_macos=true
+        ;;
+    iphoneos|iphonesimulator)
+        swift_platform=ios
+        deployment_target="$IPHONEOS_DEPLOYMENT_TARGET"
+        include_macos=false
+        ;;
+    *) echo "Unsupported Rust Apple platform: $PLATFORM_NAME" >&2; exit 1 ;;
+esac
+
 modules="$bindings/modules"
 types="$bindings/types"
 output="$BUILT_PRODUCTS_DIR/rust"
@@ -31,13 +45,14 @@ compile_module() {
     xcrun swiftc -sdk "$SDKROOT" -target "$swift_target" -swift-version 6 \
         -I "$bindings/ffi" -I "$modules" "${swift_flags[@]}" \
         -parse-as-library -emit-library -static -emit-module -module-name "$module" \
-        -emit-module-path "$module_dir/$arch-apple-ios$simulator.swiftmodule" \
+        -emit-module-path "$module_dir/$arch-apple-$swift_platform$simulator.swiftmodule" \
         -o "$library" "$@"
     libraries+=("$library")
 }
 
 ios_archs=""
 simulator_archs=""
+macos_archs=""
 rust_libraries=()
 swift_libraries=()
 for arch in $ARCHS; do
@@ -53,10 +68,15 @@ for arch in $ARCHS; do
             simulator=-simulator
             simulator_archs="$simulator_archs\"$arch\","
             ;;
+        macosx/arm64|macosx/x86_64)
+            rust_target=aarch64-apple-darwin
+            if [[ "$arch" == x86_64 ]]; then rust_target=x86_64-apple-darwin; fi
+            macos_archs="$macos_archs\"$arch\","
+            ;;
         *) echo "Unsupported Rust Apple target: $PLATFORM_NAME/$arch" >&2; exit 1 ;;
     esac
     rust_libraries+=("$PWD/target/$rust_target/$profile/libflare_ffi.a")
-    swift_target="$arch-apple-ios$IPHONEOS_DEPLOYMENT_TARGET$simulator"
+    swift_target="$arch-apple-$swift_platform$deployment_target$simulator"
     arch_dir="$bindings/$arch"
     mkdir -p "$arch_dir"
 
@@ -74,8 +94,8 @@ done
 test "${#swift_libraries[@]}" -gt 0
 
 overlay="$DERIVED_FILE_DIR/boltffi-apple.toml"
-printf '[targets.apple]\ninclude_macos = false\nios_architectures = [%s]\nsimulator_architectures = [%s]\n' \
-    "$ios_archs" "$simulator_archs" > "$overlay"
+printf '[targets.apple]\ninclude_macos = %s\nios_architectures = [%s]\nsimulator_architectures = [%s]\nmacos_architectures = [%s]\n' \
+    "$include_macos" "$ios_archs" "$simulator_archs" "$macos_archs" > "$overlay"
 (
     cd crates/flare-ffi
     env -u SDKROOT -u IPHONEOS_DEPLOYMENT_TARGET -u MACOSX_DEPLOYMENT_TARGET \

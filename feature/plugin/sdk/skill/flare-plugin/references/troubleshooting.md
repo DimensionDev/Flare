@@ -93,6 +93,7 @@ requests/responses well below them.
 | Invocation JSON request / response | 1 MiB / 5 MiB |
 | HTTP response body | 4 MiB |
 | HTTP request headers | 32 headers, 8192 characters/value, 64 KiB aggregate name/value length |
+| Media custom headers | 32 headers, 128-character names, 8192 characters/value, 64 KiB aggregate UTF-8 bytes; case-insensitive unique names |
 | HTTP text/JSON/form body | 2 MiB; form also max 256 entries |
 | HTTP redirects | 5; GET/HEAD, same origin only |
 | Page request limit / returned items | 1..100 / at most 200 |

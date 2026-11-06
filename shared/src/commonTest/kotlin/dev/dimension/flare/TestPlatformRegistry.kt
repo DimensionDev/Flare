@@ -71,6 +71,7 @@ internal fun unavailableAccountService(): AccountService =
             account: UiAccount,
             credential: T,
             serializer: KSerializer<T>,
+            beforeCommit: () -> Unit,
         ): Unit = error("Account service is not available in this test")
 
         override fun <T : Any> credentialFlow(

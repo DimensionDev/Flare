@@ -27,6 +27,7 @@ public data class PluginRuntimeKeyV1 private constructor(
     val packageHash: String,
     val scope: PluginInvocationScopeV1,
     val identity: String,
+    val accountEpoch: String? = null,
 ) {
     public companion object {
         public fun detector(
@@ -46,7 +47,9 @@ public data class PluginRuntimeKeyV1 private constructor(
             packageHash: String,
             origin: String,
             accountId: String,
-        ): PluginRuntimeKeyV1 = create(pluginId, packageHash, PluginInvocationScopeV1.Account, accountIdentity(origin, accountId))
+            epoch: String? = null,
+        ): PluginRuntimeKeyV1 =
+            create(pluginId, packageHash, PluginInvocationScopeV1.Account, accountIdentity(origin, accountId, epoch), epoch)
 
         public fun guest(
             pluginId: String,
@@ -59,11 +62,12 @@ public data class PluginRuntimeKeyV1 private constructor(
             packageHash: String,
             scope: PluginInvocationScopeV1,
             identity: String,
+            epoch: String? = null,
         ): PluginRuntimeKeyV1 {
             require(pluginId.isNotBlank() && HASH.matches(packageHash) && identity.isNotBlank() && identity.length <= 1_024) {
                 "Invalid Runtime key"
             }
-            return PluginRuntimeKeyV1(pluginId, packageHash, scope, identity)
+            return PluginRuntimeKeyV1(pluginId, packageHash, scope, identity, epoch)
         }
     }
 }
@@ -322,7 +326,7 @@ public class PluginRuntimePool(
         when (key.scope) {
             PluginInvocationScopeV1.Account -> {
                 require(
-                    key.identity == accountIdentity(context.metadata.origin, requireNotNull(context.metadata.accountId)),
+                    key.identity == accountIdentity(context.metadata.origin, requireNotNull(context.metadata.accountId), key.accountEpoch),
                 ) { "Account Runtime key mismatch" }
             }
 
@@ -367,7 +371,8 @@ private val HASH = Regex("[0-9a-f]{64}")
 private fun accountIdentity(
     origin: String,
     accountId: String,
+    epoch: String? = null,
 ): String {
     require(accountId.isNotBlank() && accountId.length <= 512) { "Invalid account ID" }
-    return "${PluginUrlPolicy.requireOrigin(origin)}\u0000$accountId"
+    return "${PluginUrlPolicy.requireOrigin(origin)}\u0000$accountId" + (epoch?.let { "\u0000$it" } ?: "")
 }

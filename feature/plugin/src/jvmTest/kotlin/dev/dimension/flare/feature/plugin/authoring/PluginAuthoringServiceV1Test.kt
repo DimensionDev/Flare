@@ -1124,7 +1124,8 @@ private class AuthoringAccounts : AccountService {
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
-    ) = Unit
+        beforeCommit: () -> Unit,
+    ) = beforeCommit()
 
     override fun <T : Any> credentialFlow(
         accountKey: MicroBlogKey,

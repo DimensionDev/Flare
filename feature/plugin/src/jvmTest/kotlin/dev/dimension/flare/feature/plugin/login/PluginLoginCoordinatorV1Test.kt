@@ -15,6 +15,8 @@ import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
+import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeUnavailableException
+import dev.dimension.flare.feature.plugin.wire.CookieAttributesV2
 import dev.dimension.flare.feature.plugin.wire.CookieSnapshotV1
 import dev.dimension.flare.feature.plugin.wire.CookieValueV1
 import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
@@ -28,6 +30,7 @@ import dev.dimension.flare.ui.presenter.login.LoginMethodType
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -697,11 +700,241 @@ class PluginLoginCoordinatorV1Test {
             }
         }
 
+    @Test
+    fun v2PendingSurvivesRuntimeEvictionAndReplacesOrClearsTheEntirePayload() =
+        runBlocking {
+            for (cleared in listOf("", ", pendingPayload: null")) {
+                plugin =
+                    install(
+                        cookieScript(
+                            """
+                if (session.value === "first") return { type: "pending", pendingPayload: { nonce: "rotated" } };
+                if (session.value === "second") {
+                  if (request.pendingPayload?.nonce !== "rotated") throw new Error("lost pending state");
+                  return { type: "pending" $cleared };
+                }
+                if (request.pendingPayload != null) throw new Error("pending state was not cleared");
+            """,
+                        ),
+                        v2Manifest(),
+                    )
+                val session = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en")
+                try {
+                    assertIs<PluginCookieCheckResultV1.Pending>(session.check(wireSnapshot("first")))
+                    pool.closeIdle()
+                    assertIs<PluginCookieCheckResultV1.Pending>(session.check(wireSnapshot("second")))
+                    pool.closeIdle()
+                    assertIs<PluginCookieCheckResultV1.Success>(session.check(wireSnapshot("valid")))
+                } finally {
+                    session.close()
+                }
+            }
+        }
+
+    @Test
+    fun v2PendingIsBoundedAndV1CannotOptIntoTheStateContract() =
+        runBlocking {
+            for ((manifest, state) in listOf(
+                v2Manifest() to "'x'.repeat(65536)",
+                LOGIN_MANIFEST to "{ nonce: 'requires-v2' }",
+            )) {
+                plugin = install(cookieScript("return { type: 'pending', pendingPayload: $state };"), manifest)
+                val session = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en")
+                try {
+                    if (manifest == LOGIN_MANIFEST) {
+                        assertFailsWith<IllegalArgumentException> { session.check(wireSnapshot("valid")) }
+                    } else {
+                        assertFailsWith<PluginRuntimeUnavailableException> { session.check(wireSnapshot("valid")) }
+                    }
+                } finally {
+                    session.close()
+                }
+            }
+        }
+
+    @Test
+    fun v2CookieMetadataAndDuplicateNamesReachThePlugin() =
+        runBlocking {
+            plugin = install(LOGIN_SCRIPT, v2Manifest())
+            val session = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en")
+            try {
+                val result =
+                    assertIs<PluginCookieCheckResultV1.Success>(
+                        session.check(
+                            CookieSnapshotV1(
+                                listOf(
+                                    CookieValueV1(
+                                        "$ORIGIN/api/cookie",
+                                        "session",
+                                        "valid",
+                                        CookieAttributesV2(domain = "plugin.example", path = "/api", session = true, secure = true),
+                                    ),
+                                    CookieValueV1("$ORIGIN/api/cookie", "session", "root", CookieAttributesV2(path = "/")),
+                                ),
+                            ),
+                        ),
+                    )
+                val cookies =
+                    result.value.credential.jsonObject
+                        .getValue("cookies")
+                        .jsonArray
+                assertEquals(2, cookies.size)
+                assertEquals(
+                    listOf("/api", "/"),
+                    cookies.map {
+                        it.jsonObject
+                            .getValue("attributes")
+                            .jsonObject
+                            .getValue("path")
+                            .jsonPrimitive.content
+                    },
+                )
+                assertNull(cookies[0].jsonObject.getValue("attributes").jsonObject["hostOnly"])
+            } finally {
+                session.close()
+            }
+        }
+
+    @Test
+    fun v2FlowExpiresWithoutExtendingItsLifetimeAndRejectsClosedOrRetiredResults() =
+        runBlocking {
+            plugin = install(LOGIN_SCRIPT, v2Manifest())
+            val session =
+                async {
+                    PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy, nowEpochMillis = { now }).begin(plugin, "cookie", ORIGIN, "en")
+                }.await()
+            assertIs<PluginCookieCheckResultV1.Pending>(async { session.check(wireSnapshot("pending")) }.await())
+            now += 15 * 60 * 1000L + 1
+            assertEquals("login.expired", assertFailsWith<PluginLoginException> { session.check(wireSnapshot("valid")) }.code)
+            session.close()
+            val retired = async { PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en") }.await()
+            assertIs<PluginCookieCheckResultV1.Success>(async { retired.check(wireSnapshot("valid")) }.await())
+            pool.retire(plugin)
+            assertFailsWith<CancellationException> { retired.check(wireSnapshot("valid")) }
+            retired.close()
+        }
+
+    @Test
+    fun closingCookieFlowRejectsAnInflightSuccessfulResult() =
+        runBlocking {
+            plugin = install(LOGIN_SCRIPT, v2Manifest())
+            pool.close()
+            val gate = GateTransport()
+            pool = PluginRuntimePool(fileSystem, gate)
+            val session = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy).begin(plugin, "cookie", ORIGIN, "en")
+            val checking = async { session.check(wireSnapshot("valid")) }
+            gate.started.await()
+            val closing = async(start = CoroutineStart.UNDISPATCHED) { session.close() }
+            gate.release.complete(Unit)
+            assertFailsWith<CancellationException> { checking.await() }
+            closing.await()
+        }
+
+    @Test
+    fun v2AccountSaveRetryReusesTheVerifiedResultWithoutReexchangingRemoteState() =
+        runBlocking {
+            plugin =
+                install("let checks = 0;\n" + cookieScript("if (++checks > 1) throw new Error('replayed login exchange');"), v2Manifest())
+            val accounts = RecordingAccountService().apply { addFailure = IllegalStateException("save failed") }
+            var completed = 0
+            val handler = cookieHandler(accounts) { completed++ }
+            try {
+                handler.perform("login")
+                assertFalse(handler.checkCookies(cookieSnapshot("valid")))
+                assertEquals("save failed", handler.state.value.error)
+                pool.closeIdle()
+                accounts.addFailure = null
+                assertTrue(handler.checkCookies(cookieSnapshot("pending")))
+                assertEquals(1, accounts.added.size)
+                assertEquals(1, completed)
+                assertFalse(handler.checkCookies(cookieSnapshot("valid")))
+            } finally {
+                handler.close()
+            }
+        }
+
+    @Test
+    fun overlappingVerifiedCookieCallbacksSaveAndCompleteOnlyOnce() =
+        runBlocking {
+            plugin = install(LOGIN_SCRIPT, v2Manifest())
+            val started = CompletableDeferred<Unit>()
+            val release = CompletableDeferred<Unit>()
+            val accounts =
+                RecordingAccountService().apply {
+                    beforeAdd = {
+                        started.complete(Unit)
+                        release.await()
+                    }
+                }
+            var completed = 0
+            val handler = cookieHandler(accounts) { completed++ }
+            try {
+                handler.perform("login")
+                val first = async { handler.checkCookies(cookieSnapshot("valid")) }
+                started.await()
+                val overlap = async(start = CoroutineStart.UNDISPATCHED) { handler.checkCookies(cookieSnapshot("valid")) }
+                val skipped = overlap.isCompleted
+                release.complete(Unit)
+                assertTrue(first.await())
+                val overlapResult = overlap.await()
+                assertTrue(skipped, "Overlapping save must be skipped immediately")
+                assertFalse(overlapResult)
+                assertEquals(1, accounts.added.size)
+                assertEquals(1, completed)
+            } finally {
+                release.complete(Unit)
+                handler.close()
+            }
+        }
+
+    @Test
+    fun closedOrExpiredCookieFlowsCannotCommitWhileAccountSaveWaits() =
+        runBlocking {
+            for (expire in listOf(false, true)) {
+                plugin = install(LOGIN_SCRIPT, v2Manifest())
+                val started = CompletableDeferred<Unit>()
+                val release = CompletableDeferred<Unit>()
+                val accounts =
+                    RecordingAccountService().apply {
+                        beforeAdd = {
+                            started.complete(Unit)
+                            release.await()
+                        }
+                    }
+                var completed = 0
+                val handler = cookieHandler(accounts, clock = { now }) { completed++ }
+                try {
+                    handler.perform("login")
+                    val checking = async { handler.checkCookies(cookieSnapshot("valid")) }
+                    started.await()
+                    if (expire) now += 15 * 60 * 1000L + 1 else handler.clear()
+                    release.complete(Unit)
+                    if (expire) assertFalse(checking.await()) else assertFailsWith<CancellationException> { checking.await() }
+                    assertTrue(accounts.added.isEmpty())
+                    assertEquals(0, completed)
+                } finally {
+                    release.complete(Unit)
+                    handler.close()
+                }
+            }
+        }
+
+    private fun wireSnapshot(value: String) = CookieSnapshotV1(listOf(CookieValueV1("$ORIGIN/api/cookie", "session", value)))
+
+    private fun v2Manifest() = LOGIN_MANIFEST.replace("\"apiVersion\": 1", "\"apiVersion\": 2")
+
+    private fun cookieScript(check: String) =
+        LOGIN_SCRIPT.replace(
+            "const session = request.cookies.cookies.find(it => it.name === \"session\");",
+            "const session = request.cookies.cookies.find(it => it.name === \"session\");\n$check",
+        )
+
     private fun cookieSnapshot(value: String) =
         LoginCookieSnapshot(values = listOf(LoginCookieValue("$ORIGIN/api/cookie", "session", value)))
 
     private fun CoroutineScope.cookieHandler(
         accounts: AccountService,
+        clock: () -> Long = { System.currentTimeMillis() },
         onSuccess: () -> Unit = {},
     ): PluginLoginMethodHandlerV1 {
         val oauth = oauthCoordinator()
@@ -714,7 +947,7 @@ class PluginLoginCoordinatorV1Test {
             oauth = oauth,
             oauthCallbacks = PluginOAuthCallbackCoordinatorV1(oauth, accounts),
             form = PluginFormLoginCoordinatorV1(pool, FixedEntropy),
-            webCookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy),
+            webCookie = PluginWebCookieLoginCoordinatorV1(pool, FixedEntropy, nowEpochMillis = clock),
             accountService = accounts,
             coroutineScope = this,
         )
@@ -778,6 +1011,7 @@ private class RecordingAccountService : AccountService {
 
     val added = mutableListOf<Pair<UiAccount, Any>>()
     var addFailure: Throwable? = null
+    var beforeAdd: suspend () -> Unit = {}
 
     override fun accountServiceFlow(accountType: AccountType): Flow<MicroblogDataSource> = emptyFlow()
 
@@ -787,7 +1021,10 @@ private class RecordingAccountService : AccountService {
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
+        beforeCommit: () -> Unit,
     ) {
+        beforeAdd()
+        beforeCommit()
         addFailure?.let { throw it }
         added += account to credential
     }

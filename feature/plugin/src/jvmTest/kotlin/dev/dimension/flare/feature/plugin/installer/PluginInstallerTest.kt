@@ -212,6 +212,45 @@ class PluginInstallerTest {
         }
 
     @Test
+    fun apiV2IsReviewedInspectedAndRestoredWhileUnknownVersionsAreRejectedBeforeScriptExecution() =
+        runBlocking {
+            TestFppFactory.write(
+                input,
+                TestFppFactory.validEntries(manifest = TestFppFactory.validManifest.replace("\"apiVersion\": 1", "\"apiVersion\": 2")),
+            )
+            val preview = installer.inspect(input)
+            assertEquals(2, PluginRegistrationInspector().inspect(TestFppFactory.validScript, apiVersion = 2).apiVersion)
+            assertTrue(
+                preview.warnings.any { it.type == PluginInstallWarningTypeV1.Compatibility && it.detail.orEmpty().contains("Set-Cookie") },
+            )
+            installer.commit(preview, confirmed = true, activate = stateStore::install)
+            assertEquals(
+                2,
+                PluginStateStore
+                    .open(
+                        fileSystem,
+                        root / "social-plugins-v2",
+                    ).running.plugins
+                    .getValue(preview.pluginId)
+                    .installed.manifest.apiVersion,
+            )
+            TestFppFactory.write(
+                input,
+                TestFppFactory.validEntries(
+                    manifest = TestFppFactory.validManifest.replace("\"apiVersion\": 1", "\"apiVersion\": 3"),
+                    script = "throw new Error('script must not run');",
+                ),
+            )
+            assertTrue(
+                assertFailsWith<IllegalArgumentException> {
+                    installer.inspect(
+                        input,
+                    )
+                }.message.orEmpty().contains("Unsupported API version"),
+            )
+        }
+
+    @Test
     fun installPersistsAReviewedPackageForStartup() =
         runBlocking<Unit> {
             TestFppFactory.write(input)

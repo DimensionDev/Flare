@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.installer
 
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.manifest.PluginManifestV1
 import dev.dimension.flare.feature.plugin.manifest.PluginTextV1
@@ -31,9 +32,10 @@ internal class PluginPackageValidator(
     internal suspend fun validate(archive: FppArchive): ValidatedPluginPackage {
         archiveReader.validateLayout(archive.entries)
         val manifest = decodeManifest(archive.files.getValue(FppPaths.MANIFEST))
+        require(manifest.apiVersion in PluginAbiV1.supportedApiVersions) { "Unsupported API version" }
         val source = decodeUtf8(archive.files.getValue(FppPaths.ENTRY), FppPaths.ENTRY)
         require('\u0000' !in source) { "plugin.js contains a null character" }
-        val methodTable = registrationInspector.inspect(source)
+        val methodTable = registrationInspector.inspect(source, manifest.apiVersion)
         val manifestValidation = manifest.validate(methodTable)
         manifestValidation.requireValid()
 

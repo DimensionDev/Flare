@@ -90,6 +90,7 @@ relogin, without requiring the account list to change.
 
 | Change | Author consequence |
 | --- | --- |
+| Adopt v2 header/session features | Set apiVersion to 2; older Hosts reject the package. Existing v1 accounts need one relogin; installation review explains application response-header access |
 | Credential payload format becomes incompatible | Increment credentialSchemaVersion; existing accounts require relogin, with no plugin migration hook |
 | Timeline IDs/parameters change incompatibly | Consider timelineSchemaVersion; it changes timeline identities and retires old specs. Explain that existing selections may need reconfiguration |
 | Capabilities removed | Running capabilities are filtered by the new manifest |

@@ -679,6 +679,7 @@ internal class PluginWireMapperV1(
         requireMediaUrl(previewUrl)
         requireMediaUrl(downloadUrl)
         requireMediaUrl(originalFrameUrl)
+        val headers = customHeaders.takeIf { it.isNotEmpty() }?.toPersistentMap()
         return when (type) {
             MediaTypeV1.Unknown -> {
                 null
@@ -692,6 +693,7 @@ internal class PluginWireMapperV1(
                     height?.toFloat() ?: 0f,
                     width?.toFloat() ?: 0f,
                     sensitive,
+                    customHeaders = headers,
                 )
             }
 
@@ -703,11 +705,19 @@ internal class PluginWireMapperV1(
                     height?.toFloat() ?: 0f,
                     width?.toFloat() ?: 0f,
                     downloadUrl = downloadUrl,
+                    customHeaders = headers,
                 )
             }
 
             MediaTypeV1.Gif -> {
-                UiMedia.Gif(url, previewUrl ?: url, description, height?.toFloat() ?: 0f, width?.toFloat() ?: 0f)
+                UiMedia.Gif(
+                    url,
+                    previewUrl ?: url,
+                    description,
+                    height?.toFloat() ?: 0f,
+                    width?.toFloat() ?: 0f,
+                    customHeaders = headers,
+                )
             }
 
             MediaTypeV1.Ugoira -> {
@@ -722,11 +732,12 @@ internal class PluginWireMapperV1(
                     width?.toFloat() ?: 0f,
                     sensitive,
                     sourceUrl = url,
+                    customHeaders = headers,
                 )
             }
 
             MediaTypeV1.Audio -> {
-                UiMedia.Audio(url, description, previewUrl)
+                UiMedia.Audio(url, description, previewUrl, customHeaders = headers)
             }
         }?.withProxy(mediaProxy)
     }

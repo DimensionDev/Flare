@@ -40,12 +40,14 @@ class PluginManifestSchemaTest {
         checkObject(schema, PluginManifestV1.serializer().descriptor)
         val properties = schema.getValue("properties").jsonObject
         assertEquals(
-            PluginAbiV1.API_VERSION,
+            PluginAbiV1.supportedApiVersions,
             properties
                 .getValue("apiVersion")
                 .jsonObject
-                .getValue("const")
-                .jsonPrimitive.int,
+                .getValue("enum")
+                .jsonArray
+                .map { it.jsonPrimitive.int }
+                .toSet(),
         )
         assertEquals(
             PluginAbiV1.MANIFEST_SCHEMA_VERSION,

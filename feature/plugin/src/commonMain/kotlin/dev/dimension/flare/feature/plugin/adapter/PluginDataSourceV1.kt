@@ -718,6 +718,7 @@ internal class PluginDataSourceV1 private constructor(
                     plugin.installed.packageHash,
                     account.snapshot.origin,
                     account.snapshot.accountId,
+                    epoch = account.sessionEpoch.takeIf { plugin.installed.manifest.apiVersion >= 2 },
                 )
             val invoker =
                 PluginAccountInvokerV1(

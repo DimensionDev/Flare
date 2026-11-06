@@ -16,7 +16,23 @@ public interface PluginCredentialAccess {
 
     /** The implementation must persist the replacement atomically. */
     public suspend fun replace(value: JsonElement)
+
+    public suspend fun readVersioned(): PluginCredentialSnapshot =
+        throw PluginHostException("host.unsupported", "Versioned credentials unavailable")
+
+    public suspend fun replaceIfCurrent(
+        value: JsonElement,
+        revision: String,
+    ): Boolean = throw PluginHostException("host.unsupported", "Conditional credentials unavailable")
+
+    public suspend fun ensureActive() {}
 }
+
+@Serializable
+public data class PluginCredentialSnapshot(
+    val value: JsonElement,
+    val revision: String,
+)
 
 @HiddenFromObjC
 public interface PluginAsset {

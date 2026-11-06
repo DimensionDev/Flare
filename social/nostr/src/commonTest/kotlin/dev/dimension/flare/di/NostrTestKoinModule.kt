@@ -80,6 +80,7 @@ private object TestAccountService : AccountService {
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
+        beforeCommit: () -> Unit,
     ): Unit = unsupported()
 
     override fun <T : Any> credentialFlow(

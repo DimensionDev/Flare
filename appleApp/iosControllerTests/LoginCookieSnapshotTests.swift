@@ -5,22 +5,24 @@ import FlareAppleCore
 
 @MainActor
 final class LoginCookieSnapshotTests: XCTestCase {
-    func testOverlappingPathsSelectMostSpecificCookieInEitherStoreOrder() throws {
+    func testOverlappingPathsPreserveBothCookiesWithMostSpecificFirst() throws {
         let root = try cookie("root", path: "/")
         let api = try cookie("api", path: "/api")
         for cookies in [[root, api], [api, root]] {
             let snapshot = snapshot(cookies, urls: ["https://login.example/api/cookie", "https://login.example/"])
-            XCTAssertEqual(snapshot.values.map(\.value), ["api", "root"])
-            XCTAssertEqual(snapshot.values.map(\.sourceUrl), ["https://login.example/api/cookie", "https://login.example/"])
+            XCTAssertEqual(snapshot.values.map(\.value), ["api", "root", "root"])
+            XCTAssertEqual(snapshot.values.compactMap { $0.attributes?.path }, ["/api", "/", "/"])
+            XCTAssertNil(snapshot.values.first?.attributes?.hostOnly)
+            XCTAssertEqual(snapshot.values.map(\.sourceUrl), ["https://login.example/api/cookie", "https://login.example/api/cookie", "https://login.example/"])
         }
     }
 
-    func testOverlappingDomainsSelectMostSpecificCookieInEitherStoreOrder() throws {
+    func testOverlappingDomainsPreserveAllCookiesWithMostSpecificFirst() throws {
         let parent = try cookie("parent", domain: ".example")
         let domain = try cookie("domain", domain: ".login.example")
         let host = try cookie("host")
         for cookies in [[parent, domain, host], [host, domain, parent]] {
-            XCTAssertEqual(snapshot(cookies).values.map(\.value), ["host"])
+            XCTAssertEqual(snapshot(cookies).values.map(\.value), ["host", "domain", "parent"])
         }
     }
 
@@ -32,7 +34,7 @@ final class LoginCookieSnapshotTests: XCTestCase {
             cookie("http", path: "/"),
             cookie("unrequested", name: "other")
         ]
-        XCTAssertEqual(snapshot(cookies).values.map(\.value), ["secure"])
+        XCTAssertEqual(snapshot(cookies).values.map(\.value), ["secure", "http"])
         XCTAssertEqual(snapshot(cookies, urls: ["http://login.example/api/cookie"]).values.map(\.value), ["http"])
     }
 

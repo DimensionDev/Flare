@@ -13,7 +13,17 @@ public data class HttpRequestV1(
     val cookies: List<HttpCookieV1> = emptyList(),
     val body: HttpBodyV1? = null,
     val timeoutMillis: Long? = null,
+    val redirect: HttpRedirectV1? = null,
 )
+
+@Serializable
+public enum class HttpRedirectV1 {
+    @SerialName("follow")
+    Follow,
+
+    @SerialName("manual")
+    Manual,
+}
 
 @Serializable
 public sealed interface HttpAuthorizationV1 {
@@ -92,6 +102,8 @@ public data class HttpResponseV1(
     val status: Int,
     val headers: Map<String, List<String>> = emptyMap(),
     val body: String,
+    val url: String? = null,
+    val redirectUrl: String? = null,
 )
 
 @Serializable

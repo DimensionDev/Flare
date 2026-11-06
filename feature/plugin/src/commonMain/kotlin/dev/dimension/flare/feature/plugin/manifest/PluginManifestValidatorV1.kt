@@ -35,7 +35,7 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     }
 
     check(schemaVersion == PluginAbiV1.MANIFEST_SCHEMA_VERSION, "manifest.schema", "schemaVersion", "Unsupported schema")
-    check(apiVersion == PluginAbiV1.API_VERSION, "manifest.api", "apiVersion", "Unsupported API version")
+    check(apiVersion in PluginAbiV1.supportedApiVersions, "manifest.api", "apiVersion", "Unsupported API version")
     check(PLUGIN_ID.matches(id), "manifest.id", "id", "Invalid plugin ID")
     check(SEMVER.matches(version), "manifest.version", "version", "Invalid semantic version")
     check(isValidLocaleTag(defaultLocale), "manifest.locale", "defaultLocale", "Invalid default locale")

@@ -13,7 +13,10 @@ import platform.Foundation.NSURLSessionConfiguration
 
 @OptIn(ExperimentalForeignApi::class)
 public fun interface AppleProxySessionConfigurator {
-    public fun configure(configuration: NSURLSessionConfiguration, connection: ProxyConnection)
+    public fun configure(
+        configuration: NSURLSessionConfiguration,
+        connection: ProxyConnection,
+    )
 }
 
 public object AppleProxyTransport {
@@ -24,13 +27,17 @@ internal actual val platformEngineCapabilities: Set<HttpClientEngineCapability<*
     setOf(HttpTimeoutCapability, WebSocketCapability, SSECapability)
 
 @OptIn(ExperimentalForeignApi::class)
-internal actual fun createPlatformHttpClientEngine(connection: ProxyConnection): HttpClientEngine =
+internal actual fun createPlatformHttpClientEngine(
+    connection: ProxyConnection,
+    plugin: Boolean,
+): HttpClientEngine =
     Darwin.create {
         configureSession {
             URLCredentialStorage = null
             URLCache = null
             HTTPCookieStorage = null
             HTTPShouldSetCookies = false
+            // shortcut: Foundation can retransmit on 401 challenges; a different native transport is needed to suppress those attempts.
             if (connection.mode != ProxyMode.SYSTEM) {
                 checkNotNull(AppleProxyTransport.configurator) { "Apple proxy transport has not been initialized" }
                     .configure(this, connection)

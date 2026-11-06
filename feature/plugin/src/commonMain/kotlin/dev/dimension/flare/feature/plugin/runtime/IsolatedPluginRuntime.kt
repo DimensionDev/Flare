@@ -125,7 +125,15 @@ internal class IsolatedPluginRuntime(
                 invocation.scope
                     .async {
                         // A catchable Host error must not cancel the invocation's coroutine scope.
-                        runCatching { gateway.call(operation, arguments, invocation.context, invocation.timeoutMillis) }
+                        runCatching {
+                            gateway.call(
+                                operation,
+                                arguments,
+                                invocation.context,
+                                invocation.timeoutMillis,
+                                plugin.installed.manifest.apiVersion,
+                            )
+                        }
                     }.await()
                     .getOrThrow()
             }
@@ -249,8 +257,8 @@ internal val RUNTIME_PRELUDE =
       const facade = {
         http: { request: request => hostCall("http.request", request) },
         credential: {
-          read: () => hostCall("credential.read"),
-          replace: value => hostCall("credential.replace", { value }),
+          read: options => hostCall("credential.read", options ? { withRevision: options.withRevision } : {}),
+          replace: (value, options) => hostCall("credential.replace", { value, expectedRevision: options?.expectedRevision }),
         },
         crypto: {
           randomHex: size => hostCall("crypto.randomHex", { size }),

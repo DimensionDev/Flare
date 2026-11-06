@@ -1,11 +1,11 @@
 ---
 name: flare-plugin
-description: Create, extend, debug, and prepare GitHub distribution for Flare Social Plugin API v1 plugins. Use when implementing a website adapter, editing a Flare plugin manifest or classic JavaScript entrypoint, adding login or datasource capabilities, or diagnosing Flare plugin installation and runtime errors.
+description: Create, extend, debug, and prepare GitHub distribution for Flare Social Plugin API v1/v2 plugins. Use when implementing a website adapter, editing a Flare plugin manifest or classic JavaScript entrypoint, adding login or datasource capabilities, or diagnosing Flare plugin installation and runtime errors.
 ---
 
 # Flare Plugin
 
-Produce a website adapter that matches Flare's API v1 contract and can be installed
+Produce a website adapter that matches Flare's declared API contract and can be installed
 from a public GitHub repository. Use the user's chosen website and requested
 features. This skill includes the SDK; resolve links relative to this file, not
 to the user's plugin repository.
@@ -23,7 +23,9 @@ to the user's plugin repository.
    points. Declare only supported behavior, including any required companion
    operations. A function's TypeScript optionality does not relax manifest rules.
 3. Use [flare-plugin.d.ts](flare-plugin.d.ts) for exact signatures and [ABI.md](ABI.md)
-   for the boundary contract. Preserve API v1 behavior. If the target Flare build
+   for the boundary contract. Declare apiVersion 2 when using application response
+   headers, manual redirects, conditional credential updates, or WebCookie pending
+   state/metadata; keep v1 manifests within their original behavior. If the target Flare build
    has a different contract, establish its version before generating code; there
    is no implied released-app minimum version in this skill.
 
@@ -45,7 +47,8 @@ Read the references needed for the task:
 
 | Task | Read |
 | --- | --- |
-| Detection, OAuth, password, token import, form, Cookie, credential refresh | [Authentication](references/authentication.md) |
+| Detection, OAuth, password, token import, form, Cookie, credential refresh, v2 pending/CAS | [Authentication](references/authentication.md) |
+| Manual SSO redirects, response headers, body/header tokens, native retry limits | [Runtime/HTTP](references/runtime-http.md) |
 | Map remote entities, HTML, media, identity, cursor pagination, opaque tokens | [Wire data](references/wire-data.md) |
 | Implement any of the twelve capabilities, guest access, actions, Deep Links, localization | [Recipes](references/recipes.md) and the relevant [capability row](references/capabilities.md) |
 | Diagnose a rejected package, missing UI, failed request, or retired runtime | [Troubleshooting and limits](references/troubleshooting.md) |

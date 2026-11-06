@@ -11,6 +11,14 @@
   },
   "cases": [
     {
+      "name": "API v2 is supported",
+      "patch": {
+        "apiVersion": 2
+      },
+      "schemaValid": true,
+      "hostValid": true
+    },
+    {
       "name": "additional HTTP origins",
       "patch": {
         "permissions": {
@@ -229,7 +237,7 @@
     {
       "name": "unsupported API version",
       "patch": {
-        "apiVersion": 2
+        "apiVersion": 3
       },
       "schemaValid": false,
       "hostValid": false

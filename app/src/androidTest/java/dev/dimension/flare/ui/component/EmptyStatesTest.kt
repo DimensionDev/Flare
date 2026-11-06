@@ -31,7 +31,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.dimension.flare.R
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectPagingState
+import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.data.model.appearance.GlobalAppearance
 import dev.dimension.flare.data.model.appearance.TimelineAppearance
@@ -47,6 +49,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.screen.media.MediaViewerScreen
 import dev.dimension.flare.ui.screen.rss.OPMLImportSheet
@@ -89,7 +92,7 @@ class EmptyStatesTest {
             val postState by posts.collectPagingState()
             TestTheme {
                 LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
-                    searchContent(userState, postState, {})
+                    searchContent(searchState(userState, postState))
                 }
             }
         }
@@ -113,7 +116,7 @@ class EmptyStatesTest {
             val postState by posts.collectPagingState()
             TestTheme {
                 LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
-                    searchContent(userState, postState, {})
+                    searchContent(searchState(userState, postState))
                 }
             }
         }
@@ -259,6 +262,29 @@ class EmptyStatesTest {
         compose.runOnIdle { loaded = false }
         empty.assertDoesNotExist()
     }
+
+    private fun searchState(
+        users: PagingState<UiProfile>,
+        status: PagingState<UiTimelineV2>,
+    ): SearchState =
+        object : SearchState {
+            override val users = users
+            override val status = status
+            override val searching = true
+            override val isSearchUnavailable = false
+            override val hasNoResults = users.isEmpty && status.isEmpty
+            override val accounts = UiState.Success<ImmutableList<UiProfile>>(persistentListOf())
+            override val defaultAccountType = UiState.Success<AccountType>(AccountType.Guest)
+            override val selectedAccount: UiProfile? = null
+
+            override fun search(query: String) {}
+
+            override suspend fun refreshSuspend() {}
+
+            override fun setAccount(profile: UiProfile) {}
+
+            override fun setAccountKey(key: MicroBlogKey) {}
+        }
 
     @Composable
     private fun TestTheme(content: @Composable () -> Unit) {

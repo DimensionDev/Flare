@@ -63,16 +63,13 @@ internal class PluginHostGateway(
                         JsonPrimitive(platformUuid())
                     }
 
-                    "crypto.sha256" -> {
+                    "crypto.md5", "crypto.sha256" -> {
                         val request = PluginJsonV1.decodeFromString<HashRequestV1>(argumentsJson)
-                        require(request.value.encodeToByteArray().size <= MAX_HASH_INPUT_BYTES) { "Hash input is too large" }
-                        JsonPrimitive(
-                            request.value
-                                .encodeToByteArray()
-                                .toByteString()
-                                .sha256()
-                                .hex(),
-                        )
+                        val input = request.value.encodeToByteArray()
+                        require(input.size <= MAX_HASH_INPUT_BYTES) { "Hash input is too large" }
+                        val bytes = input.toByteString()
+                        val digest = if (operation == "crypto.md5") bytes.md5() else bytes.sha256()
+                        JsonPrimitive(digest.hex())
                     }
 
                     "locale.current" -> {

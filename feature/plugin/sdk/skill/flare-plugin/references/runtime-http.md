@@ -210,7 +210,8 @@ replace another account's credential.
 
 `await flare.crypto.randomHex(size)` uses **bytes** as its size and returns twice
 as many hexadecimal characters. `uuid()` returns a UUID string. `sha256(value)`
-hashes the UTF-8 string and returns hex, not a byte array or base64url PKCE value.
+and `md5(value)` hash UTF-8 strings up to 1 MiB and return lowercase hexadecimal
+digests. Use MD5 for legacy protocol compatibility.
 Implement any provider-required PKCE encoding explicitly using compatible JS;
 do not assume Web Crypto or Buffer. `await flare.locale.current()` returns the
 Host locale, also supplied as `context.locale`.

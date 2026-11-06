@@ -95,6 +95,7 @@ test("npm tarball preserves the SDK and creates a typed, buildable plugin projec
   writeFileSync(join(generated, "src/type-check.ts"), `
 const profile: ProfileV1 = { key: { id: "1", host: "example.org" }, handle: "alice", displayName: "Alice" };
 const page: PageV1<TimelineItemV1> = { items: [{ type: "post", post: { key: profile.key, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Text" } } }] };
+const md5: Promise<string> = flare.crypto.md5("abc");
 // @ts-expect-error Unsupported Host method.
 flare.fetch("https://example.org");
 // @ts-expect-error Invalid SDK error code.

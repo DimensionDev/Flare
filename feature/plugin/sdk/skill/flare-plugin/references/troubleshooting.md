@@ -105,7 +105,7 @@ requests/responses well below them.
 | Inline-parent presentation depth | 4 recursive levels beyond the root item |
 | Inline parents / quotes / user list / reactions | At most 100 each; user lists cannot be empty |
 | Poll options | 2..100, distinct valid ownVotes indices |
-| Crypto randomHex input / sha256 input | 1..1024 random bytes / 1 MiB UTF-8 text |
+| Crypto randomHex input / sha256 and md5 input | 1..1024 random bytes / 1 MiB UTF-8 text |
 
 Multipart calls have at most 64 parts; text parts are at most 256 KiB. Assets have
 their own Host/compose constraints, up to 1 GiB per asset at the bridge boundary;

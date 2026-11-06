@@ -31,16 +31,19 @@ val rustSources = fileTree(rustRoot) {
     include("Cargo.toml", "Cargo.lock", ".cargo/*.toml", "crates/**/*.toml", "crates/**/*.rs")
     exclude("**/target/**")
 }
-val rustJniLibs = rustRoot.dir("target/android/jniLibs")
+val rustAndroidOutput = rustRoot.dir("target/android")
+val rustTypes = rustAndroidOutput.dir("types")
+val rustKotlinBindings = rustAndroidOutput.dir("kotlin")
+val rustJniLibs = rustAndroidOutput.dir("jniLibs")
 val boltffiExecutable = rustRoot.file("target/tools/bin/" + if (System.getProperty("os.name").startsWith("Windows")) "boltffi.exe" else "boltffi")
 extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     filter {
-        exclude { element -> element.file.invariantSeparatorsPath.contains("/rust/bindings/") }
+        exclude { element -> element.file.toPath().startsWith(rustAndroidOutput.asFile.toPath()) }
     }
 }
 val generateCruxTypes = tasks.register<Exec>("generateCruxTypes") {
     inputs.files(rustSources, rustRoot.file("Justfile"))
-    outputs.dir(rustRoot.dir("bindings/types/kotlin"))
+    outputs.dir(rustTypes)
     outputs.file(boltffiExecutable)
     workingDir(rustRoot)
     environment("CARGO", rustCargo.get())
@@ -53,7 +56,7 @@ val buildRustNative = tasks.register<Exec>("buildRustNative") {
     inputs.files(rustSources, rustNdkDirectory.map { it.file("source.properties") })
     inputs.property("abis", rustAndroidAbis)
     outputs.dir(rustJniLibs)
-    outputs.dir(rustRoot.dir("bindings/kotlin"))
+    outputs.dir(rustKotlinBindings)
     workingDir(rustRoot.dir("crates/flare-ffi"))
     doFirst {
         val architectures = rustAndroidAbis.get().split(",").map { abi ->
@@ -115,9 +118,9 @@ android {
     }
 
     sourceSets.getByName("main") {
-        kotlin.directories.add(rootProject.file("rust/bindings/kotlin").absolutePath)
-        kotlin.directories.add(rootProject.file("rust/bindings/types/kotlin/dev").absolutePath)
-        kotlin.directories.add(rootProject.file("rust/bindings/types/kotlin/com").absolutePath)
+        kotlin.directories.add(rustKotlinBindings.asFile.absolutePath)
+        kotlin.directories.add(rustTypes.dir("dev").asFile.absolutePath)
+        kotlin.directories.add(rustTypes.dir("com").asFile.absolutePath)
         jniLibs.srcDir(rustJniLibs.asFile)
     }
 

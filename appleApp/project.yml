@@ -49,8 +49,6 @@ settings:
       VALIDATE_PRODUCT: YES
 
 packages:
-  FlareCounterTypes:
-    path: ../rust/bindings/types/swift/FlareCounterTypes
   ChatLayout:
     url: https://github.com/ekazaev/ChatLayout
     exactVersion: 2.5.2
@@ -148,7 +146,10 @@ targets:
     type: framework.static
     platform: iOS
     sources:
-      - path: ../rust/bindings/swift/FlareFfiBoltFFI.swift
+      # Explicit file references work before the build has generated their contents.
+      - path: &crux_ffi_swift "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareFfiBoltFFI.swift"
+        type: file
+        optional: true
     preBuildScripts:
       - name: Generate Bindings and Compile Rust
         basedOnDependencyAnalysis: false
@@ -157,18 +158,28 @@ targets:
           - "$(SRCROOT)/../rust/Cargo.lock"
           - "$(SRCROOT)/../rust/Justfile"
           - "$(SRCROOT)/../rust/crates/flare-core/src/bin/codegen.rs"
+          - "$(SRCROOT)/../rust/crates/flare-ffi/FlareRustFFI.modulemap"
         outputFiles:
-          - "$(SRCROOT)/../rust/bindings/swift/FlareFfiBoltFFI.swift"
-          - "$(SRCROOT)/../rust/bindings/swift/boltffi.h"
-          - "$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
-          - "$(SRCROOT)/../rust/bindings/types/swift/FlareCounterTypes/Package.swift"
+          - *crux_ffi_swift
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/boltffi.h"
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"
+          - &crux_counter_types "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/FlareCounterTypes/FlareCounterTypes.swift"
+          - &crux_binary_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BinaryDeserializer.swift"
+          - &crux_binary_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BinarySerializer.swift"
+          - &crux_bincode_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BincodeDeserializer.swift"
+          - &crux_bincode_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BincodeSerializer.swift"
+          - &crux_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Deserializer.swift"
+          - &crux_indirect "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Indirect.swift"
+          - &crux_int128 "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Int128.swift"
+          - &crux_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Serializer.swift"
+          - &crux_uint128 "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/UInt128.swift"
           - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
         script: |
           set -eu
           cd "$SRCROOT/../rust"
           export CARGO="${CARGO:-$HOME/.cargo/bin/cargo}"
           export PATH="$(dirname "$CARGO"):/opt/homebrew/bin:/usr/local/bin:$PATH"
-          "${JUST:-just}" --justfile "$PWD/Justfile" swift-bindings
+          "${JUST:-just}" --justfile "$PWD/Justfile" swift-bindings "$CONFIGURATION_TEMP_DIR/CruxBindings"
           PROFILE=dev
           ARTIFACT_PROFILE=debug
           if [ "$CONFIGURATION" = Release ]; then
@@ -213,9 +224,44 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
-        SWIFT_INCLUDE_PATHS: "$(SRCROOT)/../rust/bindings/swift"
-        OTHER_SWIFT_FLAGS: "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
+        SWIFT_INCLUDE_PATHS: "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
+        OTHER_SWIFT_FLAGS: '$(inherited) -Xcc "-fmodule-map-file=$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"'
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust
+
+  Serde:
+    type: framework.static
+    platform: iOS
+    dependencies:
+      - target: FlareRust
+        link: false
+    sources:
+      - { path: *crux_binary_deserializer, type: file, optional: true }
+      - { path: *crux_binary_serializer, type: file, optional: true }
+      - { path: *crux_bincode_deserializer, type: file, optional: true }
+      - { path: *crux_bincode_serializer, type: file, optional: true }
+      - { path: *crux_deserializer, type: file, optional: true }
+      - { path: *crux_indirect, type: file, optional: true }
+      - { path: *crux_int128, type: file, optional: true }
+      - { path: *crux_serializer, type: file, optional: true }
+      - { path: *crux_uint128, type: file, optional: true }
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust.serde
+
+  FlareCounterTypes:
+    type: framework.static
+    platform: iOS
+    dependencies:
+      - target: Serde
+    sources:
+      - { path: *crux_counter_types, type: file, optional: true }
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust.countertypes
 
   iOS:
     templates: [FirebaseOptionalApp]
@@ -233,7 +279,10 @@ targets:
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
       - target: FlareRust
-      - package: FlareCounterTypes
+      - target: FlareCounterTypes
+        embed: false
+      - target: Serde
+        embed: false
       - package: Kingfisher
       - package: LazyPager
       - package: SwiftUI-Flow
@@ -270,8 +319,8 @@ targets:
         INFOPLIST_FILE: ios/Info.plist
         OTHER_LDFLAGS: "$(inherited) -ObjC -lflare_ffi"
         LIBRARY_SEARCH_PATHS: "$(inherited) $(BUILT_PRODUCTS_DIR)/rust"
-        SWIFT_INCLUDE_PATHS: "$(SRCROOT)/../rust/bindings/swift"
-        OTHER_SWIFT_FLAGS: "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../rust/bindings/swift/FlareRustFFI.modulemap"
+        SWIFT_INCLUDE_PATHS: "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
+        OTHER_SWIFT_FLAGS: '$(inherited) -Xcc "-fmodule-map-file=$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"'
 
   OpenInFlare:
     type: app-extension

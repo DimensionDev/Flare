@@ -13,7 +13,7 @@ min_sdk = 24
 [targets.android.kotlin]
 package = "dev.dimension.flare.rust"
 module_name = "FlareRust"
-output = "../../bindings/kotlin"
+output = "../../target/android/kotlin"
 
 [targets.android.header]
 # shortcut: BoltFFI 0.29.3 emits a legacy standalone header; keep it away from Kotlin's JNI header until upstream unifies them.

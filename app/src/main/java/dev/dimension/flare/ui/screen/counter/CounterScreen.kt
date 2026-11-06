@@ -20,15 +20,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.common.rememberCruxViewModel
-import dev.dimension.flare.counter.Core
 import dev.dimension.flare.counter.CounterEvent
-import dev.dimension.flare.counter.EffectHandler
-import dev.dimension.flare.counter.FfiBridge
+import dev.dimension.flare.counter.rememberCounterViewModel
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
-
-internal typealias CounterViewModel = Core
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +31,7 @@ internal fun CounterScreen(
     onBack: () -> Unit,
     initialValue: Long = 0,
 ) {
-    val viewModel = rememberCounterViewModel(initialValue)
+    val viewModel = rememberCounterViewModel(CounterEvent.Initialize(initialValue))
     val state by viewModel.view.collectAsState()
     FlareScaffold(
         topBar = {
@@ -80,11 +75,3 @@ internal fun CounterScreen(
         }
     }
 }
-
-@Composable
-internal fun rememberCounterViewModel(initialValue: Long): CounterViewModel =
-    rememberCruxViewModel(key = "counter", createBridge = { FfiBridge() }) { bridge, scope ->
-        CounterViewModel(bridge, object : EffectHandler {}, scope).apply {
-            update(CounterEvent.Initialize(initialValue))
-        }
-    }

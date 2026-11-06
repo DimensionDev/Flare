@@ -40,6 +40,12 @@ pub struct Model {
     error: Option<UiError>,
 }
 
+impl Default for Model {
+    fn default() -> Self {
+        Self::new(0)
+    }
+}
+
 impl Model {
     #[must_use]
     pub const fn new(initial_value: i64) -> Self {
@@ -91,6 +97,7 @@ impl From<CounterOverflow> for UiError {
 #[derive(Default)]
 pub struct CounterViewModel;
 
+#[crate::view_model("counter")]
 impl App for CounterViewModel {
     type Event = CounterEvent;
     type Model = Model;

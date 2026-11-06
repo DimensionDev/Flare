@@ -48,15 +48,19 @@ val generateCruxTypes = tasks.register<Exec>("generateCruxTypes") {
     workingDir(rustRoot)
     environment("CARGO", rustCargo.get())
     commandLine(rustJust.get(), "--justfile", rustRoot.file("Justfile").asFile.absolutePath, "android-types")
+    doFirst {
+        check(rustTypes.asFile.deleteRecursively()) { "Could not clear generated Crux types" }
+    }
 }
 val rustNdkDirectory = androidComponents.sdkComponents.ndkDirectory
 val rustAndroidOverlay = layout.buildDirectory.file("generated/rust/android.toml")
 val buildRustNative = tasks.register<Exec>("buildRustNative") {
     dependsOn(generateCruxTypes)
-    inputs.files(rustSources, rustNdkDirectory.map { it.file("source.properties") })
+    inputs.files(rustSources, boltffiExecutable, rustNdkDirectory.map { it.file("source.properties") })
     inputs.property("abis", rustAndroidAbis)
     outputs.dir(rustJniLibs)
     outputs.dir(rustKotlinBindings)
+    outputs.dir(rustAndroidOutput.dir("include"))
     workingDir(rustRoot.dir("crates/flare-ffi"))
     doFirst {
         val architectures = rustAndroidAbis.get().split(",").map { abi ->
@@ -76,7 +80,7 @@ val buildRustNative = tasks.register<Exec>("buildRustNative") {
         commandLine(
             boltffiExecutable.asFile.absolutePath,
             "--cargo-arg=--locked", "--overlay", overlay.absolutePath,
-            "pack", "android", "--release",
+            "pack", "android", "--release", "--deny-skipped",
         )
     }
 }

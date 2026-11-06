@@ -142,133 +142,6 @@ targetTemplates:
           "$RUN_SCRIPT"
 
 targets:
-  FlareRust:
-    type: framework.static
-    platform: iOS
-    sources:
-      # Explicit file references work before the build has generated their contents.
-      - path: &crux_ffi_swift "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareFfiBoltFFI.swift"
-        type: file
-        optional: true
-    preBuildScripts:
-      - name: Generate Bindings and Compile Rust
-        basedOnDependencyAnalysis: false
-        inputFiles:
-          - "$(SRCROOT)/../rust/Cargo.toml"
-          - "$(SRCROOT)/../rust/Cargo.lock"
-          - "$(SRCROOT)/../rust/Justfile"
-          - "$(SRCROOT)/../rust/crates/flare-core/src/bin/codegen.rs"
-          - "$(SRCROOT)/../rust/crates/flare-ffi/FlareRustFFI.modulemap"
-        outputFiles:
-          - *crux_ffi_swift
-          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/boltffi.h"
-          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"
-          - &crux_counter_types "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/FlareCounterTypes/FlareCounterTypes.swift"
-          - &crux_counter_bridge "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/FlareCounterTypes/FfiBridge.swift"
-          - &crux_binary_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BinaryDeserializer.swift"
-          - &crux_binary_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BinarySerializer.swift"
-          - &crux_bincode_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BincodeDeserializer.swift"
-          - &crux_bincode_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BincodeSerializer.swift"
-          - &crux_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Deserializer.swift"
-          - &crux_indirect "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Indirect.swift"
-          - &crux_int128 "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Int128.swift"
-          - &crux_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/Serializer.swift"
-          - &crux_uint128 "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/UInt128.swift"
-          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
-        script: |
-          set -eu
-          cd "$SRCROOT/../rust"
-          export CARGO="${CARGO:-$HOME/.cargo/bin/cargo}"
-          export PATH="$(dirname "$CARGO"):/opt/homebrew/bin:/usr/local/bin:$PATH"
-          "${JUST:-just}" --justfile "$PWD/Justfile" swift-bindings "$CONFIGURATION_TEMP_DIR/CruxBindings"
-          PROFILE=dev
-          ARTIFACT_PROFILE=debug
-          if [ "$CONFIGURATION" = Release ]; then
-            PROFILE=release
-            ARTIFACT_PROFILE=release
-          fi
-          OVERLAY="$DERIVED_FILE_DIR/boltffi-apple.toml"
-          mkdir -p "$DERIVED_FILE_DIR"
-          IOS_ARCHS=""
-          SIMULATOR_ARCHS=""
-          set --
-          for ARCH in $ARCHS; do
-            case "$PLATFORM_NAME/$ARCH" in
-              iphoneos/arm64) TARGET=aarch64-apple-ios; IOS_ARCHS="\"arm64\"," ;;
-              iphonesimulator/arm64) TARGET=aarch64-apple-ios-sim; SIMULATOR_ARCHS="$SIMULATOR_ARCHS\"arm64\"," ;;
-              iphonesimulator/x86_64) TARGET=x86_64-apple-ios; SIMULATOR_ARCHS="$SIMULATOR_ARCHS\"x86_64\"," ;;
-              *) echo "Unsupported Rust Apple target: $PLATFORM_NAME/$ARCH" >&2; exit 1 ;;
-            esac
-            set -- "$@" "$PWD/target/$TARGET/$ARTIFACT_PROFILE/libflare_ffi.a"
-          done
-          if [ "$#" -eq 0 ]; then
-            echo "ARCHS must contain at least one Apple architecture" >&2
-            exit 1
-          fi
-          printf '[targets.apple]\ninclude_macos = false\nios_architectures = [%s]\nsimulator_architectures = [%s]\n' \
-            "$IOS_ARCHS" "$SIMULATOR_ARCHS" > "$OVERLAY"
-          # BoltFFI builds the ABI exports consumed by its generated Swift bindings.
-          (
-            cd crates/flare-ffi
-            env -u SDKROOT -u IPHONEOS_DEPLOYMENT_TARGET -u MACOSX_DEPLOYMENT_TARGET \
-              -u TVOS_DEPLOYMENT_TARGET -u WATCHOS_DEPLOYMENT_TARGET -u XROS_DEPLOYMENT_TARGET \
-              ../../target/tools/bin/boltffi --cargo-arg=--locked --cargo-arg="--profile=$PROFILE" \
-              --overlay "$OVERLAY" build apple
-          )
-          mkdir -p "$BUILT_PRODUCTS_DIR/rust"
-          if [ "$#" -eq 1 ]; then
-            cp "$1" "$BUILT_PRODUCTS_DIR/rust/libflare_ffi.a"
-          else
-            xcrun lipo -create "$@" -output "$BUILT_PRODUCTS_DIR/rust/libflare_ffi.a"
-          fi
-    settings:
-      base:
-        GENERATE_INFOPLIST_FILE: YES
-        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
-        SWIFT_INCLUDE_PATHS: "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
-        OTHER_SWIFT_FLAGS: '$(inherited) -Xcc "-fmodule-map-file=$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"'
-        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust
-
-  Serde:
-    type: framework.static
-    platform: iOS
-    dependencies:
-      - target: FlareRust
-        link: false
-    sources:
-      - { path: *crux_binary_deserializer, type: file, optional: true }
-      - { path: *crux_binary_serializer, type: file, optional: true }
-      - { path: *crux_bincode_deserializer, type: file, optional: true }
-      - { path: *crux_bincode_serializer, type: file, optional: true }
-      - { path: *crux_deserializer, type: file, optional: true }
-      - { path: *crux_indirect, type: file, optional: true }
-      - { path: *crux_int128, type: file, optional: true }
-      - { path: *crux_serializer, type: file, optional: true }
-      - { path: *crux_uint128, type: file, optional: true }
-    settings:
-      base:
-        GENERATE_INFOPLIST_FILE: YES
-        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
-        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust.serde
-
-  FlareCounterTypes:
-    type: framework.static
-    platform: iOS
-    dependencies:
-      - target: FlareRust
-        link: false
-      - target: Serde
-    sources:
-      - { path: *crux_counter_types, type: file, optional: true }
-      - { path: *crux_counter_bridge, type: file, optional: true }
-    settings:
-      base:
-        GENERATE_INFOPLIST_FILE: YES
-        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
-        SWIFT_INCLUDE_PATHS: "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
-        OTHER_SWIFT_FLAGS: '$(inherited) -Xcc "-fmodule-map-file=$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"'
-        PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust.countertypes
-
   iOS:
     templates: [FirebaseOptionalApp]
     type: application
@@ -284,11 +157,6 @@ targets:
           - SafariOpenInFlare/**
       - path: Shared/FlareAppleResource/Resources/Localizable.xcstrings
     dependencies:
-      - target: FlareRust
-      - target: FlareCounterTypes
-        embed: false
-      - target: Serde
-        embed: false
       - package: Kingfisher
       - package: LazyPager
       - package: SwiftUI-Flow
@@ -323,10 +191,21 @@ targets:
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: NO
         DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
         INFOPLIST_FILE: ios/Info.plist
-        OTHER_LDFLAGS: "$(inherited) -ObjC -lflare_ffi"
+        OTHER_LDFLAGS: "$(inherited) -ObjC -lflare_viewmodels -lflare_ffi"
         LIBRARY_SEARCH_PATHS: "$(inherited) $(BUILT_PRODUCTS_DIR)/rust"
-        SWIFT_INCLUDE_PATHS: "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
-        OTHER_SWIFT_FLAGS: '$(inherited) -Xcc "-fmodule-map-file=$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"'
+        SWIFT_INCLUDE_PATHS:
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/modules"
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
+    preBuildScripts:
+      - name: Build Rust ViewModels
+        basedOnDependencyAnalysis: false
+        inputFiles:
+          - "$(SRCROOT)/../rust/scripts/build-ios.sh"
+        outputFiles:
+          - "$(CONFIGURATION_TEMP_DIR)/CruxBindings"
+          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_viewmodels.a"
+          - "$(BUILT_PRODUCTS_DIR)/rust/libflare_ffi.a"
+        script: bash "$SRCROOT/../rust/scripts/build-ios.sh"
 
   OpenInFlare:
     type: app-extension

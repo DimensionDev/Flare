@@ -16,8 +16,7 @@ module_name = "FlareRust"
 output = "../../target/android/kotlin"
 
 [targets.android.header]
-# shortcut: BoltFFI 0.29.3 emits a legacy standalone header; keep it away from Kotlin's JNI header until upstream unifies them.
-output = "../../target/boltffi/header"
+output = "../../target/android/include"
 
 [targets.android.pack]
 output = "../../target/android/jniLibs"

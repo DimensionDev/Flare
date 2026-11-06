@@ -11,8 +11,8 @@ tools:
     #!/usr/bin/env bash
     set -euo pipefail
     unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET MACOSX_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET
-    if [[ "$("$FLARE_BOLTFFI" --version 2>/dev/null || true)" != "boltffi 0.29.3" ]]; then
-        "$CARGO" install boltffi_cli --version 0.29.3 --locked --force --root target/tools
+    if [[ "$("$FLARE_BOLTFFI" --version 2>/dev/null || true)" != "boltffi 0.32.1" ]]; then
+        "$CARGO" install boltffi_cli --version 0.32.1 --locked --force --root target/tools
     fi
 
 # Each shell generates only its own types and serialization runtime.
@@ -24,15 +24,14 @@ typegen language output:
     test -n "$host"
     "$CARGO" run --locked --package flare-core --bin codegen --features codegen --target "$host" -- "$1" "$2"
 
-# The Swift wrapper is compiled by the Xcode framework target.
 swift-bindings output="target/apple-bindings": tools (typegen "swift" (output / "types"))
     #!/usr/bin/env bash
     set -euo pipefail
     unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET MACOSX_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET
     output=$(cd "$1" && pwd)
     cd crates/flare-ffi
-    "$FLARE_BOLTFFI" --cargo-arg=--locked generate swift --output "$output/ffi"
-    cp FlareRustFFI.modulemap "$output/ffi/FlareRustFFI.modulemap"
+    "$FLARE_BOLTFFI" --cargo-arg=--locked generate swift --deny-skipped --output "$output/ffi"
+    cp FlareRustFFI.modulemap "$output/ffi/module.modulemap"
 
 # Android's BoltFFI pack step generates Kotlin/JNI bindings and native libraries.
 android-types: tools (typegen "kotlin" "target/android/types")

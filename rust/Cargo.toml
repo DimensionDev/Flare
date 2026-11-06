@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/flare-core", "crates/flare-ffi"]
+members = ["crates/flare-core", "crates/flare-ffi", "crates/flare-view-model-macros"]
 resolver = "3"
 
 [workspace.package]
@@ -11,7 +11,7 @@ publish = false
 crux_core = { git = "https://github.com/redbadger/crux.git", rev = "fbb8849b5f794c171fc1cf25c9779327cfabd943" }
 facet = "=0.46.5"
 serde = { version = "1", features = ["derive"] }
-boltffi = { version = "=0.29.3", default-features = false }
+boltffi = { version = "=0.32.1", default-features = false }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

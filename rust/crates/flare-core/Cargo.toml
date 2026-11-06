@@ -7,7 +7,8 @@ publish.workspace = true
 
 [features]
 facet_typegen = ["crux_core/facet_typegen"]
-codegen = ["facet_typegen"]
+codegen = ["facet_typegen", "dep:inventory"]
+native-ffi = ["dep:boltffi"]
 
 [[bin]]
 name = "codegen"
@@ -17,6 +18,9 @@ required-features = ["codegen"]
 crux_core.workspace = true
 facet.workspace = true
 serde.workspace = true
+boltffi = { workspace = true, optional = true }
+inventory = { version = "0.3.25", optional = true }
+flare-view-model-macros = { path = "../flare-view-model-macros" }
 
 [lints]
 workspace = true

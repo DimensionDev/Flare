@@ -9,12 +9,8 @@ publish.workspace = true
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
-flare-core = { path = "../flare-core" }
-crux_core.workspace = true
+flare-core = { path = "../flare-core", features = ["native-ffi"] }
 boltffi.workspace = true
-
-[dev-dependencies]
-serde.workspace = true
 
 # BoltFFI generates the unsafe ABI boundary; handwritten implementation is safe Rust.
 [lints.clippy]

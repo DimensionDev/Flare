@@ -1,8 +1,6 @@
 import FlareCounterTypes
 import SwiftUI
 
-typealias CounterViewModel = Core
-
 struct CounterScreen: View {
     @State private var viewModel: CounterViewModel?
     private let initialValue: Int64
@@ -46,16 +44,7 @@ struct CounterScreen: View {
         .navigationTitle("Counter")
         .onAppear {
             guard viewModel == nil else { return }
-            viewModel = CounterViewModel(initialValue: initialValue)
+            viewModel = CounterViewModel(.initialize(initialValue))
         }
     }
 }
-
-extension CounterViewModel {
-    convenience init(initialValue: Int64) {
-        self.init(handler: CounterEffectHandler())
-        update(.initialize(initialValue))
-    }
-}
-
-private struct CounterEffectHandler: EffectHandler {}

@@ -1,13 +1,13 @@
-# Flare Social Plugin API v1
+# Flare Social Plugin API v1/v2
 
-This directory is the authoring contract for Social Plugin API v1. Prefer
+This directory is the authoring contract for Social Plugin API v1 and v2. Prefer
 [GitHub distribution](references/publishing.md); local `.fpp` installation is
 also supported. Start with the [authoring guide](README.md) or [agent skill](SKILL.md).
 The Host implementation remains authoritative when this document and code disagree.
 
 ## Package
 
-An API v1 package is a ZIP with a `.fpp` extension and exactly these files:
+An API v1/v2 package is a ZIP with a `.fpp` extension and exactly these files:
 
 ```text
 manifest.json
@@ -105,7 +105,7 @@ Current method paths are:
 | `flare.datasource.profile/v1` | `profile.byId`, `byHandle`, `timeline`, `following`, `followers` |
 | `flare.datasource.post/v1` | `post.detail`, `context`, `delete`, `mutate` |
 | `flare.datasource.relation/v1` | `relation.state`, `mutate` |
-| `flare.datasource.compose/v1` | `compose.publish` |
+| `flare.datasource.compose/v2` | `compose.publish` |
 | `flare.datasource.notification/v1` | `notification.page`, `badge` |
 | `flare.datasource.list/v1` | `list.page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` |
 | `flare.datasource.direct-message/v1` | `directMessage.rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` |
@@ -115,8 +115,20 @@ Current method paths are:
 
 The [capability matrix](references/capabilities.md) distinguishes required and
 optional operations and explains UI dependencies. `PluginAbiV1.kt` defines the
-Host contract. Use [flare-plugin.d.ts](flare-plugin.d.ts) for the complete v1
+Host contract. Use [flare-plugin.d.ts](flare-plugin.d.ts) for the complete
 JavaScript types and [recipes](references/recipes.md) for implementation guidance.
+
+Compose uses `flare.datasource.compose/v2`, independently of the runtime API
+version. `compose/v1` manifests and negotiated capabilities are rejected rather
+than adapted. Composer plugins must update their manifests, SDK types and
+publish handlers; existing compose accounts need a new login. New requests use
+`reference: { type: "reply" | "quote", key }`, with no reference for a new post.
+`composeDefaults.supportedTypes` is required and login narrows that set by
+intersection. See the [compose recipe](references/recipes.md#compose).
+
+Installed compose/v1 records are retained as disabled, upgradeable/uninstallable
+entries so they cannot corrupt the shared plugin index or block unrelated plugins.
+Their handlers never run, and no request or account migration is provided.
 
 Capabilities that map to a full Host interface must declare its required
 operation set; installation rejects partial interfaces. Notification filters
@@ -208,6 +220,10 @@ permission or invoke an operation.
 - Unknown capability IDs and operations do not become available to the account
   or guest. An account still needs at least one supported displayable capability.
 
+The retired `flare.datasource.compose/v1` capability is an explicit exception:
+it is rejected so old handlers cannot silently publish replies or quotes as new
+posts. Other additive compatibility behavior remains unchanged.
+
 Known malformed data still fails validation. Other enums and control results,
 including login transitions, mutation results, and Host errors, remain strict;
 an unfamiliar outcome is never reported as a successful write. Resource limits
@@ -216,13 +232,28 @@ required methods, or semantics needs a new API/schema contract rather than an
 additive extension. Previously released Hosts without this handling must be
 upgraded; a newer plugin cannot retrofit compatibility into them.
 
+## API v2 sessions
+
+Declare `apiVersion: 2` for application response headers (including Set-Cookie),
+manual redirects, versioned credential updates, and WebCookie pending state and
+Cookie metadata. New Hosts keep API v1 behavior; older Hosts reject API v2.
+The manifest schema and existing capability IDs remain v1. Shared `V1` type names
+continue to describe both APIs; fields marked v2 require the v2 manifest.
+
+API v2 exposes headers only from requests the plugin explicitly makes to approved
+origins. It does not read browser traffic or maintain a Cookie jar. The plugin
+owns Cookie scope/deletion/expiry and any custom header/body token protocol.
+Native Apple can fold repeated headers; Set-Cookie is normalized into separate
+cookie-pair values, but raw header-line fidelity is unavailable. Native retries
+are platform dependent; see [HTTP behavior](references/runtime-http.md#http-request-and-response).
+
 ## Host API
 
 The frozen `flare` object exposes:
 
 - `flare.http.request`: JSON, text, form, and streaming multipart HTTP;
 - `flare.credential.read/replace`: the current account credential only;
-- `flare.crypto.randomHex/uuid/sha256`;
+- `flare.crypto.randomHex/uuid/sha256/md5`;
 - `flare.locale.current`;
 - `flare.error`: marks a typed error safe to cross the ABI.
 
@@ -255,7 +286,21 @@ Account and guest calls may use their selected origin and `permissions.httpOrigi
 Additional HTTP origins do not grant authorization-page, Cookie-probe, or Deep Link
 access. Credentials are sent only when explicitly supplied in the request;
 extra destinations do not change account identity or proxy routing.
-Redirects stay on the current origin, even when both origins are approved.
+Automatic redirects stay on the current origin, even when both origins are approved.
+API v2 `redirect: "manual"` returns the current hop, including POST 3xx and raw
+Location. `response.url` identifies that response and optional `redirectUrl` is
+an approved HTTPS target resolved without a fragment. A subsequent explicit
+request rechecks permissions, account session, and proxy. Response names are
+lowercase and values are arrays. V1 hides sensitive headers; v2 exposes source
+application headers while filtering proxy and hop-by-hop fields.
+
+In account scope, API v2 `credential.read({withRevision:true})` returns
+`{value, revision}` and `replace(next, {expectedRevision})` returns false on a
+local conflict. Unconditional replace remains available. Revisions are opaque;
+every successful replacement changes one. A new login or account restore changes
+the private session epoch and rejects old calls. Existing v1 accounts require
+one relogin when their plugin upgrades to v2. Never replay a remote refresh or
+business write simply because local persistence conflicted or failed.
 
 Automatic media loading is a separate permission, disabled by default. A plugin
 that returns avatars, images, audio, video, covers, or HTML images must declare
@@ -269,6 +314,12 @@ the running package's grant when restored, including translated and nested media
 Permission removal and uninstall take effect immediately, like the
 package change itself; absent plugins cannot restore media.
 Development caches predating ownership metadata are rebuilt on upgrade.
+
+`MediaV1.customHeaders` optionally supplies explicit headers to native media
+loaders; it does not change HTTP origin permissions or attach credentials
+automatically. It shares the existing media cache/navigation persistence and
+applies to all URLs in that media item. See [media headers](references/wire-data.md#text-and-media)
+for validation, redirect rules and credential lifetime constraints.
 
 Flare owns HTTP routing: detector, guest, and new-login requests follow the
 global proxy policy; account requests and relogin requests follow that account's
@@ -364,6 +415,15 @@ The Host reuses its current timeline UI and cache, supplies viewer identity and
 navigation, and owns pagination gaps. Poll/reaction mutations use post.mutate;
 user-card buttons use relation.mutate. See [wire data](references/wire-data.md#timeline-items-and-interactions)
 for all fields, limits, permission checks and mutation parameters/results.
+
+API v2 WebCookie `pending` may carry at most 64 KiB `pendingPayload`; the next
+check receives it even after runtime eviction. Each pending result replaces the
+whole payload; omission/null clears it. The flow lasts at most 15 minutes and
+is kept in memory, not restored after app restart. Cookie `attributes` are
+optional and duplicate names are preserved; unknown fields remain absent.
+After a verified success, local save retries reuse that result until the flow
+expires or closes rather than repeating a remote exchange. V1 Cookie checks
+keep their original selection and completion behavior.
 
 ## Lifecycle and trust
 

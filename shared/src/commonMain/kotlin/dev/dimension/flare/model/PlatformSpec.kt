@@ -44,6 +44,8 @@ public interface PlatformSpec {
 
     public fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource
 
+    public fun restoreCredential(credentialJson: String): String = credentialJson
+
     public fun guestDataSource(
         host: String,
         locale: String,
@@ -77,6 +79,12 @@ public interface PlatformDataSourceContext {
         serializer: KSerializer<T>,
         credential: T,
     )
+
+    /** Reads and conditionally updates one account in a writer transaction; null leaves it unchanged. */
+    public suspend fun <T : Any> mutateCredential(
+        serializer: KSerializer<T>,
+        update: (T) -> T?,
+    ): T? = throw UnsupportedOperationException("Atomic credential updates are unavailable")
 
     /** Clears content derived from an older datasource implementation without removing the account. */
     public suspend fun invalidateCachedContent() {}

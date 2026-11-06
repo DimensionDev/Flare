@@ -74,7 +74,7 @@ public final class ProxyMediaImages {
             downloaders[key] = (media.proxy, route.key, downloader)
         }
         let redirect = AnyRedirectHandler { _, _, request, completion in
-            completion(MediaTransfer.redirectedRequest(request, origin: url))
+            completion(MediaTransfer.redirectedRequest(request, origin: url, headerNames: Array(headers.keys)))
         }
         let modifier = AnyModifier { request in
             var request = request

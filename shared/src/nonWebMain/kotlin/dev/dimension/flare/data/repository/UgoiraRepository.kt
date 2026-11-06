@@ -81,7 +81,11 @@ internal actual class UgoiraRepository(
         media: UiMedia.Ugoira,
         onProgress: (Float) -> Unit,
     ): UgoiraAnimation {
-        val key = "${media.accountKey}|${media.statusKey}|${media.originalFrameUrl}".encodeUtf8().sha256().hex()
+        val key =
+            buildString {
+                append("${media.accountKey}|${media.statusKey}|${media.originalFrameUrl}")
+                if (!media.customHeaders.isNullOrEmpty()) append("|${media.cacheKey}")
+            }.encodeUtf8().sha256().hex()
         val entry =
             mutex.withLock {
                 check(entries[key]?.invalidated != true) { "Ugoira cache is in use; retry after playback or export releases it" }

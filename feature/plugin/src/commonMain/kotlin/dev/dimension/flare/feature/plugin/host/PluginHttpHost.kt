@@ -5,6 +5,7 @@ import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.wire.HttpAuthorizationV1
 import dev.dimension.flare.feature.plugin.wire.HttpBodyV1
 import dev.dimension.flare.feature.plugin.wire.HttpMultipartPartV1
+import dev.dimension.flare.feature.plugin.wire.HttpRedirectV1
 import dev.dimension.flare.feature.plugin.wire.HttpRequestV1
 import dev.dimension.flare.feature.plugin.wire.HttpResponseV1
 import io.ktor.http.HttpHeaders
@@ -16,7 +17,7 @@ import kotlin.native.HiddenFromObjC
 
 @HiddenFromObjC
 public interface PluginHttpTransport {
-    /** Executes exactly one request without redirects, cookies, or logging. */
+    /** Executes one redirect hop without ambient cookies, credentials, or logging. Native retry behavior varies. */
     public suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1
 
     /** Releases transport resources. No-op transports do not need to override this. */
@@ -81,11 +82,19 @@ internal class PluginHttpHost(
         request: HttpRequestV1,
         context: PluginInvocationContextV1,
         callTimeoutMillis: Long,
+        apiVersion: Int = 1,
     ): HttpResponseV1 {
+        require(apiVersion in dev.dimension.flare.feature.plugin.abi.PluginAbiV1.supportedApiVersions) { "Unsupported API version" }
+        require(apiVersion >= 2 || request.redirect == null) { "Redirect options require API v2" }
         validateRequest(request, callTimeoutMillis)
         var currentUrl = PluginUrlPolicy.requireRequestUrl(request.url, context.metadata.approvedOrigins)
         val body = request.body?.resolve(context.assets)
         val headers = request.buildHeaders()
+        if (apiVersion >= 2) {
+            require(headers.entries.sumOf { it.key.encodeToByteArray().size + it.value.encodeToByteArray().size } <= MAX_HEADER_BYTES) {
+                "Request headers are too large"
+            }
+        }
         val timeout = request.timeoutMillis ?: callTimeoutMillis
         repeat(MAX_REDIRECTS + 1) { redirectCount ->
             val response =
@@ -101,8 +110,11 @@ internal class PluginHttpHost(
                 )
             validateResponse(response)
             val location = response.headers.firstValue(HttpHeaders.Location)
+            if (request.redirect == HttpRedirectV1.Manual) {
+                return response.toWire(apiVersion, currentUrl, context.metadata.approvedOrigins)
+            }
             if (response.status !in REDIRECT_STATUSES || location == null) {
-                return response.toWire()
+                return response.toWire(apiVersion, currentUrl, context.metadata.approvedOrigins)
             }
             require(redirectCount < MAX_REDIRECTS) { "Too many HTTP redirects" }
             require(request.method.equals("GET", true) || request.method.equals("HEAD", true)) {
@@ -314,15 +326,99 @@ private fun validateResponse(response: PluginTransportResponseV1) {
     require(total <= MAX_HEADER_BYTES) { "HTTP response headers are too large" }
 }
 
-private fun PluginTransportResponseV1.toWire(): HttpResponseV1 =
-    HttpResponseV1(
+private fun PluginTransportResponseV1.toWire(
+    apiVersion: Int,
+    url: Url,
+    approvedOrigins: Set<String>,
+): HttpResponseV1 {
+    val connectionHeaders =
+        headers.entries
+            .filter { it.key.equals("Connection", true) }
+            .flatMap { it.value }
+            .flatMap { it.split(',') }
+            .mapTo(mutableSetOf()) { it.trim().lowercase() }
+    return HttpResponseV1(
         status = status,
         headers =
             headers
-                .filterKeys { it.lowercase() !in HIDDEN_RESPONSE_HEADERS }
-                .mapKeys { it.key.lowercase() },
+                .filterKeys { name ->
+                    val lower = name.lowercase()
+                    if (apiVersion == 1) {
+                        lower !in HIDDEN_RESPONSE_HEADERS
+                    } else {
+                        lower !in HOP_RESPONSE_HEADERS && !lower.startsWith("proxy-") &&
+                            lower !in connectionHeaders
+                    }
+                }.mapKeys { it.key.lowercase() }
+                .mapValues { (name, values) ->
+                    if (apiVersion >= 2 && name == "set-cookie") {
+                        values.flatMap(::splitCombinedSetCookie).also {
+                            require(it.size <= MAX_RESPONSE_HEADER_VALUES) { "Too many Set-Cookie values" }
+                        }
+                    } else {
+                        values
+                    }
+                },
         body = body.decodeToString(throwOnInvalidSequence = true),
+        url = url.toString().takeIf { apiVersion >= 2 },
+        redirectUrl =
+            if (apiVersion >= 2 && status in REDIRECT_STATUSES) {
+                headers.entries
+                    .firstOrNull {
+                        it.key.equals(
+                            HttpHeaders.Location,
+                            true,
+                        )
+                    }?.value
+                    ?.singleOrNull()
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { location ->
+                        runCatching {
+                            PluginUrlPolicy
+                                .resolveRedirect(
+                                    url,
+                                    location.substringBefore('#').ifEmpty { url.toString() },
+                                    approvedOrigins,
+                                ).toString()
+                        }.getOrNull()
+                    }
+            } else {
+                null
+            },
     )
+}
+
+// Foundation folds Set-Cookie lines; split only before a new cookie-pair, never an Expires/quoted comma.
+internal fun splitCombinedSetCookie(value: String): List<String> {
+    val result = mutableListOf<String>()
+    var start = 0
+    var quoted = false
+    var escaped = false
+    value.forEachIndexed { index, char ->
+        if (escaped) {
+            escaped = false
+        } else if (quoted && char == '\\') {
+            escaped = true
+        } else if (char == '"') {
+            quoted = !quoted
+        } else if (char == ',' && !quoted) {
+            var nameStart = index + 1
+            while (value.getOrNull(nameStart)?.isWhitespace() == true) nameStart++
+            var nameEnd = nameStart
+            while (nameEnd < value.length && nameEnd - nameStart < 128 && value[nameEnd] !in "=;," &&
+                !value[nameEnd].isWhitespace()
+            ) {
+                nameEnd++
+            }
+            if (value.getOrNull(nameEnd) == '=' && COOKIE_NAME.matches(value.substring(nameStart, nameEnd))) {
+                result += value.substring(start, index).trim()
+                start = index + 1
+            }
+        }
+    }
+    result += value.substring(start).trim()
+    return result
+}
 
 private fun Map<String, List<String>>.firstValue(name: String): String? =
     entries.firstOrNull { it.key.equals(name, ignoreCase = true) }?.value?.firstOrNull()
@@ -365,6 +461,8 @@ private val FORBIDDEN_HEADERS =
         "upgrade",
     )
 private val HIDDEN_RESPONSE_HEADERS = FORBIDDEN_HEADERS + setOf("set-cookie", "set-cookie2")
+private val HOP_RESPONSE_HEADERS =
+    setOf("connection", "keep-alive", "te", "trailer", "transfer-encoding", "upgrade", "proxy-authenticate", "proxy-authorization")
 private val HEADER_NAME = Regex("[!#$%&'*+.^_`|~0-9A-Za-z-]{1,128}")
 private val COOKIE_NAME = HEADER_NAME
 private val MULTIPART_NAME = Regex("[A-Za-z0-9_.-]{1,128}")

@@ -97,9 +97,19 @@ internal fun WebViewLoginScreen(
                                     sourceUrl = probe.url,
                                     name = cookie.name,
                                     value = cookie.value,
+                                    attributes =
+                                        dev.dimension.flare.ui.presenter.login.LoginCookieAttributes(
+                                            domain = cookie.domain,
+                                            path = cookie.path,
+                                            expiresAt = cookie.expiresDateMs,
+                                            session = cookie.isSessionOnly,
+                                            secure = cookie.isSecure,
+                                            httpOnly = cookie.isHttpOnly,
+                                            sameSite = cookie.sameSite?.name?.lowercase(),
+                                        ),
                                 )
                             }
-                    }.distinctBy { it.sourceUrl to it.name }
+                    }
             if (callback(LoginCookieSnapshot(values = values, rawHeader = rawHeader))) {
                 onBack.invoke()
                 break

@@ -845,6 +845,7 @@ private fun List<AccountMicroblogDataSource>.agentTimelineAccountService(): Acco
             account: UiAccount,
             credential: T,
             serializer: KSerializer<T>,
+            beforeCommit: () -> Unit,
         ): Unit = error("Agent timeline tools cannot add accounts.")
 
         override fun <T : Any> credentialFlow(

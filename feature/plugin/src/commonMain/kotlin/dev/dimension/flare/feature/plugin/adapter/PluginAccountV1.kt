@@ -5,9 +5,11 @@ import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
+import dev.dimension.flare.feature.plugin.host.PluginCredentialSnapshot
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
 import dev.dimension.flare.feature.plugin.host.accountHost
+import dev.dimension.flare.feature.plugin.host.platformUuid
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
 import dev.dimension.flare.feature.plugin.manifest.fallbackText
 import dev.dimension.flare.feature.plugin.manifest.toUiText
@@ -22,6 +24,7 @@ import dev.dimension.flare.model.PlatformMetadata
 import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.http.Url
 import io.ktor.http.encodeURLPath
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -29,7 +32,7 @@ import kotlinx.serialization.json.JsonElement
 
 public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAccountCredentialV1 {
     success.requireValid()
-    mergePluginComposeConfigV1(installed.manifest.platform.composeDefaults, success.composeConfig)
+    mergePluginComposeConfigV2(installed.manifest.platform.composeDefaults, success.composeConfig)
     val manifestCapabilities =
         PluginAbiV1.knownCapabilities(
             installed.manifest.platform.capabilities
@@ -50,6 +53,8 @@ public fun RunningPluginV1.accountCredential(success: LoginSuccessV1): PluginAcc
                 credentialSchemaVersion = installed.manifest.platform.credentialSchemaVersion,
             ),
         credential = success.credential,
+        sessionEpoch = if (installed.manifest.apiVersion >= 2) platformUuid() else null,
+        credentialRevision = if (installed.manifest.apiVersion >= 2) platformUuid() else null,
     ).also { it.requireValid(this) }
 }
 
@@ -67,6 +72,7 @@ internal fun RunningPluginV1.platformMetadata(): PlatformMetadata {
 internal suspend fun AccountService.addPluginAccount(
     plugin: RunningPluginV1,
     success: LoginSuccessV1,
+    beforeCommit: () -> Unit = {},
 ): MicroBlogKey {
     plugin.session.ensureActive()
     val metadata = plugin.platformMetadata()
@@ -86,11 +92,21 @@ internal suspend fun AccountService.addPluginAccount(
             ),
         credential = plugin.accountCredential(success),
         serializer = PluginAccountCredentialV1.serializer(),
+        beforeCommit = {
+            plugin.session.ensureActive()
+            beforeCommit()
+        },
     )
     return accountKey
 }
 
 internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
+    require(
+        sessionEpoch == null || (sessionEpoch.length in 1..256 && sessionEpoch.none(Char::isISOControl)),
+    ) { "Invalid account session epoch" }
+    require(credentialRevision == null || (credentialRevision.length in 1..256 && credentialRevision.none(Char::isISOControl))) {
+        "Invalid credential revision"
+    }
     val manifest = plugin.installed.manifest
     require(snapshot.pluginId == plugin.installed.pluginId && snapshot.platformId == manifest.platform.id) {
         "Plugin account identity mismatch"
@@ -113,7 +129,7 @@ internal fun PluginAccountCredentialV1.requireValid(plugin: RunningPluginV1) {
         "Invalid plugin account capabilities"
     }
     snapshot.composeConfig?.requireValid()
-    mergePluginComposeConfigV1(manifest.platform.composeDefaults, snapshot.composeConfig)
+    mergePluginComposeConfigV2(manifest.platform.composeDefaults, snapshot.composeConfig)
     require(
         dev.dimension.flare.feature.plugin.abi.PluginJsonV1
             .encodeToString(JsonElement.serializer(), credential)
@@ -140,14 +156,61 @@ internal class PlatformDataSourceCredentialAccessV1(
     private val context: PlatformDataSourceContext,
 ) : PluginCredentialAccess {
     private val packageRefreshMutex = Mutex()
+    private val epoch = context.credential(PluginAccountCredentialV1.serializer()).sessionEpoch
 
     override suspend fun read(): JsonElement = current().credential
 
     override suspend fun replace(value: JsonElement) {
+        if (plugin.installed.manifest.apiVersion >= 2) {
+            update(value, null)
+            return
+        }
         val current = current()
         val replacement = current.copy(credential = value).also { it.requireValid(plugin) }
         plugin.session.ensureActive()
         context.updateCredential(PluginAccountCredentialV1.serializer(), replacement)
+    }
+
+    override suspend fun readVersioned(): PluginCredentialSnapshot =
+        current().let { PluginCredentialSnapshot(it.credential, requireNotNull(it.credentialRevision)) }
+
+    override suspend fun replaceIfCurrent(
+        value: JsonElement,
+        revision: String,
+    ): Boolean = update(value, revision)
+
+    override suspend fun ensureActive() {
+        if (plugin.installed.manifest.apiVersion >= 2) current()
+    }
+
+    private suspend fun update(
+        value: JsonElement,
+        revision: String?,
+    ): Boolean =
+        mutateCurrent { current ->
+            if (revision != null && revision != current.credentialRevision) {
+                null
+            } else {
+                current.copy(credential = value, credentialRevision = platformUuid()).also { it.requireValid(plugin) }
+            }
+        } != null
+
+    private suspend fun mutateCurrent(update: (PluginAccountCredentialV1) -> PluginAccountCredentialV1?): PluginAccountCredentialV1? =
+        context.mutateCredential(PluginAccountCredentialV1.serializer()) { current ->
+            requireCurrentAccount(current)
+            requireEpoch(current)
+            plugin.session.ensureActive()
+            update(current)
+        }
+
+    private fun requireEpoch(account: PluginAccountCredentialV1) {
+        if (epoch == null || account.credentialRevision == null) {
+            throw RequireReLoginException(context.accountKey, plugin.installed.manifest.platform.id)
+        }
+        if (account.sessionEpoch != epoch) throw CancellationException("Plugin account session was replaced")
+        if (account.snapshot.credentialSchemaVersion != plugin.installed.manifest.platform.credentialSchemaVersion) {
+            throw RequireReLoginException(context.accountKey, plugin.installed.manifest.platform.id)
+        }
     }
 
     fun initial(): PluginAccountCredentialV1 =
@@ -155,8 +218,21 @@ internal class PlatformDataSourceCredentialAccessV1(
             .credential(PluginAccountCredentialV1.serializer())
             .also(::requireCurrentAccount)
 
-    suspend fun current(): PluginAccountCredentialV1 =
-        persisted().let { current ->
+    suspend fun current(): PluginAccountCredentialV1 {
+        if (plugin.installed.manifest.apiVersion >= 2) {
+            return packageRefreshMutex.withLock {
+                val account = mutateCurrent { it } ?: throw CancellationException("Plugin account is unavailable")
+                if (account.snapshot.packageHash == plugin.installed.packageHash) {
+                    account
+                } else {
+                    context.invalidateCachedContent()
+                    mutateCurrent { current ->
+                        current.copy(snapshot = current.snapshot.copy(packageHash = plugin.installed.packageHash))
+                    } ?: throw CancellationException("Plugin account is unavailable")
+                }
+            }
+        }
+        return persisted().let { current ->
             plugin.session.ensureActive()
             if (current.snapshot.packageHash == plugin.installed.packageHash) {
                 current
@@ -178,6 +254,7 @@ internal class PlatformDataSourceCredentialAccessV1(
                 }
             }
         }
+    }
 
     private suspend fun persisted(): PluginAccountCredentialV1 =
         context

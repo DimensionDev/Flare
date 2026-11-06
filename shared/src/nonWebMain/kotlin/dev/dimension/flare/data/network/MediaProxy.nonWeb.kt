@@ -181,7 +181,7 @@ public actual object MediaProxy {
                 ) {
                     root.resource.headers
                 } else {
-                    root.resource.headers.filterKeys { it.lowercase() !in setOf("authorization", "cookie") }
+                    root.resource.headers.filterKeys(MediaRequestHeaders::mayForwardAcrossOrigins)
                 },
             root = root.token,
             opaque = value[0] == '1',
@@ -249,7 +249,7 @@ public actual object MediaProxy {
                             if (response.status.value in listOf(301, 302, 303, 307, 308) && location != null) {
                                 next = resolveMediaUrl(target, location)
                                 if (mediaOrigin(next) != mediaOrigin(target)) {
-                                    requestHeaders = requestHeaders.filterKeys { it.lowercase() !in setOf("authorization", "cookie") }
+                                    requestHeaders = requestHeaders.filterKeys(MediaRequestHeaders::mayForwardAcrossOrigins)
                                 }
                                 return@execute
                             }
@@ -342,7 +342,7 @@ public actual object MediaProxy {
                                                 requestHeaders.filterKeys {
                                                     mediaOrigin(url) ==
                                                         mediaOrigin(target) ||
-                                                        it.lowercase() !in setOf("authorization", "cookie")
+                                                        MediaRequestHeaders.mayForwardAcrossOrigins(it)
                                                 },
                                                 rootToken,
                                                 selected.routeKey,

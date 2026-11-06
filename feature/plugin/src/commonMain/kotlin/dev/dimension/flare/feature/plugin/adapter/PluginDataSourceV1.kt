@@ -47,9 +47,10 @@ import dev.dimension.flare.feature.plugin.manifest.toUiText
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeKeyV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.feature.plugin.wire.ComposeAssetV1
-import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
+import dev.dimension.flare.feature.plugin.wire.ComposeConfigV2
 import dev.dimension.flare.feature.plugin.wire.ComposePollV1
-import dev.dimension.flare.feature.plugin.wire.ComposeRequestV1
+import dev.dimension.flare.feature.plugin.wire.ComposeReferenceV2
+import dev.dimension.flare.feature.plugin.wire.ComposeRequestV2
 import dev.dimension.flare.feature.plugin.wire.ComposeResultV1
 import dev.dimension.flare.feature.plugin.wire.EntityKeyV1
 import dev.dimension.flare.feature.plugin.wire.EntityRequestV1
@@ -82,6 +83,7 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asType
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -101,7 +103,7 @@ internal class PluginDataSourceV1 private constructor(
     private val timelineSpecs: Map<String, TimelineSpec<TimelineSpec.AccountResourceData>>,
     private val dynamicTimelineSpec: TimelineSpec<PluginTimelineDataV1>?,
     private val coroutineScope: CoroutineScope?,
-    private val cachedComposeConfig: ComposeConfigV1?,
+    private val cachedComposeConfig: ComposeConfigV2?,
     private val loginProfile: ProfileV1?,
 ) : MicroblogDataSource,
     DataSourceCapabilityProvider,
@@ -610,6 +612,8 @@ internal class PluginDataSourceV1 private constructor(
             data: ComposeData,
             progress: () -> Unit,
         ) {
+            val config = requireNotNull(cachedComposeConfig) { "compose/v2 requires manifest defaults" }
+            require(data.type in config.supportedTypes) { "Unsupported compose type: ${data.type.name.lowercase()}" }
             val assets = linkedMapOf<String, PluginAsset>()
             val wireAssets =
                 data.medias.map { media ->
@@ -622,25 +626,26 @@ internal class PluginDataSourceV1 private constructor(
                         description = media.altText,
                     )
                 }
-            validateComposeData(data, assets, cachedComposeConfig)
+            validateComposeData(data, assets, config)
             progress()
             val result =
                 invoker.invoke(
                     capabilityId = PluginAbiV1.Capabilities.COMPOSE,
                     operation = "publish",
                     request =
-                        ComposeRequestV1(
+                        ComposeRequestV2(
                             text = data.content,
                             visibility = requireNotNull(data.visibility).toWire(),
                             languages = data.language,
                             assets = wireAssets,
                             sensitive = data.sensitive,
                             spoilerText = data.spoilerText,
-                            replyTo =
-                                data.referenceStatus
-                                    ?.composeStatus
-                                    ?.statusKey
-                                    ?.toWire(),
+                            reference =
+                                when (val status = data.referenceStatus?.composeStatus) {
+                                    is ComposeStatus.Reply -> ComposeReferenceV2.Reply(status.statusKey.toWire())
+                                    is ComposeStatus.Quote -> ComposeReferenceV2.Quote(status.statusKey.toWire())
+                                    null -> null
+                                },
                             poll =
                                 data.poll?.let {
                                     ComposePollV1(
@@ -650,7 +655,7 @@ internal class PluginDataSourceV1 private constructor(
                                     )
                                 },
                         ),
-                    requestSerializer = ComposeRequestV1.serializer(),
+                    requestSerializer = ComposeRequestV2.serializer(),
                     responseSerializer = ComposeResultV1.serializer(),
                     timeout = PluginCallTimeoutV1.Extended,
                     assets = assets,
@@ -718,6 +723,7 @@ internal class PluginDataSourceV1 private constructor(
                     plugin.installed.packageHash,
                     account.snapshot.origin,
                     account.snapshot.accountId,
+                    epoch = account.sessionEpoch.takeIf { plugin.installed.manifest.apiVersion >= 2 },
                 )
             val invoker =
                 PluginAccountInvokerV1(
@@ -740,7 +746,7 @@ internal class PluginDataSourceV1 private constructor(
                 dynamicTimelineSpec = dynamicTimelineSpec,
                 coroutineScope = coroutineScope,
                 composeConfig =
-                    mergePluginComposeConfigV1(
+                    mergePluginComposeConfigV2(
                         plugin.installed.manifest.platform.composeDefaults,
                         account.snapshot.composeConfig,
                     ),
@@ -811,7 +817,7 @@ internal class PluginDataSourceV1 private constructor(
             timelineSpecs: Map<String, TimelineSpec<TimelineSpec.AccountResourceData>>,
             dynamicTimelineSpec: TimelineSpec<PluginTimelineDataV1>?,
             coroutineScope: CoroutineScope?,
-            composeConfig: ComposeConfigV1?,
+            composeConfig: ComposeConfigV2?,
             loginProfile: ProfileV1?,
         ): PluginDataSourceV1 {
             val capabilities = PluginSessionCapabilitiesV1(plugin.installed.manifest.platform.capabilities, operations, accountKey != null)
@@ -831,6 +837,7 @@ internal class PluginDataSourceV1 private constructor(
                         mediaNetwork = plugin.installed.manifest.permissions.mediaNetwork,
                         originHost = Url(origin).accountHost(),
                         capabilities = capabilities,
+                        supportedComposeTypes = composeConfig?.supportedTypes.orEmpty(),
                     ),
                 timelineSpecs = timelineSpecs,
                 dynamicTimelineSpec = dynamicTimelineSpec,
@@ -893,9 +900,10 @@ private fun VisibilityV1.toHost(): UiTimelineV2.Post.Visibility =
         VisibilityV1.Channel -> UiTimelineV2.Post.Visibility.Channel
     }
 
-private fun ComposeConfigV1?.toHostComposeConfig(): ComposeConfig {
-    val config = this ?: return ComposeConfig()
+private fun ComposeConfigV2?.toHostComposeConfig(): ComposeConfig {
+    val config = this ?: return ComposeConfig(supportedTypes = emptySet())
     return ComposeConfig(
+        supportedTypes = config.supportedTypes,
         text = config.text?.let { ComposeConfig.Text(it.maxLength) },
         media =
             config.media?.let {
@@ -922,12 +930,14 @@ private fun ComposeConfigV1?.toHostComposeConfig(): ComposeConfig {
     )
 }
 
-internal fun mergePluginComposeConfigV1(
-    manifest: ComposeConfigV1?,
-    instance: ComposeConfigV1?,
-): ComposeConfigV1? {
-    if (manifest == null) return instance?.also(ComposeConfigV1::requireValid)
-    if (instance == null) return manifest.also(ComposeConfigV1::requireValid)
+internal fun mergePluginComposeConfigV2(
+    manifest: ComposeConfigV2?,
+    instance: ComposeConfigV2?,
+): ComposeConfigV2? {
+    if (manifest == null) return instance?.also(ComposeConfigV2::requireValid)
+    if (instance == null) return manifest.also(ComposeConfigV2::requireValid)
+    val supportedTypes = manifest.supportedTypes intersect instance.supportedTypes
+    require(supportedTypes.isNotEmpty()) { "Plugin compose supportedTypes do not overlap" }
     val media =
         when {
             manifest.media == null -> {
@@ -942,7 +952,7 @@ internal fun mergePluginComposeConfigV1(
                 val minCountForNew = maxOf(manifest.media.minCountForNew, instance.media.minCountForNew)
                 val maxCount = minOf(manifest.media.maxCount, instance.media.maxCount)
                 require(minCountForNew <= maxCount) { "Plugin compose media constraints do not overlap" }
-                ComposeConfigV1.MediaConfigV1(
+                ComposeConfigV2.MediaConfigV1(
                     minCountForNew = minCountForNew,
                     maxCount = maxCount,
                     maxBytes = minOf(manifest.media.maxBytes, instance.media.maxBytes),
@@ -969,7 +979,7 @@ internal fun mergePluginComposeConfigV1(
             else -> {
                 val allowed = manifest.visibility.allowed intersect instance.visibility.allowed
                 require(allowed.isNotEmpty()) { "Plugin compose visibility constraints do not overlap" }
-                ComposeConfigV1.VisibilityConfigV1(
+                ComposeConfigV2.VisibilityConfigV1(
                     allowed = allowed,
                     default =
                         manifest.visibility.default.takeIf(allowed::contains)
@@ -978,12 +988,13 @@ internal fun mergePluginComposeConfigV1(
                 )
             }
         }
-    return ComposeConfigV1(
+    return ComposeConfigV2(
+        supportedTypes = supportedTypes,
         text =
             when {
                 manifest.text == null -> instance.text
                 instance.text == null -> manifest.text
-                else -> ComposeConfigV1.TextConfigV1(minOf(manifest.text.maxLength, instance.text.maxLength))
+                else -> ComposeConfigV2.TextConfigV1(minOf(manifest.text.maxLength, instance.text.maxLength))
             },
         media = media,
         visibility = visibility,
@@ -992,21 +1003,21 @@ internal fun mergePluginComposeConfigV1(
             when {
                 manifest.poll == null -> instance.poll
                 instance.poll == null -> manifest.poll
-                else -> ComposeConfigV1.PollConfigV1(minOf(manifest.poll.maxOptions, instance.poll.maxOptions))
+                else -> ComposeConfigV2.PollConfigV1(minOf(manifest.poll.maxOptions, instance.poll.maxOptions))
             },
         language =
             when {
                 manifest.language == null -> instance.language
                 instance.language == null -> manifest.language
-                else -> ComposeConfigV1.LanguageConfigV1(minOf(manifest.language.maxCount, instance.language.maxCount))
+                else -> ComposeConfigV2.LanguageConfigV1(minOf(manifest.language.maxCount, instance.language.maxCount))
             },
-    ).also(ComposeConfigV1::requireValid)
+    ).also(ComposeConfigV2::requireValid)
 }
 
 private fun validateComposeData(
     data: ComposeData,
     assets: Map<String, PluginAsset>,
-    config: ComposeConfigV1?,
+    config: ComposeConfigV2,
 ) {
     data.referenceStatus
         ?.composeStatus
@@ -1016,7 +1027,7 @@ private fun validateComposeData(
     require(data.language.size <= 32 && data.language.all { it.length in 1..64 }) { "Invalid compose languages" }
     val poll = data.poll
     require((poll == null) || (poll.options.size in 2..100)) { "Invalid compose poll" }
-    if (config == null) return
+    require(data.content.isNotBlank() || assets.isNotEmpty()) { "Compose requires text or media" }
 
     config.text?.let { require(data.content.length <= it.maxLength) { "Compose text is too long" } }
     config.visibility?.let { require(requireNotNull(data.visibility).toWire() in it.allowed) { "Compose visibility is not allowed" } }
@@ -1028,7 +1039,7 @@ private fun validateComposeData(
     val media = config.media
     require((media != null) || assets.isEmpty()) { "Media is not supported" }
     media ?: return
-    val minimum = if (data.referenceStatus == null) media.minCountForNew else 0
+    val minimum = if (data.type == ComposeType.Reply) 0 else media.minCountForNew
     require(assets.size in minimum..media.maxCount) { "Invalid compose media count" }
     require(media.canSensitive || (!data.sensitive)) { "Sensitive media is not supported" }
     val supported = media.supportedMimeTypes.mapTo(linkedSetOf(), String::lowercase)

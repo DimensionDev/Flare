@@ -1,9 +1,13 @@
 package dev.dimension.flare.feature.plugin.wire
 
+import dev.dimension.flare.data.datasource.microblog.ComposeType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class ComposeConfigV1(
+public data class ComposeConfigV2(
+    // Empty modes allow disabled installation metadata to load; validation still requires a declaration.
+    val supportedTypes: Set<ComposeType> = emptySet(),
     val text: TextConfigV1? = null,
     val media: MediaConfigV1? = null,
     val visibility: VisibilityConfigV1? = null,
@@ -59,16 +63,33 @@ public data class ComposePollV1(
 )
 
 @Serializable
-public data class ComposeRequestV1(
+public data class ComposeRequestV2(
     val text: String,
     val visibility: VisibilityV1,
     val languages: List<String> = emptyList(),
     val assets: List<ComposeAssetV1> = emptyList(),
     val sensitive: Boolean = false,
     val spoilerText: String? = null,
-    val replyTo: EntityKeyV1? = null,
+    val reference: ComposeReferenceV2? = null,
     val poll: ComposePollV1? = null,
 )
+
+@Serializable
+public sealed interface ComposeReferenceV2 {
+    public val key: EntityKeyV1
+
+    @Serializable
+    @SerialName("reply")
+    public data class Reply(
+        override val key: EntityKeyV1,
+    ) : ComposeReferenceV2
+
+    @Serializable
+    @SerialName("quote")
+    public data class Quote(
+        override val key: EntityKeyV1,
+    ) : ComposeReferenceV2
+}
 
 @Serializable
 public data class ComposeResultV1(

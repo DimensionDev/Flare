@@ -12,7 +12,10 @@ import io.ktor.client.plugins.websocket.WebSocketCapability
 internal actual val platformEngineCapabilities: Set<HttpClientEngineCapability<*>> =
     setOf(HttpTimeoutCapability, WebSocketCapability, SSECapability)
 
-internal actual fun createPlatformHttpClientEngine(connection: ProxyConnection): HttpClientEngine {
+internal actual fun createPlatformHttpClientEngine(
+    connection: ProxyConnection,
+    plugin: Boolean,
+): HttpClientEngine {
     check(connection.mode == ProxyMode.SYSTEM) { "App proxies are not supported in a browser" }
     return Js.create()
 }

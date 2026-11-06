@@ -93,6 +93,7 @@ requests/responses well below them.
 | Invocation JSON request / response | 1 MiB / 5 MiB |
 | HTTP response body | 4 MiB |
 | HTTP request headers | 32 headers, 8192 characters/value, 64 KiB aggregate name/value length |
+| Media custom headers | 32 headers, 128-character names, 8192 characters/value, 64 KiB aggregate UTF-8 bytes; case-insensitive unique names |
 | HTTP text/JSON/form body | 2 MiB; form also max 256 entries |
 | HTTP redirects | 5; GET/HEAD, same origin only |
 | Page request limit / returned items | 1..100 / at most 200 |
@@ -105,7 +106,7 @@ requests/responses well below them.
 | Inline-parent presentation depth | 4 recursive levels beyond the root item |
 | Inline parents / quotes / user list / reactions | At most 100 each; user lists cannot be empty |
 | Poll options | 2..100, distinct valid ownVotes indices |
-| Crypto randomHex input / sha256 input | 1..1024 random bytes / 1 MiB UTF-8 text |
+| Crypto randomHex input / sha256 and md5 input | 1..1024 random bytes / 1 MiB UTF-8 text |
 
 Multipart calls have at most 64 parts; text parts are at most 256 KiB. Assets have
 their own Host/compose constraints, up to 1 GiB per asset at the bridge boundary;

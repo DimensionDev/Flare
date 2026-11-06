@@ -84,6 +84,7 @@ public data class MediaV1(
     val downloadUrl: String? = null,
     val ugoiraKey: EntityKeyV1? = null,
     val originalFrameUrl: String? = null,
+    val customHeaders: Map<String, String> = emptyMap(),
 )
 
 @Serializable
@@ -166,6 +167,7 @@ public enum class SemanticActionV1 {
     Unbookmark,
     Delete,
     Reply,
+    Quote,
     Follow,
     Unfollow,
     Block,

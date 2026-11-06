@@ -73,6 +73,19 @@ public data class CookieValueV1(
     val sourceUrl: String,
     val name: String,
     val value: String,
+    val attributes: CookieAttributesV2? = null,
+)
+
+@Serializable
+public data class CookieAttributesV2(
+    val domain: String? = null,
+    val hostOnly: Boolean? = null,
+    val path: String? = null,
+    val expiresAt: Long? = null,
+    val session: Boolean? = null,
+    val secure: Boolean? = null,
+    val httpOnly: Boolean? = null,
+    val sameSite: String? = null,
 )
 
 @Serializable
@@ -81,13 +94,16 @@ public data class CookieCheckRequestV1(
     val origin: String,
     val flowId: String,
     val cookies: CookieSnapshotV1,
+    val pendingPayload: JsonElement? = null,
 )
 
 @Serializable
 public sealed interface LoginTransitionV1 {
     @Serializable
     @SerialName("pending")
-    public data object Pending : LoginTransitionV1
+    public data class Pending(
+        val pendingPayload: JsonElement? = null,
+    ) : LoginTransitionV1
 
     @Serializable
     @SerialName("externalBrowser")
@@ -117,7 +133,7 @@ public data class LoginSuccessV1(
     val profile: ProfileV1,
     @Serializable(with = KnownCapabilitySetsV1Serializer::class)
     val capabilities: Map<String, Set<String>>,
-    val composeConfig: ComposeConfigV1? = null,
+    val composeConfig: ComposeConfigV2? = null,
 )
 
 @Serializable
@@ -132,7 +148,7 @@ public data class AccountPluginSnapshotV1(
     val manifestCapabilities: Map<String, Set<String>>,
     @Serializable(with = KnownCapabilitySetsV1Serializer::class)
     val negotiatedCapabilities: Map<String, Set<String>>,
-    val composeConfig: ComposeConfigV1? = null,
+    val composeConfig: ComposeConfigV2? = null,
     val credentialSchemaVersion: Int,
 )
 
@@ -141,4 +157,6 @@ public data class AccountPluginSnapshotV1(
 public data class PluginAccountCredentialV1(
     val snapshot: AccountPluginSnapshotV1,
     val credential: JsonElement,
+    val sessionEpoch: String? = null,
+    val credentialRevision: String? = null,
 )

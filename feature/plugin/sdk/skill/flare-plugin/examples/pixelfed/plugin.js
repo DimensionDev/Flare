@@ -9,7 +9,7 @@ const PIXELFED_CAPABILITIES = {
   ],
   "flare.datasource.profile/v1": ["byId", "byHandle", "timeline", "following", "followers"],
   "flare.datasource.post/v1": ["detail", "context", "delete", "mutate"],
-  "flare.datasource.compose/v1": ["publish"],
+  "flare.datasource.compose/v2": ["publish"],
 };
 
 defineFlareSocialPlugin({
@@ -245,8 +245,12 @@ defineFlareSocialPlugin({
 
     compose: {
       async publish(request, context) {
+        const reference = request.reference;
+        if (reference && reference.type !== "reply") {
+          unsupportedError("Pixelfed does not support quote publishing", reference.type);
+        }
         const assets = request.assets || [];
-        if (!request.replyTo && assets.length === 0) {
+        if (!reference && assets.length === 0) {
           validationError("Pixelfed posts require at least one media attachment", "media_required");
         }
         const mediaIds = [];
@@ -279,7 +283,7 @@ defineFlareSocialPlugin({
           sensitive: request.sensitive === true,
           spoiler_text: request.spoilerText || "",
         };
-        if (request.replyTo) payload.in_reply_to_id = request.replyTo.id;
+        if (reference) payload.in_reply_to_id = reference.key.id;
         const response = await authenticatedRequest(context, "/api/v1/statuses", {
           method: "POST",
           timeoutMillis: 120000,
@@ -462,6 +466,7 @@ function composeConfig(instance) {
     : ["image/jpeg", "image/png", "image/gif", "image/webp", "video/mp4"];
   return {
     text: { maxLength: positiveInteger(statuses.max_characters, 500, 1000000) },
+    supportedTypes: ["new", "reply"],
     media: {
       minCountForNew: 1,
       maxCount: positiveInteger(statuses.max_media_attachments, 4, 100),

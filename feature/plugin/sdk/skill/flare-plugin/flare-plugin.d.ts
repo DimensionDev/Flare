@@ -1,4 +1,4 @@
-/** Flare Social Plugin API v1. Ambient editor types; do not import at runtime.
+/** Flare Social Plugin API v1/v2. Ambient editor types; do not import at runtime.
  * See ABI.md and references/ for validation, defaults, and operation dependencies.
  * Optional service members do not relax a declared capability's required method set.
  * Compatible Hosts ignore additive fields, unsupported capabilities/operations,
@@ -41,7 +41,7 @@ interface PluginDefinitionV1 {
     profile?: Partial<ProfileServiceV1>;
     post?: Partial<PostServiceV1>;
     relation?: Partial<RelationServiceV1>;
-    compose?: { publish(request: ComposeRequestV1, context: PluginInvocationContextV1): MaybePromise<ComposeResultV1> };
+    compose?: { publish(request: ComposeRequestV2, context: PluginInvocationContextV1): MaybePromise<ComposeResultV1> };
     notification?: Partial<NotificationServiceV1>;
     list?: Partial<ListServiceV1>;
     directMessage?: Partial<DirectMessageServiceV1>;
@@ -169,11 +169,30 @@ interface CookieCheckRequestV1 {
   origin: string;
   flowId: string;
   cookies: { cookies: CookieValueV1[] };
+  /** API v2: latest Pending payload for this flow; survives runtime eviction, not app restart. */
+  pendingPayload?: JsonValue;
 }
 /** sourceUrl is the declared probe URL; do not merge Cookies across probes/origins blindly. */
-interface CookieValueV1 { sourceUrl: string; name: string; value: string }
+interface CookieValueV1 {
+  sourceUrl: string;
+  name: string;
+  value: string;
+  /** API v2: only fields reliably available on this platform; duplicate names are preserved. */
+  attributes?: CookieAttributesV2;
+}
+interface CookieAttributesV2 {
+  domain?: string;
+  hostOnly?: boolean;
+  path?: string;
+  /** Unix epoch milliseconds; absent does not imply a session cookie. */
+  expiresAt?: number;
+  session?: boolean;
+  secure?: boolean;
+  httpOnly?: boolean;
+  sameSite?: "strict" | "lax" | "none";
+}
 type LoginTransitionV1 =
-  | { type: "pending" }
+  | { type: "pending"; /** API v2: whole replacement, omitted/null clears; at most 64 KiB JSON. */ pendingPayload?: JsonValue }
   | { type: "externalBrowser"; url: string; pendingPayload: JsonValue }
   | { type: "webCookie"; startUrl: string }
   | { type: "success"; value: LoginSuccessV1 };
@@ -187,7 +206,7 @@ interface LoginSuccessV1 {
   credential: JsonValue;
   profile: ProfileV1;
   capabilities: Record<string, string[]>;
-  composeConfig?: ComposeConfigV1;
+  composeConfig?: ComposeConfigV2;
 }
 
 /** Stable ID in the selected API namespace; host is an HTTPS authority without scheme/path. */
@@ -227,11 +246,13 @@ interface MediaV1 {
   /** Ugoira requires an authenticated account and gallery.ugoiraMetadata. */
   ugoiraKey?: EntityKeyV1;
   originalFrameUrl?: string;
+  /** Explicit media headers, shared by the main URL, preview and download. See wire-data.md. */
+  customHeaders?: Record<string, string>;
 }
 type VisibilityV1 = "public" | "unlisted" | "followers" | "direct" | "channel";
 type SemanticActionV1 =
   | "Favourite" | "Unfavourite" | "Repost" | "Unrepost" | "Bookmark" | "Unbookmark"
-  | "Delete" | "Reply" | "Follow" | "Unfollow" | "Block" | "Unblock" | "Mute" | "Unmute"
+  | "Delete" | "Reply" | "Quote" | "Follow" | "Unfollow" | "Block" | "Unblock" | "Mute" | "Unmute"
   | "Vote" | "React" | "Unreact" | "AcceptFollowRequest" | "RejectFollowRequest";
 /** Semantic Host control. enabled defaults true; active/count remain meaningful when disabled.
  * actionToken is bounded opaque mutation data, not a page cursor or credential store.
@@ -499,11 +520,13 @@ interface DirectMessageDeleteRequestV1 {
 interface CountResultV1 { value: number }
 interface BooleanResultV1 { value: boolean }
 
-/** Manifest defaults are required for compose.publish. Login config is merged by section:
- * shared limits are narrowed; a section present on only one side is retained.
+/** compose/v2 defaults require supportedTypes. Login intersects modes and shared limits;
+ * an optional section present on only one side is retained. compose/v1 is rejected.
  * @see references/manifest.md#compose-defaults
  */
-interface ComposeConfigV1 {
+type ComposeTypeV2 = "new" | "reply" | "quote";
+interface ComposeConfigV2 {
+  supportedTypes: ComposeTypeV2[];
   text?: { maxLength: number };
   media?: {
     minCountForNew?: number;
@@ -521,14 +544,14 @@ interface ComposeConfigV1 {
 /** Host-owned per-invocation upload handle. Forward via multipart; bytes never enter JS. */
 interface ComposeAssetV1 { handle: string; fileName?: string; mimeType?: string; description?: string }
 interface ComposePollV1 { options: string[]; expiresInSeconds: number; multiple?: boolean }
-interface ComposeRequestV1 {
+interface ComposeRequestV2 {
   text: string;
   visibility: VisibilityV1;
   languages: string[];
   assets: ComposeAssetV1[];
   sensitive: boolean;
   spoilerText?: string;
-  replyTo?: EntityKeyV1;
+  reference?: { type: "reply" | "quote"; key: EntityKeyV1 };
   poll?: ComposePollV1;
 }
 interface ComposeResultV1 { post: PostV1 }
@@ -556,11 +579,23 @@ interface HttpRequestV1 {
   cookies?: { name: string; value: string }[];
   body?: HttpBodyV1;
   timeoutMillis?: number;
+  /** API v2 only; manual returns the current hop, follow (default) permits same-origin GET/HEAD redirects. */
+  redirect?: "manual" | "follow";
 }
 /** body is text; parse JSON explicitly after checking status. Headers contain string arrays.
  * HTTP failure statuses are returned normally; this is not a browser Response.
  */
-interface HttpResponseV1 { status: number; headers: Record<string, string[]>; body: string }
+interface HttpResponseV1 {
+  status: number;
+  /** API v2 includes source application headers, including normalized Set-Cookie values. */
+  headers: Record<string, string[]>;
+  body: string;
+  /** Always present for API v2: actual canonical response URL. */
+  url?: string;
+  /** API v2: one valid, authorized HTTPS Location resolved against url, with fragment removed. */
+  redirectUrl?: string;
+}
+interface CredentialSnapshotV2 { value: JsonValue; revision: string }
 
 type PluginErrorCodeV1 =
   | "AuthenticationRequired" | "NotFound" | "Validation" | "RateLimited" | "Network"
@@ -583,7 +618,10 @@ interface FlareHostV1 {
   /** Available only in account scope. replace atomically replaces the whole JSON payload. */
   readonly credential: {
     read(): Promise<JsonValue>;
-    replace(value: JsonValue): Promise<boolean>;
+    /** API v2: revision is opaque; it changes after every successful replacement. */
+    read(options: { withRevision: true }): Promise<CredentialSnapshotV2>;
+    /** API v2: false means a local revision conflict; reread, do not replay a remote refresh. */
+    replace(value: JsonValue, options?: { expectedRevision: string }): Promise<boolean>;
   };
   readonly crypto: {
     /** size counts random bytes (1..1024), producing twice as many hex characters. */
@@ -591,6 +629,8 @@ interface FlareHostV1 {
     uuid(): Promise<string>;
     /** SHA-256 of UTF-8 input (at most 1 MiB); returns hex, not base64url/bytes. */
     sha256(value: string): Promise<string>;
+    /** MD5 of UTF-8 input (at most 1 MiB). Returns lowercase hex for legacy protocol compatibility. */
+    md5(value: string): Promise<string>;
   };
   readonly locale: { current(): Promise<string> };
   error(value: PluginErrorV1): Error;

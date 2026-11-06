@@ -16,6 +16,14 @@ public data class ComposeData(
     val localOnly: Boolean = false,
     val referenceStatus: ReferenceStatus? = null,
 ) {
+    public val type: ComposeType
+        get() =
+            when (referenceStatus?.composeStatus) {
+                is ComposeStatus.Reply -> ComposeType.Reply
+                is ComposeStatus.Quote -> ComposeType.Quote
+                null -> ComposeType.New
+            }
+
     public data class Poll(
         val options: List<String>,
         val expiredAfter: Long,

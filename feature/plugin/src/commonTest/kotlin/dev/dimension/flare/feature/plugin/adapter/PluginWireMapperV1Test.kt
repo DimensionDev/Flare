@@ -1,5 +1,8 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ProxyRef
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
@@ -28,6 +31,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiArticleBlock
 import dev.dimension.flare.ui.model.UiIcon
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asType
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -55,6 +59,18 @@ class PluginWireMapperV1Test {
             createdAt = "2026-10-27T00:00:00Z",
             content = RichTextV1(value = "Preview"),
         )
+
+    @Test
+    fun quoteUsesTheComposeRouteWithoutRepostMutationAndHonoursSupportedModes() {
+        val account = MicroBlogKey("me", "local.example")
+        val value = post.copy(actions = listOf(ActionDescriptorV1(SemanticActionV1.Reply), ActionDescriptorV1(SemanticActionV1.Quote)))
+        val mapped = createMapper(account, postMutationAvailable = false).post(value).post
+        val quote = mapped.actions.filterIsInstance<ActionMenu.Item>().single { it.actionFamily == PostActionFamily.Quote }
+        assertEquals(true, quote.enabled)
+        assertEquals(ClickEvent.Deeplink(DeeplinkRoute.Compose.Quote(account, MicroBlogKey(post.key.id, post.key.host))), quote.clickEvent)
+        val unsupported = createMapper(account, supportedComposeTypes = setOf(ComposeType.New, ComposeType.Reply)).post(value).post
+        assertEquals(false, unsupported.actions.filterIsInstance<ActionMenu.Item>().any { it.actionFamily == PostActionFamily.Quote })
+    }
 
     @Test
     fun unknownDetailsKeepThePreviewButDisableEveryPostClickForAccountsAndGuests() {
@@ -237,6 +253,47 @@ class PluginWireMapperV1Test {
             false,
             dev.dimension.flare.ui.model.PluginMediaPermissions
                 .isAllowed(profile.pluginId!!),
+        )
+    }
+
+    @Test
+    fun mediaHeadersReachAllNativeVariantsAndTheirPreviews() {
+        val headers = mapOf("Referer" to "https://local.example/", "X-Media-Token" to "fixture-token")
+        MediaTypeV1.entries.filterNot { it == MediaTypeV1.Unknown }.forEach { type ->
+            val media =
+                MediaV1(
+                    "media",
+                    type,
+                    "https://cdn.example/media",
+                    previewUrl = "https://preview.example/image.jpg",
+                    ugoiraKey = post.key.takeIf { type == MediaTypeV1.Ugoira },
+                    customHeaders = headers,
+                )
+            val mapped =
+                mapper
+                    .post(post.copy(media = listOf(media)))
+                    .post.images
+                    .single()
+            assertEquals<Map<String, String>?>(headers, mapped.customHeaders)
+            assertEquals<Map<String, String>?>(headers, assertNotNull(mapped.preview).customHeaders)
+            assertEquals(ProxyRef.Account(MicroBlogKey("me", "local.example")), mapped.proxy)
+            val cached = PluginJsonV1.decodeFromString<UiMedia>(PluginJsonV1.encodeToString(UiMedia.serializer(), mapped))
+            assertEquals<Map<String, String>?>(headers, cached.customHeaders)
+            assertEquals<Map<String, String>?>(headers, cached.preview?.customHeaders)
+        }
+        val denied = createMapper(null, mediaNetwork = false)
+        assertFailsWith<IllegalArgumentException> {
+            denied.post(
+                post.copy(media = listOf(MediaV1("media", MediaTypeV1.Image, "https://cdn.example/image", customHeaders = headers))),
+            )
+        }
+        assertNull(
+            mapper
+                .post(
+                    post.copy(media = listOf(MediaV1("media", MediaTypeV1.Image, "https://cdn.example/image"))),
+                ).post.images
+                .single()
+                .customHeaders,
         )
     }
 
@@ -480,8 +537,10 @@ class PluginWireMapperV1Test {
         mediaNetwork: Boolean = true,
         postMutationAvailable: Boolean = true,
         platformIcon: IconType = UiIcon.World.asType(),
+        supportedComposeTypes: Set<ComposeType> = ComposeType.entries.toSet(),
     ): PluginWireMapperV1 =
         PluginWireMapperV1(
+            supportedComposeTypes = supportedComposeTypes,
             pluginId = "test.plugin",
             platformIcon = platformIcon,
             mediaNetwork = mediaNetwork,

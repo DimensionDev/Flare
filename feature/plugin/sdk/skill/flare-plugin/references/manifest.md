@@ -57,7 +57,7 @@ length in the Host rather than JSON Schema's Unicode code point count.
 | --- | --- | --- |
 | `$schema` | Omitted | Editor schema URL/path only; never loaded by Flare |
 | `schemaVersion` | `1` | Manifest schema, currently exactly 1 |
-| `apiVersion` | Required | Runtime ABI, currently exactly 1 |
+| `apiVersion` | Required | Runtime ABI, 1 or 2; v2 is required for header/session extensions |
 | `id` | Required | Stable reverse-domain plugin ID; `[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+` |
 | `version` | Required | SemVer; use stable `major.minor.patch` for GitHub distribution |
 | `defaultLocale` | `"en"` | BCP-47 locale tag |
@@ -215,8 +215,12 @@ See the [complete login recipes](authentication.md).
 
 ### Compose defaults
 
+Declare `flare.datasource.compose/v2` for `compose.publish`. The retired
+`compose/v1` capability is rejected, not treated as an unknown optional extension.
+
 | Field | Shape and defaults |
 | --- | --- |
+| `supportedTypes` | Required nonempty set of `new`, `reply`, `quote`; declare only modes the handler implements |
 | `text` | Optional `{ "maxLength": 500 }`; limit 1..1000000 |
 | `media` | Optional object; required `maxCount` (0..100), `maxBytes` (1..1073741824) |
 | `media.minCountForNew` | Default 0, between 0 and maxCount |
@@ -236,6 +240,11 @@ is retained; omission is not a prohibition. Content-warning support requires
 both sides when both configs exist. Implement every resulting enabled field in
 `compose.publish`; see [compose](recipes.md#compose).
 
+Login must also include supportedTypes when returning a compose config. Its
+intersection with manifest supportedTypes must be nonempty; login cannot enable
+an undeclared mode. `media.minCountForNew` also applies to quotes. Only replies
+are exempt from the minimum attachment count.
+
 ## Frequent invalid combinations
 
 - Timeline capability without a static/default timeline.
@@ -245,4 +254,4 @@ both sides when both configs exist. Implement every resulting enabled field in
 - A login method ID that differs from the corresponding `login` object key.
 - Localized manifest keys absent from the default catalog.
 - Extra root properties such as `author`, `homepage`, `entry`, or a trust badge:
-  API v1 defines no such manifest fields; put human-facing information in README.
+  API v1/v2 define no such manifest fields; put human-facing information in README.

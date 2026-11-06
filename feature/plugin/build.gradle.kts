@@ -70,7 +70,7 @@ val generatePluginSdk by tasks.registering {
                 // Keep the external SDK intact; only adapt the in-app reference set.
                 when (path) {
                     "ABI.md" -> {
-                        ("# Flare Social Plugin API v1\n\n" + excerpt(text, "## Registration\n", "## Lifecycle and trust\n"))
+                        ("# Flare Social Plugin API v1/v2\n\n" + excerpt(text, "## Registration\n", "## Lifecycle and trust\n"))
                             .replace(
                                 "Installation review explicitly grants\n" +
                                     "media requests to any website, including CDNs and federated servers; these URLs\n" +
@@ -215,6 +215,7 @@ kotlin {
             dependsOn(commonTest)
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.datastore.core)
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.androidx.test.runner)
                 implementation(libs.junit)

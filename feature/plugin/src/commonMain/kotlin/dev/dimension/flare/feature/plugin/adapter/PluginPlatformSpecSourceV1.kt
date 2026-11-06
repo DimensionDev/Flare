@@ -8,6 +8,7 @@ import dev.dimension.flare.data.model.tab.TimelineSpec
 import dev.dimension.flare.data.model.tab.toUiTimelineTabItem
 import dev.dimension.flare.data.repository.AccountService
 import dev.dimension.flare.di.koinInject
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.host.PluginCallTimeoutV1
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginUrlPolicy
@@ -90,6 +91,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -214,6 +216,24 @@ private class PluginPlatformSpecV1(
 
     override fun createDataSource(context: PlatformDataSourceContext): MicroblogDataSource =
         PluginDataSourceV1.authenticated(plugin, runtimePool, context, specs, dynamicTimelineSpec, coroutineScope)
+
+    override fun restoreCredential(credentialJson: String): String {
+        if (plugin.installed.manifest.apiVersion < 2) return credentialJson
+        val account = PluginJsonV1.decodeFromString<dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1>(credentialJson)
+        account.requireValid(plugin)
+        return PluginJsonV1.encodeToString(
+            dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
+                .serializer(),
+            account.copy(
+                sessionEpoch =
+                    dev.dimension.flare.feature.plugin.host
+                        .platformUuid(),
+                credentialRevision =
+                    dev.dimension.flare.feature.plugin.host
+                        .platformUuid(),
+            ),
+        )
+    }
 
     override fun guestDataSource(
         host: String,
@@ -453,6 +473,7 @@ internal class PluginLoginMethodHandlerV1(
     private val mutableState = MutableStateFlow(state())
     private val mutableEffects = MutableSharedFlow<LoginEffect>(extraBufferCapacity = 1)
     private var cookieSession: PluginWebCookieSessionV1? = null
+    private val cookieCheckMutex = Mutex()
     private var oauthFlowId: String? = null
     private var retired = false
     private val removeCleanup =
@@ -534,7 +555,7 @@ internal class PluginLoginMethodHandlerV1(
                 }
 
                 LoginInteractionV1.WebCookie -> {
-                    cookieSession?.close()
+                    closeCookieSession()?.join()
                     val session =
                         webCookie.begin(
                             plugin = plugin,
@@ -590,23 +611,55 @@ internal class PluginLoginMethodHandlerV1(
             } == true
 
     override suspend fun checkCookies(snapshot: LoginCookieSnapshot): Boolean {
+        if (!cookieCheckMutex.tryLock()) return false
+        try {
+            return checkCookieSession(snapshot)
+        } finally {
+            cookieCheckMutex.unlock()
+        }
+    }
+
+    private suspend fun checkCookieSession(snapshot: LoginCookieSnapshot): Boolean {
         val session = cookieSession ?: return false
         return try {
             val result =
                 session.check(
                     CookieSnapshotV1(
                         cookies =
-                            snapshot.values.map { cookie ->
-                                CookieValueV1(
-                                    sourceUrl = cookie.sourceUrl,
-                                    name = cookie.name,
-                                    value = cookie.value,
-                                )
-                            },
+                            snapshot.values
+                                .map { cookie ->
+                                    CookieValueV1(
+                                        sourceUrl = cookie.sourceUrl,
+                                        name = cookie.name,
+                                        value = cookie.value,
+                                        attributes =
+                                            cookie.attributes
+                                                ?.let { attributes ->
+                                                    dev.dimension.flare.feature.plugin.wire.CookieAttributesV2(
+                                                        attributes.domain,
+                                                        attributes.hostOnly,
+                                                        attributes.path,
+                                                        attributes.expiresAt,
+                                                        attributes.session,
+                                                        attributes.secure,
+                                                        attributes.httpOnly,
+                                                        attributes.sameSite,
+                                                    )
+                                                }.takeIf { plugin.installed.manifest.apiVersion >= 2 },
+                                    )
+                                }.let { cookies ->
+                                    if (plugin.installed.manifest.apiVersion ==
+                                        1
+                                    ) {
+                                        cookies.distinctBy { it.sourceUrl to it.name }
+                                    } else {
+                                        cookies
+                                    }
+                                },
                     ),
                 )
             if (result is PluginCookieCheckResultV1.Success) {
-                complete(result.value)
+                complete(result.value, session)
             } else if (result !is PluginCookieCheckResultV1.Busy) {
                 mutableState.value = state()
             }
@@ -633,11 +686,24 @@ internal class PluginLoginMethodHandlerV1(
         closeOAuthFlow(cancelPending = false)
     }
 
-    private suspend fun complete(success: LoginSuccessV1) {
+    private suspend fun complete(
+        success: LoginSuccessV1,
+        expectedCookieSession: PluginWebCookieSessionV1? = null,
+    ) {
         plugin.session.ensureActive()
         val accountKey = MicroBlogKey(success.accountId, Url(success.origin).accountHost())
         context.requireReloginAccount(accountKey)
-        accountService.addPluginAccount(plugin, success)
+        accountService.addPluginAccount(plugin, success) {
+            if (expectedCookieSession != null) {
+                if (cookieSession !== expectedCookieSession) throw CancellationException("Cookie login flow was replaced")
+                if (plugin.installed.manifest.apiVersion >= 2) expectedCookieSession.requireActive()
+            }
+        }
+        if (expectedCookieSession != null) {
+            expectedCookieSession.close()
+            if (cookieSession !== expectedCookieSession) return
+            cookieSession = null
+        }
         mutableState.value = state()
         context.onSuccess()
     }

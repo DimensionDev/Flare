@@ -2,7 +2,7 @@
 
 Use this directory as the `flare-plugin` skill to build a website adapter with an
 AI coding agent, or read the same references directly. All material describes
-Social Plugin API v1 in the accompanying Flare source. Use a Flare build that
+Social Plugin API v1/v2 in the accompanying Flare source. Use a Flare build that
 includes this subsystem; this directory does not promise a minimum public app
 release. The module targets Android, JVM Desktop, iOS, and native macOS, not Web.
 

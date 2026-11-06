@@ -17,7 +17,9 @@ internal object KnownManifestCapabilitiesV1Serializer :
         return JsonObject(
             capabilities
                 .mapNotNull { (id, value) ->
-                    val known = PluginAbiV1.knownCapabilityOperations[id] ?: return@mapNotNull null
+                    val known =
+                        PluginAbiV1.knownCapabilityOperations[id]
+                            ?: if (id == PluginAbiV1.RETIRED_COMPOSE) setOf("publish") else return@mapNotNull null
                     val declaration = value.wireObject()
                     val operations = declaration["operations"]?.wireObject()
                     require(operations == null || operations.size <= 32) { "Too many operations" }

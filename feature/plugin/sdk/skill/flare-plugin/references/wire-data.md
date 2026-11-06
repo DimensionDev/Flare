@@ -96,6 +96,46 @@ Remote media needs the manifest's mediaNetwork permission, including profile
 avatars, article covers, and images inside HTML. Returning text successfully does
 not prove media permission is correct.
 
+`MediaV1.customHeaders` is an optional string-to-string map, defaulting to empty.
+The Host passes these explicit headers to native image, video, GIF, audio and
+ugoira loaders, including previews, downloads and supported HLS child requests.
+The same map applies to every URL declared in that media item, even when those
+URLs have different origins; only group resources that may share these headers.
+Avatars, article covers and HTML images use separate URL fields and do not inherit
+this map. The existing `mediaNetwork` grant is still required.
+
+```js
+{ id: "video", type: "video", url: playUrl, previewUrl: thumbnailUrl,
+  customHeaders: { Referer: "https://www.bilibili.com/", "User-Agent": providerUa,
+    "X-Media-Token": shortLivedToken } }
+```
+
+Cookie, Authorization and provider-specific headers are accepted explicitly;
+the Host never adds account credentials or a browser Cookie jar. Header names
+must be unique ignoring case and valid HTTP tokens of at most 128 characters.
+Limits are 32 headers, 8192 characters per value and 64 KiB aggregate UTF-8 name/value
+bytes. Control characters are rejected. Host, connection/hop-by-hop, proxy-*, sec-*,
+Content-Length, Accept-Encoding, Range, If-Range, If-None-Match and If-Modified-Since
+are transport-managed and cannot be overridden.
+
+Same-origin redirects retain headers. Across an origin change, only Accept,
+Accept-Language, Origin, Referer and User-Agent custom headers are retained;
+Cookie, Authorization and unknown custom headers are removed. The relay applies
+this rule to HLS child playlists, segments and keys as well, without restoring
+removed headers when a later relay child returns to the original origin.
+The five retained names are treated as public; do not embed secrets in them.
+For a CDN requiring a private header, return its final URL explicitly instead
+of relying on cross-origin redirects to forward the credential.
+
+Headers use the existing native media cache and internal-navigation serialization;
+they are not a secret store. Keep long-lived credentials in `credential`, and use
+short-lived media tokens or signed URLs where available. Refresh expired media
+metadata through the plugin's existing data operations. Cache identities hash the
+header values and include the viewing account scope when headers are present.
+An older Host may ignore this optional field; require an appropriate Host version
+if the media cannot load without it. Web/browser media does not gain native header
+support from this field.
+
 `presentation.repost` holds the original PostV1 with its own key and detailType; do not
 overwrite it with the wrapper ID. `replyTo` is an EntityKey, not a full post.
 Spoiler text, sensitive flag, visibility, and action state should reflect the

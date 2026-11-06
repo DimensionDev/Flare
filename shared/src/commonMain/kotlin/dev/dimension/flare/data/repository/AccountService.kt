@@ -26,10 +26,12 @@ public interface AccountService {
 
     public fun allAccountServicesFlow(): Flow<List<AccountMicroblogDataSource>>
 
+    /** Runs beforeCommit inside the account writer transaction, immediately before persistence. */
     public suspend fun <T : Any> addAccount(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
+        beforeCommit: () -> Unit = {},
     ): Unit
 
     public fun <T : Any> credentialFlow(
@@ -104,11 +106,13 @@ internal class RepositoryAccountService(
         account: UiAccount,
         credential: T,
         serializer: KSerializer<T>,
+        beforeCommit: () -> Unit,
     ): Unit =
         repository.addAccount(
             account = account,
             credential = credential,
             serializer = serializer,
+            beforeCommit = beforeCommit,
         )
 
     override fun <T : Any> credentialFlow(

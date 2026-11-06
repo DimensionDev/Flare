@@ -504,7 +504,7 @@ class PluginManifestV1Test {
                     "target": { "type": "Profile", "value": "{username}" }
                   }
                 ],
-                "composeDefaults": {
+                "composeDefaults": { "supportedTypes": ["new", "reply", "quote"],
                   "text": { "maxLength": 500 },
                   "media": {
                     "minCountForNew": 1,

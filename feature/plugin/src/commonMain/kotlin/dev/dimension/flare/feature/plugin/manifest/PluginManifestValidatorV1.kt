@@ -35,7 +35,7 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     }
 
     check(schemaVersion == PluginAbiV1.MANIFEST_SCHEMA_VERSION, "manifest.schema", "schemaVersion", "Unsupported schema")
-    check(apiVersion == PluginAbiV1.API_VERSION, "manifest.api", "apiVersion", "Unsupported API version")
+    check(apiVersion in PluginAbiV1.supportedApiVersions, "manifest.api", "apiVersion", "Unsupported API version")
     check(PLUGIN_ID.matches(id), "manifest.id", "id", "Invalid plugin ID")
     check(SEMVER.matches(version), "manifest.version", "version", "Invalid semantic version")
     check(isValidLocaleTag(defaultLocale), "manifest.locale", "defaultLocale", "Invalid default locale")
@@ -73,6 +73,7 @@ public fun PluginManifestV1.validate(methodTable: PluginMethodTableV1? = null): 
     check(platform.capabilities.size <= 32, "capability.count", "platform.capabilities", "Too many capabilities")
     platform.capabilities.forEach { (capabilityId, declaration) ->
         val path = "platform.capabilities.$capabilityId"
+        check(capabilityId != PluginAbiV1.RETIRED_COMPOSE, "compose.version", path, "compose/v1 is retired; update to compose/v2")
         check(CAPABILITY_ID.matches(capabilityId), "capability.id", path, "Invalid capability ID")
         val knownOperations = PluginAbiV1.knownCapabilityOperations[capabilityId] ?: return@forEach
         check(declaration.operations.size <= 32, "capability.operations", path, "Too many operations")

@@ -34,7 +34,8 @@ Requests and contexts are deeply frozen. Copy data before modifying it.
 Runtime scopes are detector attempt, login flow, account, and guest origin.
 Calls in one runtime serialize. Globals may cache derived data but are not
 persistent storage. Login begin/resume can use different runtime generations;
-OAuth state that your code needs belongs in `pendingPayload`. There are no
+OAuth state that your code needs belongs in `pendingPayload`; API v2 WebCookie
+checks can also return a pendingPayload for the next check. There are no
 lifecycle hooks or general-purpose storage API.
 An unmarked exception, invalid Wire response, timeout, cancellation, or memory
 failure retires that generation. See [recovery](troubleshooting.md).
@@ -108,9 +109,11 @@ Older Hosts ignore the new manifest field and continue rejecting extra origins;
 check this context before invoking features that require the grant and report a
 typed Unsupported error if unavailable.
 
-Only GET/HEAD redirects are supported, up to five, staying on the current origin
-even if another origin is approved. Redirected POST uploads/token
-exchanges must use their final endpoint directly.
+Automatic redirects support only GET/HEAD, up to five, staying on the current
+origin even if another origin is approved. API v2 `redirect: "manual"` returns
+the current response before automatic redirect checks, including a POST 3xx.
+No next-hop request is sent automatically. Explicitly request an approved next
+target with the correct credentials; never forward all previous headers blindly.
 
 `mediaNetwork: true` separately permits automatic remote images/avatars/covers/
 audio/video, including HTML images and CDN/federated destinations. Installation
@@ -149,7 +152,7 @@ try {
 The result is `{ status, headers, body }`: body is a UTF-8 string and each header
 value is an array of strings. Inspect status yourself; a 4xx/5xx response is not
 automatically a thrown plugin error. Handle legitimate empty/204 responses
-without JSON parsing. Header names should be looked up case-insensitively.
+without JSON parsing. Host response header names are lowercase.
 Do not use `response.ok`, `.json()`, `.text()`, or binary Response APIs.
 
 `method` defaults to GET; allowed methods are GET, POST, PUT, PATCH, DELETE, HEAD.
@@ -161,10 +164,35 @@ Authentication uses `authorization: { type: "bearer", token }` or
 `{ type: "basic", username, password }`; Cookies use
 `cookies: [{ name, value }]`. Never put Authorization/Cookie/Host/Content-Length
 directly in headers. Connection/keep-alive/transfer/upgrade and proxy-/sec-
-headers are also controlled by the Host. Response headers exclude sensitive and
-hop-by-hop headers, including Set-Cookie: there is no implicit Cookie jar to
-build from a login response. Use the Cookie login flow when browser Cookies are
-required, or the website's documented token API.
+headers are also controlled by the Host. Ordinary request headers such as
+Referer, User-Agent, or X-Xsrf-Token can be supplied explicitly. Generated Cookie
+and Authorization headers count toward API v2's 64 KiB total header limit.
+
+API v1 responses hide sensitive headers, including Set-Cookie. API v2 returns
+source application headers, including Set-Cookie, Authorization, WWW-Authenticate,
+Location, and custom tokens. Proxy-* and hop-by-hop fields (including fields
+named by Connection) remain hidden. The Host never automatically persists or
+replays these headers. Native Apple folds some repeated headers into one value;
+Set-Cookie is split before new cookie-pairs, preserving Expires and quoted commas.
+This is application-level normalization, not a raw HTTP capture. A folded ordinary
+header cannot always be reconstructed into its original lines.
+
+API v2 also returns `url`, the actual canonical URL for this hop (or final hop
+in follow mode). `redirectUrl` is present only for a redirect with exactly one
+nonblank Location resolving to an approved HTTPS URL without userinfo. It has
+no fragment. Raw Location remains readable even when no safe target can be
+provided. Use this field instead of unavailable browser URL helpers. A subsequent
+request independently rechecks the target and proxy. Follow mode returns only
+the final response and loses intermediate headers; use manual for session chains.
+
+Android/JVM plugin transports disable connection-failure retries, ambient
+Cookie/authentication storage, and native redirects. Native Apple Foundation
+can retry a received GET after a reset and can resend GET **or POST** on a Basic
+401 challenge, even without system credentials. There is no uniform single-attempt
+or exactly-once guarantee. Failed/ambiguous requests and local CAS conflicts do
+not authorize replaying writes; use the platform protocol's idempotency rules.
+No plugin-level retry is added by the Host. Native checks covered loopback
+HTTP/1.1 on JVM, Android emulator, macOS, and iOS simulator, not TLS/HTTP2 or devices.
 
 ### Body recipes
 
@@ -208,9 +236,22 @@ necessary. Initial login returns `credential` in `LoginSuccessV1` instead; neith
 detector nor login nor guest has credential access. An account cannot read or
 replace another account's credential.
 
+For API v2, `await flare.credential.read({withRevision:true})` returns
+`{value, revision}`. `await flare.credential.replace(next, {expectedRevision})`
+returns false if another local update won; no data is written in that case.
+Unconditional replacement still advances the revision. Serialize remote refresh
+operations inside the plugin; CAS does not prevent a refresh token being consumed
+remotely twice. On conflict, reread the latest state instead of re-exchanging the
+old token. A failed local save after a successful exchange needs recovery or
+relogin, not automatic replay. Host session epochs reject old work after relogin,
+delete/re-add, or restore. Upgrading an existing v1 account to v2 requires one
+relogin to establish this private metadata. Backups contain credentials; restore
+rotates their Host epoch/revision and discards in-flight login state.
+
 `await flare.crypto.randomHex(size)` uses **bytes** as its size and returns twice
 as many hexadecimal characters. `uuid()` returns a UUID string. `sha256(value)`
-hashes the UTF-8 string and returns hex, not a byte array or base64url PKCE value.
+and `md5(value)` hash UTF-8 strings up to 1 MiB and return lowercase hexadecimal
+digests. Use MD5 for legacy protocol compatibility.
 Implement any provider-required PKCE encoding explicitly using compatible JS;
 do not assume Web Crypto or Buffer. `await flare.locale.current()` returns the
 Host locale, also supplied as `context.locale`.

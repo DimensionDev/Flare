@@ -2,8 +2,10 @@ package dev.dimension.flare.feature.plugin.runtime
 
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
+import dev.dimension.flare.feature.plugin.adapter.PluginAccountInvokerV1
 import dev.dimension.flare.feature.plugin.adapter.PluginSessionCapabilitiesV1
 import dev.dimension.flare.feature.plugin.host.PluginCredentialAccess
+import dev.dimension.flare.feature.plugin.host.PluginCredentialSnapshot
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginInvocationContextV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
@@ -12,18 +14,23 @@ import dev.dimension.flare.feature.plugin.installer.PluginInstaller
 import dev.dimension.flare.feature.plugin.installer.TestFppFactory
 import dev.dimension.flare.feature.plugin.lifecycle.PluginStateStore
 import dev.dimension.flare.feature.plugin.lifecycle.RunningPluginV1
+import dev.dimension.flare.feature.plugin.login.PluginFormLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.wire.PageV1
 import dev.dimension.flare.feature.plugin.wire.PostDetailTypeV1
 import dev.dimension.flare.feature.plugin.wire.TimelineItemV1
 import dev.dimension.flare.feature.plugin.wire.requireValid
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -461,10 +468,276 @@ class PluginRuntimePoolTest {
             assertEquals(1, closed)
         }
 
-    private suspend fun install(script: String): RunningPluginV1 {
+    @Test
+    fun v2SessionChainCarriesApplicationHeadersBodyTokensAndConditionalCredentialUpdates() =
+        runBlocking {
+            val manifest =
+                TestFppFactory.validManifest
+                    .replace("\"apiVersion\": 1", "\"apiVersion\": 2")
+                    .replace("\"platform\": {", "\"permissions\": {\"httpOrigins\": [\"https://sso.example\"]}, \"platform\": {")
+                    .replace(
+                        "\"interaction\": \"OAuth\"",
+                        "\"interaction\": \"Form\", \"fields\": [{\"id\": \"token\", \"type\": \"Secret\", \"label\": \"Token\"}]",
+                    )
+            val script =
+                pageScript(
+                    """async function(request, context) {
+            const { value, revision } = await flare.credential.read({ withRevision: true });
+            if (value.csrf) {
+              await flare.http.request({ url: context.origin + "/next", cookies: value.cookies, headers: { "X-Csrf-Token": value.csrf, "X-Nonce": value.nonce } });
+              return { persisted: value };
+            }
+            const first = await flare.http.request({ url: context.origin + "/refresh", cookies: value.cookies, redirect: "manual" });
+            if (first.status !== 302 || first.headers["set-cookie"].length !== 2 || first.url !== context.origin + "/refresh") throw new Error("lost hop headers");
+            const config = await flare.http.request({ url: first.redirectUrl, redirect: "manual", headers: { "X-Nonce": first.headers["x-nonce"][0] } });
+            const { st } = JSON.parse(config.body);
+            await flare.http.request({ url: context.origin + "/confirm", method: "POST", redirect: "manual", headers: { "X-Csrf-Token": st }, body: { type: "form", values: { st } } });
+            // This fixture's server defines exactly these two known Cookie names;
+            // production plugins need their platform's scope/expiry/deletion rules.
+            const cookies = first.headers["set-cookie"].map(line => {
+              const pair = line.split(";", 1)[0]; const at = pair.indexOf("=");
+              return { name: pair.slice(0, at), value: pair.slice(at + 1) };
+            });
+            const next = { cookies, csrf: st, nonce: config.headers["x-nonce"][0] };
+            if (!await flare.credential.replace(next, { expectedRevision: revision })) throw new Error("unexpected conflict");
+            if (await flare.credential.replace({ stale: true }, { expectedRevision: revision })) throw new Error("stale overwrite");
+            return { saved: true };
+        }""",
+                ).replace(
+                    "async begin() { return { type: \"pending\" }; }",
+                    """async begin(request) {
+          return { type: "success", value: { accountId: "first", origin: request.origin,
+            credential: { cookies: [{ name: "session", value: request.values.token }] },
+            profile: { key: { id: "first", host: "one.example" }, handle: "first", displayName: "First" },
+            capabilities: { "flare.datasource.timeline/v1": ["page"] } } };
+        }""",
+                )
+            val plugin = install(script, manifest)
+            val requests = mutableListOf<PluginTransportRequestV1>()
+            val transport =
+                object : PluginHttpTransport {
+                    override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 {
+                        requests += request
+                        return when (request.url) {
+                            "https://one.example/refresh" -> {
+                                PluginTransportResponseV1(
+                                    302,
+                                    mapOf(
+                                        "Set-Cookie" to listOf("session=rotated; Path=/", "csrf=cookie-token; Path=/"),
+                                        "Location" to listOf("https://sso.example/config#fragment"),
+                                        "X-Nonce" to listOf("first-nonce"),
+                                    ),
+                                    byteArrayOf(),
+                                )
+                            }
+
+                            "https://sso.example/config" -> {
+                                PluginTransportResponseV1(
+                                    200,
+                                    mapOf("X-Nonce" to listOf("next-nonce")),
+                                    "{\"st\":\"body-token\"}".encodeToByteArray(),
+                                )
+                            }
+
+                            else -> {
+                                PluginTransportResponseV1(200, emptyMap(), "ok".encodeToByteArray())
+                            }
+                        }
+                    }
+                }
+            val pool = PluginRuntimePool(fileSystem, transport)
+            try {
+                val login =
+                    PluginFormLoginCoordinatorV1(pool).login(
+                        plugin,
+                        "oauth",
+                        "https://one.example",
+                        "en",
+                        mapOf("token" to "initial"),
+                    )
+                val credential = MemoryCredential(login.credential)
+                val context = accountContext(plugin, "first", "https://one.example", credential)
+                assertEquals(JsonPrimitive(true), invokePage(pool, plugin, context, JsonObject(emptyMap()))["saved"])
+                pool.closeIdle()
+                val result = invokePage(pool, plugin, context, JsonObject(emptyMap())).getValue("persisted").jsonObject
+                assertEquals("body-token", result.getValue("csrf").jsonPrimitive.content)
+                assertEquals(
+                    listOf(
+                        "https://one.example/refresh",
+                        "https://sso.example/config",
+                        "https://one.example/confirm",
+                        "https://one.example/next",
+                    ),
+                    requests.map {
+                        it.url
+                    },
+                )
+                assertEquals("first-nonce", requests[1].headers["X-Nonce"])
+                assertTrue(requests[1].headers.keys.none { it.equals("Cookie", true) })
+                assertEquals("body-token", requests[2].headers["X-Csrf-Token"])
+                assertEquals(
+                    mapOf("st" to "body-token"),
+                    (requests[2].body as dev.dimension.flare.feature.plugin.host.PluginTransportBodyV1.Form).values,
+                )
+                assertEquals("session=rotated; csrf=cookie-token", requests[3].headers["Cookie"])
+                assertEquals("next-nonce", requests[3].headers["X-Nonce"])
+                assertTrue(
+                    requests.all {
+                        it.proxy ==
+                            dev.dimension.flare.data.model.ProxyRef
+                                .Account(
+                                    dev.dimension.flare.model
+                                        .MicroBlogKey("first", "one.example"),
+                                )
+                    },
+                )
+            } finally {
+                pool.close()
+            }
+        }
+
+    @Test
+    fun v2InvocationRejectsAnAlreadyDecodedResultAfterItsAccountSessionChanges() =
+        runBlocking<Unit> {
+            val plugin =
+                install(
+                    pageScript("async function() { return { value: 'late' }; }"),
+                    TestFppFactory.validManifest.replace("\"apiVersion\": 1", "\"apiVersion\": 2"),
+                )
+            val pool = PluginRuntimePool(fileSystem, CapturingTransport())
+            val active = MutableStateFlow(true)
+            val credential =
+                object : PluginCredentialAccess by MemoryCredential() {
+                    override suspend fun ensureActive() {
+                        if (!active.value) throw CancellationException("Account session changed")
+                    }
+                }
+            try {
+                val context = accountContext(plugin, "first", "https://one.example", credential)
+                val invoker =
+                    PluginAccountInvokerV1(
+                        plugin,
+                        pool,
+                        PluginRuntimeKeyV1.account(PLUGIN_ID, plugin.installed.packageHash, "https://one.example", "first", "old-epoch"),
+                        dev.dimension.flare.model
+                            .MicroBlogKey("first", "one.example"),
+                    ) { _, _ -> context }
+                assertFailsWith<CancellationException> {
+                    invoker.invoke(
+                        PluginAbiV1.Capabilities.TIMELINE,
+                        "page",
+                        JsonObject(
+                            emptyMap(),
+                        ),
+                        JsonObject.serializer(),
+                        JsonObject.serializer(),
+                        validate = {
+                            active.value =
+                                false
+                        },
+                    )
+                }
+            } finally {
+                pool.close()
+            }
+        }
+
+    @Test
+    fun v2AuthenticationErrorsFromReplacedSessionsDoNotRequestAnotherLogin() =
+        runBlocking<Unit> {
+            for (replaceSession in listOf(false, true)) {
+                val plugin =
+                    install(
+                        pageScript(
+                            """async function() {
+              await flare.credential.read();
+              throw flare.error({ code: "AuthenticationRequired", message: { value: "Expired" } });
+            }""",
+                        ),
+                        TestFppFactory.validManifest.replace("\"apiVersion\": 1", "\"apiVersion\": 2"),
+                    )
+                val pool = PluginRuntimePool(fileSystem, CapturingTransport())
+                val active = MutableStateFlow(true)
+                val credential =
+                    object : PluginCredentialAccess by MemoryCredential() {
+                        override suspend fun read(): JsonElement {
+                            if (replaceSession) active.value = false
+                            return JsonObject(emptyMap())
+                        }
+
+                        override suspend fun ensureActive() {
+                            if (!active.value) throw CancellationException("Account session changed")
+                        }
+                    }
+                try {
+                    val context = accountContext(plugin, "first", "https://one.example", credential)
+                    val invoker =
+                        PluginAccountInvokerV1(
+                            plugin,
+                            pool,
+                            PluginRuntimeKeyV1.account(
+                                PLUGIN_ID,
+                                plugin.installed.packageHash,
+                                "https://one.example",
+                                "first",
+                                "old-epoch",
+                            ),
+                            dev.dimension.flare.model
+                                .MicroBlogKey("first", "one.example"),
+                        ) { _, _ -> context }
+                    val failure =
+                        runCatching {
+                            invoker.invoke(
+                                PluginAbiV1.Capabilities.TIMELINE,
+                                "page",
+                                JsonObject(emptyMap()),
+                                JsonObject.serializer(),
+                                JsonObject.serializer(),
+                            )
+                        }.exceptionOrNull()
+                    if (replaceSession) {
+                        assertTrue(failure is CancellationException, failure.toString())
+                    } else {
+                        assertTrue(failure is dev.dimension.flare.data.repository.RequireReLoginException, failure.toString())
+                    }
+                } finally {
+                    pool.close()
+                }
+            }
+        }
+
+    @Test
+    fun v1JavascriptCannotSpoofTheTrustedApiVersion() =
+        runBlocking {
+            val plugin =
+                install(
+                    pageScript(
+                        """async function(request, context) {
+          let rejected = 0;
+          try { await flare.http.request({ url: context.origin, redirect: "manual", apiVersion: 2 }); } catch (_) { rejected++; }
+          try { await flare.credential.read({ withRevision: true, apiVersion: 2 }); } catch (_) { rejected++; }
+          return { rejected };
+        }""",
+                    ),
+                )
+            val transport = CapturingTransport()
+            val pool = PluginRuntimePool(fileSystem, transport)
+            try {
+                val context = accountContext(plugin, "first", "https://one.example", MemoryCredential())
+                assertEquals(JsonPrimitive(2), invokePage(pool, plugin, context, JsonObject(emptyMap()))["rejected"])
+                assertTrue(transport.urls.isEmpty())
+            } finally {
+                pool.close()
+            }
+        }
+
+    private suspend fun install(
+        script: String,
+        manifest: String = TestFppFactory.validManifest,
+    ): RunningPluginV1 {
         TestFppFactory.write(
             input,
-            TestFppFactory.validEntries(script = script) +
+            TestFppFactory.validEntries(script = script, manifest = manifest) +
                 listOf(
                     "locales/en.json" to "{\"error.missing\":\"Content was not found\"}".encodeToByteArray(),
                     "locales/zh-Hans.json" to
@@ -497,6 +770,7 @@ class PluginRuntimePoolTest {
             accountId = accountId,
             locale = locale,
             credential = credential,
+            httpOrigins = plugin.installed.manifest.permissions.httpOrigins,
         )
 
     private suspend fun invokePage(
@@ -526,11 +800,33 @@ class PluginRuntimePoolTest {
 private class MemoryCredential(
     private var value: JsonElement = JsonObject(emptyMap()),
 ) : PluginCredentialAccess {
-    override suspend fun read(): JsonElement = value
+    private val mutex = Mutex()
+    private var revision = 0
+
+    override suspend fun read(): JsonElement = mutex.withLock { value }
 
     override suspend fun replace(value: JsonElement) {
-        this.value = value
+        mutex.withLock {
+            this.value = value
+            revision++
+        }
     }
+
+    override suspend fun readVersioned(): PluginCredentialSnapshot = mutex.withLock { PluginCredentialSnapshot(value, revision.toString()) }
+
+    override suspend fun replaceIfCurrent(
+        value: JsonElement,
+        revision: String,
+    ): Boolean =
+        mutex.withLock {
+            if (revision != this.revision.toString()) {
+                false
+            } else {
+                this.value = value
+                this.revision++
+                true
+            }
+        }
 }
 
 private open class CapturingTransport : PluginHttpTransport {

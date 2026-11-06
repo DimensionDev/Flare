@@ -24,6 +24,7 @@ internal class PluginHostGateway(
         argumentsJson: String,
         context: PluginInvocationContextV1,
         callTimeoutMillis: Long,
+        apiVersion: Int = 1,
     ): String {
         require(argumentsJson.encodeToByteArray().size <= MAX_HOST_ARGUMENT_BYTES) { "Host arguments are too large" }
         return try {
@@ -31,25 +32,43 @@ internal class PluginHostGateway(
                 when (operation) {
                     "http.request" -> {
                         val request = PluginJsonV1.decodeFromString<HttpRequestV1>(argumentsJson)
+                        if (apiVersion >= 2) context.credential?.ensureActive()
+                        val response = http.execute(request, context, callTimeoutMillis, apiVersion)
+                        if (apiVersion >= 2) context.credential?.ensureActive()
                         PluginJsonV1.encodeToJsonElement(
                             dev.dimension.flare.feature.plugin.wire.HttpResponseV1
                                 .serializer(),
-                            http.execute(request, context, callTimeoutMillis),
+                            response,
                         )
                     }
 
                     "credential.read" -> {
-                        requireEmptyArguments(argumentsJson)
+                        val request = PluginJsonV1.decodeFromString<CredentialReadRequestV2>(argumentsJson)
+                        if (apiVersion == 1) requireEmptyArguments(argumentsJson)
                         val credential = context.credential ?: throw PluginHostException("credential.denied", "Credential is unavailable")
-                        credential.read().also(::requireCredentialSize)
+                        if (request.withRevision) {
+                            val snapshot = credential.readVersioned()
+                            requireCredentialSize(snapshot.value)
+                            require(snapshot.revision.length in 1..256) { "Invalid credential revision" }
+                            PluginJsonV1.encodeToJsonElement(PluginCredentialSnapshot.serializer(), snapshot)
+                        } else {
+                            credential.read().also(::requireCredentialSize)
+                        }
                     }
 
                     "credential.replace" -> {
                         val request = PluginJsonV1.decodeFromString<CredentialReplaceRequestV1>(argumentsJson)
                         requireCredentialSize(request.value)
                         val credential = context.credential ?: throw PluginHostException("credential.denied", "Credential is unavailable")
-                        credential.replace(request.value)
-                        JsonPrimitive(true)
+                        if (request.expectedRevision != null) {
+                            require(
+                                apiVersion >= 2 && request.expectedRevision.length in 1..256,
+                            ) { "Conditional credentials require API v2 and a valid revision" }
+                            JsonPrimitive(credential.replaceIfCurrent(request.value, request.expectedRevision))
+                        } else {
+                            credential.replace(request.value)
+                            JsonPrimitive(true)
+                        }
                     }
 
                     "crypto.randomHex" -> {
@@ -63,16 +82,13 @@ internal class PluginHostGateway(
                         JsonPrimitive(platformUuid())
                     }
 
-                    "crypto.sha256" -> {
+                    "crypto.md5", "crypto.sha256" -> {
                         val request = PluginJsonV1.decodeFromString<HashRequestV1>(argumentsJson)
-                        require(request.value.encodeToByteArray().size <= MAX_HASH_INPUT_BYTES) { "Hash input is too large" }
-                        JsonPrimitive(
-                            request.value
-                                .encodeToByteArray()
-                                .toByteString()
-                                .sha256()
-                                .hex(),
-                        )
+                        val input = request.value.encodeToByteArray()
+                        require(input.size <= MAX_HASH_INPUT_BYTES) { "Hash input is too large" }
+                        val bytes = input.toByteString()
+                        val digest = if (operation == "crypto.md5") bytes.md5() else bytes.sha256()
+                        JsonPrimitive(digest.hex())
                     }
 
                     "locale.current" -> {
@@ -100,6 +116,12 @@ internal class PluginHostGateway(
 @Serializable
 private data class CredentialReplaceRequestV1(
     val value: JsonElement,
+    val expectedRevision: String? = null,
+)
+
+@Serializable
+private data class CredentialReadRequestV2(
+    val withRevision: Boolean = false,
 )
 
 @Serializable

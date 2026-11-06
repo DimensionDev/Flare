@@ -182,7 +182,7 @@ private fun ProxyLoginWebView(
                                         value = item.substringAfter('=', missingDelimiterValue = "").trim(),
                                     )
                                 }
-                        }.distinctBy { it.sourceUrl to it.name }
+                        }
                 if (route.isValid && callback(LoginCookieSnapshot(values = values, rawHeader = rawHeader))) {
                     onBack()
                     return@LaunchedEffect

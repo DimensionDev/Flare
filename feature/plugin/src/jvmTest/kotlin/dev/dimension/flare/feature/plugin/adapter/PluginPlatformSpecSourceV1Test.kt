@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.adapter
 
+import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
@@ -13,6 +14,8 @@ import dev.dimension.flare.feature.plugin.login.PluginOAuthPendingV1
 import dev.dimension.flare.feature.plugin.login.PluginWebCookieLoginCoordinatorV1
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimePool
 import dev.dimension.flare.feature.plugin.runtime.PluginRuntimeUnavailableException
+import dev.dimension.flare.feature.plugin.wire.PluginAccountCredentialV1
+import dev.dimension.flare.model.PlatformSpec
 import dev.dimension.flare.ui.presenter.login.LoginPlatformProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +30,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -64,9 +68,37 @@ class PluginPlatformSpecSourceV1Test {
             }
         }
 
+    @Test
+    fun apiV2RestorationRetainsPluginStateButRotatesPrivateSessionMetadata() =
+        runBlocking {
+            withPlatform(mediaNetwork = false, metadata = "description: 'Restore'", apiVersion = 2) { provider ->
+                val saved = """{
+              "snapshot": {
+                "pluginId": "dev.dimension.flare.test.plugin", "platformId": "TestPlugin", "packageHash": "${"a".repeat(64)}",
+                "origin": "https://instance.example", "accountId": "me",
+                "profile": { "key": { "id": "me", "host": "instance.example" }, "handle": "me", "displayName": "Me" },
+                "manifestCapabilities": { "flare.datasource.timeline/v1": ["page"] },
+                "negotiatedCapabilities": { "flare.datasource.timeline/v1": ["page"] }, "credentialSchemaVersion": 1
+              }, "credential": { "token": "kept" }, "sessionEpoch": "saved-epoch", "credentialRevision": "saved-revision"
+            }"""
+                val platform = provider as PlatformSpec
+                val original = PluginJsonV1.decodeFromString(PluginAccountCredentialV1.serializer(), saved)
+                val first = PluginJsonV1.decodeFromString(PluginAccountCredentialV1.serializer(), platform.restoreCredential(saved))
+                val second = PluginJsonV1.decodeFromString(PluginAccountCredentialV1.serializer(), platform.restoreCredential(saved))
+                assertEquals(original.snapshot, first.snapshot)
+                assertEquals(original.credential, first.credential)
+                assertNotNull(first.sessionEpoch)
+                assertNotNull(first.credentialRevision)
+                assertNotEquals(original.sessionEpoch, first.sessionEpoch)
+                assertNotEquals(first.sessionEpoch, second.sessionEpoch)
+                assertNotEquals(first.credentialRevision, second.credentialRevision)
+            }
+        }
+
     private suspend fun withPlatform(
         mediaNetwork: Boolean,
         metadata: String,
+        apiVersion: Int = 1,
         block: suspend (LoginPlatformProvider) -> Unit,
     ) {
         val root = Files.createTempDirectory("plugin-detector-media").toOkioPath()
@@ -83,7 +115,7 @@ class PluginPlatformSpecSourceV1Test {
         try {
             val archive = root / "plugin.fpp"
             val manifest =
-                TestFppFactory.validManifest.replace(
+                TestFppFactory.validManifest.replace("\"apiVersion\": 1", "\"apiVersion\": $apiVersion").replace(
                     "\"platform\": {",
                     "\"permissions\": {\"mediaNetwork\": $mediaNetwork}, \"platform\": {",
                 )

@@ -114,6 +114,7 @@ const media: MediaV1 = { id: "image", type: "image", url: "https://cdn.example.o
 // @ts-expect-error Header values must be strings.
 const invalidMedia: MediaV1 = { ...media, customHeaders: { "X-Media-Token": 1 } };
 const page: PageV1<TimelineItemV1> = { items: [{ type: "post", post: { key: profile.key, author: profile, createdAt: "2026-01-01T00:00:00Z", content: { value: "Text" } } }] };
+const md5: Promise<string> = flare.crypto.md5("abc");
 // @ts-expect-error Unsupported Host method.
 flare.fetch("https://example.org");
 // @ts-expect-error Invalid SDK error code.

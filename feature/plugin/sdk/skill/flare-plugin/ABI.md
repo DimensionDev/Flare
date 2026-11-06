@@ -237,7 +237,7 @@ The frozen `flare` object exposes:
 
 - `flare.http.request`: JSON, text, form, and streaming multipart HTTP;
 - `flare.credential.read/replace`: the current account credential only;
-- `flare.crypto.randomHex/uuid/sha256`;
+- `flare.crypto.randomHex/uuid/sha256/md5`;
 - `flare.locale.current`;
 - `flare.error`: marks a typed error safe to cross the ABI.
 

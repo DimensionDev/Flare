@@ -264,6 +264,7 @@ internal val RUNTIME_PRELUDE =
           randomHex: size => hostCall("crypto.randomHex", { size }),
           uuid: () => hostCall("crypto.uuid"),
           sha256: value => hostCall("crypto.sha256", { value }),
+          md5: value => hostCall("crypto.md5", { value }),
         },
         locale: { current: () => hostCall("locale.current") },
         error: value => {

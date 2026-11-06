@@ -153,6 +153,28 @@ class PlatformPluginRuntimeTest {
         }
 
     @Test
+    fun md5UsesUtf8AndEnforcesTheHashInputLimit() =
+        runBlocking<Unit> {
+            val runtime =
+                runtime(
+                    """
+                    const digest = await flare.crypto.md5('中文 👋');
+                    let limitError = null;
+                    try { await flare.crypto.md5('é'.repeat(512 * 1024 + 1)); }
+                    catch (error) { limitError = error.code; }
+                    return { digest, limitError };
+                    """.trimIndent(),
+                )
+            try {
+                val result = invoke(runtime).jsonObject
+                assertEquals("15baf50d3d0d35b1ed119aa3e40403fc", result.getValue("digest").jsonPrimitive.content)
+                assertEquals("host.invalid-request", result.getValue("limitError").jsonPrimitive.content)
+            } finally {
+                runtime.close()
+            }
+        }
+
+    @Test
     fun engineUnavailabilityDoesNotCountTowardPluginPause() =
         runBlocking<Unit> {
             val runtime = runtime("return 'ok';", engineFactory = { throw PluginJavaScriptUnavailableException("Provider stopped") })

@@ -627,6 +627,8 @@ interface FlareHostV1 {
     uuid(): Promise<string>;
     /** SHA-256 of UTF-8 input (at most 1 MiB); returns hex, not base64url/bytes. */
     sha256(value: string): Promise<string>;
+    /** MD5 of UTF-8 input (at most 1 MiB). Returns lowercase hex for legacy protocol compatibility. */
+    md5(value: string): Promise<string>;
   };
   readonly locale: { current(): Promise<string> };
   error(value: PluginErrorV1): Error;

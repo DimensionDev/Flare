@@ -24,6 +24,7 @@ public data class ComposeConfig public constructor(
     val contentWarning: ContentWarning? = null,
     val visibility: Visibility? = null,
     val language: Language? = null,
+    val supportedTypes: Set<ComposeType> = ComposeType.entries.toSet(),
 ) {
     @Immutable
     public class Text private constructor(
@@ -459,6 +460,7 @@ public data class ComposeConfig public constructor(
             contentWarning = contentWarning,
             visibility = visibility,
             language = language,
+            supportedTypes = supportedTypes intersect other.supportedTypes,
         )
     }
 }

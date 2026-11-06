@@ -45,7 +45,8 @@ public fun <T> PageV1<T>.requireValid(validateItem: (T) -> Unit) {
     items.forEach(validateItem)
 }
 
-public fun ComposeConfigV1.requireValid() {
+public fun ComposeConfigV2.requireValid() {
+    require(supportedTypes.isNotEmpty()) { "Compose supportedTypes must not be empty" }
     text?.let { require(it.maxLength in 1..1_000_000) { "Invalid compose text limit" } }
     media?.let {
         require(it.maxCount in 0..100) { "Invalid compose media count" }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.feature.plugin.lifecycle
 
+import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
 import dev.dimension.flare.feature.plugin.github.COMMIT_SHA
 import dev.dimension.flare.feature.plugin.github.stableGitHubVersion
@@ -183,6 +184,11 @@ public class PluginStateStore private constructor(
                     PluginStateIssueV1("uninstall.pending", installed.pluginId, "Plugin removal is incomplete. Retry deleting this plugin.")
                 return@forEach
             }
+            if (PluginAbiV1.RETIRED_COMPOSE in installed.manifest.platform.capabilities) {
+                issues +=
+                    PluginStateIssueV1("compose.retired", installed.pluginId, "compose/v1 is retired. Update this plugin to compose/v2.")
+                return@forEach
+            }
             val packagePath = paths.packagePath(installed.packageHash)
             val iconPath = paths.iconPath(installed.packageHash, installed.iconExtension)
             val packageValid = fileSystem.metadataOrNull(packagePath)?.let { it.isRegularFile && it.size == installed.packageSize } == true
@@ -308,7 +314,20 @@ private fun validateIndex(index: PluginStateIndexV1) {
         require(plugin.packageSize in 1..FppLimits.MAX_PACKAGE_BYTES) { "Invalid package size" }
         require(plugin.iconSize in 1..FppLimits.MAX_ICON_BYTES) { "Invalid icon size" }
         require("assets/icon.${plugin.iconExtension}" in FppPaths.ICONS) { "Invalid icon extension" }
-        plugin.manifest.validate().requireValid()
+        val manifest =
+            if (PluginAbiV1.RETIRED_COMPOSE in plugin.manifest.platform.capabilities) {
+                // Retain incompatible records for upgrade/uninstall without executing their handlers.
+                plugin.manifest.copy(
+                    platform =
+                        plugin.manifest.platform.copy(
+                            capabilities = plugin.manifest.platform.capabilities - PluginAbiV1.RETIRED_COMPOSE,
+                            composeDefaults = null,
+                        ),
+                )
+            } else {
+                plugin.manifest
+            }
+        manifest.validate().requireValid()
         validatePluginCatalogs(plugin.manifest, plugin.catalogs)
     }
 }

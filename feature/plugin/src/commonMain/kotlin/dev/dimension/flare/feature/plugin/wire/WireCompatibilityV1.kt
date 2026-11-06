@@ -135,6 +135,7 @@ internal object KnownCapabilitySetsV1Serializer :
     JsonTransformingSerializer<Map<String, Set<String>>>(MapSerializer(String.serializer(), SetSerializer(String.serializer()))) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         val capabilities = element.wireObject()
+        PluginAbiV1.requireCurrentComposeContract(capabilities.keys)
         require(capabilities.size <= 32) { "Too many capabilities" }
         require(capabilities.keys.all(PluginAbiV1.capabilityIdPattern::matches)) { "Invalid capability ID" }
         return JsonObject(

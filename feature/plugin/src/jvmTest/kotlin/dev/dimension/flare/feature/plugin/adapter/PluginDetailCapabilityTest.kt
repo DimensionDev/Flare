@@ -3,6 +3,7 @@ package dev.dimension.flare.feature.plugin.adapter
 import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.PostEvent
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.host.PluginHttpTransport
+import dev.dimension.flare.feature.plugin.host.PluginTransportBodyV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportRequestV1
 import dev.dimension.flare.feature.plugin.host.PluginTransportResponseV1
 import dev.dimension.flare.feature.plugin.installer.PluginInstaller
@@ -35,6 +37,7 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UriLauncher
 import dev.dimension.flare.ui.model.postEventOrNull
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
@@ -52,7 +55,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
@@ -75,11 +81,13 @@ class PluginDetailCapabilityTest {
     private lateinit var root: Path
     private lateinit var runtimePool: PluginRuntimePool
     private lateinit var scope: CoroutineScope
+    private lateinit var transport: NoopTransport
 
     @BeforeTest
     fun setUp() {
         root = Files.createTempDirectory("plugin-detail-capability-test").toOkioPath()
-        runtimePool = PluginRuntimePool(fileSystem, NoopTransport())
+        transport = NoopTransport()
+        runtimePool = PluginRuntimePool(fileSystem, transport)
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
 
@@ -409,14 +417,122 @@ class PluginDetailCapabilityTest {
         }
 
     @Test
+    fun composeBridgePreservesReplyAndQuoteWithoutLegacyFields() =
+        runBlocking {
+            val source = authenticated(installCompose()).capabilitySet.compose!!
+            source.compose(ComposeData("new post")) {}
+            val normal = Json.parseToJsonElement(assertIs<PluginTransportBodyV1.Text>(transport.requests.last().body).value).jsonObject
+            assertFalse("reference" in normal || "replyTo" in normal)
+            val target = MicroBlogKey("opaque/42", "remote.example")
+            for ((type, status) in listOf("reply" to ComposeStatus.Reply(target), "quote" to ComposeStatus.Quote(target))) {
+                source.compose(ComposeData("caption", referenceStatus = ComposeData.ReferenceStatus(status))) {}
+                val payload = Json.parseToJsonElement(assertIs<PluginTransportBodyV1.Text>(transport.requests.last().body).value).jsonObject
+                val reference = payload["reference"]?.jsonObject
+                assertEquals(type, reference?.get("type")?.jsonPrimitive?.content)
+                assertEquals(
+                    target.id,
+                    reference
+                        ?.get("key")
+                        ?.jsonObject
+                        ?.get("id")
+                        ?.jsonPrimitive
+                        ?.content,
+                )
+                assertEquals(
+                    target.host,
+                    reference
+                        ?.get("key")
+                        ?.jsonObject
+                        ?.get("host")
+                        ?.jsonPrimitive
+                        ?.content,
+                )
+                assertFalse("replyTo" in payload || "quoteTo" in payload)
+            }
+        }
+
+    @Test
+    fun unsupportedComposeTypesAndEmptyQuotesFailBeforePluginCalls() =
+        runBlocking {
+            installCompose().let { running ->
+                val source = authenticated(running).capabilitySet.compose!!
+                assertFailsWith<IllegalArgumentException> {
+                    source.compose(
+                        ComposeData(
+                            "",
+                            referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Quote(MicroBlogKey("target", "remote.example"))),
+                        ),
+                    ) {
+                    }
+                }
+            }
+            assertTrue(transport.requests.isEmpty())
+            val restricted = installCompose(supportedTypes = "\"new\", \"reply\"")
+            val source = authenticated(restricted).capabilitySet.compose!!
+            val quote =
+                ComposeData(
+                    "caption",
+                    visibility = UiTimelineV2.Post.Visibility.Public,
+                    referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Quote(MicroBlogKey("target", "remote.example"))),
+                )
+            var progress = 0
+            assertFailsWith<IllegalArgumentException> { source.compose(quote) { progress++ } }
+            assertFailsWith<IllegalArgumentException> { source.publish(quote) { progress++ } }
+            assertEquals(0, progress)
+            assertTrue(transport.requests.isEmpty())
+        }
+
+    @Test
+    fun quoteCannotUseTheReplyMediaExemption() =
+        runBlocking {
+            val source = authenticated(installCompose(minimumMedia = 1)).capabilitySet.compose!!
+            val target = MicroBlogKey("target", "remote.example")
+            assertFailsWith<IllegalArgumentException> {
+                source.compose(ComposeData("caption", referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Quote(target)))) {}
+            }
+            assertTrue(transport.requests.isEmpty())
+            source.compose(ComposeData("caption", referenceStatus = ComposeData.ReferenceStatus(ComposeStatus.Reply(target)))) {}
+            assertEquals(1, transport.requests.size)
+        }
+
+    private suspend fun installCompose(
+        minimumMedia: Int = 0,
+        supportedTypes: String = "\"new\", \"reply\", \"quote\"",
+    ): RunningPluginV1 {
+        val manifest =
+            MANIFEST.replace(
+                "\"capabilities\": {",
+                """
+                "composeDefaults": {
+                  "supportedTypes": [$supportedTypes], "text": { "maxLength": 1000 },
+                  "media": { "minCountForNew": $minimumMedia, "maxCount": 4, "maxBytes": 1000000 }
+                },
+                "capabilities": { "${PluginAbiV1.Capabilities.COMPOSE}": { "operations": { "publish": {} } },
+                """.trimIndent(),
+            )
+        val script =
+            SCRIPT.replace(
+                "defineFlareSocialPlugin({ capabilities: {",
+                """
+                defineFlareSocialPlugin({ capabilities: {
+                  compose: { async publish(request, context) {
+                    await flare.http.request({ url: context.origin + "/record", method: "POST", body: { type: "json", value: request } });
+                    return { post: post("published") };
+                  } },
+                """.trimIndent(),
+            )
+        return install(manifest, script)
+    }
+
+    @Test
     fun composeWithoutProfileCapabilityKeepsThePersistedLoginProfile() =
         runBlocking<Unit> {
             val manifest =
                 MANIFEST.replace(
                     "\"capabilities\": {",
                     """
-                    "composeDefaults": { "text": { "maxLength": 1000 } },
-                    "capabilities": { "flare.datasource.compose/v1": { "operations": { "publish": {} } },
+                    "composeDefaults": { "supportedTypes": ["new", "reply", "quote"], "text": { "maxLength": 1000 } },
+                    "capabilities": { "flare.datasource.compose/v2": { "operations": { "publish": {} } },
                     """.trimIndent(),
                 )
             val script =
@@ -867,8 +983,12 @@ private class MemoryPlatformContext(
 }
 
 private class NoopTransport : PluginHttpTransport {
-    override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 =
-        PluginTransportResponseV1(200, emptyMap(), "{}".encodeToByteArray())
+    val requests = mutableListOf<PluginTransportRequestV1>()
+
+    override suspend fun execute(request: PluginTransportRequestV1): PluginTransportResponseV1 {
+        requests += request
+        return PluginTransportResponseV1(200, emptyMap(), "{}".encodeToByteArray())
+    }
 }
 
 private const val MANIFEST =

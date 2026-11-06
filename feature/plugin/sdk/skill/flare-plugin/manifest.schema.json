@@ -20,7 +20,10 @@
     },
     "apiVersion": {
       "type": "integer",
-      "enum": [1, 2],
+      "enum": [
+        1,
+        2
+      ],
       "description": "Plugin Host API version."
     },
     "id": {
@@ -409,10 +412,10 @@
               "capabilities": {
                 "type": "object",
                 "properties": {
-                  "flare.datasource.compose/v1": true
+                  "flare.datasource.compose/v2": true
                 },
                 "required": [
-                  "flare.datasource.compose/v1"
+                  "flare.datasource.compose/v2"
                 ]
               }
             }
@@ -448,10 +451,10 @@
               "capabilities": {
                 "type": "object",
                 "required": [
-                  "flare.datasource.compose/v1"
+                  "flare.datasource.compose/v2"
                 ],
                 "properties": {
-                  "flare.datasource.compose/v1": true
+                  "flare.datasource.compose/v2": true
                 }
               }
             }
@@ -1383,9 +1386,12 @@
       "type": "object",
       "maxProperties": 32,
       "default": {},
-      "description": "Declare supported API v1 operations; the Host checks their JavaScript registration.",
+      "description": "Declare supported capability operations; compose/v2 uses typed references and requires explicit supportedTypes.",
       "propertyNames": {
-        "pattern": "^(?:[a-z0-9.-]+/[a-z0-9.-]+)(?![\\s\\S])"
+        "pattern": "^(?:[a-z0-9.-]+/[a-z0-9.-]+)(?![\\s\\S])",
+        "not": {
+          "const": "flare.datasource.compose/v1"
+        }
       },
       "properties": {
         "flare.datasource.timeline/v1": {
@@ -1403,7 +1409,7 @@
         "flare.datasource.relation/v1": {
           "$ref": "#/definitions/capability-relation"
         },
-        "flare.datasource.compose/v1": {
+        "flare.datasource.compose/v2": {
           "$ref": "#/definitions/capability-compose"
         },
         "flare.datasource.notification/v1": {
@@ -1484,11 +1490,19 @@
           "$ref": "#/definitions/text"
         },
         "icon": {
-          "allOf": [{ "$ref": "#/definitions/hostIcon" }],
+          "allOf": [
+            {
+              "$ref": "#/definitions/hostIcon"
+            }
+          ],
           "default": "Home"
         },
         "display": {
-          "allOf": [{ "$ref": "#/definitions/timelineDisplay" }],
+          "allOf": [
+            {
+              "$ref": "#/definitions/timelineDisplay"
+            }
+          ],
           "default": "List"
         },
         "parameters": {
@@ -1515,11 +1529,19 @@
           "$ref": "#/definitions/text"
         },
         "icon": {
-          "allOf": [{ "$ref": "#/definitions/hostIcon" }],
+          "allOf": [
+            {
+              "$ref": "#/definitions/hostIcon"
+            }
+          ],
           "default": "Profile"
         },
         "display": {
-          "allOf": [{ "$ref": "#/definitions/timelineDisplay" }],
+          "allOf": [
+            {
+              "$ref": "#/definitions/timelineDisplay"
+            }
+          ],
           "default": "List"
         },
         "parameters": {
@@ -1767,7 +1789,11 @@
           "description": "The default visibility must be a member; checked by Flare."
         },
         "default": {
-          "allOf": [{ "$ref": "#/definitions/visibility" }],
+          "allOf": [
+            {
+              "$ref": "#/definitions/visibility"
+            }
+          ],
           "default": "public"
         }
       },
@@ -1807,6 +1833,15 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "supportedTypes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/composeType"
+          }
+        },
         "text": {
           "anyOf": [
             {
@@ -1866,7 +1901,18 @@
           ],
           "default": null
         }
-      }
+      },
+      "required": [
+        "supportedTypes"
+      ]
+    },
+    "composeType": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reply",
+        "quote"
+      ]
     }
   }
 }

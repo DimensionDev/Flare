@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -22,7 +23,18 @@ import kotlin.test.assertTrue
 
 class ComposeAccountSelectionFlowTest {
     @Test
-    fun `minimum media count applies only to new posts`() {
+    fun unsupportedModesDisableSendAndIntersectAcrossAccounts() {
+        val all = ComposeConfig(text = ComposeConfig.Text(100))
+        val restricted = all.copy(supportedTypes = setOf(ComposeType.New, ComposeType.Reply))
+        val config = all.merge(restricted)
+        assertTrue(isComposeContentValid("caption", emptyList(), config, null))
+        assertTrue(isComposeContentValid("caption", emptyList(), config, ComposeStatus.Reply(MicroBlogKey("target", "example.com"))))
+        assertFalse(isComposeContentValid("caption", emptyList(), config, ComposeStatus.Quote(MicroBlogKey("target", "example.com"))))
+        assertFalse(isComposeContentValid("", emptyList(), all, ComposeStatus.Quote(MicroBlogKey("target", "example.com"))))
+    }
+
+    @Test
+    fun `minimum media count applies to new and quote but not reply`() {
         val config =
             ComposeConfig(
                 media =

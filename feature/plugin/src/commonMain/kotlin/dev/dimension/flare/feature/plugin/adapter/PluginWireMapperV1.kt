@@ -1,6 +1,7 @@
 package dev.dimension.flare.feature.plugin.adapter
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.PostActionFamily
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.SemanticPostAction
@@ -78,6 +79,7 @@ internal class PluginWireMapperV1(
     private val capabilities: PluginSessionCapabilitiesV1,
     private val mediaNetwork: Boolean = false,
     private val platformIcon: IconType = UiIcon.World.asType(),
+    private val supportedComposeTypes: Set<ComposeType> = emptySet(),
 ) {
     private val accountType: AccountType = accountKey?.let(AccountType::Specific) ?: AccountType.GuestHost(originHost)
     private val mediaProxy = ProxyRef.forAccountType(accountType)
@@ -507,23 +509,37 @@ internal class PluginWireMapperV1(
                 val enabled = descriptor.enabled && accountKey != null && capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "mutate")
                 val item = semanticPostActionMenu(key, semantic, descriptor.actionToken, descriptor.count ?: 0, accountKey)
                 directActions += item.copy(enabled = enabled, clickEvent = if (enabled) item.clickEvent else ClickEvent.Noop)
-            } else if (descriptor.action == SemanticActionV1.Reply && capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE) &&
+            } else if (descriptor.action in setOf(SemanticActionV1.Reply, SemanticActionV1.Quote) &&
+                capabilities.canExpose(PluginAbiV1.Capabilities.COMPOSE) &&
                 accountKey != null
             ) {
+                val quote = descriptor.action == SemanticActionV1.Quote
+                val type = if (quote) ComposeType.Quote else ComposeType.Reply
+                if (type !in supportedComposeTypes) return@forEach
                 directActions +=
                     ActionMenu.Item(
-                        icon = UiIcon.Reply,
-                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                        icon = if (quote) UiIcon.Retweet else UiIcon.Reply,
+                        text =
+                            ActionMenu.Item.Text.Localized(
+                                if (quote) ActionMenu.Item.Text.Localized.Type.Quote else ActionMenu.Item.Text.Localized.Type.Reply,
+                            ),
                         enabled = descriptor.enabled,
                         clickEvent =
                             if (descriptor.enabled) {
                                 ClickEvent.Deeplink(
-                                    DeeplinkRoute.Compose.Reply(accountKey, key),
+                                    if (quote) {
+                                        DeeplinkRoute.Compose.Quote(
+                                            accountKey,
+                                            key,
+                                        )
+                                    } else {
+                                        DeeplinkRoute.Compose.Reply(accountKey, key)
+                                    },
                                 )
                             } else {
                                 ClickEvent.Noop
                             },
-                        actionFamily = PostActionFamily.Reply,
+                        actionFamily = if (quote) PostActionFamily.Quote else PostActionFamily.Reply,
                     )
             } else if (descriptor.action == SemanticActionV1.Delete && accountKey != null &&
                 capabilities.hasOperation(PluginAbiV1.Capabilities.POST, "delete")
@@ -778,6 +794,7 @@ private fun SemanticActionV1.toUiIcon(): UiIcon? =
 
         SemanticActionV1.Repost,
         SemanticActionV1.Unrepost,
+        SemanticActionV1.Quote,
         -> UiIcon.Retweet
 
         SemanticActionV1.Bookmark,

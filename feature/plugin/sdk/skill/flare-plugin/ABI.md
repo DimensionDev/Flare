@@ -105,7 +105,7 @@ Current method paths are:
 | `flare.datasource.profile/v1` | `profile.byId`, `byHandle`, `timeline`, `following`, `followers` |
 | `flare.datasource.post/v1` | `post.detail`, `context`, `delete`, `mutate` |
 | `flare.datasource.relation/v1` | `relation.state`, `mutate` |
-| `flare.datasource.compose/v1` | `compose.publish` |
+| `flare.datasource.compose/v2` | `compose.publish` |
 | `flare.datasource.notification/v1` | `notification.page`, `badge` |
 | `flare.datasource.list/v1` | `list.page`, `detail`, `create`, `update`, `delete`, `timeline`, `members`, `memberships`, `addMember`, `removeMember` |
 | `flare.datasource.direct-message/v1` | `directMessage.rooms`, `room`, `messages`, `send`, `delete`, `leave`, `create`, `badge`, `canSend` |
@@ -115,8 +115,20 @@ Current method paths are:
 
 The [capability matrix](references/capabilities.md) distinguishes required and
 optional operations and explains UI dependencies. `PluginAbiV1.kt` defines the
-Host contract. Use [flare-plugin.d.ts](flare-plugin.d.ts) for the complete v1
+Host contract. Use [flare-plugin.d.ts](flare-plugin.d.ts) for the complete
 JavaScript types and [recipes](references/recipes.md) for implementation guidance.
+
+Compose uses `flare.datasource.compose/v2`, independently of the runtime API
+version. `compose/v1` manifests and negotiated capabilities are rejected rather
+than adapted. Composer plugins must update their manifests, SDK types and
+publish handlers; existing compose accounts need a new login. New requests use
+`reference: { type: "reply" | "quote", key }`, with no reference for a new post.
+`composeDefaults.supportedTypes` is required and login narrows that set by
+intersection. See the [compose recipe](references/recipes.md#compose).
+
+Installed compose/v1 records are retained as disabled, upgradeable/uninstallable
+entries so they cannot corrupt the shared plugin index or block unrelated plugins.
+Their handlers never run, and no request or account migration is provided.
 
 Capabilities that map to a full Host interface must declare its required
 operation set; installation rejects partial interfaces. Notification filters
@@ -207,6 +219,10 @@ permission or invoke an operation.
   actor fallback used when a target is absent.
 - Unknown capability IDs and operations do not become available to the account
   or guest. An account still needs at least one supported displayable capability.
+
+The retired `flare.datasource.compose/v1` capability is an explicit exception:
+it is rejected so old handlers cannot silently publish replies or quotes as new
+posts. Other additive compatibility behavior remains unchanged.
 
 Known malformed data still fails validation. Other enums and control results,
 including login transitions, mutation results, and Host errors, remain strict;

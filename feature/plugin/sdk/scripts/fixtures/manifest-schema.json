@@ -1071,7 +1071,7 @@
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
@@ -1089,7 +1089,12 @@
           "composeDefaults": {
             "text": {
               "maxLength": 500
-            }
+            },
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
           }
         }
       },
@@ -1097,17 +1102,23 @@
       "hostValid": false
     },
     {
-      "name": "empty compose config",
+      "name": "compose types without optional limits",
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
             }
           },
-          "composeDefaults": {}
+          "composeDefaults": {
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
+          }
         }
       },
       "schemaValid": true,
@@ -1118,7 +1129,7 @@
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
@@ -1146,7 +1157,12 @@
             },
             "language": {
               "maxCount": 1
-            }
+            },
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
           }
         }
       },
@@ -1158,7 +1174,7 @@
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
@@ -1168,7 +1184,12 @@
             "media": {
               "maxCount": 101,
               "maxBytes": 100
-            }
+            },
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
           }
         }
       },
@@ -1180,7 +1201,7 @@
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
@@ -1193,7 +1214,12 @@
               "supportedMimeTypes": [
                 "image"
               ]
-            }
+            },
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
           }
         }
       },
@@ -1205,7 +1231,7 @@
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
@@ -1216,7 +1242,12 @@
               "minCountForNew": 5,
               "maxCount": 4,
               "maxBytes": 100
-            }
+            },
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
           }
         }
       },
@@ -1228,7 +1259,7 @@
       "patch": {
         "platform": {
           "capabilities": {
-            "flare.datasource.compose/v1": {
+            "flare.datasource.compose/v2": {
               "operations": {
                 "publish": {}
               }
@@ -1239,7 +1270,12 @@
               "allowed": [
                 "followers"
               ]
-            }
+            },
+            "supportedTypes": [
+              "new",
+              "reply",
+              "quote"
+            ]
           }
         }
       },
@@ -1462,6 +1498,90 @@
           }
         }
       }
+    },
+    {
+      "name": "empty supported compose types",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v2": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "supportedTypes": [],
+            "text": {
+              "maxLength": 1000
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "unknown compose type",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v2": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "supportedTypes": [
+              "reply",
+              "repost"
+            ],
+            "text": {
+              "maxLength": 1000
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "compose/v1 is retired",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v1": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
+    },
+    {
+      "name": "compose supportedTypes is required",
+      "patch": {
+        "platform": {
+          "capabilities": {
+            "flare.datasource.compose/v2": {
+              "operations": {
+                "publish": {}
+              }
+            }
+          },
+          "composeDefaults": {
+            "text": {
+              "maxLength": 1000
+            }
+          }
+        }
+      },
+      "schemaValid": false,
+      "hostValid": false
     }
   ]
 }

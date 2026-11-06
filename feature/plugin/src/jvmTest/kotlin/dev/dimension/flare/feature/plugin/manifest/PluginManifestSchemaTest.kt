@@ -1,8 +1,9 @@
 package dev.dimension.flare.feature.plugin.manifest
 
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.feature.plugin.abi.PluginAbiV1
 import dev.dimension.flare.feature.plugin.abi.PluginJsonV1
-import dev.dimension.flare.feature.plugin.wire.ComposeConfigV1
+import dev.dimension.flare.feature.plugin.wire.ComposeConfigV2
 import dev.dimension.flare.feature.plugin.wire.HostIconV1
 import dev.dimension.flare.feature.plugin.wire.PageDirectionV1
 import dev.dimension.flare.feature.plugin.wire.TimelineDisplayV1
@@ -36,7 +37,7 @@ class PluginManifestSchemaTest {
     private val definitions = schema.getValue("definitions").jsonObject
 
     @Test
-    fun everyManifestFieldAndRequiredPropertyMatchesSerialization() {
+    fun everyManifestFieldAndRequiredPropertyMatchesTheHostContract() {
         checkObject(schema, PluginManifestV1.serializer().descriptor)
         val properties = schema.getValue("properties").jsonObject
         assertEquals(
@@ -74,13 +75,17 @@ class PluginManifestSchemaTest {
             "cookieRequirement" to CookieRequirementManifestV1.serializer().descriptor,
             "deepLink" to DeepLinkManifestV1.serializer().descriptor,
             "deepLinkTarget" to DeepLinkTargetV1.serializer().descriptor,
-            "compose" to ComposeConfigV1.serializer().descriptor,
-            "composeText" to ComposeConfigV1.TextConfigV1.serializer().descriptor,
-            "composeMedia" to ComposeConfigV1.MediaConfigV1.serializer().descriptor,
-            "composeVisibility" to ComposeConfigV1.VisibilityConfigV1.serializer().descriptor,
-            "composePoll" to ComposeConfigV1.PollConfigV1.serializer().descriptor,
-            "composeLanguage" to ComposeConfigV1.LanguageConfigV1.serializer().descriptor,
+            "composeText" to ComposeConfigV2.TextConfigV1.serializer().descriptor,
+            "composeMedia" to ComposeConfigV2.MediaConfigV1.serializer().descriptor,
+            "composeVisibility" to ComposeConfigV2.VisibilityConfigV1.serializer().descriptor,
+            "composePoll" to ComposeConfigV2.PollConfigV1.serializer().descriptor,
+            "composeLanguage" to ComposeConfigV2.LanguageConfigV1.serializer().descriptor,
         ).forEach { (name, descriptor) -> checkObject(definitions.getValue(name).jsonObject, descriptor) }
+        checkObject(
+            definitions.getValue("compose").jsonObject,
+            ComposeConfigV2.serializer().descriptor,
+            requiredByValidation = setOf("supportedTypes"),
+        )
         checkObject(definitions.getValue("literalSegment").jsonObject, DeepLinkPathSegmentV1.Literal.serializer().descriptor, setOf("type"))
         checkObject(definitions.getValue("captureSegment").jsonObject, DeepLinkPathSegmentV1.Capture.serializer().descriptor, setOf("type"))
     }
@@ -89,6 +94,7 @@ class PluginManifestSchemaTest {
     fun everyEnumAndCapabilityOperationMatchesTheHost() {
         listOf(
             "loginInteraction" to LoginInteractionV1.serializer().descriptor,
+            "composeType" to ComposeType.serializer().descriptor,
             "loginFieldType" to LoginFieldTypeV1.serializer().descriptor,
             "pageDirection" to PageDirectionV1.serializer().descriptor,
             "notificationFilter" to NotificationFilterKindV1.serializer().descriptor,
@@ -159,11 +165,12 @@ class PluginManifestSchemaTest {
         document: JsonObject,
         descriptor: SerialDescriptor,
         discriminator: Set<String> = emptySet(),
+        requiredByValidation: Set<String> = emptySet(),
     ) {
         val fields = (0 until descriptor.elementsCount).map(descriptor::getElementName)
         assertEquals(fields.toSet() + discriminator, document.getValue("properties").jsonObject.keys, descriptor.serialName)
         assertEquals(
-            fields.filterIndexed { index, _ -> !descriptor.isElementOptional(index) }.toSet() + discriminator,
+            fields.filterIndexed { index, _ -> !descriptor.isElementOptional(index) }.toSet() + discriminator + requiredByValidation,
             document.strings("required"),
             descriptor.serialName,
         )

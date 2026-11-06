@@ -164,6 +164,7 @@ targets:
           - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/boltffi.h"
           - "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"
           - &crux_counter_types "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/FlareCounterTypes/FlareCounterTypes.swift"
+          - &crux_counter_bridge "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/FlareCounterTypes/FfiBridge.swift"
           - &crux_binary_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BinaryDeserializer.swift"
           - &crux_binary_serializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BinarySerializer.swift"
           - &crux_bincode_deserializer "$(CONFIGURATION_TEMP_DIR)/CruxBindings/types/FlareCounterTypes/Sources/Serde/BincodeDeserializer.swift"
@@ -254,13 +255,18 @@ targets:
     type: framework.static
     platform: iOS
     dependencies:
+      - target: FlareRust
+        link: false
       - target: Serde
     sources:
       - { path: *crux_counter_types, type: file, optional: true }
+      - { path: *crux_counter_bridge, type: file, optional: true }
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+        SWIFT_INCLUDE_PATHS: "$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi"
+        OTHER_SWIFT_FLAGS: '$(inherited) -Xcc "-fmodule-map-file=$(CONFIGURATION_TEMP_DIR)/CruxBindings/ffi/FlareRustFFI.modulemap"'
         PRODUCT_BUNDLE_IDENTIFIER: dev.dimension.flare.rust.countertypes
 
   iOS:
@@ -368,7 +374,6 @@ targets:
         product: FirebaseCrashlytics
     sources:
       - path: iosTests
-      - path: ios/Common/CruxModel.swift
       - path: ios/UI/Component/IPadCompactTabBarModifier.swift
       - path: ios/UI/Component/MediaViewerDismissEffect.swift
       - path: ios/Common/MediaViewerDismissGesturePolicy.swift

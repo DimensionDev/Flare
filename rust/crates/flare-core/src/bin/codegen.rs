@@ -1,14 +1,22 @@
 use std::{error::Error, path::Path};
 
-use crux_core::type_generation::facet::{Config, TypeRegistry};
-use flare_core::counter::CounterApp;
+use crux_core::type_generation::facet::{BoltFfi, Config, TypeRegistry};
+use flare_core::counter::CounterViewModel;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
     let [language, output] = args.as_slice() else {
         return Err("usage: codegen <swift|kotlin> <output directory>".into());
     };
-    let types = TypeRegistry::new().register_app::<CounterApp>()?.build()?;
+    let types = TypeRegistry::new()
+        .register_app::<CounterViewModel>()?
+        .build()?
+        .boltffi(
+            BoltFfi::new()
+                .class("CounterViewModelFfi")
+                .swift("FlareRust")
+                .kotlin_package("dev.dimension.flare.rust"),
+        );
     match language.to_str() {
         Some("kotlin") => {
             types.kotlin(

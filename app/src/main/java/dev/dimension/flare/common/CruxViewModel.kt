@@ -3,76 +3,34 @@ package dev.dimension.flare.common
 import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
-internal interface CruxBridge : AutoCloseable {
-    fun update(event: ByteArray): ByteArray
-
-    fun view(): ByteArray
-}
-
-internal class CruxBinding<State : Any, Event : Any>(
-    val createBridge: () -> CruxBridge,
-    val encodeEvent: (Event) -> ByteArray,
-    val decodeState: (ByteArray) -> State,
-    val processEffects: (ByteArray, render: () -> Unit) -> Unit,
-)
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 
 @MainThread
-internal class CruxViewModel<State : Any, Event : Any>(
-    private val binding: CruxBinding<State, Event>,
-) : ViewModel(),
-    AutoCloseable {
-    private var bridge: CruxBridge? = null
-    private val mutableState = MutableStateFlow<State?>(null)
-    private val mutableError = MutableStateFlow<String?>(null)
-    val state = mutableState.asStateFlow()
-    val error = mutableError.asStateFlow()
-
-    init {
+internal class CruxViewModel<VM : Any>(
+    bridge: AutoCloseable,
+    createViewModel: (CoroutineScope) -> VM,
+) : ViewModel(bridge) {
+    val viewModel: VM =
         try {
-            val native = binding.createBridge().also { bridge = it }
-            mutableState.value = binding.decodeState(native.view())
-        } catch (error: Exception) {
-            close()
-            mutableError.value = error.message ?: error.toString()
+            createViewModel(viewModelScope)
+        } catch (failure: Throwable) {
+            viewModelScope.cancel()
+            runCatching { bridge.close() }.exceptionOrNull()?.let(failure::addSuppressed)
+            throw failure
         }
-    }
-
-    fun send(event: Event) {
-        val native = bridge ?: return
-        try {
-            mutableError.value = null
-            binding.processEffects(native.update(binding.encodeEvent(event))) {
-                if (bridge === native) {
-                    try {
-                        mutableState.value = binding.decodeState(native.view())
-                    } catch (error: Exception) {
-                        mutableError.value = error.message ?: error.toString()
-                    }
-                }
-            }
-        } catch (error: Exception) {
-            mutableError.value = error.message ?: error.toString()
-        }
-    }
-
-    override fun close() {
-        val native = bridge ?: return
-        bridge = null
-        native.close()
-    }
-
-    override fun onCleared() {
-        close()
-    }
 }
 
 /** An explicit key keeps different features separate despite generic erasure. */
 @Composable
-internal fun <State : Any, Event : Any> cruxViewModel(
+internal fun <Bridge : AutoCloseable, VM : Any> rememberCruxViewModel(
     key: String,
-    binding: () -> CruxBinding<State, Event>,
-): CruxViewModel<State, Event> = viewModel(key = key) { CruxViewModel(binding()) }
+    createBridge: () -> Bridge,
+    createViewModel: (Bridge, CoroutineScope) -> VM,
+): VM =
+    viewModel<CruxViewModel<VM>>(key = key) {
+        val bridge = createBridge()
+        CruxViewModel(bridge) { scope -> createViewModel(bridge, scope) }
+    }.viewModel

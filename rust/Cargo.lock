@@ -157,9 +157,8 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
 name = "crux_core"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "488100da60c1b29000fb4de03b8da5318cfd51a9f15021823c034f97074276ba"
+version = "0.21.0"
+source = "git+https://github.com/redbadger/crux.git?rev=fbb8849b5f794c171fc1cf25c9779327cfabd943#fbb8849b5f794c171fc1cf25c9779327cfabd943"
 dependencies = [
  "anyhow",
  "bincode",
@@ -168,6 +167,7 @@ dependencies = [
  "facet",
  "facet_generate",
  "futures",
+ "heck",
  "log",
  "serde",
  "serde_json",
@@ -177,9 +177,8 @@ dependencies = [
 
 [[package]]
 name = "crux_macros"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98e4708c9175417f5b89fdd200e1b7da19d1f732de2c8d6a87f6fe3bbb8872b6"
+version = "0.11.0"
+source = "git+https://github.com/redbadger/crux.git?rev=fbb8849b5f794c171fc1cf25c9779327cfabd943#fbb8849b5f794c171fc1cf25c9779327cfabd943"
 dependencies = [
  "darling 0.24.1",
  "heck",
@@ -331,9 +330,8 @@ dependencies = [
 
 [[package]]
 name = "facet-generate-attrs"
-version = "0.18.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9748acb73b45dbcbc3fd9b61cc2e6b678ec6e05d6ada20775851e798764e566e"
+version = "0.18.0"
+source = "git+https://github.com/redbadger/facet-generate?rev=d9d4fc7b#d9d4fc7bf1043ff2da2c77114c2ec884d1e2a553"
 dependencies = [
  "facet",
 ]
@@ -385,9 +383,8 @@ dependencies = [
 
 [[package]]
 name = "facet_generate"
-version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "173892540182391eb72ad3df47af1249e4823bdbeb257c40578a9db71a6d994a"
+version = "0.21.0"
+source = "git+https://github.com/redbadger/facet-generate?rev=d9d4fc7b#d9d4fc7bf1043ff2da2c77114c2ec884d1e2a553"
 dependencies = [
  "derive_builder",
  "facet",

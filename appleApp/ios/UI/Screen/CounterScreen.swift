@@ -1,44 +1,61 @@
 import FlareCounterTypes
 import SwiftUI
 
+typealias CounterViewModel = Core
+
 struct CounterScreen: View {
-    @StateObject private var model: CruxModel<CounterState, CounterEvent>
+    @State private var viewModel: CounterViewModel?
+    private let initialValue: Int64
 
     init(initialValue: Int64 = 0) {
-        _model = StateObject(wrappedValue: CruxModel(binding: counterBinding(initialValue: initialValue)))
+        self.initialValue = initialValue
     }
 
     var body: some View {
         VStack(spacing: 24) {
-            if let state = model.state {
+            if let viewModel {
+                let state = viewModel.view
                 Text(state.value.formatted())
                     .font(.system(size: 64, weight: .medium, design: .rounded))
                     .monospacedDigit()
                     .accessibilityIdentifier("counter-value")
                 HStack(spacing: 24) {
                     Button("Decrease", systemImage: "minus") {
-                        model.send(.decrement)
+                        viewModel.update(.decrement)
                     }
                     .accessibilityIdentifier("counter-decrement")
                     Button("Increase", systemImage: "plus") {
-                        model.send(.increment)
+                        viewModel.update(.increment)
                     }
                     .accessibilityIdentifier("counter-increment")
                 }
                 .buttonStyle(.borderedProminent)
-                Button("Reset") { model.send(.reset) }
+                Button("Reset") { viewModel.update(.reset) }
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("counter-reset")
-            } else if model.error == nil {
+                if let error = state.error {
+                    Text(error.message).foregroundStyle(.red)
+                        .accessibilityIdentifier("counter-error")
+                }
+            } else {
                 ProgressView()
-            }
-            if let error = model.error ?? model.state?.error?.message {
-                Text(error).foregroundStyle(.red)
-                    .accessibilityIdentifier("counter-error")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
         .navigationTitle("Counter")
+        .onAppear {
+            guard viewModel == nil else { return }
+            viewModel = CounterViewModel(initialValue: initialValue)
+        }
     }
 }
+
+extension CounterViewModel {
+    convenience init(initialValue: Int64) {
+        self.init(handler: CounterEffectHandler())
+        update(.initialize(initialValue))
+    }
+}
+
+private struct CounterEffectHandler: EffectHandler {}

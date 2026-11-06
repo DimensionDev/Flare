@@ -38,7 +38,7 @@ final class CounterInteractionTests: XCTestCase {
     }
 
     @MainActor
-    func testCoveringPageKeepsSessionUntilItIsPopped() {
+    func testStackedCounterPagesHaveIndependentCores() {
         let app = XCUIApplication()
         app.launchArguments = ["--counter-test", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
@@ -48,8 +48,11 @@ final class CounterInteractionTests: XCTestCase {
         expect(app.staticTexts["counter-value"], "0")
         app.buttons["counter-increment"].tap()
         expect(app.staticTexts["counter-value"], "1")
-        app.buttons["counter-detail"].tap()
-        app.navigationBars["Detail"].buttons.firstMatch.tap()
+        app.buttons["counter-next"].tap()
+        expect(app.staticTexts["counter-value"], "0")
+        app.buttons["counter-decrement"].tap()
+        expect(app.staticTexts["counter-value"], "-1")
+        app.navigationBars["Counter"].buttons.firstMatch.tap()
         expect(app.staticTexts["counter-value"], "1")
         app.navigationBars["Counter"].buttons.firstMatch.tap()
     }

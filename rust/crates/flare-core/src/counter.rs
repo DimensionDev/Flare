@@ -9,12 +9,16 @@ use serde::{Deserialize, Serialize};
 use crate::domain::counter::{Counter, CounterOverflow};
 use crate::ui::UiError;
 
-#[derive(Clone, Copy, Debug, Facet, Serialize, Deserialize)]
+#[derive(Clone, Debug, Facet, Serialize, Deserialize)]
 #[repr(C)]
 pub enum CounterEvent {
     Increment,
     Decrement,
     Reset,
+    Initialize(i64),
+    // Only the Rust bridge sends this. Keep it after the shell's wire variants.
+    #[facet(skip)]
+    BridgeFailed(String),
 }
 
 #[effect(facet_typegen)]
@@ -46,13 +50,26 @@ impl Model {
         }
     }
 
-    fn apply(&mut self, event: CounterEvent) -> Result<(), CounterOverflow> {
+    fn apply(&mut self, event: CounterEvent) -> Result<(), UiError> {
         let mut next = self.counter;
         match event {
-            CounterEvent::Increment => next.increment()?,
-            CounterEvent::Decrement => next.decrement()?,
-            CounterEvent::Reset => next.reset(),
-        }
+            CounterEvent::Increment => next.increment(),
+            CounterEvent::Decrement => next.decrement(),
+            CounterEvent::Reset => {
+                next.reset();
+                Ok(())
+            }
+            CounterEvent::Initialize(value) => {
+                *self = Self::new(value);
+                return Ok(());
+            }
+            CounterEvent::BridgeFailed(message) => {
+                return Err(UiError {
+                    code: "counter_bridge_error".into(),
+                    message,
+                });
+            }
+        }?;
         if next.value() != self.counter.value() {
             let revision = self.revision.checked_add(1).ok_or(CounterOverflow)?;
             self.counter = next;
@@ -62,10 +79,19 @@ impl Model {
     }
 }
 
-#[derive(Default)]
-pub struct CounterApp;
+impl From<CounterOverflow> for UiError {
+    fn from(_: CounterOverflow) -> Self {
+        Self {
+            code: "counter_overflow".into(),
+            message: "counter value or state revision would overflow".into(),
+        }
+    }
+}
 
-impl App for CounterApp {
+#[derive(Default)]
+pub struct CounterViewModel;
+
+impl App for CounterViewModel {
     type Event = CounterEvent;
     type Model = Model;
     type ViewModel = CounterState;
@@ -77,10 +103,7 @@ impl App for CounterApp {
         model: &mut Model,
     ) -> Command<CounterEffect, CounterEvent> {
         let previous = self.view(model);
-        model.error = model.apply(event).err().map(|_| UiError {
-            code: "counter_overflow".into(),
-            message: "counter value or state revision would overflow".into(),
-        });
+        model.error = model.apply(event).err();
         if self.view(model) == previous {
             Command::done()
         } else {
@@ -104,7 +127,7 @@ mod tests {
 
     #[test]
     fn events_update_the_view_and_no_op_reset_does_not_render() {
-        let core = Core::new_with(CounterApp, Model::new(7));
+        let core = Core::new_with(CounterViewModel, Model::new(7));
         assert_eq!(core.view().value, 7);
         assert_eq!(core.view().revision, 0);
         for (event, value, revision) in [
@@ -135,7 +158,7 @@ mod tests {
             (i64::MAX, CounterEvent::Increment),
             (i64::MIN, CounterEvent::Decrement),
         ] {
-            let core = Core::new_with(CounterApp, Model::new(initial));
+            let core = Core::new_with(CounterViewModel, Model::new(initial));
             core.process_event(event);
             let failed = core.view();
             assert_eq!((failed.value, failed.revision), (initial, 0));
@@ -155,7 +178,7 @@ mod tests {
     #[test]
     fn revision_overflow_is_atomic_and_clearing_an_error_renders_even_on_a_no_op() {
         let core = Core::new_with(
-            CounterApp,
+            CounterViewModel,
             Model {
                 revision: u64::MAX,
                 ..Model::new(0)
@@ -180,8 +203,8 @@ mod tests {
 
     #[test]
     fn core_instances_and_owned_snapshots_are_independent() {
-        let first = Core::new_with(CounterApp, Model::new(0));
-        let second = Core::new_with(CounterApp, Model::new(9));
+        let first = Core::new_with(CounterViewModel, Model::new(0));
+        let second = Core::new_with(CounterViewModel, Model::new(9));
         let snapshot = first.view();
         first.process_event(CounterEvent::Increment);
         assert_eq!(snapshot.value, 0);

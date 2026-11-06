@@ -44,6 +44,20 @@ class CounterScreenTest {
     }
 
     @Test
+    fun stackedCounterPagesHaveIndependentCores() {
+        open()
+        compose.onNodeWithTag("counter-increment").performClick()
+        value("1")
+        compose.onNodeWithTag("counter-next").performClick()
+        value("0")
+        compose.onNodeWithTag("counter-decrement").performClick()
+        value("-1")
+        back()
+        value("1")
+        back()
+    }
+
+    @Test
     fun actionFailureKeepsContentAndAllowsRecovery() {
         compose.activityRule.scenario.onActivity { it.intent.putExtra("counter-initial-value", Long.MAX_VALUE) }
         open(Long.MAX_VALUE.toString())

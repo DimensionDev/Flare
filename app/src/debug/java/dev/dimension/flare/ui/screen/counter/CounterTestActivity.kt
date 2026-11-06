@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.ComposeRuntimeFlags
 import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -52,15 +54,23 @@ class CounterTestActivity : ComponentActivity() {
                             entryProvider =
                                 entryProvider<NavKey> {
                                     entry<Route.Home> {
-                                        Button(onClick = { stack.add(Route.Counter) }, modifier = Modifier.testTag("compose")) {
+                                        Button(onClick = { stack.add(Route.Counter()) }, modifier = Modifier.testTag("compose")) {
                                             Text("Compose")
                                         }
                                     }
                                     entry<Route.Counter> {
-                                        CounterScreen(
-                                            onBack = { stack.removeLastOrNull() },
-                                            initialValue = intent.getLongExtra("counter-initial-value", 0),
-                                        )
+                                        Box {
+                                            CounterScreen(
+                                                onBack = { stack.removeLastOrNull() },
+                                                initialValue = intent.getLongExtra("counter-initial-value", 0),
+                                            )
+                                            Button(
+                                                onClick = { stack.add(Route.Counter()) },
+                                                modifier = Modifier.align(Alignment.BottomCenter).testTag("counter-next"),
+                                            ) {
+                                                Text("Next")
+                                            }
+                                        }
                                     }
                                 },
                         ),

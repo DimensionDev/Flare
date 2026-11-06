@@ -12,6 +12,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.capabilities
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -77,7 +78,7 @@ public class EditListMemberPresenter(
             Triple(service, filter, members)
         }.flatMapLatest { (service, filter, members) ->
             val search = service.capabilities.search
-            if (service.capabilities.list == null || search == null || filter.isEmpty()) {
+            if (service.capabilities.list == null || search?.supports(SearchOperation.Profiles) != true || filter.isEmpty()) {
                 PagingData.emptyFlow<Pair<UiProfile, Boolean>>()
             } else {
                 Pager(config = pagingConfig) {

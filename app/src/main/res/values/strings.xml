@@ -1003,6 +1003,7 @@
     <string name="visibility_self">Only me</string>
     <string name="visibility_self_description">Only you can see this post</string>
     <string name="empty_search_results">No search results</string>
+    <string name="search_unavailable">Search is unavailable for this account</string>
     <string name="empty_discover">No recommendations yet</string>
     <string name="empty_following">No followed users yet</string>
     <string name="empty_followers">No followers yet</string>

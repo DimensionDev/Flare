@@ -44,11 +44,8 @@ import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.isLoading
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.isSuccess
-import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineDisplayMode
-import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -67,6 +64,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.UserPlaceholder
+import dev.dimension.flare.ui.component.status.pagingError
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
@@ -79,10 +77,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun DiscoverScreen(
-    onUserClick: (AccountType, MicroBlogKey) -> Unit,
-    onAskAiClick: (String?) -> Unit,
-) {
+internal fun DiscoverScreen(onAskAiClick: (String?) -> Unit) {
     val state by producePresenter("discover") { discoverPresenter() }
     val lazyListState = rememberLazyStaggeredGridState()
     val isBigScreen = isBigScreen()
@@ -231,15 +226,9 @@ internal fun DiscoverScreen(
                         }
                     }
                     if (state.isInSearchMode) {
-                        searchContent(
-                            searchUsers = state.searchState.users,
-                            searchStatus = state.searchState.status,
-                            toUser = { key ->
-                                onUserClick(state.selectedAccountType, key)
-                            },
-                        )
+                        searchContent(state.searchState)
                     } else {
-                        if (state.users.isEmpty && state.hashtags.isEmpty && state.status.isEmpty) {
+                        if (state.hasNoRecommendations) {
                             item(span = StaggeredGridItemSpan.FullLine) {
                                 ListEmptyView(
                                     modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
@@ -303,9 +292,6 @@ internal fun DiscoverScreen(
                                             CommonStatusHeaderComponent(
                                                 modifier = Modifier.padding(8.dp),
                                                 data = item,
-                                                onUserClick = {
-                                                    onUserClick(state.selectedAccountType, item.key)
-                                                },
                                             )
                                         }
                                     }
@@ -313,6 +299,7 @@ internal fun DiscoverScreen(
                             }
                         }
 
+                        pagingError(state.users)
                         state.hashtags.onSuccess {
                             item(
                                 span = StaggeredGridItemSpan.FullLine,
@@ -354,7 +341,7 @@ internal fun DiscoverScreen(
                                         AdaptiveOutlinedCard(
                                             modifier =
                                                 Modifier
-                                                    .clickable {
+                                                    .clickable(enabled = state.canSearchPosts && hashtag != null) {
                                                         hashtag?.searchContent?.let { it1 ->
                                                             state.commitSearch(
                                                                 it1,
@@ -390,42 +377,17 @@ internal fun DiscoverScreen(
                                 }
                             }
                         }
-                        state.status
-                            .onSuccess {
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine,
-                                ) {
-                                    ListItem(
-                                        colors =
-                                            ListItemDefaults
-                                                .colors(
-                                                    containerColor = Color.Transparent,
-                                                ),
-                                        elevation = ListItemDefaults.elevation(),
-                                        content = {
-                                            Text(text = stringResource(R.string.discover_status))
-                                        },
-                                    )
-                                }
-                                status(state.status)
-                            }.onLoading {
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine,
-                                ) {
-                                    ListItem(
-                                        colors =
-                                            ListItemDefaults
-                                                .colors(
-                                                    containerColor = Color.Transparent,
-                                                ),
-                                        elevation = ListItemDefaults.elevation(),
-                                        content = {
-                                            Text(text = stringResource(R.string.discover_status))
-                                        },
-                                    )
-                                }
-                                status(state.status)
+                        pagingError(state.hashtags)
+                        if (!state.status.isEmpty) {
+                            item(span = StaggeredGridItemSpan.FullLine) {
+                                ListItem(
+                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                                    elevation = ListItemDefaults.elevation(),
+                                    content = { Text(text = stringResource(R.string.discover_status)) },
+                                )
                             }
+                            status(state.status)
+                        }
                     }
                 }
             },
@@ -439,11 +401,11 @@ private fun discoverPresenter() =
         val scope = rememberCoroutineScope()
         val state = remember { DiscoverPresenter() }.invoke()
         val searchBarState = searchBarPresenter()
-        val searchState = rememberDiscoverSearchState(state.selectedAccountType, state.isAccountReady)
+        val searchState = rememberDiscoverSearchState(state)
 
         object : DiscoverState by state, SearchBarState by searchBarState {
             val searchState = searchState
-            val isInSearchMode = queryTextState.text.isNotEmpty()
+            val isInSearchMode = searchState.searching
             val refreshing =
                 if (!isInSearchMode) {
                     state.users.isRefreshing ||
@@ -459,17 +421,7 @@ private fun discoverPresenter() =
                 if (isInSearchMode) {
                     scope.launch { searchState.refreshSuspend() }
                 } else {
-                    scope.launch {
-                        state.users.onSuccess {
-                            refreshSuspend()
-                        }
-                        state.status.onSuccess {
-                            refreshSuspend()
-                        }
-                        state.hashtags.onSuccess {
-                            refreshSuspend()
-                        }
-                    }
+                    scope.launch { state.refreshSuspend() }
                 }
             }
 

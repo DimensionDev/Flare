@@ -14,6 +14,7 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileCapability
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.SearchCapability
+import dev.dimension.flare.data.datasource.microblog.SearchOperation
 import dev.dimension.flare.data.datasource.microblog.TabCatalogCapability
 import dev.dimension.flare.data.datasource.microblog.TimelineCapability
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
@@ -128,6 +129,11 @@ internal class PluginDataSourceV1 private constructor(
             dynamicTimelineSpec = dynamicTimelineSpec,
         )
     }
+
+    override val searchOperations: Set<SearchOperation> =
+        SearchOperation.entries.filterTo(linkedSetOf()) {
+            capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, it.pluginName)
+        }
 
     override val capabilitySet: DataSourceCapabilitySet by lazy {
         DataSourceCapabilitySet(
@@ -450,17 +456,17 @@ internal class PluginDataSourceV1 private constructor(
         }
     }
 
-    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> = searchPosts("posts", query)
+    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> = searchPosts(SearchOperation.Posts, query)
 
-    override fun searchUser(query: String): RemoteLoader<UiProfile> = searchProfiles("profiles", query)
+    override fun searchUser(query: String): RemoteLoader<UiProfile> = searchProfiles(SearchOperation.Profiles, query)
 
-    override fun discoverUsers(): RemoteLoader<UiProfile> = searchProfiles("discoverProfiles", "")
+    override fun discoverUsers(): RemoteLoader<UiProfile> = searchProfiles(SearchOperation.DiscoverProfiles, "")
 
-    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = searchPosts("discoverPosts", "")
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = searchPosts(SearchOperation.DiscoverPosts, "")
 
     override fun discoverHashtags(): RemoteLoader<UiHashtag> {
-        val operation = "discoverHashtags"
-        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
+        if (SearchOperation.DiscoverHashtags !in searchOperations) return notSupported()
+        val operation = SearchOperation.DiscoverHashtags.pluginName
         return pluginRemoteLoader(
             directions = capabilities.directions(PluginAbiV1.Capabilities.SEARCH, operation),
             load = { pageSize, request ->
@@ -551,10 +557,11 @@ internal class PluginDataSourceV1 private constructor(
     }
 
     private fun searchPosts(
-        operation: String,
+        searchOperation: SearchOperation,
         query: String,
     ): RemoteLoader<UiTimelineV2> {
-        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
+        if (searchOperation !in searchOperations) return notSupported()
+        val operation = searchOperation.pluginName
         return timelinePageLoader(PluginAbiV1.Capabilities.SEARCH, operation, listOf(query)) { pageSize, request ->
             invoker.invoke(
                 capabilityId = PluginAbiV1.Capabilities.SEARCH,
@@ -568,10 +575,11 @@ internal class PluginDataSourceV1 private constructor(
     }
 
     private fun searchProfiles(
-        operation: String,
+        searchOperation: SearchOperation,
         query: String,
     ): RemoteLoader<UiProfile> {
-        if (!capabilities.hasOperation(PluginAbiV1.Capabilities.SEARCH, operation)) return notSupported()
+        if (searchOperation !in searchOperations) return notSupported()
+        val operation = searchOperation.pluginName
         return pluginRemoteLoader(
             directions = capabilities.directions(PluginAbiV1.Capabilities.SEARCH, operation),
             load = { pageSize, request ->
@@ -848,6 +856,16 @@ internal interface PluginNamedTimelineDataSourceV1 {
         parameters: Map<String, String> = emptyMap(),
     ): RemoteLoader<UiTimelineV2>
 }
+
+private val SearchOperation.pluginName: String
+    get() =
+        when (this) {
+            SearchOperation.Posts -> "posts"
+            SearchOperation.Profiles -> "profiles"
+            SearchOperation.DiscoverPosts -> "discoverPosts"
+            SearchOperation.DiscoverProfiles -> "discoverProfiles"
+            SearchOperation.DiscoverHashtags -> "discoverHashtags"
+        }
 
 private fun MicroBlogKey.toWire(): EntityKeyV1 = EntityKeyV1(id, host)
 

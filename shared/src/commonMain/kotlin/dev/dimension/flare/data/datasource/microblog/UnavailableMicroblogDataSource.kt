@@ -9,6 +9,8 @@ import kotlinx.collections.immutable.persistentListOf
 
 /** Keeps observers alive while a development-only platform is detached. */
 internal object UnavailableMicroblogDataSource : MicroblogDataSource {
+    override val searchOperations: Set<SearchOperation> = emptySet()
+
     override fun homeTimeline() = notSupported<UiTimelineV2>()
 
     override fun userTimeline(

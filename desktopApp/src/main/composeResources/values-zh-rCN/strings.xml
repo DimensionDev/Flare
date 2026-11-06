@@ -396,6 +396,8 @@
     <string name="users">用户</string>
     <string name="hashtags">话题</string>
     <string name="statues">动态</string>
+    <string name="search_unavailable">此账号暂不支持搜索</string>
+    <string name="search_empty">没有搜索结果</string>
     <string name="compose_title">发布</string>
     <string name="compose_hint">在想些什么？</string>
     <string name="compose_poll_option_hint">选项 %1$s</string>

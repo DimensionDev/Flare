@@ -51,6 +51,8 @@
   "searchTitle": "搜索",
   "searchUsers": "用户",
   "searchStatus": "动态",
+  "searchNoResults": "没有搜索结果",
+  "searchUnavailable": "此账号暂不支持搜索",
   "notificationFilterAll": "全部",
   "notificationFilterMentions": "提及",
   "notificationFilterComments": "评论",

@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -38,12 +39,14 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
+import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.delete
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.search_empty
+import dev.dimension.flare.search_unavailable
 import dev.dimension.flare.statues
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -54,7 +57,9 @@ import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.LocalTimelineAppearance
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.UserPlaceholder
+import dev.dimension.flare.ui.component.status.pagingError
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
@@ -75,6 +80,7 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.surface.Card
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
@@ -83,7 +89,6 @@ import org.jetbrains.compose.resources.stringResource
 fun SearchScreen(
     initialQuery: String?,
     accountType: AccountType,
-    toUser: (AccountType, MicroBlogKey) -> Unit,
     toAskAi: (String?) -> Unit,
 ) {
     val state by producePresenter("search_${accountType}_$initialQuery") {
@@ -233,6 +238,16 @@ fun SearchScreen(
                     }
                 }
 
+                if (state.isSearchUnavailable || state.hasNoResults) {
+                    val message = if (state.isSearchUnavailable) Res.string.search_unavailable else Res.string.search_empty
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        ListEmptyView(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                            text = stringResource(message),
+                            icon = FontAwesomeIcons.Solid.MagnifyingGlass,
+                        )
+                    }
+                }
                 state.users
                     .onSuccess {
                         item(
@@ -257,20 +272,10 @@ fun SearchScreen(
                                         modifier =
                                             Modifier
                                                 .width(256.dp),
-                                        onClick = {
-                                        },
                                     ) {
                                         if (user != null) {
                                             CommonStatusHeaderComponent(
                                                 data = user,
-                                                onUserClick = {
-                                                    state.selectedAccount?.let { account ->
-                                                        toUser.invoke(
-                                                            AccountType.Specific(account.key),
-                                                            user.key,
-                                                        )
-                                                    }
-                                                },
                                                 modifier = Modifier.padding(8.dp),
                                             )
                                         } else {
@@ -312,22 +317,13 @@ fun SearchScreen(
                             }
                         }
                     }
-                state.status
-                    .onSuccess {
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
-                        ) {
-                            Header(stringResource(Res.string.statues))
-                        }
-                        status(state.status)
-                    }.onLoading {
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
-                        ) {
-                            Header(stringResource(Res.string.statues))
-                        }
-                        status(state.status)
+                pagingError(state.users)
+                if (!state.status.isEmpty) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        Header(stringResource(Res.string.statues))
                     }
+                    status(state.status)
+                }
             }
         }
 
@@ -347,6 +343,7 @@ private fun presenter(
     initialQuery: String?,
     accountType: AccountType,
 ) = run {
+    val scope = rememberCoroutineScope()
     val textState = rememberTextFieldState(initialText = initialQuery.orEmpty())
     val searchState =
         remember(initialQuery, accountType) {
@@ -378,7 +375,7 @@ private fun presenter(
         }
 
         fun refresh() {
-            searchState.search(textState.text.toString())
+            scope.launch { searchState.refreshSuspend() }
         }
 
         fun commitSearch(new: String) {

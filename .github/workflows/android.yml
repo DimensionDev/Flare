@@ -313,11 +313,13 @@ jobs:
             -parallel-testing-enabled NO -collect-test-diagnostics never
       - name: Run timeline media scroll regressions
         working-directory: ./appleApp
+        # XCTest can time out waiting for the simulator to report the app PID.
         run: |
           xcodebuild test-without-building -project Flare.xcodeproj -scheme CI-iOS \
             -derivedDataPath build/DerivedData -destination "platform=iOS Simulator,id=$FLARE_TEST_SIMULATOR" \
             -only-testing:MediaViewerInteractionTests/TimelineMediaScrollTests \
-            -parallel-testing-enabled NO -collect-test-diagnostics never
+            -parallel-testing-enabled NO -collect-test-diagnostics never \
+            -retry-tests-on-failure -test-iterations 2
       - name: Run image translation error UI regressions
         working-directory: ./appleApp
         run: |

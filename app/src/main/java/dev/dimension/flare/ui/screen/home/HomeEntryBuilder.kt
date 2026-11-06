@@ -63,9 +63,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     }
     entry<Route.Discover> { args ->
         DiscoverScreen(
-            onUserClick = { accountType, userKey ->
-                navigate(Route.Profile.User(accountType, userKey))
-            },
             onAskAiClick = { initialMessage ->
                 navigate(newGenericChatRoute(initialMessage))
             },
@@ -95,9 +92,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         SearchScreen(
             initialQuery = args.query,
             accountType = args.accountType,
-            onUserClick = { accountType, userKey ->
-                navigate(Route.Profile.User(accountType, userKey))
-            },
             onAskAiClick = { initialMessage ->
                 navigate(newGenericChatRoute(initialMessage))
             },

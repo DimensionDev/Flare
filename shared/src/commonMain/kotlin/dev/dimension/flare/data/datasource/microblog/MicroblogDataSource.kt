@@ -24,6 +24,9 @@ public interface MicroblogDataSource {
 
     public fun shareReplyChildren(reply: UiTimelineV2): RemoteLoader<UiTimelineV2>? = null
 
+    public val searchOperations: Set<SearchOperation>
+        get() = defaultSearchOperations
+
     public fun searchStatus(query: String): RemoteLoader<UiTimelineV2>
 
     public fun searchUser(query: String): RemoteLoader<UiProfile>
@@ -40,3 +43,5 @@ public interface MicroblogDataSource {
 
     public suspend fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab>
 }
+
+private val defaultSearchOperations = SearchOperation.entries.toSet()

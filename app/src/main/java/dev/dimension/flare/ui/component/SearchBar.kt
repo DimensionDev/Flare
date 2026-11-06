@@ -45,24 +45,22 @@ import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.ImmutableListWrapper
-import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineDisplayMode
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.ListEmptyView
 import dev.dimension.flare.ui.component.status.UserPlaceholder
+import dev.dimension.flare.ui.component.status.pagingError
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
+import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -218,21 +216,17 @@ private fun SearchContent(
     }
 }
 
-internal fun LazyStaggeredGridScope.searchContent(
-    searchUsers: PagingState<UiProfile>,
-    searchStatus: PagingState<UiTimelineV2>,
-    toUser: (MicroBlogKey) -> Unit,
-) {
-    if (searchUsers.isEmpty && searchStatus.isEmpty) {
+internal fun LazyStaggeredGridScope.searchContent(state: SearchState) {
+    if (state.isSearchUnavailable || state.hasNoResults) {
         item(span = StaggeredGridItemSpan.FullLine) {
             ListEmptyView(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
-                text = stringResource(R.string.empty_search_results),
+                text = stringResource(if (state.isSearchUnavailable) R.string.search_unavailable else R.string.empty_search_results),
                 icon = FontAwesomeIcons.Solid.MagnifyingGlass,
             )
         }
     }
-    searchUsers
+    state.users
         .onSuccess {
             item(
                 span = StaggeredGridItemSpan.FullLine,
@@ -279,9 +273,6 @@ internal fun LazyStaggeredGridScope.searchContent(
                                 CommonStatusHeaderComponent(
                                     modifier = Modifier.padding(8.dp),
                                     data = item,
-                                    onUserClick = {
-                                        toUser(item.key)
-                                    },
                                 )
                             }
                         }
@@ -317,7 +308,8 @@ internal fun LazyStaggeredGridScope.searchContent(
             }
         }
 
-    searchStatus.onSuccess {
+    pagingError(state.users)
+    state.status.onSuccess {
         item(
             span = StaggeredGridItemSpan.FullLine,
         ) {
@@ -333,7 +325,9 @@ internal fun LazyStaggeredGridScope.searchContent(
                 },
             )
         }
-        status(searchStatus)
+    }
+    if (!state.status.isEmpty) {
+        status(state.status)
     }
 }
 

@@ -169,8 +169,9 @@ struct ComposeScreen: View {
             if case .success(let initialText) = onEnum(of: newValue) {
                 initialTextApplied = true
                 let prefill = initialText.data.text
-                viewModel.text = prefill
-                pendingCursor = Int(initialText.data.cursorPosition)
+                let existingTextLength = viewModel.text.utf16.count
+                viewModel.text = prefill + viewModel.text
+                pendingCursor = Int(initialText.data.cursorPosition) + existingTextLength
                 requestComposerFocus()
                 applyCursorIfPossible()
             }

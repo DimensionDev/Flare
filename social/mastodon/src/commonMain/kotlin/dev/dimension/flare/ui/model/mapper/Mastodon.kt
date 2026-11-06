@@ -1150,19 +1150,19 @@ private fun replaceMentionAndHashtag(
             val c = node.attribute("class")?.value
             val mention = mentions.firstOrNull { it.url == href }
             if (mention != null) {
-                val id = mention.id
-                if (id != null) {
-                    node.attributes().put(
-                        "href",
-                        DeeplinkRoute.Profile
-                            .User(
-                                accountType =
-                                    accountKey?.let { AccountType.Specific(it) }
-                                        ?: AccountType.GuestHost(host),
-                                userKey = MicroBlogKey(id, host),
-                            ).toUri(),
-                    )
-                }
+                val acct = mention.acct?.takeIf { it.isNotBlank() }
+                val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.GuestHost(host)
+                val profile =
+                    if (acct != null) {
+                        DeeplinkRoute.Profile.UserNameWithHost(
+                            accountType = accountType,
+                            userName = acct.substringBefore('@'),
+                            host = acct.substringAfter('@', host),
+                        )
+                    } else {
+                        mention.id?.let { DeeplinkRoute.Profile.User(accountType, MicroBlogKey(it, host)) }
+                    }
+                profile?.let { node.attributes().put("href", it.toUri()) }
             } else if (node.text().startsWith("#")) {
                 node.attributes().put(
                     "href",

@@ -14,6 +14,8 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.UiTranslatableText
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -44,25 +46,30 @@ class ReplyParticipantInitialTextTest {
     }
 
     @Test
-    fun `resolves reply mentions for mastodon and filters duplicates current user and selected account`() {
+    fun `resolves current Misskey profile routes and filters duplicates current user and selected account`() {
         val selectedAccountKey = MicroBlogKey("author", "example.com")
         val authorHandle = UiHandle("author", "example.com")
         val currentUserHandle = UiHandle("me", "example.com")
         val mentionedHandle = "@friend@example.com"
+
+        fun profileLink(name: String) =
+            DeeplinkRoute.Profile
+                .UserNameWithHost(AccountType.Specific(selectedAccountKey), name, "example.com")
+                .toUri()
         val post =
             createPost(
-                platformId = "Mastodon",
+                platformId = "Misskey",
                 statusKey = MicroBlogKey("post-1", "example.com"),
                 user = createUser(handle = authorHandle, key = selectedAccountKey),
                 content =
                     text(
                         """
                         <span>
-                          <a href="flare://ProfileWithNameAndHost/friend/example.com?accountKey=author@example.com">$mentionedHandle</a>
-                          <a href="flare://ProfileWithNameAndHost/me/example.com?accountKey=author@example.com">@me@example.com</a>
-                          <a href="flare://ProfileWithNameAndHost/friend/example.com?accountKey=author@example.com">$mentionedHandle</a>
+                          <a href="${profileLink("friend")}">@friend</a>
+                          <a href="${profileLink("me")}">@me</a>
+                          <a href="${profileLink("friend")}">Friend</a>
                           <a href="https://example.com/profile">@external@example.com</a>
-                          <a href="flare://ProfileWithNameAndHost/author/example.com?accountKey=author@example.com">${authorHandle.canonical}</a>
+                          <a href="${profileLink("author")}">${authorHandle.canonical}</a>
                         </span>
                         """.trimIndent(),
                     ),

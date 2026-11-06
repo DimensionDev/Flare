@@ -198,8 +198,9 @@ struct MacComposeScreen: View {
             guard !initialTextApplied else { return }
             if case .success(let initialText) = onEnum(of: newValue) {
                 initialTextApplied = true
-                viewModel.text = initialText.data.text
-                pendingCursor = Int(initialText.data.cursorPosition)
+                let existingTextLength = viewModel.text.utf16.count
+                viewModel.text = initialText.data.text + viewModel.text
+                pendingCursor = Int(initialText.data.cursorPosition) + existingTextLength
                 requestComposerFocus()
                 applyCursorIfPossible()
             }

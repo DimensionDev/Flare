@@ -154,7 +154,7 @@ struct AccountManagementScreen: View {
                 Text(account.platformDisplayNameText.text)
                 Text(verbatim: account.accountKey.description())
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
         }
     }

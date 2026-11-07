@@ -147,11 +147,13 @@ private struct TimelinePagingListRowStyle: ViewModifier {
                 .listRowSeparator(.hidden)
                 .padding(.horizontal)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .flareTextBackground(.flareSystemGroupedBackground)
                 .listRowBackground(Color.clear)
         } else {
             content
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .flareTextBackground(.flareSystemGroupedBackground)
                 .listRowBackground(Color.clear)
         }
     }
@@ -256,6 +258,7 @@ public struct TimelineGalleryItemView: View {
                 placeholderTile
             }
         }
+        .flareTextBackground(.flareSecondarySystemGroupedBackground)
         .background(Color.flareSecondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay {
@@ -343,13 +346,14 @@ public struct TimelineGalleryItemView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     if let title = feed.title, !title.isEmpty {
                         Text(title)
+                            .flarePrimaryText()
                             .font(.subheadline.weight(.semibold))
                             .lineLimit(3)
                     }
                     if let description = feed.description_, !description.isEmpty {
                         Text(description)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .lineLimit(4)
                     }
                 }

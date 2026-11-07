@@ -28,19 +28,20 @@ struct StatusCardView: View {
                 spacing: 0
             ) {
                 Text(data.title)
+                    .flarePrimaryText()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(2)
                 if let desc = data.description_, !desc.isEmpty {
                     Text(desc)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .lineLimit(2)
                 } else {
                     Text(data.url)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .lineLimit(2)
                 }
             }
@@ -82,19 +83,20 @@ struct StatusCompatCardView: View {
                 spacing: 0
             ) {
                 Text(data.title)
+                    .flarePrimaryText()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(1)
                 if let desc = data.description_, !desc.isEmpty {
                     Text(desc)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .lineLimit(1)
                 } else {
                     Text(data.url)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .lineLimit(1)
                 }
             }

@@ -71,7 +71,7 @@ public struct AgentChatHistoryRow: View {
                 }
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .flareSecondaryText()
         }
         .padding(.vertical, 4)
     }

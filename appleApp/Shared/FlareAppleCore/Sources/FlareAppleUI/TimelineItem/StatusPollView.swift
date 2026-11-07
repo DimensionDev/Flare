@@ -33,18 +33,20 @@ public struct StatusPollView: View {
                     } label: {
                         HStack {
                             Text(option.title)
+                                .flarePrimaryText()
                                 .font(.caption)
                             Spacer()
                             if selectedOption.contains(index) {
                                 Image(systemName: "checkmark.circle")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .flareSecondaryText()
                             } else {
                                 EmptyView()
                             }
                         }
                         .padding(8)
                         .frame(maxWidth: .infinity)
+                        .flareTextBackground(selectedOption.contains(index) ? nil : .flareSystemGroupedBackground)
                         .background(
                             RoundedRectangle(cornerRadius: 8, style: .continuous)
                                 .fill(selectedOption.contains(index) ? Color.accentColor.opacity(0.2) : Color.flareSystemGroupedBackground)
@@ -62,6 +64,7 @@ public struct StatusPollView: View {
                     VStack {
                         HStack {
                             Text(option.title)
+                                .flarePrimaryText()
                                 .font(.caption)
                             Spacer()
                             if data.ownVotes.contains(KotlinInt(value: Int32(index))) {
@@ -72,7 +75,7 @@ public struct StatusPollView: View {
                             }
                             Text(option.humanizedPercentage)
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .flareSecondaryText()
                         }
                         ProgressView(value: option.percentage)
                             .progressViewStyle(.linear)
@@ -93,14 +96,14 @@ public struct StatusPollView: View {
             if data.expired {
                 Text("poll_expired", bundle: FlareAppleUILocalization.bundle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             } else if let expiredAt = data.expiredAt {
                 Text("poll_expires_at", bundle: FlareAppleUILocalization.bundle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                 DateTimeText(data: expiredAt, fullTime: true)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
             
             if data.canVote {

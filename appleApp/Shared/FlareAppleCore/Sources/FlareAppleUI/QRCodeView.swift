@@ -20,7 +20,7 @@ public struct QRCodeView: View {
                 .resizable()
                 .scaledToFit()
                 .padding(40)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
         }
     }
 

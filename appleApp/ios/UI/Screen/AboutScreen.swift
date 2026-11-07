@@ -1,3 +1,4 @@
+import FlareAppleUI
 import SwiftUI
 import UIKit
 import FlareAppleCore
@@ -31,6 +32,7 @@ struct AboutScreen: View {
                 AboutHeader(iconName: iconName, version: version)
             }
             .listRowInsets(EdgeInsets(top: 28, leading: 20, bottom: 28, trailing: 20))
+            .flareTextBackground(.flareSystemGroupedBackground)
             .listRowBackground(Color.clear)
 
             Section {
@@ -67,14 +69,14 @@ private struct AboutHeader: View {
 
                 Text("settings_about_description")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if !version.isEmpty {
                     Text(verbatim: version)
                         .font(.footnote.monospacedDigit())
-                        .foregroundStyle(.tertiary)
+                        .flareTertiaryText()
                 }
             }
         }
@@ -101,7 +103,7 @@ private struct AboutLinkRow: View {
 
                 Text(item.subtitleKey)
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .lineLimit(2)
             }
 
@@ -109,7 +111,7 @@ private struct AboutLinkRow: View {
 
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(.tertiary)
+                .flareTertiaryText()
         }
         .contentShape(Rectangle())
     }

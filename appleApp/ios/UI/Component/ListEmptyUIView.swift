@@ -1,4 +1,5 @@
 import UIKit
+import FlareAppleUI
 
 /// UIKit port of `ListEmptyView`.
 final class ListEmptyUIView: UIView {
@@ -10,6 +11,7 @@ final class ListEmptyUIView: UIView {
         icon.translatesAutoresizingMaskIntoConstraints = false
 
         let label = UILabel()
+        label.textColor = .flareLabel
         label.text = String(localized: "list_empty_title")
         label.font = .preferredFont(forTextStyle: .headline)
         label.textAlignment = .center

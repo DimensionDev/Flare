@@ -36,7 +36,7 @@ public struct TimelineListHeader {
         Self(id: key, isPinned: true) {
             Text(FlareAppleUILocalization.string(key))
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)

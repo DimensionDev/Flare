@@ -34,7 +34,7 @@ struct AltTextEditSheet: View {
                     Spacer()
                     Text("\(item.altText.count)/\(maxLength)")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
                 .padding(.horizontal)
                 

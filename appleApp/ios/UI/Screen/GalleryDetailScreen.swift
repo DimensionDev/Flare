@@ -42,6 +42,7 @@ struct GalleryDetailScreen: View {
             GalleryDetailLoadingView()
         }
         .environment(\.timelineAppearance, timelineAppearance.galleryCardTimeline())
+        .flareTextBackground(.flareSystemGroupedBackground)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
@@ -173,6 +174,7 @@ struct GalleryDetailScreen: View {
                 )
                 .frame(width: sidebarWidth(for: proxy.size.width))
                 .frame(maxHeight: .infinity)
+                .flareTextBackground(.flareSystemGroupedBackground)
                 .background(Color(.systemGroupedBackground))
             }
         }
@@ -380,13 +382,14 @@ private struct GalleryAuthorCard: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(detail.title)
+                        .flarePrimaryText()
                         .font(.headline)
                         .fontWeight(.semibold)
                         .fixedSize(horizontal: false, vertical: true)
                     if let user = detail.author {
                         RichText(text: user.name)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .lineLimit(1)
                     }
                 }
@@ -438,7 +441,7 @@ private struct GalleryMetadataRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             DateTimeText(data: detail.createdAt, fullTime: true)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .lineLimit(1)
             ForEach(Array(detail.matrix.enumerated()), id: \.offset) { _, item in
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
@@ -448,7 +451,7 @@ private struct GalleryMetadataRow: View {
                     }
                 }
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .accessibilityLabel(
                     Text(
                         verbatim: item.humanizedCount.isEmpty
@@ -672,13 +675,14 @@ private struct GalleryCompactToolbarTitle: View {
                 }
                 VStack(alignment: .leading, spacing: 1) {
                     Text(detail.title)
+                        .flarePrimaryText()
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .lineLimit(1)
                     if let user {
                         RichText(text: user.name)
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .lineLimit(1)
                     }
                 }
@@ -721,6 +725,7 @@ private struct GallerySectionTitle: View {
 
     var body: some View {
         Text(title)
+            .flarePrimaryText()
             .font(.headline)
             .fontWeight(.semibold)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -767,6 +772,7 @@ struct GalleryCommentsScreen: View {
             suppressInitialRefreshIndicator: true
         )
         .environment(\.timelineAppearance, TimelineAppearance.companion.Default.galleryCardTimeline())
+        .flareTextBackground(.flareSystemGroupedBackground)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("Comments")
         .navigationBarTitleDisplayMode(.inline)

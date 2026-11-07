@@ -69,6 +69,7 @@ struct StatusShareSheet: View {
                 .frame(height: 360)
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .flareTextBackground(.flareSystemGroupedBackground)
                 .listRowBackground(Color.clear)
 
                 Section {
@@ -135,10 +136,10 @@ struct StatusShareSheet: View {
                                 .foregroundStyle(.primary)
                             Spacer()
                             Text(String(format: String(localized: "share_replies_count"), Int(presenter.state.selectedCount)))
-                                .foregroundStyle(.secondary)
+                                .flareSecondaryText()
                             Image(systemName: "chevron.forward")
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+                                .flareTertiaryText()
                         }
                     }
                 }
@@ -193,6 +194,7 @@ struct StatusShareSheet: View {
         StatusShareContent(data: data, statusKey: statusKey, replies: Array(presenter.state.selectedReplies))
             .frame(width: 360)
             .padding()
+            .flareTextBackground(.flareSecondarySystemGroupedBackground)
             .background(Color(.secondarySystemGroupedBackground))
             .if(previewStyle == .card) { view in
                 view

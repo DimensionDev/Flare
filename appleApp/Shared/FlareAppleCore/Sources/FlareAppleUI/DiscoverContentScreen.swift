@@ -190,7 +190,7 @@ public struct DiscoverContentScreen<AskAiOverlay: View>: View {
                                 Text(selectedAccount.handle.display)
                                 Image(fontAwesome: .chevronDown)
                                     .font(.footnote)
-                                    .foregroundStyle(.secondary)
+                                    .flareSecondaryText()
                                     .scaledToFit()
                                     .frame(width: 8, height: 8)
                                     .padding(8)
@@ -532,6 +532,7 @@ private struct DiscoverListStyle: ViewModifier {
         content
             .scrollContentBackground(.hidden)
             .listRowSpacing(2)
+            .flareTextBackground(.flareSystemBackground)
             .listStyle(.plain)
         #else
         content
@@ -547,6 +548,7 @@ private struct DiscoverSectionRowStyle: ViewModifier {
             .listRowSeparator(.hidden)
             .padding(.horizontal)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .flareTextBackground(.flareSystemGroupedBackground)
             .listRowBackground(Color.clear)
     }
 }

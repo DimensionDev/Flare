@@ -79,6 +79,7 @@ final class DMConversationMessagesController: UIViewController, UICollectionView
         setupCollectionView()
         setupDataSource()
         view.backgroundColor = .systemGroupedBackground
+        view.traitOverrides[FlareTextBackgroundTrait.self] = .systemGroupedBackground
         if let currentData {
             applySnapshot(data: currentData)
         }
@@ -907,7 +908,7 @@ private final class DMBubbleView: UIView {
                 isTextSelectionEnabled: false,
                 onOpenURL: onOpenURL,
                 baseTextStyle: .body,
-                baseTextColor: item.isFromMe ? .white : .label,
+                baseTextColor: item.isFromMe ? .white : .flareLabel,
                 preferredContentSizeCategory: appearance.preferredContentSizeCategory,
                 contentKey: item.hash
             )
@@ -1007,9 +1008,11 @@ private final class DMBubbleView: UIView {
     private func updateBackground() {
         if usesBubbleBackground {
             backgroundColor = isOutgoing ? .systemBlue : .secondarySystemGroupedBackground
+            traitOverrides[FlareTextBackgroundTrait.self] = backgroundColor
             layer.cornerRadius = 18
         } else {
             backgroundColor = .clear
+            traitOverrides.remove(FlareTextBackgroundTrait.self)
             layer.cornerRadius = 12
         }
     }

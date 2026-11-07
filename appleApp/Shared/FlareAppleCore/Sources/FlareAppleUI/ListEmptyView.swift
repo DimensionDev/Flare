@@ -19,6 +19,7 @@ public struct ListEmptyView: View {
         ContentUnavailableView {
             Label {
                 Text(title, bundle: FlareAppleUILocalization.bundle)
+                    .flarePrimaryText()
             } icon: {
                 icon
             }

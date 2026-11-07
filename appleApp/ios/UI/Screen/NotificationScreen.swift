@@ -291,13 +291,13 @@ struct NotificationAccountsMenu: View {
                             if let unreadText = unreadText(for: totalUnreadCount) {
                                 Text(unreadText)
                                     .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .flareSecondaryText()
                                     .lineLimit(1)
                             }
                         }
                         Image(fontAwesome: .chevronDown)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .scaledToFit()
                             .frame(width: 8, height: 8)
                             .padding(8)

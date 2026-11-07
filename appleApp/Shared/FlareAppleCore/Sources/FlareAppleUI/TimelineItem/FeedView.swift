@@ -24,29 +24,31 @@ struct FeedView: View {
                         .frame(width: 20, height: 20)
                 }
                 Text(data.source.name)
+                    .flarePrimaryText()
                     .font(.footnote)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 if data.translationDisplayState != .hidden {
                     TranslateStatusComponent(data: data.translationDisplayState)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
                 if let date = data.actualCreatedAt {
                     DateTimeText(data: date)
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
             }
             if let title = data.title {
                 Text(title)
+                    .flarePrimaryText()
             }
             if desc != nil || data.media != nil {
                 HStack(alignment: .top, spacing: 8) {
                     if let desc {
                         Text(desc)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .lineLimit(5)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .fixedSize(horizontal: false, vertical: true)

@@ -315,7 +315,7 @@ private struct ChangeLogNotice: View {
                 .font(.headline)
             Text("changelog_message")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
             Text(message)
                 .font(.body)
                 .fixedSize(horizontal: false, vertical: true)
@@ -324,6 +324,7 @@ private struct ChangeLogNotice: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
+        .flareTextBackground(nil)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
         .overlay {
             RoundedRectangle(cornerRadius: 16)

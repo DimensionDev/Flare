@@ -595,7 +595,7 @@ private final class ActionItemControl: UIButton, ManualLayoutMeasurable, Timelin
 
         label.text = title
         label.font = metrics.nativeFont
-        label.textColor = tintColor
+        label.textColor = tintColor.isEqual(UIColor.label) ? .flareLabel : tintColor
         label.isHidden = title == nil
         let titleWidth = title.map { _ in
             let width = label.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)).width

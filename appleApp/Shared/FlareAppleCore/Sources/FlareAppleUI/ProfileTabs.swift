@@ -63,7 +63,11 @@ public struct ProfileTabBar: View {
                                 .foregroundStyle(Color.secondary)
                                 .overlay {
                                     Text(title)
+                                        #if os(iOS)
+                                        .flarePrimaryText()
+                                        #else
                                         .foregroundStyle(Color.primary)
+                                        #endif
                                         .opacity(tabEmphasis(at: index))
                                         .accessibilityHidden(true)
                                 }
@@ -170,7 +174,7 @@ public struct ProfileTabsLoadingPlaceholder: View {
                 HStack {
                     ForEach(placeholderTitles.indices, id: \.self) { index in
                         Text(verbatim: placeholderTitles[index])
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .padding(.vertical, 12)
                             .overlay(alignment: .bottom) {
                                 if index == 0 {

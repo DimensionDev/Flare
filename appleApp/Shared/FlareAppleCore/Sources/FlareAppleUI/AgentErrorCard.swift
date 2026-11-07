@@ -48,6 +48,7 @@ struct AgentErrorCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .flareTextBackground(nil)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
     }
 

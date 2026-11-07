@@ -426,11 +426,12 @@ private final class ReactionChipView: UIControl, ManualLayoutMeasurable, Timelin
     }
 
     private func updateColors() {
-        nameLabel.textColor = .label
-        countLabel.textColor = .label
+        nameLabel.textColor = .flareLabel
+        countLabel.textColor = .flareLabel
         backgroundColor = isMyReaction
             ? tintColor.withAlphaComponent(0.18)
             : .tertiarySystemGroupedBackground
+        traitOverrides[FlareTextBackgroundTrait.self] = backgroundColor
         layer.borderWidth = isMyReaction ? Self.borderWidth : 0
         layer.borderColor = isMyReaction ? tintColor.cgColor : UIColor.clear.cgColor
     }

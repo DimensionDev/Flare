@@ -20,6 +20,7 @@ public struct ListCardView<Content: View>: View {
 
     public var body: some View {
         content()
+            .flareTextBackground(.flareSecondarySystemGroupedBackground)
             .background {
                 UnevenRoundedRectangle(
                     cornerRadii: cornerRadii,

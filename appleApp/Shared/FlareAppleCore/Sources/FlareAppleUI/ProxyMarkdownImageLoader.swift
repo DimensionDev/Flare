@@ -9,11 +9,47 @@ struct AgentMarkdownText: View {
 
     var body: some View {
         StructuredText(markdown: markdown)
+            #if os(iOS)
+            .textual.paragraphStyle(FlareMarkdownParagraphStyle())
+            .textual.headingStyle(FlareMarkdownHeadingStyle())
+            .textual.blockQuoteStyle(FlareMarkdownQuoteStyle())
+            .textual.tableCellStyle(FlareMarkdownTableCellStyle())
+            #endif
             .textual.imageAttachmentLoader(ProxyMarkdownImageLoader())
             .textual.textSelection(.enabled)
             .id(ProxyMediaImages.shared.revision)
     }
 }
+
+#if os(iOS)
+private struct FlareMarkdownParagraphStyle: StructuredText.ParagraphStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        StructuredText.DefaultParagraphStyle().makeBody(configuration: configuration)
+            .foregroundStyle(FlarePrimaryTextStyle())
+    }
+}
+
+private struct FlareMarkdownHeadingStyle: StructuredText.HeadingStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        StructuredText.DefaultHeadingStyle.default.makeBody(configuration: configuration)
+            .foregroundStyle(FlarePrimaryTextStyle())
+    }
+}
+
+private struct FlareMarkdownQuoteStyle: StructuredText.BlockQuoteStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        StructuredText.DefaultBlockQuoteStyle.default.makeBody(configuration: configuration)
+            .flareTextBackground(nil)
+    }
+}
+
+private struct FlareMarkdownTableCellStyle: StructuredText.TableCellStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        StructuredText.DefaultTableCellStyle().makeBody(configuration: configuration)
+            .foregroundStyle(FlarePrimaryTextStyle())
+    }
+}
+#endif
 
 struct ProxyMarkdownImageLoader: AttachmentLoader {
     nonisolated func attachment(

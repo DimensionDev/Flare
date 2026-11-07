@@ -122,7 +122,7 @@ private struct DraftBoxContentRow: View {
                     if let spoilerText = draft.data.spoilerText?.nonEmpty {
                         Text(spoilerText)
                             .font(rowMode == .compact ? .caption : .subheadline)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .lineLimit(1)
                     }
 
@@ -151,13 +151,13 @@ private struct DraftBoxContentRow: View {
 
                     DateTimeText(data: draft.updatedAt, fullTime: true)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .lineLimit(1)
 
                     if !draft.medias.isEmpty {
                         Text(attachmentCountText(draft.medias.count))
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                             .lineLimit(1)
                     }
                 }
@@ -176,7 +176,7 @@ private struct DraftBoxContentRow: View {
                     )
                 } label: {
                     Image(fontAwesome: .ellipsisVertical)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .frame(width: rowMode == .compact ? 24 : 28, height: rowMode == .compact ? 24 : 28)
                 }
                 .modifier(DraftBoxMenuButtonStyle())
@@ -254,7 +254,7 @@ private struct DraftAccountsStrip: View {
                     Image(systemName: "person.crop.circle.fill")
                         .resizable()
                         .scaledToFit()
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .frame(width: 22, height: 22)
                         .accessibilityLabel(Text(verbatim: postingAccountDescription(account)))
                 }
@@ -263,9 +263,10 @@ private struct DraftAccountsStrip: View {
             if accounts.count > 6 {
                 Text("+\(accounts.count - 6)")
                     .font(.caption2.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .padding(.horizontal, 6)
                     .frame(height: 22)
+                    .flareTextBackground(nil)
                     .background(.quaternary, in: Capsule())
             }
         }
@@ -341,7 +342,7 @@ private struct DraftMediaThumbnail: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color.flareSecondarySystemGroupedBackground)
             Image(systemName: icon)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
         }
     }
 }

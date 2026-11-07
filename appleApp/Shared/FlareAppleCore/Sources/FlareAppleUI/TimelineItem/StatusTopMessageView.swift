@@ -19,6 +19,7 @@ public struct StatusTopMessageView: View {
             }
             if let text = topMessage.type.localizedText {
                 Text(text)
+                    .flarePrimaryText()
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

@@ -114,9 +114,10 @@ public struct StatusShareReplyPicker: View {
                 .frame(maxWidth: .infinity, alignment: .center)
             } else if state.replies.isEmpty {
                 Text("share_replies_empty", bundle: FlareAppleUILocalization.bundle)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
         }
+        .flareTextBackground(.flareSystemBackground)
         .listStyle(.plain)
         .timelineMediaViewport()
     }
@@ -124,7 +125,7 @@ public struct StatusShareReplyPicker: View {
     private var selectionCount: some View {
         Text(String(format: String(localized: "share_replies_count", bundle: FlareAppleUILocalization.bundle), Int(state.selectedCount)))
             .font(.subheadline)
-            .foregroundStyle(.secondary)
+            .flareSecondaryText()
     }
 
     private var clearButton: some View {

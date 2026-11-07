@@ -998,6 +998,7 @@ final class UITimelineCollectionViewController: UIViewController, UICollectionVi
         )
         view.backgroundColor = backgroundColor
         collectionView.backgroundColor = backgroundColor
+        view.traitOverrides[FlareTextBackgroundTrait.self] = backgroundColor
     }
 
     // MARK: - Cell Configuration

@@ -148,7 +148,7 @@ private struct TimelineFilterSettingsItem: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("tab_settings_filter_title")
-                    .foregroundColor(.primary)
+                    .flarePrimaryText()
                 Text("tab_settings_filter_desc")
                     .font(.caption)
                     .foregroundColor(.secondary)

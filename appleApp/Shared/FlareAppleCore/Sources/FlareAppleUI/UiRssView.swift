@@ -29,7 +29,7 @@ public struct UiRssView: View {
 
             Text(data.url)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .lineLimit(1)
                 .truncationMode(.middle)
         }

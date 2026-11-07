@@ -1,3 +1,4 @@
+import FlareAppleUI
 import SwiftUI
 @preconcurrency import KotlinSharedUI
 import FlareAppleCore
@@ -14,7 +15,7 @@ struct NostrRelaysScreen: View {
                 let relays = (relaysAny as NSArray).cast(NSString.self).map(String.init)
                 if relays.isEmpty {
                     Text("No relays configured")
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 } else {
                     ForEach(relays, id: \.self) { item in
                         Text(item)
@@ -44,7 +45,7 @@ struct NostrRelaysScreen: View {
                 }
             } errorContent: { _ in
                 Text("No relays configured")
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             } loadingContent: {
                 ProgressView()
             }

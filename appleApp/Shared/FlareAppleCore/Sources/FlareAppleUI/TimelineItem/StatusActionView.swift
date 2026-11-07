@@ -55,30 +55,35 @@ public struct StatusActionsView: View {
     }
 
     public var body: some View {
-        let metrics = StatusActionLayoutMetrics(fontSize: isDetail || useText ? bodyFontSize : fontSize, scale: displayScale)
-        let actions = resolvedData.filter { action in
-            if case .divider = onEnum(of: action) { return useText }
-            return true
-        }
-        if useText {
-            ForEach(0..<actions.count, id: \.self) { index in
-                StatusActionView(data: actions[index], useText: true, isFixedWidth: false,
-                                 metrics: metrics, showNumbers: showNumbers, openURL: openURL)
+        Group {
+            let metrics = StatusActionLayoutMetrics(fontSize: isDetail || useText ? bodyFontSize : fontSize, scale: displayScale)
+            let actions = resolvedData.filter { action in
+                if case .divider = onEnum(of: action) { return useText }
+                return true
             }
-        } else if !actions.isEmpty {
-            let isStretched = postActionStyle == .stretch && allowSpacer
-            StatusActionRowLayout(metrics: metrics, style: postActionStyle, allowSpacer: allowSpacer,
-                                  lastHasNumber: hasTrailingCount(actions)) {
+            if useText {
                 ForEach(0..<actions.count, id: \.self) { index in
-                    StatusActionView(data: actions[index], useText: false,
-                                     isFixedWidth: !isStretched && postActionFixedWidth && index != actions.count - 1,
-                                     metrics: metrics, showNumbers: showNumbers, openURL: openURL,
-                                     animationIdentity: animationIdentity(for: actions[index], position: index))
+                    StatusActionView(data: actions[index], useText: true, isFixedWidth: false,
+                                     metrics: metrics, showNumbers: showNumbers, openURL: openURL)
                 }
+            } else if !actions.isEmpty {
+                let isStretched = postActionStyle == .stretch && allowSpacer
+                StatusActionRowLayout(metrics: metrics, style: postActionStyle, allowSpacer: allowSpacer,
+                                      lastHasNumber: hasTrailingCount(actions)) {
+                    ForEach(0..<actions.count, id: \.self) { index in
+                        StatusActionView(data: actions[index], useText: false,
+                                         isFixedWidth: !isStretched && postActionFixedWidth && index != actions.count - 1,
+                                         metrics: metrics, showNumbers: showNumbers, openURL: openURL,
+                                         animationIdentity: animationIdentity(for: actions[index], position: index))
+                    }
+                }
+                .font(.system(size: metrics.fontSize))
+                .padding(.top, topPadding)
             }
-            .font(.system(size: metrics.fontSize))
-            .padding(.top, topPadding)
         }
+        #if os(iOS)
+        .environment(\.flareTextRole, isDetail || useText ? .primary : .secondary)
+        #endif
     }
 
     private func hasTrailingCount(_ actions: [ActionMenu]) -> Bool {
@@ -302,7 +307,7 @@ public struct StatusActionItemView: View {
         if useText {
             Group {
                 if let title = resolvedTitle {
-                    Label { Text(title) } icon: { StatusActionIcon(icon: data.icon) }
+                    Label { Text(title).actionForeground(data.color?.swiftColor) } icon: { StatusActionIcon(icon: data.icon) }
                 } else {
                     StatusActionIcon(icon: data.icon)
                 }
@@ -398,9 +403,9 @@ private struct StatusActionBarLabel: View {
             .frame(width: StatusActionLayoutMetrics.iconWidth, height: metrics.iconHeight)
             if let text = state.text {
                 Text(text)
+                    .actionForeground(state.color?.swiftColor)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .optionalForegroundStyle(state.color?.swiftColor)
                     #if os(iOS)
                     .opacity(animateNumber ? 0 : 1)
                     .transaction { $0.animation = nil; $0.disablesAnimations = true }
@@ -513,8 +518,8 @@ private struct StatusActionNumberMotion: View {
         ZStack(alignment: .leading) {
             if let previous = motion.previous.text {
                 Text(previous)
+                    .actionForeground(motion.previous.color?.swiftColor)
                     .lineLimit(1)
-                    .optionalForegroundStyle(motion.previous.color?.swiftColor)
                     .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 0, opacity: 1), trigger: trigger) { content, value in
                         content.visualEffect { effect, geometry in
                             effect.offset(y: geometry.size.height * direction * CGFloat(value.progress))
@@ -533,8 +538,8 @@ private struct StatusActionNumberMotion: View {
             }
             if let target = motion.target.text {
                 Text(target)
+                    .actionForeground(motion.target.color?.swiftColor)
                     .lineLimit(1)
-                    .optionalForegroundStyle(motion.target.color?.swiftColor)
                     .keyframeAnimator(initialValue: StatusActionMotionValues(progress: 0, opacity: 0), trigger: trigger) { content, value in
                         content.visualEffect { effect, geometry in
                             effect.offset(y: -geometry.size.height * direction * CGFloat(1 - value.progress))
@@ -628,6 +633,13 @@ private struct StatusActionHoverModifier: ViewModifier {
     }
 }
 #endif
+
+private extension Text {
+    func actionForeground(_ color: Color?) -> Text {
+        if let color { return foregroundStyle(color) }
+        return flarePrimaryText()
+    }
+}
 
 private extension View {
     @ViewBuilder

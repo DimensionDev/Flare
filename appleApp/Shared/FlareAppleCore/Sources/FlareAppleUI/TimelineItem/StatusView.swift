@@ -259,7 +259,7 @@ public struct StatusView: View {
                                         }
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
-                                        .padding(.top, 4)
+                                        .padding(.top, showAsFullWidth ? 2 : 4)
                                     }
                                     if !contentWarningIsEmpty {
                                         VStack(alignment: .leading, spacing: 4) {
@@ -332,6 +332,11 @@ public struct StatusView: View {
                                                 StatusPollView(data: poll)
                                             }
                                         }
+                                        .padding(
+                                            .top,
+                                            showAsFullWidth && contentWarningIsEmpty &&
+                                                (user != nil || replyToHandle != nil) && contents.contains { !$0.isEmpty } ? 2 : 0
+                                        )
                                     }
 
                                     if isDetail, showTranslate {

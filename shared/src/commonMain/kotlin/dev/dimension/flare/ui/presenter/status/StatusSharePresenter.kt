@@ -15,12 +15,9 @@ import dev.dimension.flare.di.koinInject
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
-import dev.dimension.flare.ui.model.TranslationDisplayState
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.asTimelinePostItem
 import dev.dimension.flare.ui.model.contentPostOrNull
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -46,7 +43,7 @@ public class StatusSharePresenter(
                 }
             }
         return object : State {
-            override val status = status.map { it.forScreenshot() }
+            override val status = status
             override val replies = session.replies
             override val selectedReplies = session.selectedReplies
             override val expandableReplies = session.expandableReplies
@@ -166,7 +163,7 @@ internal class StatusShareSession(
 
     fun confirm() {
         val keys = draftKeys ?: return
-        selectedReplies = replies.filter { it.statusKey in keys }.map { it.forScreenshot() }.toImmutableList()
+        selectedReplies = replies.filter { it.statusKey in keys }.toImmutableList()
         draftKeys = null
     }
 
@@ -268,33 +265,3 @@ internal class StatusShareSession(
         }
     }
 }
-
-internal fun UiTimelineV2.forScreenshot(): UiTimelineV2 =
-    when (this) {
-        is UiTimelineV2.Post -> {
-            copy(translationDisplayState = TranslationDisplayState.Hidden)
-        }
-
-        is UiTimelineV2.TimelinePostItem -> {
-            copy(
-                post = post.forScreenshot() as UiTimelineV2.Post,
-                presentation =
-                    presentation.copy(
-                        inlineParents =
-                            presentation.inlineParents
-                                .map { it.forScreenshot() as UiTimelineV2.TimelinePostItem }
-                                .toImmutableList(),
-                        quotes = presentation.quotes.map { it.forScreenshot() as UiTimelineV2.Post }.toImmutableList(),
-                        repost = presentation.repost?.forScreenshot() as? UiTimelineV2.Post,
-                    ),
-            )
-        }
-
-        is UiTimelineV2.Feed -> {
-            copy(translationDisplayState = TranslationDisplayState.Hidden)
-        }
-
-        else -> {
-            this
-        }
-    }

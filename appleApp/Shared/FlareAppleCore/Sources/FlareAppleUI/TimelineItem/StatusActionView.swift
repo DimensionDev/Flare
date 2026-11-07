@@ -824,6 +824,8 @@ public struct MacStatusShareSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.timelineAppearance) private var timelineAppearance
+    @Environment(\.translateConfig) private var translateConfig
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var presenter: KotlinPresenter<StatusSharePresenterState>
     @State private var theme: ColorScheme?
     @State private var previewStyle: MacStatusSharePreviewStyle = .card
@@ -837,7 +839,7 @@ public struct MacStatusShareSheet: View {
 
     private var previewRevision: String {
         let statusHash: Int32 = if case .success(let data) = onEnum(of: presenter.state.status) { data.data.renderHash } else { 0 }
-        return "\(statusHash)-\(Array(presenter.state.selectedReplies).map { $0.renderHash })-\(resolvedColorScheme)-\(previewStyle)-\(renderAttempt)"
+        return "\(statusHash)-\(Array(presenter.state.selectedReplies).map { $0.renderHash })-\(resolvedColorScheme)-\(previewStyle)-\(renderAttempt)-\(timelineAppearance.hash)-\(translateConfig.showOriginalWithTranslation)-\(dynamicTypeSize)"
     }
 
     private var currentScreenshotURL: URL? { renderedRevision == previewRevision ? screenshotURL : nil }
@@ -865,12 +867,9 @@ public struct MacStatusShareSheet: View {
         StateView(state: presenter.state.status) { state in
             VStack(spacing: 0) {
                 ScrollView {
-                    if let url = currentScreenshotURL, let image = NSImage(contentsOf: url) {
-                        Image(nsImage: image).resizable().scaledToFit()
-                    } else if isRenderingScreenshot {
-                        ProgressView("share_replies_preparing")
-                            .padding()
-                    }
+                    previewView(data: state)
+                        .frame(maxWidth: .infinity)
+                        .allowsHitTesting(false)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Divider()
@@ -986,6 +985,19 @@ public struct MacStatusShareSheet: View {
         }
     }
 
+    private func previewView(data: UiTimelineV2) -> MacStatusSharePreview {
+        MacStatusSharePreview(
+            data: data,
+            statusKey: statusKey,
+            replies: Array(presenter.state.selectedReplies),
+            colorScheme: resolvedColorScheme,
+            previewStyle: previewStyle,
+            timelineAppearance: timelineAppearance,
+            translateConfig: translateConfig,
+            dynamicTypeSize: dynamicTypeSize
+        )
+    }
+
     private func renderScreenshot(data: UiTimelineV2) async {
         guard !crossPostDispatched else { return }
         let requestID = UUID()
@@ -995,14 +1007,7 @@ public struct MacStatusShareSheet: View {
         isRenderingScreenshot = true
         do {
             let screenshot = try await MacStatusShareScreenshotRenderer.render(
-                view: MacStatusSharePreview(
-                    data: data,
-                    statusKey: statusKey,
-                    replies: Array(presenter.state.selectedReplies),
-                    colorScheme: resolvedColorScheme,
-                    previewStyle: previewStyle,
-                    timelineAppearance: timelineAppearance
-                ),
+                view: previewView(data: data),
                 fileName: "flare-status-\(statusKey.description()).png"
             )
             guard !Task.isCancelled, renderRequestID == requestID, revision == previewRevision else {
@@ -1033,6 +1038,8 @@ private struct MacStatusSharePreview: View {
     let colorScheme: ColorScheme
     let previewStyle: MacStatusSharePreviewStyle
     let timelineAppearance: TimelineAppearance
+    let translateConfig: AppSettings.TranslateConfig
+    let dynamicTypeSize: DynamicTypeSize
 
     var body: some View {
         StatusShareContent(data: data, statusKey: statusKey, replies: replies)
@@ -1049,6 +1056,8 @@ private struct MacStatusSharePreview: View {
         .background(Color.flareSystemGroupedBackground)
         .environment(\.colorScheme, colorScheme)
         .environment(\.timelineAppearance, timelineAppearance)
+        .environment(\.translateConfig, translateConfig)
+        .dynamicTypeSize(dynamicTypeSize)
     }
 }
 

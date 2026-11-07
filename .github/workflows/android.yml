@@ -302,6 +302,7 @@ jobs:
             -only-testing:TimelineControllerTests/TimelineControllerIntegrationTests/testViewportHeightChangeResizesSingleMediaAndPreservesReadingPosition \
             -only-testing:TimelineControllerTests/TimelineControllerIntegrationTests/testSingleMediaLimitSwitchKeepsReadingPosition \
             -only-testing:TimelineControllerTests/TimelineRefreshAnimationTests \
+            -only-testing:TimelineControllerTests/StatusShareTests \
             -only-testing:TimelineControllerTests/TimelineMediaPreviewTests/testSwiftUIMediaKeepsItsInitialHeightWhenLazyRowsAppearAndReturn \
             -only-testing:TimelineControllerTests/TimelineMediaPreviewTests/testSwiftUIMediaIgnoresPlaybackViewportAndChromeInsetsButRespondsToResize \
             -only-testing:iOSTests/VideoPlaybackSessionTests \

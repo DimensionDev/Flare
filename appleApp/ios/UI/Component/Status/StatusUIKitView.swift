@@ -812,6 +812,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
             showOriginalWithTranslation: appearance.showOriginalWithTranslation
         )
         let hasCW = contentWarnings.contains { !$0.text.isEmpty }
+        let bodyTopSpacing: CGFloat = showAsFullWidth && !hasCW && data.user != nil ? 2 : 0
 
         // reply-to
         if let replyToHandle = data.replyToHandle {
@@ -880,7 +881,7 @@ final class StatusUIKitView: UIView, UIGestureRecognizerDelegate, ManualLayoutMe
                     preferredContentSizeCategory: appearance.preferredContentSizeCategory,
                     collapseAboveLineCount: collapseAboveLineCount
                 )
-                append(bodyText, before: visibleBodyCount == 0 ? 0 : 4)
+                append(bodyText, before: visibleBodyCount == 0 ? bodyTopSpacing : 4)
                 visibleBodyCount += 1
             }
             if contents.contains(where: { !$0.text.isEmpty }),

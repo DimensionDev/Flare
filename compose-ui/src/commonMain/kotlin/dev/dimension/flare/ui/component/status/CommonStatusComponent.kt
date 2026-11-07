@@ -387,7 +387,7 @@ public fun CommonStatusComponent(
                     }
                 }
                 item.replyToHandle?.let { replyHandle ->
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(if (showAsFullWidth) 2.dp else 4.dp))
                     StatusReplyComponent(
                         replyHandle = replyHandle,
                     )
@@ -411,6 +411,7 @@ public fun CommonStatusComponent(
                         maxLines = maxLines,
                         showExpandButton = showExpandButton,
                         translationDisplayed = item.translationDisplayState == TranslationDisplayState.Translated,
+                        topSpacing = if (showAsFullWidth && (item.user != null || item.replyToHandle != null)) 2.dp else 0.dp,
                     )
                 }
 
@@ -1331,6 +1332,7 @@ private fun StatusContentComponent(
     maxLines: Int?,
     showExpandButton: Boolean,
     translationDisplayed: Boolean,
+    topSpacing: Dp = 0.dp,
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalTimelineAppearance.current
@@ -1371,6 +1373,9 @@ private fun StatusContentComponent(
     Column(
         modifier = modifier,
     ) {
+        if (topSpacing > 0.dp && visibleContentWarning.all { it.isEmpty } && visibleContent.any { !it.isEmpty }) {
+            Spacer(modifier = Modifier.height(topSpacing))
+        }
         val expandContentWarning = appearanceSettings.expandContentWarning
         if (visibleContentWarning.any { !it.isEmpty }) {
             Column(

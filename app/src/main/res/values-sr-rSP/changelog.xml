@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="changelog_title">Добро дошли назад!</string>
+    <string name="changelog_message">Направили смо неке измене од ваше последње пријаве. Ево детаља:</string>
     <string name="changelog_current"><![CDATA[
             <span>Верзија %1$s:</span>
             <ul>
@@ -10,6 +12,4 @@
                 <li>Исправљене су неке грешке учитавања слика, радње обележавања у галерији и отварање FANBOX веза. Побољшане су мешовите временске линије, приказ превода и памћење изабраног налога.</li>
             </ul>
         ]]></string>
-    <string name="changelog_title">Добро дошли назад!</string>
-    <string name="changelog_message">Направили смо неке измене од ваше последње пријаве. Ево детаља:</string>
 </resources>

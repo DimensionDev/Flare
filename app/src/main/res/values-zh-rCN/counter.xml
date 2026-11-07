@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="counter_title">计数器</string>
+    <string name="counter_increment">增加</string>
+    <string name="counter_decrement">减少</string>
+    <string name="counter_reset">重置</string>
+</resources>

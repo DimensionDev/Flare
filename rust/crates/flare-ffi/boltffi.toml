@@ -1,0 +1,22 @@
+[package]
+name = "FlareRust"
+crate = "flare-ffi"
+version = "0.1.0"
+
+[targets.apple.swift]
+module_name = "FlareRust"
+ffi_module_name = "FlareRustFFI"
+
+[targets.android]
+min_sdk = 24
+
+[targets.android.kotlin]
+package = "dev.dimension.flare.rust"
+module_name = "FlareRust"
+output = "../../target/android/kotlin"
+
+[targets.android.header]
+output = "../../target/android/include"
+
+[targets.android.pack]
+output = "../../target/android/jniLibs"

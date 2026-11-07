@@ -15,6 +15,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.presenter.login.LoginCookieSnapshot
 import dev.dimension.flare.ui.presenter.login.LoginEffect
 import dev.dimension.flare.ui.presenter.login.ReloginTarget
+import java.util.UUID
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
@@ -208,6 +209,11 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data object Home : Route
+
+    @Serializable
+    data class Counter(
+        val instanceId: String = UUID.randomUUID().toString(),
+    ) : Route
 
     data class Timeline(
         val tabItem: UiTimelineTabItem,

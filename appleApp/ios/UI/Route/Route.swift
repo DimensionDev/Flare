@@ -59,7 +59,7 @@ enum Route: Hashable, Identifiable {
         switch self {
         case .home: HomeTimelineScreen(
             toServiceSelect: { onNavigate(.serviceSelect) },
-            toCompose: { onNavigate(.composeNew) },
+            toCompose: { onNavigate(.counter) },
             toTabSetting: { onNavigate(.tabSettings) },
             toSecondaryMenu: { onNavigate(.secondaryMenu) },
             onNavigate: onNavigate
@@ -108,6 +108,8 @@ enum Route: Hashable, Identifiable {
                 onNavigate(.agentChat(Self.newGenericChatConversationId(), query))
             }
             .environment(\.timelineListRenderer, nil)
+        case .counter:
+            CounterScreen()
         case .composeNew:
             ComposeScreen(accountType: nil)
         case .composeCrossPost(let prefill):
@@ -296,6 +298,7 @@ enum Route: Hashable, Identifiable {
 
     case home
     case timeline(UiTimelineTabItem)
+    case counter
     case composeNew
     case composeCrossPost(ComposePrefill)
     case composeDraft(String)

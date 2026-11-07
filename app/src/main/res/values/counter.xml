@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="counter_title">Counter</string>
+    <string name="counter_increment">Increase</string>
+    <string name="counter_decrement">Decrease</string>
+    <string name="counter_reset">Reset</string>
+</resources>

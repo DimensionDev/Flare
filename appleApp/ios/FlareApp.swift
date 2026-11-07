@@ -45,7 +45,9 @@ struct FlareApp: App {
     @ViewBuilder
     private var root: some View {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--media-viewer-test") {
+        if ProcessInfo.processInfo.arguments.contains("--counter-test") {
+            CounterTestFixture()
+        } else if ProcessInfo.processInfo.arguments.contains("--media-viewer-test") {
             MediaViewerTestFixture()
         } else if ProcessInfo.processInfo.arguments.contains("--timeline-media-scroll-test") {
             TimelineMediaScrollTestFixture()

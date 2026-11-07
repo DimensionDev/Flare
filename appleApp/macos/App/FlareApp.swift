@@ -13,6 +13,9 @@ enum MacWindowID {
     static let rssManagement = "rss-management"
     static let agentHistory = "agent-history"
     static let directMessages = "direct-messages"
+    #if DEBUG
+    static let counter = "rust-counter"
+    #endif
 }
 
 @main
@@ -95,6 +98,15 @@ struct FlareApp: App {
         .defaultSize(width: 760, height: 640)
         .windowToolbarStyle(.unified)
         .disableRestorationBehavior()
+
+        #if DEBUG
+        WindowGroup("Counter", id: MacWindowID.counter) {
+            CounterScreen(initialValue: ProcessInfo.processInfo.arguments.contains("--counter-overflow") ? .max : 0)
+        }
+        .defaultSize(width: 360, height: 240)
+        .disableRestorationBehavior()
+        .commandsRemoved()
+        #endif
 
         Settings {
             FlareTheme {
@@ -213,6 +225,11 @@ private struct MacAppCommands: Commands {
                 }
             }
             .keyboardShortcut("n")
+            #if DEBUG
+            Button("Rust Counter") {
+                openWindow(id: MacWindowID.counter)
+            }
+            #endif
         }
 
         CommandGroup(after: .sidebar) {

@@ -1,0 +1,26 @@
+[workspace]
+members = [
+    "crates/flare-core",
+    "crates/flare-datastore",
+    "crates/flare-ffi",
+    "crates/flare-view-model-macros",
+]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.90"
+publish = false
+
+[workspace.dependencies]
+crux_core = { git = "https://github.com/redbadger/crux.git", rev = "fbb8849b5f794c171fc1cf25c9779327cfabd943" }
+facet = "=0.46.5"
+serde = { version = "1", features = ["derive"] }
+boltffi = { version = "=0.32.1", default-features = false }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"

@@ -14,6 +14,7 @@ import dev.dimension.flare.ui.component.platform.WindowSizeClass
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.agent.AgentChatScreen
 import dev.dimension.flare.ui.screen.agent.LocalHistoryAgentScreen
+import dev.dimension.flare.ui.screen.counter.CounterScreen
 import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
@@ -23,6 +24,9 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     openDrawer: () -> Unit,
     uriHandler: UriHandler,
 ) {
+    entry<Route.Counter> {
+        CounterScreen(onBack = onBack)
+    }
     entry<Route.Home>(
         metadata = ListDetailSceneStrategy.detailPane(
             "home",

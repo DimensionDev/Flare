@@ -1,0 +1,4 @@
+module FlareRustFFI {
+    header "boltffi.h"
+    export *
+}

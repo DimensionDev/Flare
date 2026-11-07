@@ -4,6 +4,7 @@ import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 // END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
 import dev.dimension.flare.buildlogic.flare
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -18,6 +19,73 @@ plugins {
     // END Non-FOSS component
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
+}
+
+val rustAndroidAbis = providers.gradleProperty("rustAndroidAbis")
+    .orElse("arm64-v8a,armeabi-v7a,x86,x86_64")
+val rustRoot = rootProject.layout.projectDirectory.dir("rust")
+val rustCargo = providers.environmentVariable("CARGO")
+    .orElse("${System.getProperty("user.home")}/.cargo/bin/cargo")
+val rustJust = providers.environmentVariable("JUST").orElse("just")
+val rustSources = fileTree(rustRoot) {
+    include("Cargo.toml", "Cargo.lock", ".cargo/*.toml", "crates/**/*.toml", "crates/**/*.rs", "crates/**/*.proto", "bindings/**")
+    exclude("**/target/**")
+}
+val rustAndroidOutput = rustRoot.dir("target/android")
+val rustTypes = rustAndroidOutput.dir("types")
+val rustKotlinBindings = rustAndroidOutput.dir("kotlin")
+val rustJniLibs = rustAndroidOutput.dir("jniLibs")
+val boltffiExecutable = rustRoot.file("target/tools/bin/" + if (System.getProperty("os.name").startsWith("Windows")) "boltffi.exe" else "boltffi")
+extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    filter {
+        exclude { element -> element.file.toPath().startsWith(rustAndroidOutput.asFile.toPath()) }
+    }
+}
+val generateCruxTypes = tasks.register<Exec>("generateCruxTypes") {
+    inputs.files(rustSources, rustRoot.file("Justfile"))
+    outputs.dir(rustTypes)
+    outputs.file(boltffiExecutable)
+    workingDir(rustRoot)
+    environment("CARGO", rustCargo.get())
+    commandLine(rustJust.get(), "--justfile", rustRoot.file("Justfile").asFile.absolutePath, "android-types")
+    doFirst {
+        check(rustTypes.asFile.deleteRecursively()) { "Could not clear generated Crux types" }
+    }
+}
+val rustNdkDirectory = androidComponents.sdkComponents.ndkDirectory
+val rustAndroidOverlay = layout.buildDirectory.file("generated/rust/android.toml")
+val buildRustNative = tasks.register<Exec>("buildRustNative") {
+    dependsOn(generateCruxTypes)
+    inputs.files(rustSources, boltffiExecutable, rustNdkDirectory.map { it.file("source.properties") })
+    inputs.property("abis", rustAndroidAbis)
+    outputs.dir(rustJniLibs)
+    outputs.dir(rustKotlinBindings)
+    outputs.dir(rustAndroidOutput.dir("include"))
+    workingDir(rustRoot.dir("crates/flare-ffi"))
+    doFirst {
+        val architectures = rustAndroidAbis.get().split(",").map { abi ->
+            when (abi) {
+                "arm64-v8a" -> "arm64"
+                "armeabi-v7a" -> "armv7"
+                "x86" -> "x86"
+                "x86_64" -> "x86_64"
+                else -> error("Unsupported Rust Android ABI: $abi")
+            }
+        }
+        val overlay = rustAndroidOverlay.get().asFile
+        overlay.parentFile.mkdirs()
+        overlay.writeText("[targets.android]\narchitectures = [" + architectures.joinToString(",") { "\"$it\"" } + "]\n")
+        environment("ANDROID_NDK_HOME", rustNdkDirectory.get().asFile.absolutePath)
+        environment("PATH", file(rustCargo.get()).parent + File.pathSeparator + System.getenv("PATH").orEmpty())
+        commandLine(
+            boltffiExecutable.asFile.absolutePath,
+            "--cargo-arg=--locked", "--overlay", overlay.absolutePath,
+            "pack", "android", "--release", "--deny-skipped",
+        )
+    }
+}
+tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
+    mustRunAfter(generateCruxTypes, buildRustNative)
 }
 
 flare {
@@ -39,16 +107,25 @@ kotlin {
 }
 
 android {
+    ndkVersion = "28.2.13676358"
     val fdroid = rootProject.file("fdroid.properties")
     val fdroidProp = Properties()
     fdroidProp.load(fdroid.inputStream())
 
     defaultConfig {
+        ndk { abiFilters.addAll(rustAndroidAbis.get().split(",")) }
         versionCode =
             System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")
                 ?.toIntOrNull() ?: 1
         versionName =
             System.getenv("BUILD_VERSION") ?: fdroidProp.getProperty("versionName") ?: "0.0.0"
+    }
+
+    sourceSets.getByName("main") {
+        kotlin.directories.add(rustKotlinBindings.asFile.absolutePath)
+        kotlin.directories.add(rustTypes.dir("dev").asFile.absolutePath)
+        kotlin.directories.add(rustTypes.dir("com").asFile.absolutePath)
+        jniLibs.srcDir(rustJniLibs.asFile)
     }
 
     val file = rootProject.file("signing.properties")
@@ -76,6 +153,9 @@ android {
         release {
             optimization {
                 enable = true
+                keepRules {
+                    files.add(project.file("rust-proguard-rules.pro"))
+                }
             }
             // START Non-FOSS component
             if (project.file("google-services.json").exists()) {
@@ -102,6 +182,8 @@ android {
         sourceSets.getByName("main").kotlin.directories.add("src/foss/java")
     }
 }
+
+tasks.named("preBuild") { dependsOn(buildRustNative) }
 
 dependencies {
     implementation(libs.core.ktx)
@@ -157,7 +239,6 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.richtext.ui.material3)
     implementation(libs.androidx.browser)
-    implementation("net.java.dev.jna:jna:${libs.versions.jna.get()}@aar")
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

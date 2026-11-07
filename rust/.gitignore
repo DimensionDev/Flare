@@ -1,0 +1,3 @@
+target/
+/generated/
+!/scripts/build-apple.sh

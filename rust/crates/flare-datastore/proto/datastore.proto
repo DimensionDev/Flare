@@ -1,0 +1,499 @@
+syntax = "proto2";
+package flare.datastore;
+
+// Field numbers and enum values match the current Kotlin Protobuf serializers.
+// Keep presence and defaults when evolving this schema. Map entries are explicit
+// messages so an edit preserves unknown fields inside entries and their values.
+// Kotlin uses the last value when the wire contains duplicate map keys.
+
+message AccountSelectionPreferences {
+  optional MicroBlogKey selected_account_key = 1;
+}
+
+message HomeTimelinePreferences {
+  optional string selected_tab_id = 1;
+  repeated HomeTimelinePositionEntry positions = 2;
+}
+
+message FlareConfig {
+  optional string server_url = 1 [default = "https://api.flareapp.moe"];
+}
+
+message ComposeConfigData {
+  optional Visibility visibility = 1;
+  repeated MicroBlogKey last_accounts = 2;
+}
+
+message AppSettings {
+  required string version = 1;
+  optional AiConfig ai_config = 2;
+  optional string language = 3;
+  optional TranslateConfig translate_config = 4;
+  optional LinkOpenDefaults link_open_defaults = 5;
+  optional bool mxga_enabled = 6;
+  optional bool refresh_home_timeline_on_launch = 7 [default = true];
+  optional TimelineAutoRefreshInterval home_timeline_auto_refresh_interval = 8;
+  optional bool remember_home_timeline_position = 9;
+  optional ImageTranslationConfig image_translation_config = 10;
+}
+
+message PlatformOAuthPendingData {
+  repeated PlatformOAuthPendingEntry entries = 1;
+}
+
+message AppearanceBag {
+  optional int32 schema_version = 1 [default = 2];
+  repeated StringEntry entries = 2;
+}
+
+message TabSettingsV2 {
+  repeated TimelineSlot home_slots = 1;
+}
+
+message ProxySettings {
+  repeated ProxyProfile profiles = 1;
+  optional ProxyPolicy global = 2;
+  repeated AccountProxyPolicyEntry accounts = 3;
+  repeated string removed_accounts = 4;
+}
+
+message MicroBlogKey {
+  required string id = 1;
+  required string host = 2;
+}
+
+message HomeTimelinePosition {
+  required string source_key = 1;
+  required TimelineReadingPosition position = 2;
+  required int64 updated_at = 3;
+}
+
+enum Visibility {
+  VISIBILITY_PUBLIC = 0;
+  VISIBILITY_HOME = 1;
+  VISIBILITY_FOLLOWERS = 2;
+  VISIBILITY_SPECIFIED = 3;
+  VISIBILITY_CHANNEL = 4;
+  VISIBILITY_FRIENDS = 5;
+  VISIBILITY_SELF_ONLY = 6;
+}
+
+message AiConfig {
+  optional bool translation = 1;
+  optional bool tldr = 2;
+  optional KotlinVariant model_type = 3;
+  optional string translate_prompt = 4 [default =
+    "You are a translation engine. Output only the translated template.\n"
+    "The target language is {target_language}.\n"
+    "The input is a plain-text translation template extracted from a social post.\n"
+    "Header lines like <<<B0>>>, <<<E0>>>, <<<I key C>>>, and <<<F content>>> are control lines.\n"
+    "Keep every control line exactly unchanged.\n"
+    "Inline markers like {{T0}} and {{L1}} are control markers.\n"
+    "Keep every control marker exactly unchanged and in the same order.\n"
+    "Translate every natural-language segment that appears after a {{Tn}} marker into natural {target_language}.\n"
+    "Copying the original source text after a {{Tn}} marker is wrong unless that segment is already naturally written in {target_language}.\n"
+    "If you are unsure, still provide your best translation in {target_language} instead of leaving the source text unchanged.\n"
+    "Do not add any text after a {{Ln}} marker.\n"
+    "For item headers, use S only when the source text is already in {target_language}; otherwise keep C and translate.\n"
+    "Return ONLY the translated template without JSON, markdown code fences, comments, or explanations.\n"
+    "Example input:\n"
+    "<<<B0>>>\n"
+    "{{T0}}Hello {{L1}}{{T2}}from Tokyo\n"
+    "<<<E0>>>\n"
+    "Example output:\n"
+    "<<<B0>>>\n"
+    "{{T0}}你好 {{L1}}{{T2}}来自东京\n"
+    "<<<E0>>>\n"
+    "Translate the following template to {target_language}:\n"
+    "{source_text}"];
+  optional string tldr_prompt = 5 [default =
+    "Summarize the following text in {target_language}\n"
+    "Respond in raw text, limit the response to 200 characters.\n"
+    "Text: \"{source_text}\""];
+  optional bool pre_translation = 6;
+  optional bool agent = 7 [default = true];
+  optional OpenAiConfig agent_type = 8;
+}
+
+message TranslateConfig {
+  optional bool pre_translate = 1;
+  optional KotlinVariant provider = 2;
+  repeated string auto_translate_excluded_languages = 3;
+  optional bool prefer_platform_translation = 4;
+  optional bool show_original_with_translation = 5;
+}
+
+message LinkOpenDefaults {
+  repeated LinkOpenRule rules = 1;
+}
+
+enum TimelineAutoRefreshInterval {
+  TIMELINE_AUTO_REFRESH_INTERVAL_DISABLED = 0;
+  TIMELINE_AUTO_REFRESH_INTERVAL_FIVE_MINUTES = 1;
+  TIMELINE_AUTO_REFRESH_INTERVAL_FIFTEEN_MINUTES = 2;
+  TIMELINE_AUTO_REFRESH_INTERVAL_THIRTY_MINUTES = 3;
+  TIMELINE_AUTO_REFRESH_INTERVAL_ONE_HOUR = 4;
+  TIMELINE_AUTO_REFRESH_INTERVAL_ONE_MINUTE = 5;
+}
+
+message ImageTranslationConfig {
+  optional ImageTranslationProvider provider = 1;
+  repeated ImageTranslationProviderSettings settings = 2;
+  optional bool use_shared_ai_config = 3;
+}
+
+message PlatformOAuthPendingEntry {
+  required string platform_id = 1;
+  required string host = 2;
+  optional string flow_id = 3 [default = "OAuth"];
+  optional int64 created_at_epoch_millis = 4;
+  repeated StringEntry attributes = 5;
+}
+
+message TimelineSlot {
+  required string id = 1;
+  required KotlinVariant content = 2;
+  optional TimelinePresentation presentation = 3;
+  // Kotlin derives omitted title and icon from the presentation and content.
+  optional KotlinVariant title = 4;
+  optional KotlinVariant icon = 5;
+}
+
+message ProxyProfile {
+  required string id = 1;
+  required string name = 2;
+  required ProxyProtocol protocol = 3;
+  required string host = 4;
+  required int32 port = 5;
+}
+
+message ProxyPolicy {
+  optional ProxyMode mode = 1 [default = PROXY_MODE_INHERIT];
+  optional string proxy_id = 2;
+}
+
+message TimelineReadingPosition {
+  required int32 index = 1;
+  required double offset = 2;
+}
+
+message OpenAiConfig {
+  required string server_url = 1;
+  required string api_key = 2;
+  optional string model = 3;
+  optional string reasoning_effort = 4;
+  optional string extra_body = 5;
+  optional int32 context_window = 6;
+}
+
+message LinkOpenRule {
+  required string host = 1;
+  required KotlinVariant method = 2;
+}
+
+enum ImageTranslationProvider {
+  IMAGE_TRANSLATION_PROVIDER_DISABLED = 0;
+  IMAGE_TRANSLATION_PROVIDER_TENCENT = 1;
+  IMAGE_TRANSLATION_PROVIDER_OPEN_AI_IMAGES = 2;
+  IMAGE_TRANSLATION_PROVIDER_GEMINI = 3;
+  IMAGE_TRANSLATION_PROVIDER_QWEN = 4;
+}
+
+message ImageTranslationProviderSettings {
+  required ImageTranslationProvider provider = 1;
+  repeated StringEntry values = 2;
+}
+
+message StringEntry {
+  required string key = 1;
+  required string value = 2;
+}
+
+message TimelinePresentation {
+  optional string title_override = 1;
+  optional KotlinVariant icon_override = 2;
+  optional AppearanceBag appearance_override = 3;
+  optional bool enabled = 4 [default = true];
+  optional TimelineFilterConfig filter_config = 5;
+}
+
+enum ProxyProtocol {
+  PROXY_PROTOCOL_HTTPS = 0;
+  PROXY_PROTOCOL_SOCKS5 = 1;
+}
+
+enum ProxyMode {
+  PROXY_MODE_SYSTEM = 0;
+  PROXY_MODE_DIRECT = 1;
+  PROXY_MODE_PROXY = 2;
+  PROXY_MODE_INHERIT = 3;
+}
+
+message OnDeviceAiConfig {}
+
+message AiTranslationProvider {}
+
+message DeepLTranslationProvider {
+  optional string api_key = 1;
+  optional bool use_pro = 2;
+}
+
+message GoogleCloudTranslationProvider {
+  optional string api_key = 1;
+}
+
+message GoogleWebTranslationProvider {}
+
+message LibreTranslationProvider {
+  optional string base_url = 1;
+  optional string api_key = 2;
+}
+
+message TimelineGroup {
+  repeated TimelineSlot children = 1;
+  optional GroupSource source = 2;
+  optional TimelineMergePolicy merge_policy = 3;
+}
+
+message TimelineSource {
+  required TimelineSourceRef source = 1;
+}
+
+message TimelineFilterConfig {
+  repeated TimelinePostKind excluded_kinds = 1;
+  repeated TimelinePostContent excluded_contents = 2;
+}
+
+message ExternalText {
+  required string namespace = 1;
+  required string key = 2;
+  required string fallback = 3;
+  repeated TextArgumentEntry args = 4;
+}
+
+message LocalizedText {
+  required UiStrings text = 1;
+}
+
+message RawText {
+  required string text = 1;
+}
+
+message AvatarIcon {
+  required MicroBlogKey account_key = 1;
+}
+
+message Favicon {
+  required string host = 1;
+}
+
+message MaterialIcon {
+  required UiIcon icon = 1;
+}
+
+message MixedIcon {
+  required UiIcon icon = 1;
+  required MicroBlogKey account_key = 2;
+}
+
+message UrlIcon {
+  required string url = 1;
+}
+
+message OpenLinkInAccount {
+  required MicroBlogKey account_key = 1;
+}
+
+message OpenLinkInBrowser {}
+
+enum GroupSource {
+  GROUP_SOURCE_MANUAL = 0;
+  GROUP_SOURCE_SYSTEM_HOME = 1;
+}
+
+enum TimelineMergePolicy {
+  TIMELINE_MERGE_POLICY_TIME = 0;
+  TIMELINE_MERGE_POLICY_TIME_PER_PAGE = 1;
+  TIMELINE_MERGE_POLICY_STAGGERED = 2;
+}
+
+message TimelineSourceRef {
+  required string id = 1;
+  required string spec_id = 2;
+  required KotlinVariant title = 3;
+  required KotlinVariant icon = 4;
+  required string data = 5;
+  optional MicroBlogKey owner_account_key = 6;
+}
+
+enum TimelinePostKind {
+  TIMELINE_POST_KIND_ORIGINAL = 0;
+  TIMELINE_POST_KIND_REPLY = 1;
+  TIMELINE_POST_KIND_REPOST = 2;
+  TIMELINE_POST_KIND_QUOTE = 3;
+}
+
+enum TimelinePostContent {
+  TIMELINE_POST_CONTENT_TEXT = 0;
+  TIMELINE_POST_CONTENT_IMAGE = 1;
+  TIMELINE_POST_CONTENT_VIDEO = 2;
+  TIMELINE_POST_CONTENT_OTHER = 3;
+}
+
+enum UiStrings {
+  UI_STRINGS_HOME = 0;
+  UI_STRINGS_NOTIFICATIONS = 1;
+  UI_STRINGS_DISCOVER = 2;
+  UI_STRINGS_ME = 3;
+  UI_STRINGS_SETTINGS = 4;
+  UI_STRINGS_MASTODON_LOCAL = 5;
+  UI_STRINGS_MASTODON_PUBLIC = 6;
+  UI_STRINGS_FEATURED = 7;
+  UI_STRINGS_BOOKMARK = 8;
+  UI_STRINGS_FAVOURITE = 9;
+  UI_STRINGS_LIST = 10;
+  UI_STRINGS_FEEDS = 11;
+  UI_STRINGS_DIRECT_MESSAGE = 12;
+  UI_STRINGS_RSS = 13;
+  UI_STRINGS_ANTENNA = 14;
+  UI_STRINGS_MIXED_TIMELINE = 15;
+  UI_STRINGS_SOCIAL = 16;
+  UI_STRINGS_LIKED = 17;
+  UI_STRINGS_ALL_RSS_FEEDS = 18;
+  UI_STRINGS_POSTS = 19;
+  UI_STRINGS_CHANNEL = 20;
+  UI_STRINGS_DEFAULT = 21;
+  UI_STRINGS_LOGIN = 22;
+  UI_STRINGS_VERIFY = 23;
+  UI_STRINGS_CANCEL = 24;
+  UI_STRINGS_NEXT = 25;
+  UI_STRINGS_USERNAME = 26;
+  UI_STRINGS_PASSWORD = 27;
+  UI_STRINGS_OTP = 28;
+  UI_STRINGS_O_AUTH_LOGIN = 29;
+  UI_STRINGS_PASSWORD_LOGIN = 30;
+  UI_STRINGS_QR_CONNECT = 31;
+  UI_STRINGS_CREDENTIAL_IMPORT = 32;
+  UI_STRINGS_EXTERNAL_SIGNER = 33;
+  UI_STRINGS_WEB_COOKIE_LOGIN = 34;
+  UI_STRINGS_NOSTR_LOGIN_ACCOUNT = 35;
+  UI_STRINGS_PIXIV_RANKING_WEEK = 36;
+  UI_STRINGS_PIXIV_RANKING_MONTH = 37;
+  UI_STRINGS_PIXIV_RANKING_DAY_MALE = 38;
+  UI_STRINGS_PIXIV_RANKING_DAY_FEMALE = 39;
+  UI_STRINGS_PIXIV_RANKING_WEEK_ORIGINAL = 40;
+  UI_STRINGS_PIXIV_RANKING_WEEK_ROOKIE = 41;
+  UI_STRINGS_PIXIV_RANKING_DAY_MANGA = 42;
+  UI_STRINGS_ILLUSTRATIONS = 43;
+  UI_STRINGS_MANGA = 44;
+  UI_STRINGS_FOLLOWING = 45;
+  UI_STRINGS_POSTS_WITH_REPLIES = 46;
+  UI_STRINGS_MEDIA = 47;
+  UI_STRINGS_FANBOX_SUPPORTED = 48;
+  UI_STRINGS_FANBOX_RECOMMENDED_CREATORS = 49;
+  UI_STRINGS_PIXIV_PRIVATE_FOLLOWING = 50;
+  UI_STRINGS_PIXIV_PRIVATE_BOOKMARKS = 51;
+  UI_STRINGS_BLUESKY_FIX_DELEGATION_SCOPES = 52;
+  UI_STRINGS_PIXIV_PRIVATE_FAVOURITES = 53;
+  UI_STRINGS_HIGHLIGHTS = 54;
+  UI_STRINGS_FOR_YOU = 55;
+  UI_STRINGS_POPULAR = 56;
+  UI_STRINGS_REPOSTS = 57;
+  UI_STRINGS_ARTICLES = 58;
+  UI_STRINGS_WEIBO_FRIENDS_CIRCLE = 59;
+  UI_STRINGS_WEIBO_PRIVATE_FOLLOWING = 60;
+}
+
+enum UiIcon {
+  UI_ICON_HOME = 0;
+  UI_ICON_NOTIFICATION = 1;
+  UI_ICON_SEARCH = 2;
+  UI_ICON_PROFILE = 3;
+  UI_ICON_SETTINGS = 4;
+  UI_ICON_LOCAL = 5;
+  UI_ICON_WORLD = 6;
+  UI_ICON_FEATURED = 7;
+  UI_ICON_BOOKMARK = 8;
+  UI_ICON_HEART = 9;
+  UI_ICON_TWITTER = 10;
+  UI_ICON_MASTODON = 11;
+  UI_ICON_MISSKEY = 12;
+  UI_ICON_BLUESKY = 13;
+  UI_ICON_LIST = 14;
+  UI_ICON_FEEDS = 15;
+  UI_ICON_MESSAGES = 16;
+  UI_ICON_RSS = 17;
+  UI_ICON_WEIBO = 18;
+  UI_ICON_CHANNEL = 19;
+  UI_ICON_LIKE = 20;
+  UI_ICON_UNLIKE = 21;
+  UI_ICON_RETWEET = 22;
+  UI_ICON_UNRETWEET = 23;
+  UI_ICON_REPLY = 24;
+  UI_ICON_COMMENT = 25;
+  UI_ICON_QUOTE = 26;
+  UI_ICON_UNBOOKMARK = 27;
+  UI_ICON_MORE = 28;
+  UI_ICON_MORE_VERTICEL = 29;
+  UI_ICON_DELETE = 30;
+  UI_ICON_REPORT = 31;
+  UI_ICON_REACT = 32;
+  UI_ICON_UN_REACT = 33;
+  UI_ICON_SHARE = 34;
+  UI_ICON_CHAT_MESSAGE = 35;
+  UI_ICON_MUTE = 36;
+  UI_ICON_UN_MUTE = 37;
+  UI_ICON_BLOCK = 38;
+  UI_ICON_UN_BLOCK = 39;
+  UI_ICON_FOLLOW = 40;
+  UI_ICON_FAVOURITE = 41;
+  UI_ICON_MENTION = 42;
+  UI_ICON_POLL = 43;
+  UI_ICON_EDIT = 44;
+  UI_ICON_INFO = 45;
+  UI_ICON_PIN = 46;
+  UI_ICON_CHECK = 47;
+  UI_ICON_NOSTR = 48;
+  UI_ICON_X = 49;
+  UI_ICON_TRANSLATE = 50;
+  UI_ICON_UN_FAVOURITE = 51;
+  UI_ICON_PIXIV = 52;
+  UI_ICON_FANBOX = 53;
+  UI_ICON_EYE = 54;
+}
+
+message BooleanTextArgument {
+  required bool value = 1;
+  optional string text = 2;
+}
+
+message NumberTextArgument {
+  required double value = 1;
+  optional string text = 2;
+}
+
+message StringTextArgument {
+  required string value = 1;
+  optional string text = 2;
+}
+
+// Kotlin sealed values store the serialization name and an embedded Protobuf message.
+message KotlinVariant {
+  required string serial_name = 1;
+  required bytes payload = 2;
+}
+
+message HomeTimelinePositionEntry {
+  required string key = 1;
+  required HomeTimelinePosition value = 2;
+}
+
+message AccountProxyPolicyEntry {
+  required string key = 1;
+  required ProxyPolicy value = 2;
+}
+
+message TextArgumentEntry {
+  required string key = 1;
+  required KotlinVariant value = 2;
+}

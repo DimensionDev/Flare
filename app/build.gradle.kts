@@ -28,7 +28,7 @@ val rustCargo = providers.environmentVariable("CARGO")
     .orElse("${System.getProperty("user.home")}/.cargo/bin/cargo")
 val rustJust = providers.environmentVariable("JUST").orElse("just")
 val rustSources = fileTree(rustRoot) {
-    include("Cargo.toml", "Cargo.lock", ".cargo/*.toml", "crates/**/*.toml", "crates/**/*.rs")
+    include("Cargo.toml", "Cargo.lock", ".cargo/*.toml", "crates/**/*.toml", "crates/**/*.rs", "crates/**/*.proto", "bindings/**")
     exclude("**/target/**")
 }
 val rustAndroidOutput = rustRoot.dir("target/android")

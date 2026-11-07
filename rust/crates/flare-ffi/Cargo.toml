@@ -9,8 +9,19 @@ publish.workspace = true
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
+flare-core = { path = "../flare-core" }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 flare-core = { path = "../flare-core", features = ["native-ffi"] }
 boltffi.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = "0.3"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
 
 # BoltFFI generates the unsafe ABI boundary; handwritten implementation is safe Rust.
 [lints.clippy]

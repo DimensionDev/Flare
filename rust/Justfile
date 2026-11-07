@@ -2,6 +2,7 @@ set positional-arguments
 
 export CARGO := env("CARGO", "cargo")
 export FLARE_BOLTFFI := justfile_directory() / "target/tools/bin/boltffi" + if os() == "windows" { ".exe" } else { "" }
+export FLARE_WASM_BINDGEN := justfile_directory() / "target/tools/bin/wasm-bindgen" + if os() == "windows" { ".exe" } else { "" }
 
 default:
     @just --list
@@ -31,7 +32,26 @@ swift-bindings output="target/apple-bindings": tools (typegen "swift" (output / 
     output=$(cd "$1" && pwd)
     cd crates/flare-ffi
     "$FLARE_BOLTFFI" --cargo-arg=--locked generate swift --deny-skipped --output "$output/ffi"
+    python3 ../../scripts/fix-swift-initialization.py "$output/ffi/FlareFfiBoltFFI.swift"
+    cat "$output/types/Initialization.swift" >> "$output/ffi/FlareFfiBoltFFI.swift"
     cp FlareRustFFI.modulemap "$output/ffi/module.modulemap"
 
 # Android's BoltFFI pack step generates Kotlin/JNI bindings and native libraries.
 android-types: tools (typegen "kotlin" "target/android/types")
+
+# Match the wasm-bindgen version in Cargo.lock.
+web-tools:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ "$("$FLARE_WASM_BINDGEN" --version 2>/dev/null || true)" != "wasm-bindgen 0.2.130" ]]; then
+        "$CARGO" install wasm-bindgen-cli --version 0.2.130 --locked --root target/tools
+    fi
+
+# Browser ES module and TypeScript declarations for the application entry point.
+web-bindings output="target/web": web-tools
+    #!/usr/bin/env bash
+    set -euo pipefail
+    unset SDKROOT IPHONEOS_DEPLOYMENT_TARGET MACOSX_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET XROS_DEPLOYMENT_TARGET
+    "$CARGO" build --locked --package flare-ffi --lib --target wasm32-unknown-unknown --release
+    target_dir="${CARGO_TARGET_DIR:-target}"
+    "$FLARE_WASM_BINDGEN" --target web --out-dir "$1" --out-name flare "$target_dir/wasm32-unknown-unknown/release/flare_ffi.wasm"

@@ -1,0 +1,3 @@
+Summarize the following text in {target_language}
+Respond in raw text, limit the response to 200 characters.
+Text: "{source_text}"

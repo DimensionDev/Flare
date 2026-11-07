@@ -40,8 +40,22 @@ fn generate_view_models(language: Language, output: &Path) -> Result<(), Box<dyn
         modules.push_str(view_model.swift_module);
         modules.push('\n');
     }
-    if matches!(language, Language::Swift) {
-        fs::write(output.join("modules.txt"), modules)?;
+    match language {
+        Language::Swift => {
+            fs::write(output.join("modules.txt"), modules)?;
+            fs::write(
+                output.join("Initialization.swift"),
+                include_str!("../../../../bindings/Initialization.swift"),
+            )?;
+        }
+        Language::Kotlin => {
+            let package = output.join("dev/dimension/flare/rust");
+            fs::create_dir_all(&package)?;
+            fs::write(
+                package.join("Initialization.kt"),
+                include_str!("../../../../bindings/Initialization.kt"),
+            )?;
+        }
     }
     Ok(())
 }

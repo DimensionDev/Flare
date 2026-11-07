@@ -26,6 +26,7 @@ struct StatusReactionView: View {
                     }
                     .lineLimit(1)
                     .foregroundStyle(Color.flareLabel)
+                    .flareTextBackground(item.me ? nil : .flareTertiarySystemGroupedBackground)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(

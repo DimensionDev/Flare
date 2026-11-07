@@ -345,12 +345,12 @@ private struct LinkOpenDefaultSettingsMenu: View {
                         .foregroundStyle(.primary)
                     LinkOpenDefaultSelectedOptionLabel(option: target.selectedOption)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
                 Spacer()
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .flareTertiaryText()
             }
             .contentShape(.rect)
         }

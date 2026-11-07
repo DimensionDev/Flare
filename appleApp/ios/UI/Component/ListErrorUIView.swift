@@ -1,5 +1,6 @@
 import UIKit
 import KotlinSharedUI
+import FlareAppleUI
 
 /// UIKit port of `ListErrorView`.
 ///
@@ -21,6 +22,7 @@ final class ListErrorUIView: UIView {
     }()
     private let titleLabel: UILabel = {
         let l = UILabel()
+        l.textColor = .flareLabel
         l.font = .preferredFont(forTextStyle: .headline)
         l.textAlignment = .center
         l.numberOfLines = 0
@@ -28,6 +30,7 @@ final class ListErrorUIView: UIView {
     }()
     private let messageLabel: UILabel = {
         let l = UILabel()
+        l.textColor = .flareLabel
         l.font = .preferredFont(forTextStyle: .body)
         l.textAlignment = .center
         l.numberOfLines = 0

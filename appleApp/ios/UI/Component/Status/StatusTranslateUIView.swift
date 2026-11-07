@@ -1,3 +1,4 @@
+import FlareAppleUI
 import UIKit
 import Combine
 import KotlinSharedUI
@@ -427,7 +428,7 @@ private final class TextResultView: UIView, TimelineHeightProviding {
         super.init(frame: frame)
         label.numberOfLines = 0
         label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = .label
+        label.textColor = .flareLabel
         addSubview(label)
         addSubview(spinner)
     }

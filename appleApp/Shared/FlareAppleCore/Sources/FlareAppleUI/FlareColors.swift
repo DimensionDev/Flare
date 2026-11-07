@@ -58,7 +58,7 @@ public extension Color {
 
     static var flareLabel: Color {
         #if os(iOS)
-        Color(.label)
+        Color(.flareLabel)
         #elseif os(macOS)
         Color(nsColor: .labelColor)
         #endif

@@ -113,7 +113,7 @@ public struct ProxySettingsView: View {
             Text(verbatim: profile.name)
             Text(verbatim: "\(profile.protocol.name) · \(profile.host):\(profile.port)")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
         }
     }
 
@@ -138,7 +138,7 @@ public struct ProxySettingsView: View {
                             Text(verbatim: account.platformDisplayName)
                             Text(verbatim: account.accountKey.description())
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .flareSecondaryText()
                         }
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, alignment: .leading)

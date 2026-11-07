@@ -40,9 +40,11 @@ public struct ListErrorView: View {
                     .scaledToFit()
                     .frame(width: 64, height: 64)
                 Text("permission_denied_title", bundle: FlareAppleUILocalization.bundle)
+                    .flarePrimaryText()
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Text("permission_denied_message", bundle: FlareAppleUILocalization.bundle)
+                    .flarePrimaryText()
                 Button {
                     if let url = reloginURL(
                         accountKey: reloginError.accountKey,
@@ -61,6 +63,7 @@ public struct ListErrorView: View {
                     .scaledToFit()
                     .frame(width: 64, height: 64)
                 Text("error", bundle: FlareAppleUILocalization.bundle)
+                    .flarePrimaryText()
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
@@ -73,7 +76,7 @@ public struct ListErrorView: View {
                 if let message = error.message {
                     Text(message)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
             }
         }

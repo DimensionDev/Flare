@@ -155,7 +155,7 @@ public struct CommonProfileHeader: View {
                                     if case .success(let relationState) = onEnum(of: relation), relationState.data.isFans {
                                         Text("relation_is_fans", bundle: FlareAppleUILocalization.bundle)
                                             .font(.caption)
-                                            .foregroundStyle(.secondary)
+                                            .flareSecondaryText()
                                             .multilineTextAlignment(.center)
                                     }
                                 }
@@ -253,7 +253,7 @@ public struct CommonProfileHeader: View {
                 if user.translationDisplayState != .hidden {
                     TranslateStatusComponent(data: user.translationDisplayState)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
             }
             if let desc = user.description_ {
@@ -425,7 +425,7 @@ public struct MatrixView: View {
             }
         }
         .font(.caption)
-        .foregroundStyle(.secondary)
+        .flareSecondaryText()
     }
 }
 
@@ -482,9 +482,10 @@ public struct FieldsView: View {
                 ForEach(0..<keys.count, id: \.self) { index in
                     let key = keys[index]
                     Text(key)
+                        .flarePrimaryText()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                     if let richText = fields[key] {
                         RichText(text: richText)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -497,6 +498,7 @@ public struct FieldsView: View {
                 .padding(.horizontal)
             }
             .padding(.vertical)
+            .flareTextBackground(.flareSecondarySystemBackground)
             .background(Color.flareSecondarySystemBackground)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {

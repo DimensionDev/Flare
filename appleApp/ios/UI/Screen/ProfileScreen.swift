@@ -35,6 +35,7 @@ struct ProfileScreen: View {
                 compatBody
             }
         }
+        .flareTextBackground(timelineDisplayMode == .plain && horizontalSizeClass == .compact ? .flareSystemBackground : .flareSystemGroupedBackground)
         .background(Color(timelineDisplayMode == .plain && horizontalSizeClass == .compact ? .clear : .systemGroupedBackground))
         .toolbarBackground(
             horizontalSizeClass == .compact ? Visibility.hidden : Visibility.automatic,
@@ -135,6 +136,7 @@ struct ProfileScreen: View {
                         onFansClick: onFansClick
                     )
                     .padding(.bottom)
+                    .flareTextBackground(layout.usesCard ? .flareSecondarySystemGroupedBackground : .flareSystemBackground)
                     .background(layout.usesCard ? Color.flareSecondarySystemGroupedBackground : Color(.systemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: layout.usesCard ? 32 : 0, style: .continuous))
                 }
@@ -371,7 +373,7 @@ private struct BlockedProfileGate: View {
                 .font(.headline)
             Text(String(localized: "profile_blocked_gate_description", defaultValue: "You blocked this user. Their tabs and timeline are hidden until you choose to show them."))
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
             Button {
                 onShow()
             } label: {
@@ -1685,12 +1687,14 @@ private final class ProfileHostedAccessoryView: UIView {
 
     func setBaseBackgroundColor(_ color: UIColor) {
         baseBackgroundColor = color
+        traitOverrides[FlareTextBackgroundTrait.self] = hidesBaseBackground ? nil : color
         backgroundColor = hidesBaseBackground ? .clear : color
     }
 
     func setBaseBackgroundHidden(_ hidden: Bool) {
         guard hidesBaseBackground != hidden else { return }
         hidesBaseBackground = hidden
+        traitOverrides[FlareTextBackgroundTrait.self] = hidden ? nil : baseBackgroundColor
         backgroundColor = hidden ? .clear : baseBackgroundColor
     }
 

@@ -1,3 +1,4 @@
+import FlareAppleUI
 import SwiftUI
 import UIKit
 import FlareAppleCore
@@ -37,14 +38,14 @@ struct AppIconSettingsScreen: View {
 
             if !UIApplication.shared.supportsAlternateIcons {
                 Text("This device does not support alternate app icons.")
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .padding(.horizontal)
             }
 
             if let errorMessage {
                 Text(errorMessage)
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
@@ -98,6 +99,7 @@ private struct AppIconGridItem: View {
                 if isPending {
                     ProgressView()
                         .padding(8)
+                        .flareTextBackground(nil)
                         .background(.regularMaterial, in: Circle())
                 } else if isSelected {
                     Image(fontAwesome: .check)

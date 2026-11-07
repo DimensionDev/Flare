@@ -209,6 +209,7 @@ private struct LocalHistoryListStyle: ViewModifier {
             content
                 .scrollContentBackground(.hidden)
                 .listRowSpacing(2)
+                .flareTextBackground(.flareSystemBackground)
                 .listStyle(.plain)
         } else {
             content
@@ -217,6 +218,7 @@ private struct LocalHistoryListStyle: ViewModifier {
         if selection == .status {
             content
                 .scrollContentBackground(.hidden)
+                .flareTextBackground(.flareSystemBackground)
                 .listStyle(.plain)
         } else {
             content

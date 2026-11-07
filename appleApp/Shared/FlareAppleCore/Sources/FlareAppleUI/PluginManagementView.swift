@@ -38,6 +38,7 @@ public struct PluginManagementView: View {
                 GroupBox {
                     betaNotice.padding(4)
                 }
+                .flareTextBackground(.flareSystemGroupedBackground)
                 .listRowBackground(Color.clear)
                 #else
                 betaNotice
@@ -73,7 +74,7 @@ public struct PluginManagementView: View {
                                 Text(issue.pluginId)
                                 Text(runtimeIssueText(issue.code))
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .flareSecondaryText()
                             }
                             Spacer()
                             Button("plugin_retry") {
@@ -95,6 +96,7 @@ public struct PluginManagementView: View {
                 } description: {
                     Text("settings_plugins_subtitle")
                 }
+                .flareTextBackground(.flareSystemGroupedBackground)
                 .listRowBackground(Color.clear)
             } else {
                 Section {
@@ -131,6 +133,7 @@ public struct PluginManagementView: View {
             if presenter.state.busy {
                 ProgressView()
                     .padding()
+                    .flareTextBackground(nil)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
             }
         }
@@ -211,7 +214,7 @@ public struct PluginManagementView: View {
                 .accessibilityHidden(true)
             Text("plugin_beta_description")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 // Feedback must bypass the app's social content routing.
                 .environment(\.openURL, OpenURLAction { .systemAction($0) })
@@ -264,7 +267,7 @@ public struct PluginManagementView: View {
                         .font(.headline)
                     Text(subtitle)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 }
                 Spacer()
                 pluginMenu(name: name) {
@@ -276,7 +279,7 @@ public struct PluginManagementView: View {
 
 
             if let source = plugin.sourceUrl {
-                Text(source).font(.caption).foregroundStyle(.secondary)
+                Text(source).font(.caption).flareSecondaryText()
             }
             if let update = plugin.availableUpdate {
                 Button {
@@ -288,7 +291,7 @@ public struct PluginManagementView: View {
             }
             if let authoring = plugin.authoring {
                 if authoring.phase != .idle && authoring.phase != .applied {
-                    Text(pluginAuthoringLabel(authoring.phase)).font(.caption).foregroundStyle(.secondary)
+                    Text(pluginAuthoringLabel(authoring.phase)).font(.caption).flareSecondaryText()
                 }
                 if let error = authoring.error {
                     Text(verbatim: error).font(.caption).foregroundStyle(.red)
@@ -395,7 +398,7 @@ public struct PluginManagementView: View {
     private var developmentSection: some View {
         let state = presenter.state.development
         return Section("plugin_development") {
-            Text("plugin_development_description").foregroundStyle(.secondary)
+            Text("plugin_development_description").flareSecondaryText()
             if let directory = state.directory ?? state.recentDirectory {
                 Text(directory).font(.caption).textSelection(.enabled)
             }

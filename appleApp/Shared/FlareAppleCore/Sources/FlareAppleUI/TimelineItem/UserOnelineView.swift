@@ -39,7 +39,7 @@ public struct UserOnelineView<TrailingContent: View>: View {
                 RichText(text: data.name)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing()

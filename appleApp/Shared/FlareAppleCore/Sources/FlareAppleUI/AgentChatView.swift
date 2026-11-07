@@ -106,7 +106,7 @@ public struct AgentChatView: View {
                 }
             }
         }
-//        .background(Color.flareSystemGroupedBackground)
+        .flareTextBackground(.flareSystemBackground)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
                 if isRunning {
@@ -158,6 +158,7 @@ private struct AgentChatEmptyPlaceholder: View {
         ContentUnavailableView {
             Label {
                 Text("agent_chat_empty_title", bundle: .main)
+                    .flarePrimaryText()
             } icon: {
                 Image(fontAwesome: .robot)
             }
@@ -218,6 +219,7 @@ private struct AgentChatInputBar: View {
 
     var body: some View {
         TextField(inputPlaceholder, text: $draft, axis: .vertical)
+            .flareTextBackground(nil)
             .lineLimit(1...5)
             .textFieldStyle(.plain)
             .padding()
@@ -275,6 +277,7 @@ private struct AgentChatMessageBubble: View {
                     .textSelection(.enabled)
                     .padding(12)
                     .foregroundStyle(.white)
+                    .flareTextBackground(nil)
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .fill(Color.accentColor)
@@ -489,6 +492,7 @@ private struct AgentUserPreview: View {
         )
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .flareTextBackground(.flareSecondarySystemGroupedBackground)
         .background(Color.flareSecondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -608,7 +612,7 @@ private struct ShimmeringTextModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .foregroundStyle(.secondary)
+            .flareSecondaryText()
             .overlay {
                 GeometryReader { proxy in
                     LinearGradient(

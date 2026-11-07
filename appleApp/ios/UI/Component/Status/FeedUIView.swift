@@ -27,6 +27,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
     private let sourceName: UILabel = {
         let l = UILabel()
+        l.textColor = .flareLabel
         l.font = .preferredFont(forTextStyle: .footnote)
         l.numberOfLines = 0
         l.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -44,6 +45,7 @@ final class FeedUIView: UIView, ManualLayoutMeasurable, TimelineHeightProviding 
 
     private let titleLabel: UILabel = {
         let l = UILabel()
+        l.textColor = .flareLabel
         l.font = .preferredFont(forTextStyle: .body)
         l.numberOfLines = 0
         return l

@@ -33,6 +33,7 @@ struct ServiceSelectionScreen: View {
         List {
             Section {
                 header
+                    .flareTextBackground(.flareSystemGroupedBackground)
                     .listRowBackground(Color.clear)
             }
 
@@ -73,7 +74,7 @@ struct ServiceSelectionScreen: View {
                 .multilineTextAlignment(.center)
             Text(ServiceSelectCopy.welcomeMessage)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: 520)
@@ -105,7 +106,7 @@ struct ServiceSelectionScreen: View {
                         .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .disabled(instanceInput.isEmpty)
                 .accessibilityLabel(Text(instanceInput.isEmpty ? ServiceSelectCopy.search : ServiceSelectCopy.clear))
             }
@@ -134,7 +135,7 @@ struct ServiceSelectionScreen: View {
                     .accessibilityLabel(Text("service_select_detecting_platform"))
             case .error:
                 Image(systemName: "questionmark.circle")
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .transition(ServiceSelectionAnimation.inline)
                     .accessibilityLabel(Text("service_select_unknown_platform"))
             }
@@ -152,7 +153,7 @@ struct ServiceSelectionScreen: View {
                 if node.compatibleMode {
                     Text(ServiceSelectCopy.compatibilityWarning(node.software))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                         .multilineTextAlignment(.center)
                         .transition(ServiceSelectionAnimation.inline)
                 }
@@ -185,7 +186,7 @@ struct ServiceSelectionScreen: View {
                     .font(.headline)
                 Text(node.host)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
             Spacer()
         }
@@ -210,7 +211,7 @@ struct ServiceSelectionScreen: View {
             emptyContent: {
                 Text(ServiceSelectCopy.emptyMessage)
                     .font(.headline)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .frame(maxWidth: .infinity)
                     .padding()
             }
@@ -270,6 +271,7 @@ struct ReloginScreen: View {
         List {
             Section {
                 header
+                    .flareTextBackground(.flareSystemGroupedBackground)
                     .listRowBackground(Color.clear)
             }
 
@@ -312,7 +314,7 @@ struct ReloginScreen: View {
                 .multilineTextAlignment(.center)
             Text(ServiceSelectCopy.loginExpiredMessage)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -563,7 +565,7 @@ private struct LoginFieldView: View {
             case .displayText:
                 Text(field.value)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                     .multilineTextAlignment(.center)
             default:
                 TextField(field.label.text, text: $value)
@@ -592,7 +594,7 @@ private struct QRLoginView: View {
         VStack(spacing: 10) {
             Text(ServiceSelectCopy.nostrQRHint)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .multilineTextAlignment(.center)
             QRCodeView(text: content)
                 .frame(width: 220, height: 220)
@@ -605,7 +607,7 @@ private struct QRLoginView: View {
             }
             Text(ServiceSelectCopy.nostrQRLinkLabel)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
             Text(content)
                 .font(.caption2)
                 .textSelection(.enabled)
@@ -690,7 +692,7 @@ private struct LoginAgreementView: View {
         if let urlString, let url = URL(string: urlString) {
             Text(agreement(url: url))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 .multilineTextAlignment(.center)
         }
     }

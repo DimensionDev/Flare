@@ -49,6 +49,7 @@ public struct SearchScreen: View {
         scrollingContent
         .scrollContentBackground(.hidden)
         .searchListRowSpacing(2)
+        .flareTextBackground(.flareSystemBackground)
         .listStyle(.plain)
         .refreshable {
             try? await searchPresenter.state.refreshSuspend()
@@ -162,6 +163,7 @@ public struct SearchScreen: View {
                     .padding(.horizontal)
                     .listRowSeparator(.hidden)
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .flareTextBackground(.flareSystemGroupedBackground)
                     .listRowBackground(Color.clear)
                 }
                 Section {
@@ -223,7 +225,7 @@ public struct SearchScreen: View {
                                 Text(selectedAccount.handle.display)
                                 Image(fontAwesome: .chevronDown)
                                     .font(.footnote)
-                                    .foregroundStyle(.secondary)
+                                    .flareSecondaryText()
                                     .scaledToFit()
                                     .frame(width: 8, height: 8)
                                     .padding(8)
@@ -348,6 +350,7 @@ private struct MacSearchAccountRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .flareTextBackground(isSelected ? nil : .flareSystemGroupedBackground)
         .background(
             isSelected ? Color.accentColor.opacity(0.12) : Color.clear,
             in: RoundedRectangle(cornerRadius: 6, style: .continuous)

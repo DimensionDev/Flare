@@ -70,7 +70,7 @@ public struct TimelineView: View {
                 .if(!topMessageOnly, transform: { view in
                     view.lineLimit(1)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                 })
         }
     }

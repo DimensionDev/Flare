@@ -70,6 +70,7 @@ struct ComposeScreen: View {
                         TextField(text: $viewModel.contentWarning) {
                             Text("compose_cw_placeholder")
                         }
+                        .foregroundStyle(FlarePrimaryTextStyle())
                         .textFieldStyle(.plain)
                         .textInputAutocapitalization(.sentences)
                         .keyboardType(.twitter)
@@ -78,6 +79,7 @@ struct ComposeScreen: View {
                     }
                     
                     TextEditor(text: $viewModel.text)
+                        .foregroundStyle(FlarePrimaryTextStyle())
                         .font(.body)
                         .scrollContentBackground(.hidden)
                         .textInputAutocapitalization(.sentences)
@@ -93,7 +95,7 @@ struct ComposeScreen: View {
                         .overlay(alignment: .topLeading) {
                             if viewModel.text.isEmpty {
                                 Text("compose_placeholder")
-                                    .foregroundStyle(.tertiary)
+                                    .flareTertiaryText()
                                     .padding(.horizontal, 5)
                                     .padding(.vertical, 8)
                                     .allowsHitTesting(false)
@@ -140,6 +142,7 @@ struct ComposeScreen: View {
             .scrollIndicators(.hidden)
             .safeAreaInset(edge: .bottom) {
                 composeActionBar
+                    .flareTextBackground(nil)
                     .padding()
                     .backport
                     .glassEffect(.regular, in: .capsule, fallbackBackground: .regularMaterial)
@@ -147,6 +150,7 @@ struct ComposeScreen: View {
             }
             
         }
+        .flareTextBackground(.flareSystemBackground)
         .onAppear {
             let currentPresenter = presenter
             let content = viewModel
@@ -360,6 +364,7 @@ struct ComposeScreen: View {
                     }
                     .padding(.horizontal, 6)
                     .padding(.vertical, 4)
+                    .flareTextBackground(.flareSecondarySystemBackground)
                     .background(Color(.secondarySystemBackground))
                     .clipShape(Capsule())
                 }
@@ -472,7 +477,7 @@ struct ComposeScreen: View {
                 Text(user.handle.display)
                 Text(user.key.host)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
         } icon: {
             accountAvatar(user: user, size: 24)

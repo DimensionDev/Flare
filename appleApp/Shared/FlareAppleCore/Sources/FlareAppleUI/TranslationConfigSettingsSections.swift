@@ -219,10 +219,10 @@ private struct TranslationConfigSettingsSectionsContent: View {
                     bundle: FlareAppleUILocalization.bundle
                 )
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
                 Text("Sample text", bundle: FlareAppleUILocalization.bundle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
                 RichText(text: state.aiTranslationTestPresenter.state.sampleText)
                 Button {
                     state.aiTranslationTestPresenter.state.runTest()
@@ -240,7 +240,7 @@ private struct TranslationConfigSettingsSectionsContent: View {
                 if let translatedText = state.aiTranslationTestPresenter.state.translatedText {
                     Text("Translated text", bundle: FlareAppleUILocalization.bundle)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .flareSecondaryText()
                     RichText(text: translatedText)
                 }
             }
@@ -424,7 +424,7 @@ private struct TranslationExcludedLanguagesSheet: View {
             if option.title != option.tag {
                 Text(option.tag)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             }
         } icon: {
             EmptyView()

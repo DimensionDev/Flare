@@ -1,5 +1,6 @@
 import UIKit
 import KotlinSharedUI
+import FlareAppleUI
 
 // MARK: - StatusPollUIView
 // Mirrors StatusPollView.swift: vote-mode vs view-mode rows, optional expired
@@ -191,6 +192,7 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
         addSubview(bg)
 
         titleLabel.font = .preferredFont(forTextStyle: .caption1)
+        titleLabel.textColor = .flareLabel
         titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
         titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
@@ -225,6 +227,7 @@ private final class PollOptionButton: UIControl, ManualLayoutMeasurable, Timelin
         bg.backgroundColor = selected
             ? UIColor.tintColor.withAlphaComponent(0.2)
             : .systemGroupedBackground
+        traitOverrides[FlareTextBackgroundTrait.self] = bg.backgroundColor
         invalidateIntrinsicContentSize()
         setNeedsLayout()
     }
@@ -291,6 +294,7 @@ private final class PollOptionResultView: UIView, ManualLayoutMeasurable, Timeli
     override init(frame: CGRect) {
         super.init(frame: frame)
         titleLabel.font = .preferredFont(forTextStyle: .caption1)
+        titleLabel.textColor = .flareLabel
         titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
         titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)

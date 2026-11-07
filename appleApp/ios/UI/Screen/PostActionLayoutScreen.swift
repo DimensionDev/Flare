@@ -55,7 +55,7 @@ struct PostActionLayoutScreen: View {
         Section(placement.title) {
             if families.isEmpty {
                 Text("No actions")
-                    .foregroundStyle(.secondary)
+                    .flareSecondaryText()
             } else {
                 ForEach(Array(families.enumerated()), id: \.element.name) { index, family in
                     actionRow(family: family, placement: placement, index: index, totalCount: families.count)
@@ -80,7 +80,7 @@ struct PostActionLayoutScreen: View {
             Text(family.title)
             Spacer()
             Image(systemName: "line.3.horizontal")
-                .foregroundStyle(.secondary)
+                .flareSecondaryText()
             Menu {
                 ForEach(placements, id: \.name) { target in
                     if target.name != placement.name {
@@ -121,7 +121,7 @@ struct PostActionLayoutScreen: View {
                     .frame(width: 32, height: 32)
             }
             .buttonStyle(.borderless)
-            .foregroundStyle(.secondary)
+            .flareSecondaryText()
             .accessibilityLabel(Text("more"))
         }
     }

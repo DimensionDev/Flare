@@ -190,7 +190,7 @@ public struct RichText: View {
 
     @ViewBuilder
     private func renderBlock(textContent: PlatformTextTextContent) -> some View {
-        let renderedText = render(textContent: textContent)
+        let renderedText = render(textContent: textContent).flarePrimaryText()
         if textContent.isBlockQuote {
             HStack(alignment: .top, spacing: 11) {
                 Rectangle()
@@ -201,6 +201,7 @@ public struct RichText: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .flareTextBackground(nil)
             .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
         } else if textContent.alignment == .center {
             renderedText

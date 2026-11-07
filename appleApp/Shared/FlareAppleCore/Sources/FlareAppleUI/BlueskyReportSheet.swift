@@ -15,7 +15,7 @@ public struct BlueskyReportSheet: View {
                         Text(FlareAppleUILocalization.string(reason.stringKey))
                         Text(FlareAppleUILocalization.string(reason.descriptionKey))
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .flareSecondaryText()
                     }
                     .tag(reason)
                 }

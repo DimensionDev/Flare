@@ -31,7 +31,7 @@ struct DMListScreen: View {
                                             Text(user.handle.display)
                                                 .lineLimit(1)
                                                 .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                                .flareSecondaryText()
                                         }
                                     }
                                 }
@@ -40,13 +40,13 @@ struct DMListScreen: View {
                                     DateTimeText(data: lasMessage.timestamp)
                                         .lineLimit(1)
                                         .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                        .flareSecondaryText()
                                 }
                             }
                             Text(item.lastMessageText)
                                 .lineLimit(2)
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .flareSecondaryText()
                         }
                         if item.unreadCount > 0 {
                             Spacer()

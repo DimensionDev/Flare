@@ -76,12 +76,12 @@ private final class TimelineHeaderViews {
         return headers.map { header in
             let view = views[header.id] ?? TimelineHostedAccessoryView()
             views[header.id] = view
-            view.update(AnyView(header.view.environment(\.self, environment)))
+            view.update(AnyView(header.view.environment(\.self, environment).flareTextBackground(.flareSystemGroupedBackground)))
             var pinned: TimelineHostedAccessoryView?
             if header.isPinned {
                 pinned = pinnedViews[header.id] ?? TimelineHostedAccessoryView()
                 pinnedViews[header.id] = pinned
-                pinned?.update(AnyView(header.view.environment(\.self, environment)))
+                pinned?.update(AnyView(header.view.environment(\.self, environment).flareTextBackground(.flareSystemGroupedBackground)))
             }
             return UITimelineCollectionViewAccessoryItem(id: header.id, view: view, pinnedView: pinned)
         }

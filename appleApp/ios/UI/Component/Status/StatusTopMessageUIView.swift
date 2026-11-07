@@ -59,7 +59,7 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         if let user = message.user {
             nameView.isHidden = false
             nameView.baseTextStyle = topMessageOnly ? .body : .caption1
-            nameView.baseTextColor = topMessageOnly ? .label : .secondaryLabel
+            nameView.baseTextColor = topMessageOnly ? .flareLabel : .secondaryLabel
             nameView.text = user.name
             nameView.onOpenURL = onOpenURL
             nameView.lineLimit = topMessageOnly ? nil : 1
@@ -73,7 +73,7 @@ final class StatusTopMessageUIView: UIView, ManualLayoutMeasurable, TimelineHeig
             textLabel.text = text
             if topMessageOnly {
                 textLabel.font = .preferredFont(forTextStyle: .body)
-                textLabel.textColor = .label
+                textLabel.textColor = .flareLabel
                 textLabel.numberOfLines = 0
             } else {
                 textLabel.font = .preferredFont(forTextStyle: .caption1)

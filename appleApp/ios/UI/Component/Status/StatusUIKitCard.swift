@@ -30,6 +30,7 @@ final class StatusCardUIView: UIView, ManualLayoutMeasurable, TimelineHeightProv
         addSubview(mediaContainer)
 
         titleLabel.numberOfLines = 2
+        titleLabel.textColor = .flareLabel
         titleLabel.font = .preferredFont(forTextStyle: .body)
         titleLabel.adjustsFontForContentSizeCategory = true
         addSubview(titleLabel)
@@ -183,6 +184,7 @@ final class StatusCompatCardUIView: UIView, ManualLayoutMeasurable, TimelineHeig
         addSubview(mediaWrap)
 
         titleLabel.numberOfLines = 1
+        titleLabel.textColor = .flareLabel
         titleLabel.font = .preferredFont(forTextStyle: .body)
         titleLabel.adjustsFontForContentSizeCategory = true
         addSubview(titleLabel)

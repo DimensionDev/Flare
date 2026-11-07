@@ -18,23 +18,7 @@ struct StatusShareSheet: View {
     let fixvxShareUrl: String?
     let onCrossPost: (ComposePrefill) -> Void
     
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.timelineAppearance) private var timelineAppearance
     @State private var presenter: KotlinPresenter<StatusSharePresenterState>
-    @State private var theme: ColorScheme? = nil
-    @State private var previewStyle: SharePreviewStyle = .card
-    @State private var image: UIImage? = nil
-    @State private var renderedRevision: String?
-    @State private var renderError: String?
-    @State private var renderAttempt = 0
-
-    private var previewRevision: String {
-        let statusHash: Int32 = if case .success(let data) = onEnum(of: presenter.state.status) { data.data.renderHash } else { 0 }
-        return "\(statusHash)-\(Array(presenter.state.selectedReplies).map { $0.renderHash })-\(String(describing: theme ?? colorScheme))-\(previewStyle)-\(renderAttempt)"
-    }
-
-    private var currentImage: UIImage? { renderedRevision == previewRevision ? image : nil }
     
     init(
         statusKey: MicroBlogKey,
@@ -52,24 +36,65 @@ struct StatusShareSheet: View {
         self.onCrossPost = onCrossPost
         self._presenter = .init(wrappedValue: .init(presenter: StatusSharePresenter(accountType: accountType, statusKey: statusKey)))
     }
+
+    var body: some View {
+        StatusShareSheetContent(
+            statusKey: statusKey,
+            shareUrl: shareUrl,
+            fxShareUrl: fxShareUrl,
+            fixvxShareUrl: fixvxShareUrl,
+            onCrossPost: onCrossPost,
+            state: presenter.state
+        )
+    }
+}
+
+struct StatusShareSheetContent: View {
+    let statusKey: MicroBlogKey
+    let shareUrl: String
+    let fxShareUrl: String?
+    let fixvxShareUrl: String?
+    let onCrossPost: (ComposePrefill) -> Void
+    let state: StatusSharePresenterState
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.timelineAppearance) private var timelineAppearance
+    @Environment(\.translateConfig) private var translateConfig
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var theme: ColorScheme? = nil
+    @State private var previewStyle: SharePreviewStyle = .card
+    @State private var image: UIImage? = nil
+    @State private var renderedRevision: String?
+    @State private var renderError: String?
+    @State private var renderAttempt = 0
+
+    private var previewRevision: String {
+        let statusHash: Int32 = if case .success(let data) = onEnum(of: state.status) { data.data.renderHash } else { 0 }
+        return "\(statusHash)-\(Array(state.selectedReplies).map { $0.renderHash })-\(String(describing: theme ?? colorScheme))-\(previewStyle)-\(renderAttempt)-\(timelineAppearance.hash)-\(translateConfig.showOriginalWithTranslation)-\(dynamicTypeSize)"
+    }
+
+    private var currentImage: UIImage? { renderedRevision == previewRevision ? image : nil }
     
     var body: some View {
         List {
-            StateView(state: presenter.state.status) { data in
-                ScrollView {
-                    if let currentImage {
-                        Image(uiImage: currentImage).resizable().scaledToFit()
-                    } else if let renderError {
-                        Text(renderError)
-                        Button("share_replies_retry") { renderAttempt += 1 }
-                    } else {
-                        ProgressView("share_replies_preparing")
-                    }
+            StateView(state: state.status) { data in
+                ViewBox {
+                    previewView(data: data)
+                        .padding()
+                        .allowsHitTesting(false)
                 }
                 .frame(height: 360)
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .listRowBackground(Color.clear)
+
+                if let renderError {
+                    Section {
+                        Text(renderError)
+                        Button("share_replies_retry") { renderAttempt += 1 }
+                    }
+                }
 
                 Section {
                     Button {
@@ -128,13 +153,13 @@ struct StatusShareSheet: View {
                     }
 
                     Button {
-                        presenter.state.selectReplies()
+                        state.selectReplies()
                     } label: {
                         HStack {
                             Text("share_replies_title")
                                 .foregroundStyle(.primary)
                             Spacer()
-                            Text(String(format: String(localized: "share_replies_count"), Int(presenter.state.selectedCount)))
+                            Text(String(format: String(localized: "share_replies_count"), Int(state.selectedCount)))
                                 .foregroundStyle(.secondary)
                             Image(systemName: "chevron.forward")
                                 .font(.caption.weight(.semibold))
@@ -163,19 +188,19 @@ struct StatusShareSheet: View {
         }
         .navigationTitle("fx_share")
         .sheet(isPresented: Binding(
-            get: { presenter.state.selecting },
-            set: { if !$0 { presenter.state.cancelSelection() } }
+            get: { state.selecting },
+            set: { if !$0 { state.cancelSelection() } }
         )) {
-            StatusShareReplyPicker(state: presenter.state)
+            StatusShareReplyPicker(state: state)
                 .presentationDetents([.large])
         }
         .task(id: previewRevision) {
             let revision = previewRevision
             image = nil
             renderError = nil
-            guard case .success(let data) = onEnum(of: presenter.state.status) else { return }
+            guard case .success(let data) = onEnum(of: state.status) else { return }
             do {
-                let result = try await previewView(data: data.data).snapshot(colorScheme: theme ?? colorScheme)
+                let result = try await previewView(data: data.data).snapshot(colorScheme: theme ?? colorScheme, dynamicTypeSize: dynamicTypeSize)
                 try Task.checkCancellation()
                 guard revision == previewRevision else { return }
                 image = result
@@ -190,7 +215,7 @@ struct StatusShareSheet: View {
     
     @ViewBuilder
     private func previewView(data: UiTimelineV2) -> some View {
-        StatusShareContent(data: data, statusKey: statusKey, replies: Array(presenter.state.selectedReplies))
+        StatusShareContent(data: data, statusKey: statusKey, replies: Array(state.selectedReplies))
             .frame(width: 360)
             .padding()
             .background(Color(.secondarySystemGroupedBackground))
@@ -204,6 +229,7 @@ struct StatusShareSheet: View {
             .background(Color(.systemGroupedBackground))
             .environment(\.colorScheme, theme ?? colorScheme)
             .environment(\.timelineAppearance, timelineAppearance)
+            .environment(\.translateConfig, translateConfig)
     }
     
     
@@ -228,9 +254,9 @@ struct StatusShareSheet: View {
 
 extension View {
     @MainActor
-    func snapshot(colorScheme: ColorScheme) async throws -> UIImage {
+    func snapshot(colorScheme: ColorScheme, dynamicTypeSize: DynamicTypeSize = .large) async throws -> UIImage {
         let loading = ShareImageLoading()
-        let controller = UIHostingController(rootView: self.environment(\.shareImageLoading, loading).fixedSize())
+        let controller = UIHostingController(rootView: self.environment(\.shareImageLoading, loading).dynamicTypeSize(dynamicTypeSize).fixedSize())
         // Screenshot padding must not inherit the window's safe area.
         controller.safeAreaRegions = []
         controller.overrideUserInterfaceStyle = colorScheme == .dark ? .dark : .light

@@ -6,6 +6,74 @@ import KotlinSharedUI
 
 @MainActor
 final class StatusShareTests: XCTestCase {
+    func testCachedPostPreviewRemainsVisibleWhenScreenshotMediaFails() async throws {
+        let (cached, url) = try await cachedImagePost()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let missing = UiMediaImage(url: "file:///nonexistent-flare-share-preview.png", proxy: ProxyRef.Global.shared)
+        let root = post("cached", textBlocks: ["Cached post"], images: cached.images + [missing])
+        try await withShareSheet(data: root) { host in
+            for _ in 0..<100 {
+                host.view.layoutIfNeeded()
+                if greenPixels(in: host.view, attachOnFailure: false) > 1_000 { break }
+                try await Task.sleep(for: .milliseconds(20))
+            }
+            XCTAssertGreaterThan(greenPixels(in: host.view), 1_000,
+                                 "Cached content must remain visible even when screenshot preparation cannot finish")
+        }
+    }
+
+    func testCachedPostPreviewDoesNotDisappearWhenDetailRefreshes() async throws {
+        let (root, url) = try await cachedImagePost()
+        defer { try? FileManager.default.removeItem(at: url) }
+        try await withShareSheet(data: root) { host in
+            try await Task.sleep(for: .milliseconds(400))
+            XCTAssertGreaterThan(greenPixels(in: host.view), 1_000)
+            let refreshed = UiTimelineV2.TimelinePostItem(
+                post: root,
+                presentation: UiTimelineV2.PostPresentation(message: nil, inlineParents: [], quotes: [], repost: nil, notificationKey: nil),
+                itemKey: "post_only_cached"
+            )
+            host.rootView = shareSheet(data: refreshed)
+            for _ in 0..<4 {
+                try await Task.sleep(for: .milliseconds(30))
+                host.view.layoutIfNeeded()
+                XCTAssertGreaterThan(greenPixels(in: host.view), 1_000,
+                                     "Refreshing an unchanged cached post must not replace its preview with a spinner")
+            }
+        }
+    }
+
+    func testSharePreviewRespondsToShowingOriginalWithTranslation() async throws {
+        let (cached, url) = try await cachedImagePost()
+        defer { try? FileManager.default.removeItem(at: url) }
+        let root = post(
+            "translated", textBlocks: [Array(repeating: "Original text line", count: 30).joined(separator: "\n")],
+            images: cached.images, translation: post("translation", text: "Translated text").content.original,
+            translationDisplayState: .translated
+        )
+        try await withShareSheet(data: root) { host in
+            try await Task.sleep(for: .milliseconds(400))
+            let translatedOnly = greenPixels(in: host.view)
+            XCTAssertGreaterThan(translatedOnly, 1_000)
+            host.rootView = shareSheet(data: root, showOriginalWithTranslation: true)
+            try await Task.sleep(for: .milliseconds(400))
+            let withOriginal = greenPixels(in: host.view)
+            XCTAssertGreaterThan(withOriginal, 100)
+            XCTAssertLessThan(withOriginal, translatedOnly / 2,
+                              "The original text must join the translated text and resize the live preview")
+        }
+    }
+
+    func testScreenshotUsesTheCurrentFontSize() async throws {
+        let root = post("font-size", text: Array(repeating: "A line of shared post text", count: 20).joined(separator: "\n"))
+        let content = StatusShareContent(data: root, statusKey: root.statusKey, replies: []).frame(width: 360)
+        let small = try await content.snapshot(colorScheme: .light, dynamicTypeSize: .small)
+        let large = try await content.snapshot(colorScheme: .light, dynamicTypeSize: .xxxLarge)
+        XCTAssertEqual(small.size.width, large.size.width)
+        XCTAssertGreaterThan(large.size.height, small.size.height * 1.2,
+                             "Exported text must use the font size from the current preview")
+    }
+
     func testScreenshotKeepsEqualPaddingOnEveryEdge() async throws {
         let root = post("centered", text: "Centered post")
         let reply = post("reply", text: Array(repeating: "Reply line", count: 40).joined(separator: "\n"))
@@ -278,7 +346,8 @@ final class StatusShareTests: XCTestCase {
         post(id, textBlocks: [text])
     }
 
-    private func post(_ id: String, textBlocks: [String], platformIcon: IconType = IconType.Material(icon: .world)) -> UiTimelineV2.Post {
+    private func post(_ id: String, textBlocks: [String], platformIcon: IconType = IconType.Material(icon: .world), images: [UiMedia] = [],
+                      translation: UiRichText? = nil, translationDisplayState: TranslationDisplayState = .hidden) -> UiTimelineV2.Post {
         let style = RenderTextStyle(link: nil, bold: false, italic: false, strikethrough: false,
                                     monospace: false, code: false, underline: false, small: false, time: false, imageLink: nil)
         let text = textBlocks.joined(separator: "\n\n")
@@ -286,9 +355,9 @@ final class StatusShareTests: XCTestCase {
             RenderContent.Text(runs: [RenderRun.Text(text: $0, style: style)], block: RenderBlockStyle())
         },
                               isRtl: false, raw: text, innerText: text, imageUrls: [])
-        return UiTimelineV2.Post(platformId: "mastodon", images: [], sensitive: false, contentWarning: nil,
-                                user: nil, platformIcon: platformIcon, sourceLanguages: [], translationDisplayState: .hidden,
-                                content: UiTranslatableText(original: rich, translation: nil), actions: [], poll: nil,
+        return UiTimelineV2.Post(platformId: "mastodon", images: images, sensitive: false, contentWarning: nil,
+                                user: nil, platformIcon: platformIcon, sourceLanguages: [], translationDisplayState: translationDisplayState,
+                                content: UiTranslatableText(original: rich, translation: translation), actions: [], poll: nil,
                                 statusKey: MicroBlogKey(id: id, host: "example.invalid"), card: nil,
                                 createdAt: KotlinInstant.companion.fromEpochMilliseconds(epochMilliseconds: 0).toUi(),
                                 emojiReactions: [], sourceChannel: nil, visibility: nil, replyToHandle: nil,
@@ -299,14 +368,17 @@ final class StatusShareTests: XCTestCase {
     private final class ReplyPickerState: NSObject, StatusSharePresenterState {
         let replies: [UiTimelineV2]
         var status: UiState<UiTimelineV2> { UiStateSuccess(data: replies[0]) }
-        var selectedReplies: [UiTimelineV2] { Array(replies.prefix(1)) }
+        var selectedReplies: [UiTimelineV2] { selecting ? Array(replies.prefix(1)) : [] }
         var expandableReplies: [MicroBlogKey] { [] }
-        var selectedCount: Int32 { 1 }
-        var selecting: Bool { true }
+        var selectedCount: Int32 { Int32(selectedReplies.count) }
+        let selecting: Bool
         var loading: Bool { false }
         var hasMore: Bool { false }
         var error: KotlinThrowable? { nil }
-        init(replies: [UiTimelineV2]) { self.replies = replies }
+        init(replies: [UiTimelineV2], selecting: Bool = true) {
+            self.replies = replies
+            self.selecting = selecting
+        }
         func isSelected(key: MicroBlogKey) -> Bool { key == replies.first?.statusKey }
         func toggleReply(key: MicroBlogKey) {}
         func selectReplies() {}
@@ -315,5 +387,75 @@ final class StatusShareTests: XCTestCase {
         func confirmSelection() {}
         func loadMore() {}
         func loadReplyChildren(key: MicroBlogKey) {}
+    }
+
+    private func cachedImagePost() async throws -> (UiTimelineV2.Post, URL) {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("share-preview-\(UUID().uuidString).png")
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 64, height: 64)).image { context in
+            UIColor.green.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 64, height: 64))
+        }
+        try XCTUnwrap(image.pngData()).write(to: url)
+        let media = UiMediaImage(url: url.absoluteString, previewUrl: url.absoluteString,
+                                description: nil, height: 64, width: 64, sensitive: false,
+                                customHeaders: nil, proxy: ProxyRef.Global.shared)
+        _ = try await NetworkImage(data: media).frame(width: 64, height: 64).snapshot(colorScheme: .light)
+        return (post("cached", textBlocks: ["Cached post"], images: [media]), url)
+    }
+
+    private func shareSheet(data: UiTimelineV2, showOriginalWithTranslation: Bool = false) -> AnyView {
+        let config = AppSettings.companion.default.translateConfig
+        return AnyView(StatusShareSheetContent(
+            statusKey: data.statusKey, shareUrl: "https://example.invalid/post", fxShareUrl: nil,
+            fixvxShareUrl: nil, onCrossPost: { _ in }, state: ReplyPickerState(replies: [data], selecting: false)
+        ).environment(\.colorScheme, .light)
+            .environment(\.translateConfig, config.doCopy(
+                preTranslate: config.preTranslate, provider: config.provider,
+                autoTranslateExcludedLanguages: config.autoTranslateExcludedLanguages,
+                preferPlatformTranslation: config.preferPlatformTranslation,
+                showOriginalWithTranslation: showOriginalWithTranslation
+            )))
+    }
+
+    private func withShareSheet(data: UiTimelineV2, operation: (UIHostingController<AnyView>) async throws -> Void) async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        let host = UIHostingController(rootView: shareSheet(data: data))
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        host.view.layoutIfNeeded()
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            previousWindow?.makeKey()
+        }
+        try await operation(host)
+    }
+
+    private func greenPixels(in view: UIView, attachOnFailure: Bool = true) -> Int {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.preferredRange = .standard
+        let image = UIGraphicsImageRenderer(bounds: view.bounds, format: format).image { _ in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+        }
+        guard let cgImage = image.cgImage else { return 0 }
+        var pixels = [UInt8](repeating: 0, count: cgImage.width * cgImage.height * 4)
+        let context = CGContext(data: &pixels, width: cgImage.width, height: cgImage.height,
+                                bitsPerComponent: 8, bytesPerRow: cgImage.width * 4,
+                                space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
+        // Cached images still fade in; identify the fixture by hue rather than final brightness.
+        let count = stride(from: 0, to: pixels.count, by: 4).filter {
+            Int(pixels[$0 + 1]) > Int(pixels[$0]) + 20 && Int(pixels[$0 + 1]) > Int(pixels[$0 + 2]) + 20
+        }.count
+        if attachOnFailure && count < 1_000 {
+            let attachment = XCTAttachment(image: image)
+            attachment.name = "share-preview"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+        return count
     }
 }

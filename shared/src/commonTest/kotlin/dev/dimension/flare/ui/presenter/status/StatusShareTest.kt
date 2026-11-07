@@ -212,19 +212,39 @@ class StatusShareTest {
         }
 
     @Test
-    fun screenshotAlwaysUsesOriginalTextIncludingQuotedPosts() {
-        val translated = post("translated").copy(translationDisplayState = TranslationDisplayState.Translated)
-        val result =
-            UiTimelineV2.TimelinePostItem(translated, UiTimelineV2.PostPresentation(quotes = persistentListOf(translated))).forScreenshot()
-                as UiTimelineV2.TimelinePostItem
-        assertEquals(TranslationDisplayState.Hidden, result.post.translationDisplayState)
-        assertEquals(
-            TranslationDisplayState.Hidden,
-            result.presentation.quotes
-                .single()
-                .translationDisplayState,
-        )
-    }
+    fun confirmedRepliesPreserveTranslationDisplayAndTextIncludingQuotedPosts() =
+        runTest {
+            val translated =
+                post("translated").copy(
+                    content = UiTranslatableText("original".toUiPlainText(), "translated".toUiPlainText()),
+                    translationDisplayState = TranslationDisplayState.Translated,
+                )
+            val reply =
+                UiTimelineV2.TimelinePostItem(
+                    translated,
+                    UiTimelineV2.PostPresentation(quotes = persistentListOf(translated)),
+                )
+            val session = StatusShareSession { loader { PagingResult(data = listOf(reply)) } }
+            session.beginSelection()
+            session.loadMore()
+            session.toggle(reply.statusKey)
+            session.confirm()
+
+            assertEquals(listOf<UiTimelineV2>(reply), session.selectedReplies)
+            val result = session.selectedReplies.single() as UiTimelineV2.TimelinePostItem
+            assertEquals(TranslationDisplayState.Translated, result.post.translationDisplayState)
+            assertEquals(
+                "translated",
+                result.post.content.translation
+                    ?.raw,
+            )
+            assertEquals(
+                TranslationDisplayState.Translated,
+                result.presentation.quotes
+                    .single()
+                    .translationDisplayState,
+            )
+        }
 
     @Test
     fun imageBudgetRejectsOverflowEmptyAndOversizedImages() {
